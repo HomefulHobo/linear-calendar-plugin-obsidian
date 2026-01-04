@@ -257,3 +257,431 @@
         font-size: 0.6em;
     }
 }
+
+/* Settings page dropdown styling */
+.dropdown,
+select.dropdown {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M6 9L1 4h10z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    padding-right: 28px !important;
+}
+
+/* All select elements in settings should have dropdown arrows */
+.setting-item-control select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12"><path fill="currentColor" d="M6 9L1 4h10z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 12px;
+    padding-right: 28px;
+}
+
+/* ==================== SETTINGS UI STYLES ==================== */
+
+/* Rule Container */
+.lc-rule-container {
+    border: 1px solid var(--background-modifier-border);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    background: var(--background-primary);
+}
+
+.lc-rule-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.lc-rule-header:hover .lc-chevron-icon {
+    opacity: 1;
+}
+
+.lc-rule-toggle {
+    margin-top: 8px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.lc-rule-name-container {
+    flex: 1;
+    min-width: 0;
+}
+
+.lc-rule-name-input {
+    font-weight: 600;
+    font-size: 1.1em;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 5px;
+    color: var(--text-normal);
+    transition: border-color 0.2s;
+}
+
+.lc-rule-name-input:focus {
+    outline: none;
+    border-bottom: 1px solid var(--interactive-accent);
+}
+
+.lc-rule-description {
+    width: 100%;
+    min-height: 40px;
+    max-height: 100px;
+    padding: 5px;
+    box-sizing: border-box;
+    resize: vertical;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+}
+
+.lc-rule-description:focus {
+    outline: none;
+    border-color: var(--interactive-accent);
+}
+
+/* Chevron Icon */
+.lc-chevron-icon {
+    flex-shrink: 0;
+    margin-top: 8px;
+    font-size: 1.2em;
+    color: var(--text-muted);
+    opacity: 0.6;
+    transition: transform 0.2s ease, opacity 0.2s;
+    cursor: pointer;
+}
+
+.lc-chevron-expanded {
+    transform: rotate(90deg);
+}
+
+/* Collapsible Content */
+.lc-rule-collapsible-content {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.lc-rule-collapsed .lc-rule-collapsible-content {
+    max-height: 0 !important;
+    opacity: 0;
+    margin: 0;
+}
+
+/* Filter Section */
+.lc-filter-section {
+    margin-top: 10px;
+}
+
+.lc-filter-section-title {
+    margin-top: 10px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.lc-filter-content-box {
+    padding: 10px;
+    background: var(--background-secondary);
+    border-radius: 3px;
+    margin-bottom: 10px;
+}
+
+.lc-filter-group {
+    padding: 10px 0;
+    margin-bottom: 10px;
+}
+
+.lc-filter-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.lc-filter-logic-select {
+    padding: 4px 8px;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-normal);
+}
+
+.lc-condition-row {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    margin-bottom: 5px;
+    flex-wrap: wrap;
+}
+
+.lc-condition-property-select,
+.lc-condition-operator-select {
+    padding: 2px 5px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    color: var(--text-normal);
+}
+
+.lc-condition-value-input {
+    padding: 2px 5px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    color: var(--text-normal);
+    flex: 1;
+    min-width: 120px;
+}
+
+.lc-condition-value-input:focus {
+    outline: none;
+    border-color: var(--interactive-accent);
+}
+
+/* Date Extraction */
+.lc-date-section {
+    margin-top: 15px;
+}
+
+.lc-date-section-title {
+    margin-top: 15px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.lc-date-extraction-box {
+    padding: 10px;
+    background: var(--background-secondary);
+    border-radius: 3px;
+}
+
+.lc-date-config-container {
+    margin-bottom: 10px;
+}
+
+.lc-date-config-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+    color: var(--text-normal);
+}
+
+.lc-date-method-select {
+    padding: 4px 8px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    width: 100%;
+    margin-bottom: 5px;
+    color: var(--text-normal);
+}
+
+.lc-date-property-input {
+    padding: 4px 8px;
+    background: var(--background-primary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 3px;
+    width: 100%;
+    color: var(--text-normal);
+}
+
+.lc-date-property-input:focus {
+    outline: none;
+    border-color: var(--interactive-accent);
+}
+
+/* Button Styles */
+.lc-btn {
+    padding: 4px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: none;
+    font-size: 0.9em;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.lc-btn-primary {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    font-weight: 500;
+}
+
+.lc-btn-primary:hover {
+    background: var(--interactive-accent-hover);
+}
+
+.lc-btn-secondary {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    box-shadow: none;
+}
+
+.lc-btn-secondary:hover {
+    color: var(--text-normal);
+    background: var(--background-modifier-hover);
+}
+
+.lc-btn-danger {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    flex-shrink: 0;
+}
+
+.lc-btn-danger:hover {
+    background: var(--interactive-accent-hover);
+}
+
+.lc-btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    opacity: 0.6;
+    padding: 0;
+    transition: opacity 0.2s;
+}
+
+.lc-btn-icon:hover {
+    opacity: 1;
+}
+
+/* Section Divider */
+.lc-section-divider {
+    height: 1px;
+    background: var(--background-modifier-border);
+    margin: 15px 0;
+}
+
+/* Checkbox with Label */
+.lc-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin-top: 5px;
+}
+
+.lc-checkbox-label input[type="checkbox"] {
+    cursor: pointer;
+}
+
+/* Input Small Variant */
+.lc-input-small {
+    padding: 2px 5px;
+    font-size: 0.9em;
+}
+
+/* ==================== CUSTOM TOOLTIP ==================== */
+
+.lc-tooltip {
+    position: fixed;
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    z-index: 1000;
+    pointer-events: none;
+    white-space: nowrap;
+    border: 1px solid var(--background-modifier-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== CALENDAR WIDTH MODES ==================== */
+
+/* Scrollable mode overrides */
+.calendar-scrollable {
+    justify-content: flex-start;
+}
+
+.calendar-scrollable .linear-calendar {
+    table-layout: fixed;
+    width: max-content;
+    min-width: 100%;
+}
+
+.calendar-scrollable .day-cell {
+    width: var(--cell-min-width, 30px);
+    min-width: var(--cell-min-width, 30px);
+    max-width: var(--cell-min-width, 30px);
+}
+
+.calendar-scrollable .weekday-header {
+    width: var(--cell-min-width, 30px);
+    min-width: var(--cell-min-width, 30px);
+    max-width: var(--cell-min-width, 30px);
+}
+
+.calendar-scrollable .month-label-cell,
+.calendar-scrollable .month-label-cell-right,
+.calendar-scrollable .month-label,
+.calendar-scrollable .month-label-right {
+    width: 35px;
+    min-width: 35px;
+    max-width: 35px;
+}
+
+/* ==================== EXPERIMENTAL FEATURES ==================== */
+
+/* Multi-line notes */
+.exp-multiline .note-link {
+    white-space: normal !important;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.2;
+}
+
+/* Vertical text */
+.exp-vertical .note-link {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    white-space: nowrap;
+    max-height: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.exp-vertical .day-notes {
+    display: flex;
+    flex-direction: row;
+    gap: 3px;
+    justify-content: center;
+}
+
+/* Compact font size */
+.exp-compact .note-link {
+    font-size: 0.75em;
+}
+
+.exp-compact .multi-day-link {
+    font-size: 0.75em;
+}
+
+/* Condensed letter spacing */
+.exp-condensed .note-link {
+    letter-spacing: -0.5px;
+}
+
+.exp-condensed .multi-day-link {
+    letter-spacing: -0.5px;
+}

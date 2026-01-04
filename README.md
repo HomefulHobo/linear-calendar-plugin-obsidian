@@ -8,7 +8,7 @@ A linear calendar plugin that displays all 365 days of the year in a single view
 
 This plugin is in **early development** and may undergo significant changes. The core functionality—how notes are recognized and dates are extracted—will remain stable. If you use properties or dates in filenames, these will continue to work.
 
-New features are actively being developed. If you encounter any issues or have feedback, please reach out via **[I'll add an email soon]**.
+New features are actively being developed. If you encounter any issues or have feedback, please reach out via [GitHub](https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/) or via [e-mail](https://www.homefulhobo.com/contact/).
 
 This plugin is being developed with the help of AI.
 

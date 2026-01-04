@@ -8,23 +8,21 @@ A linear calendar plugin that displays all 365 days of the year in a single view
 
 This plugin is in **early development** and may undergo significant changes. The core functionality—how notes are recognized and dates are extracted—will remain stable. If you use properties or dates in filenames, these will continue to work.
 
-New features are actively being developed. If you encounter any issues or have feedback, please reach out via **your-email@example.com**
+New features are actively being developed. If you encounter any issues or have feedback, please reach out via **[I'll add an email soon]**.
+
+This plugin is being developed with the help of AI.
 
 ## ✨ Features
 
 ### 📝 Note Display
 - **Single-day notes**: Notes appear in their respective day cells
 - **Multi-day events**: Events spanning multiple days shown as horizontal bars
-- **Smart truncation**: Long note names are truncated with instant hover tooltips
 - **Clickable notes**: Click any note to open it instantly
 - **Instant tooltips**: Hover over any note to see the full title immediately
-- **Responsive updates**: Calendar adjusts on window resize
 
 ### 📆 Daily Notes Integration
-- **Click to create**: Click any day number to open or create a daily note
-- **Flexible location**: Use Obsidian's native Daily Notes folder or a custom folder
-- **Custom format**: Configure filename format (default: YYYY-MM-DD)
-- **Subfolder support**: Searches subfolders when looking for existing daily notes
+
+![Settings Daily Notes Screenshot](screenshots/settings-daily-notes.png)
 
 ### 🔍 Flexible Date Extraction
 
@@ -51,6 +49,8 @@ date_end: 2024-01-20
 Or use filenames:
 - `2024-01-15 Meeting.md` → Single-day note on Jan 15
 - `2024-01-15 – 2024-01-20 Conference.md` → Multi-day event Jan 15-20
+
+![Settings Date Extraction Screenshot](screenshots/settings-date-extraction.png)
 
 ### 🎨 Customization Options
 
@@ -84,6 +84,7 @@ Filter which notes appear in the calendar:
 - Exclude notes tagged with #draft
 - Show only notes with a specific property
 
+![Settings Filters Screenshot](screenshots/settings-filters.png)
 
 ## 📥 Installation
 
@@ -132,13 +133,13 @@ Filter which notes appear in the calendar:
      ```
    - Or use two dates in filename: `2024-01-15 – 2024-01-20 Conference.md`
 
-5. **Customize appearance**: Adjust calendar width, cell size, and display options in settings``
+5. **Customize appearance**: Adjust calendar width, cell size, and display options in settings
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to email me.
 
-## 💖 Support
+## 💚 Support
 
 If you find this plugin helpful, consider:
 - ⭐ Starring the repository

@@ -46,7 +46,7 @@ body:
     attributes:
       label: What happened?
       description: Describe the bug you encountered
-      placeholder: Tell us what you see!
+      placeholder: Tell me what you see!
     validations:
       required: true
 
@@ -55,7 +55,7 @@ body:
     attributes:
       label: Expected Behavior
       description: What did you expect to happen?
-      placeholder: Tell us what you expected!
+      placeholder: Tell me what you expected!
     validations:
       required: true
 
@@ -63,13 +63,13 @@ body:
     id: steps
     attributes:
       label: Steps to Reproduce
-      description: How can we reproduce this issue?
+      description: How can I reproduce this issue?
       placeholder: |
         1. Go to...
         2. Click on...
         3. See error...
     validations:
-      required: true
+      required: false
 
   - type: textarea
     id: screenshots

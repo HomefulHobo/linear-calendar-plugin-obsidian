@@ -1,6 +1,6 @@
 {
   "name": "linear-calendar",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A linear year calendar view that displays all 365 days with notes based on date properties",
   "main": "main.js",
   "scripts": {

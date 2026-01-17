@@ -4,6 +4,11 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.4] - 2025-01-17
+
+### Fixed
+- GitHub Actions workflow tag pattern to support v-prefixed tags
+
 ## [0.2.3] - 2025-01-17
 
 ### Added

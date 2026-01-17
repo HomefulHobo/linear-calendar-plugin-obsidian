@@ -4,7 +4,7 @@ import { CalendarSettingTab } from './SettingsTab';
 import { LinearCalendarSettings, DEFAULT_SETTINGS, VIEW_TYPE_CALENDAR } from './types';
 
 export default class LinearCalendarPlugin extends Plugin {
-    settings: LinearCalendarSettings;
+    settings!: LinearCalendarSettings;
 
     async onload(): Promise<void> {
         await this.loadSettings();

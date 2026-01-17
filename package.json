@@ -1,0 +1,21 @@
+{
+  "name": "linear-calendar",
+  "version": "0.2.2",
+  "description": "A linear year calendar view that displays all 365 days with notes based on date properties",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
+  },
+  "keywords": ["obsidian", "plugin", "calendar", "linear", "timeline"],
+  "author": "Celine | HomefulHobo",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "esbuild": "^0.27.2",
+    "obsidian": "^1.11.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,28 @@
+# Node modules
+node_modules/
+
+# Build outputs
+build/
+*.js.map
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# User settings (keep private)
+data.json
+
+# Optional: Comment out if you want to commit built files
+# main.js

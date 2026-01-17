@@ -4,6 +4,16 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.2.3] - 2025-01-17
+
+### Added
+- GitHub Actions for automated releases and CI
+- Issue templates for bug reports and feature requests
+- Comprehensive CHANGELOG
+
+### Fixed
+- TypeScript strict mode compatibility
+
 ## [0.2.2] - 2025-01-04
 
 Fixed certain settings text that wouldn't update properly

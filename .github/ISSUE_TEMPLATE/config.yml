@@ -1,8 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Question or Discussion
-    url: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/discussions
-    about: Ask questions or discuss ideas with the community
   - name: Contact Developer
     url: https://www.homefulhobo.com/contact/
     about: Contact the developer directly via email

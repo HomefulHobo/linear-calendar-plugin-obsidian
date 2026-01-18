@@ -1,6 +1,6 @@
 # Linear Calendar for Obsidian
 
-[![GitHub release](https://img.shields.io/github/v/release/HomefulHobo/linear-calendar-plugin-obsidian)](https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/latest)
+[![GitHub release](https://img.shields.io/github/v/release/HomefulHobo/linear-calendar-plugin-obsidian?include_prereleases)](https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/latest)
 [![CI](https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/actions/workflows/ci.yml/badge.svg)](https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

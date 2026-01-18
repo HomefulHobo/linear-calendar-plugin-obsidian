@@ -18,6 +18,14 @@ A TypeScript-based Obsidian plugin that displays all days of the year in a linea
 
 ```
 linear-calendar/
+├── .github/                      # GitHub automation and templates
+│   ├── workflows/
+│   │   ├── release.yml           # Automated release builds
+│   │   └── ci.yml                # Continuous integration checks
+│   └── ISSUE_TEMPLATE/
+│       ├── bug_report.yml        # Bug report form
+│       ├── feature_request.yml   # Feature request form
+│       └── config.yml            # Issue template configuration
 ├── src/                          # TypeScript source files
 │   ├── main.ts                   # Plugin entry point
 │   ├── types.ts                  # Type definitions and defaults
@@ -29,7 +37,10 @@ linear-calendar/
 ├── manifest.json                 # Plugin manifest
 ├── package.json                  # npm configuration
 ├── tsconfig.json                 # TypeScript configuration
-└── esbuild.config.mjs            # Build configuration
+├── esbuild.config.mjs            # Build configuration
+├── CHANGELOG.md                  # Version history
+├── LICENSE                       # MIT License
+└── .gitignore                    # Git ignore patterns
 ```
 
 ## Core Concepts
@@ -198,6 +209,78 @@ interface NoteInfo {
 - Check console for errors
 - Verify settings persistence by reopening settings tab
 
+## GitHub Integration
+
+### Repository Structure
+- **Repository**: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian
+- **License**: MIT
+- **Source Code**: All TypeScript source files in `src/` directory are committed to GitHub
+- **Releases**: Automated via GitHub Actions
+
+### Automated Workflows
+
+#### Release Workflow (`.github/workflows/release.yml`)
+- **Trigger**: Pushing a tag matching `v*.*.*` or `*.*.*` (e.g., `v0.2.4`)
+- **Process**:
+  1. Checks out code
+  2. Installs Node.js 20
+  3. Runs `npm ci` to install dependencies
+  4. Runs `npm run build` to compile TypeScript → JavaScript
+  5. Creates GitHub release with auto-generated notes
+  6. Attaches required plugin files: `main.js`, `manifest.json`, `styles.css`
+- **Permissions**: Requires `contents: write` permission to upload release assets
+- **Note**: Pre-releases are supported (mark as pre-release when creating)
+
+#### CI Workflow (`.github/workflows/ci.yml`)
+- **Trigger**: Push to main/master branch or pull requests
+- **Process**:
+  1. Checks out code
+  2. Installs Node.js 20
+  3. Runs `npm ci`
+  4. Runs `npm run build`
+  5. Runs `npx tsc --noEmit` to check for TypeScript errors
+- **Purpose**: Catches build errors and type errors before release
+
+### Issue Templates
+- **Bug Report** (`.github/ISSUE_TEMPLATE/bug_report.yml`): Structured form collecting Obsidian version, plugin version, platform, steps to reproduce, expected behavior, screenshots
+- **Feature Request** (`.github/ISSUE_TEMPLATE/feature_request.yml`): Form for problem description, proposed solution, alternatives, contribution willingness
+- **Blank Issues**: Enabled for general questions/discussions
+- **Contact Link**: Direct email contact via https://www.homefulhobo.com/contact/
+
+### Release Process
+1. **Update version numbers**:
+   - `manifest.json`: Update `version` field
+   - `package.json`: Update `version` field
+   - `CHANGELOG.md`: Add new version section with changes
+2. **Build and test locally**: Run `npm run build` and test in Obsidian
+3. **Commit changes**: Using GitHub Desktop or git CLI
+4. **Push to GitHub**: Ensure all changes are pushed
+5. **Create release**:
+   - Go to GitHub repository → Releases → "Create a new release"
+   - Create tag: `v0.2.x` (with "v" prefix)
+   - Add title: `v0.2.x`
+   - Description: Auto-generated from commits (or write custom notes)
+   - Mark as pre-release if needed
+   - Click "Publish release"
+6. **Automated build**: GitHub Actions automatically builds and attaches files
+7. **Verify**: Check Actions tab for green checkmark, confirm files attached to release
+
+### README Badges
+- **Release Badge**: Shows latest version (includes pre-releases with `?include_prereleases` parameter)
+- **CI Badge**: Shows build status (passing/failing)
+- **License Badge**: Shows MIT license
+
+### Version Control
+- **Git**: Repository initialized with all source code
+- **Ignored Files** (`.gitignore`):
+  - `node_modules/` - Dependencies
+  - `data.json` - User settings (keep private)
+  - OS files (.DS_Store)
+  - IDE files (.vscode/, .idea/)
+  - Logs and temporary files
+- **Committed Files**: All source code, configuration, documentation
+- **Built Files**: `main.js` is built by CI/CD and attached to releases (not committed to repo)
+
 ## Common Patterns
 
 ### Adding a New Property to Settings
@@ -228,7 +311,36 @@ interface NoteInfo {
 
 ## Version History
 
-- **v1.0.0**: Initial TypeScript setup with redesigned settings
+- **v0.2.4** (2025-01-17): GitHub Actions integration
+  - Fixed workflow tag pattern to support v-prefixed tags
+  - Fixed workflow permissions for automated releases
+  - Added comprehensive GitHub automation (CI/CD)
+
+- **v0.2.3** (2025-01-17): GitHub infrastructure setup
+  - GitHub Actions for automated releases and CI
+  - Issue templates for bug reports and feature requests
+  - Comprehensive CHANGELOG.md
+  - TypeScript strict mode compatibility fixes
+  - Professional README with status badges
+
+- **v0.2.2** (2025-01-04): Settings text updates
+  - Fixed certain settings text that wouldn't update properly
+
+- **v0.2.1** (2025-01-04): Early development notice
+  - Settings enhancements noting early development phase
+  - Calendar improvements including distinguishable icon redesign
+  - Auto-reload when settings change or new notes created
+  - Experimental single-day note title display options
+
+- **v0.2.0** (2024-12-26): Major customization update
+  - Major expansion of customization for date extraction from properties/filenames
+  - Advanced filtering capabilities for files and folders
+  - Daily notes display options (cells, following text, date hiding)
+  - Cell width customization
+  - Full note titles display on hover
+
+- **v0.1.0** (2024-12-23): Initial release
+  - Initial TypeScript setup with redesigned settings
   - Simplified date extraction (property arrays instead of single values)
   - Simplified filter system (include/exclude instead of complex rules)
   - Drag-and-drop property ordering with hints
@@ -270,6 +382,6 @@ When working on this project:
 
 ---
 
-**Last Updated**: 2025-12-26
-**Plugin Version**: 1.0.0
+**Last Updated**: 2025-01-18
+**Plugin Version**: 0.2.4
 **Maintained for**: Claude Code and other AI assistants

@@ -327,6 +327,22 @@ export class LinearCalendarView extends ItemView {
         }
     }
 
+    /**
+     * Parse a date string (YYYY-MM-DD) as a local date, not UTC.
+     * This prevents timezone issues where dates shift to the previous day.
+     */
+    private parseLocalDate(dateStr: string): Date | null {
+        const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!match) return null;
+
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1; // JS months are 0-indexed
+        const day = parseInt(match[3], 10);
+
+        const date = new Date(year, month, day);
+        return isNaN(date.getTime()) ? null : date;
+    }
+
     async extractDateFromFile(file: TFile): Promise<{ startDate: Date | null; endDate: Date | null }> {
         const config = this.plugin.settings.dateExtraction;
         const result: { startDate: Date | null; endDate: Date | null } = {
@@ -343,8 +359,8 @@ export class LinearCalendarView extends ItemView {
                 const cache = this.app.metadataCache.getFileCache(file);
                 const dateStr = cache?.frontmatter?.[propName];
                 if (dateStr) {
-                    const date = new Date(dateStr);
-                    if (!isNaN(date.getTime())) {
+                    const date = this.parseLocalDate(dateStr);
+                    if (date && !isNaN(date.getTime())) {
                         startSources.push({ type: 'property', date });
                         break; // Use first valid property
                     }
@@ -357,8 +373,8 @@ export class LinearCalendarView extends ItemView {
             const datePattern = /^(\d{4}-\d{2}-\d{2})/;
             const match = file.basename.match(datePattern);
             if (match) {
-                const date = new Date(match[1]);
-                if (!isNaN(date.getTime())) {
+                const date = this.parseLocalDate(match[1]);
+                if (date && !isNaN(date.getTime())) {
                     startSources.push({ type: 'filename', date });
                 }
             }
@@ -384,8 +400,8 @@ export class LinearCalendarView extends ItemView {
                 const cache = this.app.metadataCache.getFileCache(file);
                 const dateStr = cache?.frontmatter?.[propName];
                 if (dateStr) {
-                    const date = new Date(dateStr);
-                    if (!isNaN(date.getTime())) {
+                    const date = this.parseLocalDate(dateStr);
+                    if (date && !isNaN(date.getTime())) {
                         endSources.push({ type: 'property', date });
                         break; // Use first valid property
                     }
@@ -400,8 +416,8 @@ export class LinearCalendarView extends ItemView {
             const matches = file.basename.match(datePattern);
             if (matches && matches.length >= 2) {
                 // Use second date
-                const date = new Date(matches[1]);
-                if (!isNaN(date.getTime())) {
+                const date = this.parseLocalDate(matches[1]);
+                if (date && !isNaN(date.getTime())) {
                     endSources.push({ type: 'filename', date });
                 }
             }

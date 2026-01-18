@@ -331,6 +331,19 @@ var LinearCalendarView = class extends import_obsidian.ItemView {
         return false;
     }
   }
+  /**
+   * Parse a date string (YYYY-MM-DD) as a local date, not UTC.
+   * This prevents timezone issues where dates shift to the previous day.
+   */
+  parseLocalDate(dateStr) {
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) return null;
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const day = parseInt(match[3], 10);
+    const date = new Date(year, month, day);
+    return isNaN(date.getTime()) ? null : date;
+  }
   async extractDateFromFile(file) {
     var _a, _b;
     const config = this.plugin.settings.dateExtraction;
@@ -344,8 +357,8 @@ var LinearCalendarView = class extends import_obsidian.ItemView {
         const cache = this.app.metadataCache.getFileCache(file);
         const dateStr = (_a = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _a[propName];
         if (dateStr) {
-          const date = new Date(dateStr);
-          if (!isNaN(date.getTime())) {
+          const date = this.parseLocalDate(dateStr);
+          if (date && !isNaN(date.getTime())) {
             startSources.push({ type: "property", date });
             break;
           }
@@ -356,8 +369,8 @@ var LinearCalendarView = class extends import_obsidian.ItemView {
       const datePattern = /^(\d{4}-\d{2}-\d{2})/;
       const match = file.basename.match(datePattern);
       if (match) {
-        const date = new Date(match[1]);
-        if (!isNaN(date.getTime())) {
+        const date = this.parseLocalDate(match[1]);
+        if (date && !isNaN(date.getTime())) {
           startSources.push({ type: "filename", date });
         }
       }
@@ -376,8 +389,8 @@ var LinearCalendarView = class extends import_obsidian.ItemView {
         const cache = this.app.metadataCache.getFileCache(file);
         const dateStr = (_b = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _b[propName];
         if (dateStr) {
-          const date = new Date(dateStr);
-          if (!isNaN(date.getTime())) {
+          const date = this.parseLocalDate(dateStr);
+          if (date && !isNaN(date.getTime())) {
             endSources.push({ type: "property", date });
             break;
           }
@@ -388,8 +401,8 @@ var LinearCalendarView = class extends import_obsidian.ItemView {
       const datePattern = /\d{4}-\d{2}-\d{2}/g;
       const matches = file.basename.match(datePattern);
       if (matches && matches.length >= 2) {
-        const date = new Date(matches[1]);
-        if (!isNaN(date.getTime())) {
+        const date = this.parseLocalDate(matches[1]);
+        if (date && !isNaN(date.getTime())) {
           endSources.push({ type: "filename", date });
         }
       }

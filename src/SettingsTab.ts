@@ -1248,8 +1248,7 @@ export class CalendarSettingTab extends PluginSettingTab {
                 async (newColor) => {
                     config.defaultCategoryColor = newColor;
                     await this.plugin.saveSettings();
-                },
-                'defaultColor'
+                }
             );
         } else {
             const themeAccentNote = defaultColorContainer.createDiv();
@@ -1512,8 +1511,7 @@ export class CalendarSettingTab extends PluginSettingTab {
                     category.color = newColor;
                     await this.plugin.saveSettings();
                     this.display();
-                },
-                `category_${category.id}`
+                }
             );
 
             // Use icon checkbox
@@ -2026,8 +2024,7 @@ export class CalendarSettingTab extends PluginSettingTab {
     renderColorPicker(
         container: HTMLElement,
         currentColor: string,
-        onColorChange: (color: string) => Promise<void>,
-        dropdownId: string
+        onColorChange: (color: string) => Promise<void>
     ): void {
         const config = this.plugin.settings.colorCategories;
 

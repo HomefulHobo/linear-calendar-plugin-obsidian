@@ -3307,8 +3307,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
         async (newColor) => {
           config.defaultCategoryColor = newColor;
           await this.plugin.saveSettings();
-        },
-        "defaultColor"
+        }
       );
     } else {
       const themeAccentNote = defaultColorContainer.createDiv();
@@ -3508,8 +3507,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
           category.color = newColor;
           await this.plugin.saveSettings();
           this.display();
-        },
-        `category_${category.id}`
+        }
       );
       const useIconContainer = content.createEl("div");
       useIconContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 10px;";
@@ -3901,7 +3899,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
   /**
    * Render a color picker with optional palette selection popover
    */
-  renderColorPicker(container, currentColor, onColorChange, dropdownId) {
+  renderColorPicker(container, currentColor, onColorChange) {
     const config = this.plugin.settings.colorCategories;
     const colorPickerContainer = container.createDiv();
     colorPickerContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";

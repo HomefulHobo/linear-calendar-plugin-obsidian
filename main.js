@@ -28,10 +28,10 @@ __export(main_exports, {
   default: () => LinearCalendarPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian4 = require("obsidian");
+var import_obsidian5 = require("obsidian");
 
 // src/CalendarView.ts
-var import_obsidian = require("obsidian");
+var import_obsidian4 = require("obsidian");
 
 // src/types.ts
 var DEFAULT_SETTINGS = {
@@ -49,6 +49,10 @@ var DEFAULT_SETTINGS = {
   // Fit to screen width by default
   cellMinWidth: 30,
   // Minimum 30px per cell when scrollable
+  columnAlignment: "weekday",
+  // Align by weekday by default
+  weekStartDay: 0,
+  // Sunday by default
   dateExtraction: {
     startFromProperties: ["date"],
     startFromFilename: false,
@@ -59,6 +63,26 @@ var DEFAULT_SETTINGS = {
   },
   filterMode: "none",
   filterConditions: [],
+  colorCategories: {
+    enabled: true,
+    // Enable colors by default
+    categories: [],
+    defaultCategoryColor: null,
+    showCategoryIndex: true,
+    showIconsInCalendar: true,
+    colorPalettes: [
+      {
+        name: "Default",
+        colors: [
+          { name: "Purple", hex: "#876c9d" },
+          { name: "Blue", hex: "#6c849d" },
+          { name: "Red", hex: "#9d6c6c" },
+          { name: "Yellow", hex: "#9d906c" },
+          { name: "Green", hex: "#779d6c" }
+        ]
+      }
+    ]
+  },
   experimental: {
     multilineNotes: false,
     verticalText: false,
@@ -68,656 +92,11 @@ var DEFAULT_SETTINGS = {
 };
 var VIEW_TYPE_CALENDAR = "linear-calendar-view";
 
-// src/CalendarView.ts
-var LinearCalendarView = class extends import_obsidian.ItemView {
-  constructor(leaf, plugin) {
-    super(leaf);
-    this.resizeObserver = null;
-    this.tooltip = null;
-    this.plugin = plugin;
-  }
-  getViewType() {
-    return VIEW_TYPE_CALENDAR;
-  }
-  getDisplayText() {
-    return "Linear Calendar";
-  }
-  getIcon() {
-    return "calendar";
-  }
-  async onOpen() {
-    const container = this.containerEl.children[1];
-    container.empty();
-    container.addClass("linear-calendar-container");
-    await this.renderCalendar(container);
-    this.resizeObserver = new ResizeObserver(() => {
-      this.updateMultiDayBarWidths(container);
-    });
-    this.resizeObserver.observe(container);
-    this.registerEvent(
-      this.app.workspace.on("active-leaf-change", (leaf) => {
-        if (leaf && leaf.view === this) {
-          this.reload();
-        }
-      })
-    );
-  }
-  async reload() {
-    const container = this.containerEl.children[1];
-    if (container) {
-      container.empty();
-      await this.renderCalendar(container);
-    }
-  }
-  updateMultiDayBarWidths(container) {
-    const bars = container.querySelectorAll(".multi-day-bar[data-span]");
-    bars.forEach((bar) => {
-      const span = parseInt(bar.dataset.span || "0");
-      const parentCell = bar.parentElement;
-      if (parentCell && parentCell.parentElement) {
-        const row = parentCell.parentElement;
-        const cells = Array.from(row.querySelectorAll(".day-cell"));
-        const startIndex = cells.indexOf(parentCell);
-        if (startIndex >= 0 && startIndex + span - 1 < cells.length) {
-          const lastCell = cells[startIndex + span - 1];
-          const firstCellRect = parentCell.getBoundingClientRect();
-          const lastCellRect = lastCell.getBoundingClientRect();
-          const totalWidth = lastCellRect.right - firstCellRect.left - 6;
-          bar.style.width = `${totalWidth}px`;
-        }
-      }
-    });
-  }
-  async renderCalendar(container) {
-    const year = this.plugin.settings.currentYear;
-    const header = container.createDiv({ cls: "calendar-header" });
-    const prevBtn = header.createEl("button", { text: "\u2190", cls: "year-nav-btn" });
-    header.createEl("span", { text: `${year}`, cls: "year-title" });
-    const nextBtn = header.createEl("button", { text: "\u2192", cls: "year-nav-btn" });
-    prevBtn.onclick = async () => {
-      this.plugin.settings.currentYear--;
-      await this.plugin.saveSettings();
-      container.empty();
-      await this.renderCalendar(container);
-    };
-    nextBtn.onclick = async () => {
-      this.plugin.settings.currentYear++;
-      await this.plugin.saveSettings();
-      container.empty();
-      await this.renderCalendar(container);
-    };
-    const notesWithDates = await this.getNotesWithDates();
-    const multiDayEntries = this.processMultiDayEntries(notesWithDates);
-    const calendarWrapper = container.createDiv({ cls: "calendar-wrapper" });
-    const exp = this.plugin.settings.experimental;
-    if (exp.multilineNotes) {
-      calendarWrapper.addClass("exp-multiline");
-    }
-    if (exp.verticalText) {
-      calendarWrapper.addClass("exp-vertical");
-    }
-    if (exp.compactFontSize) {
-      calendarWrapper.addClass("exp-compact");
-    }
-    if (exp.condensedLetters) {
-      calendarWrapper.addClass("exp-condensed");
-    }
-    if (this.plugin.settings.calendarWidth === "scrollable") {
-      calendarWrapper.addClass("calendar-scrollable");
-      calendarWrapper.style.overflowX = "auto";
-    } else {
-      calendarWrapper.removeClass("calendar-scrollable");
-      calendarWrapper.style.overflowX = "";
-    }
-    const calendarTable = calendarWrapper.createEl("table", { cls: "linear-calendar" });
-    if (this.plugin.settings.calendarWidth === "scrollable") {
-      calendarTable.style.minWidth = "max-content";
-      calendarTable.style.setProperty("--cell-min-width", `${this.plugin.settings.cellMinWidth}px`);
-    } else {
-      calendarTable.style.minWidth = "";
-      calendarTable.style.removeProperty("--cell-min-width");
-    }
-    const maxDayCells = 37;
-    const headerRow = calendarTable.createEl("thead").createEl("tr");
-    headerRow.createEl("th", { cls: "month-label-cell" });
-    const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-    for (let i = 0; i < maxDayCells; i++) {
-      headerRow.createEl("th", {
-        text: weekdays[i % 7],
-        cls: "weekday-header"
-      });
-    }
-    headerRow.createEl("th", { cls: "month-label-cell-right" });
-    const tbody = calendarTable.createEl("tbody");
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    ];
-    for (let month = 0; month < 12; month++) {
-      await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, maxDayCells);
-    }
-    const footerRow = calendarTable.createEl("tfoot").createEl("tr");
-    footerRow.createEl("td", { cls: "month-label-cell" });
-    for (let i = 0; i < maxDayCells; i++) {
-      footerRow.createEl("td", {
-        text: weekdays[i % 7],
-        cls: "weekday-header"
-      });
-    }
-    footerRow.createEl("td", { cls: "month-label-cell-right" });
-  }
-  async getNotesWithDates() {
-    var _a;
-    const notesMap = /* @__PURE__ */ new Map();
-    const files = this.app.vault.getMarkdownFiles();
-    for (const file of files) {
-      if (!this.filePassesFilter(file)) {
-        continue;
-      }
-      const dateInfo = await this.extractDateFromFile(file);
-      if (dateInfo.startDate && !isNaN(dateInfo.startDate.getTime())) {
-        const key = this.dateToKey(dateInfo.startDate);
-        if (!notesMap.has(key)) {
-          notesMap.set(key, []);
-        }
-        const noteInfo = {
-          file,
-          startDate: dateInfo.startDate,
-          endDate: dateInfo.endDate,
-          isMultiDay: !!dateInfo.endDate
-        };
-        (_a = notesMap.get(key)) == null ? void 0 : _a.push(noteInfo);
-      }
-    }
-    return notesMap;
-  }
-  filePassesFilter(file) {
-    const { filterMode, filterConditions } = this.plugin.settings;
-    if (filterMode === "none" || filterConditions.length === 0) {
-      return true;
-    }
-    const matchesConditions = filterConditions.every(
-      (condition) => this.evaluateCondition(file, condition)
-    );
-    return filterMode === "include" ? matchesConditions : !matchesConditions;
-  }
-  evaluateCondition(file, condition) {
-    var _a, _b, _c, _d, _e, _f;
-    const { property, operator, value, includeSubfolders } = condition;
-    let actualValue;
-    if (property === "file.name") {
-      actualValue = file.name;
-    } else if (property === "file.basename") {
-      actualValue = file.basename;
-    } else if (property === "file.folder") {
-      actualValue = ((_a = file.parent) == null ? void 0 : _a.path) || "";
-    } else if (property === "file.path") {
-      actualValue = file.path;
-    } else if (property === "file.ext") {
-      actualValue = file.extension;
-    } else if (property.startsWith("property:")) {
-      const propertyName = property.substring(9);
-      const cache = this.app.metadataCache.getFileCache(file);
-      actualValue = (_b = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _b[propertyName];
-    } else {
-      const cache = this.app.metadataCache.getFileCache(file);
-      actualValue = (_c = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _c[property];
-    }
-    switch (operator) {
-      case "is":
-        if (property === "file.folder" && includeSubfolders) {
-          const folderPath = value ? value + "/" : "";
-          return file.path.startsWith(folderPath) || ((_d = file.parent) == null ? void 0 : _d.path) === value;
-        }
-        return actualValue === value;
-      case "isNot":
-        return actualValue !== value;
-      case "contains":
-        if (typeof actualValue === "string") {
-          return actualValue.toLowerCase().includes(value.toLowerCase());
-        }
-        return false;
-      case "doesNotContain":
-        if (typeof actualValue === "string") {
-          return !actualValue.toLowerCase().includes(value.toLowerCase());
-        }
-        return true;
-      case "startsWith":
-        if (typeof actualValue === "string") {
-          return actualValue.toLowerCase().startsWith(value.toLowerCase());
-        }
-        return false;
-      case "endsWith":
-        if (typeof actualValue === "string") {
-          return actualValue.toLowerCase().endsWith(value.toLowerCase());
-        }
-        return false;
-      case "matches":
-        try {
-          const regex = new RegExp(value);
-          return regex.test(actualValue);
-        } catch (e) {
-          return false;
-        }
-      case "exists":
-        return actualValue !== void 0 && actualValue !== null;
-      case "doesNotExist":
-        return actualValue === void 0 || actualValue === null;
-      case "hasTag":
-        const cache = this.app.metadataCache.getFileCache(file);
-        const tags = ((_e = cache == null ? void 0 : cache.tags) == null ? void 0 : _e.map((t) => t.tag.substring(1))) || [];
-        const frontmatterTags = ((_f = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _f.tags) || [];
-        const allTags = [...tags, ...frontmatterTags];
-        return allTags.some((tag) => tag.toLowerCase() === value.toLowerCase());
-      case "matchesDatePattern":
-        const datePattern = /^(\d{4}-\d{2}-\d{2})/;
-        const match = file.basename.match(datePattern);
-        if (!match) return false;
-        if (condition.requireAdditionalText) {
-          return file.basename.length > match[0].length;
-        }
-        return true;
-      default:
-        return false;
-    }
-  }
-  /**
-   * Parse a date string (YYYY-MM-DD) as a local date, not UTC.
-   * This prevents timezone issues where dates shift to the previous day.
-   */
-  parseLocalDate(dateStr) {
-    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (!match) return null;
-    const year = parseInt(match[1], 10);
-    const month = parseInt(match[2], 10) - 1;
-    const day = parseInt(match[3], 10);
-    const date = new Date(year, month, day);
-    return isNaN(date.getTime()) ? null : date;
-  }
-  async extractDateFromFile(file) {
-    var _a, _b;
-    const config = this.plugin.settings.dateExtraction;
-    const result = {
-      startDate: null,
-      endDate: null
-    };
-    const startSources = [];
-    if (config.startFromProperties.length > 0) {
-      for (const propName of config.startFromProperties) {
-        const cache = this.app.metadataCache.getFileCache(file);
-        const dateStr = (_a = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _a[propName];
-        if (dateStr) {
-          const date = this.parseLocalDate(dateStr);
-          if (date && !isNaN(date.getTime())) {
-            startSources.push({ type: "property", date });
-            break;
-          }
-        }
-      }
-    }
-    if (config.startFromFilename) {
-      const datePattern = /^(\d{4}-\d{2}-\d{2})/;
-      const match = file.basename.match(datePattern);
-      if (match) {
-        const date = this.parseLocalDate(match[1]);
-        if (date && !isNaN(date.getTime())) {
-          startSources.push({ type: "filename", date });
-        }
-      }
-    }
-    if (startSources.length > 0) {
-      if (startSources.length === 1) {
-        result.startDate = startSources[0].date;
-      } else {
-        const prioritySource = startSources.find((s) => s.type === config.startPriority);
-        result.startDate = (prioritySource == null ? void 0 : prioritySource.date) || startSources[0].date;
-      }
-    }
-    const endSources = [];
-    if (config.endFromProperties.length > 0) {
-      for (const propName of config.endFromProperties) {
-        const cache = this.app.metadataCache.getFileCache(file);
-        const dateStr = (_b = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _b[propName];
-        if (dateStr) {
-          const date = this.parseLocalDate(dateStr);
-          if (date && !isNaN(date.getTime())) {
-            endSources.push({ type: "property", date });
-            break;
-          }
-        }
-      }
-    }
-    if (config.endFromFilename) {
-      const datePattern = /\d{4}-\d{2}-\d{2}/g;
-      const matches = file.basename.match(datePattern);
-      if (matches && matches.length >= 2) {
-        const date = this.parseLocalDate(matches[1]);
-        if (date && !isNaN(date.getTime())) {
-          endSources.push({ type: "filename", date });
-        }
-      }
-    }
-    if (endSources.length > 0) {
-      if (endSources.length === 1) {
-        result.endDate = endSources[0].date;
-      } else {
-        const prioritySource = endSources.find((s) => s.type === config.endPriority);
-        result.endDate = (prioritySource == null ? void 0 : prioritySource.date) || endSources[0].date;
-      }
-    }
-    return result;
-  }
-  processMultiDayEntries(notesMap) {
-    const multiDayMap = /* @__PURE__ */ new Map();
-    notesMap.forEach((notes) => {
-      notes.forEach((noteInfo) => {
-        if (noteInfo.isMultiDay && noteInfo.endDate && !isNaN(noteInfo.endDate.getTime())) {
-          let currentDate = new Date(noteInfo.startDate);
-          const endDate = new Date(noteInfo.endDate);
-          let monthCount = 0;
-          const maxMonths = 24;
-          while (currentDate <= endDate && monthCount < maxMonths) {
-            const currentMonth = currentDate.getMonth();
-            const currentYear = currentDate.getFullYear();
-            const entryId = `${noteInfo.file.path}-${currentYear}-${currentMonth}`;
-            if (!multiDayMap.has(entryId)) {
-              const segmentStartDay = currentDate.getDate();
-              const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-              let segmentEndDay;
-              if (endDate.getFullYear() === currentYear && endDate.getMonth() === currentMonth) {
-                segmentEndDay = endDate.getDate();
-              } else {
-                segmentEndDay = lastDayOfMonth;
-              }
-              multiDayMap.set(entryId, {
-                file: noteInfo.file,
-                startDate: new Date(currentYear, currentMonth, segmentStartDay),
-                endDate: new Date(currentYear, currentMonth, segmentEndDay),
-                month: currentMonth,
-                year: currentYear
-              });
-            }
-            currentDate = new Date(currentYear, currentMonth + 1, 1);
-            monthCount++;
-          }
-        }
-      });
-    });
-    return multiDayMap;
-  }
-  dateToKey(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  }
-  isDailyNote(file) {
-    const format = this.plugin.settings.dailyNoteFormat;
-    const basename = file.basename;
-    const pattern = format.replace("YYYY", "\\d{4}").replace("MM", "\\d{2}").replace("DD", "\\d{2}");
-    const regex = new RegExp(`^${pattern}$`);
-    return regex.test(basename);
-  }
-  hasDateAndText(file) {
-    const datePattern = /^\d{4}-\d{2}-\d{2}/;
-    const match = file.basename.match(datePattern);
-    if (!match) return false;
-    return file.basename.length > match[0].length;
-  }
-  getDisplayName(file) {
-    if (!this.plugin.settings.hideDateInTitle) {
-      return file.basename;
-    }
-    const datePattern = /\d{4}-\d{2}-\d{2}/g;
-    const matches = file.basename.match(datePattern);
-    if (matches && matches.length > 1) {
-      return file.basename;
-    }
-    const startDatePattern = /^\d{4}-\d{2}-\d{2}\s*/;
-    return file.basename.replace(startDatePattern, "").trim() || file.basename;
-  }
-  shouldShowNote(file) {
-    if (this.isDailyNote(file)) {
-      return this.plugin.settings.showDailyNotesInCells;
-    }
-    if (this.hasDateAndText(file)) {
-      return this.plugin.settings.showNotesWithDateAndText;
-    }
-    return true;
-  }
-  getDailyNoteFolder() {
-    var _a, _b, _c, _d;
-    if (this.plugin.settings.dailyNoteFolderMode === "obsidian") {
-      const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
-      if (dailyNotesPlugin && dailyNotesPlugin.enabled) {
-        let folder = ((_d = (_c = dailyNotesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder) || "";
-        folder = folder.replace(/^\/+|\/+$/g, "");
-        return folder ? folder + "/" : "";
-      }
-      return "";
-    } else {
-      const folder = this.plugin.settings.dailyNoteCustomFolder;
-      return folder ? folder + "/" : "";
-    }
-  }
-  async findDailyNoteInFolder(filename, folderPath) {
-    const files = this.app.vault.getMarkdownFiles();
-    for (const file of files) {
-      if (file.path.startsWith(folderPath) && file.name === filename) {
-        return file;
-      }
-    }
-    return null;
-  }
-  formatDateForDailyNote(date) {
-    const format = this.plugin.settings.dailyNoteFormat;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return format.replace("YYYY", String(year)).replace("MM", month).replace("DD", day);
-  }
-  async openOrCreateDailyNote(date) {
-    const filename = this.formatDateForDailyNote(date);
-    const folderPath = this.getDailyNoteFolder();
-    const existingFile = await this.findDailyNoteInFolder(`${filename}.md`, folderPath);
-    if (existingFile) {
-      await this.app.workspace.getLeaf(false).openFile(existingFile);
-    } else {
-      const fullPath = `${folderPath}${filename}.md`;
-      const newFile = await this.app.vault.create(fullPath, "");
-      await this.app.workspace.getLeaf(false).openFile(newFile);
-    }
-  }
-  async renderMonthRow(tbody, year, month, monthName, notesMap, multiDayEntries, maxDayCells) {
-    const row = tbody.createEl("tr", { cls: "month-row" });
-    row.createEl("td", { text: monthName, cls: "month-label" });
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-    const dayCells = [];
-    const activeMultiDayEntries = [];
-    multiDayEntries.forEach((entry) => {
-      if (entry.month === month && entry.year === year && this.shouldShowNote(entry.file)) {
-        activeMultiDayEntries.push(entry);
-      }
-    });
-    const occupiedRows = [];
-    const barPositions = /* @__PURE__ */ new Map();
-    activeMultiDayEntries.forEach((entry) => {
-      const startDay = entry.startDate.getDate();
-      const endDay = entry.endDate.getDate();
-      const startCol = startingDayOfWeek + startDay - 1;
-      const endCol = startingDayOfWeek + endDay - 1;
-      const span = endCol - startCol + 1;
-      if (span <= 0) return;
-      let rowIndex = 0;
-      while (occupiedRows.some(
-        (occupied) => occupied.row === rowIndex && occupied.start < endCol + 1 && occupied.end > startCol
-      )) {
-        rowIndex++;
-      }
-      occupiedRows.push({ row: rowIndex, start: startCol, end: endCol + 1 });
-      barPositions.set(entry.file.path + "-" + entry.month, { rowIndex, startCol, endCol, span });
-    });
-    const maxBarRow = occupiedRows.length > 0 ? Math.max(...occupiedRows.map((o) => o.row)) : -1;
-    const topPadding = (maxBarRow + 1) * 16 + 18;
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      const emptyCell = row.createEl("td", { cls: "day-cell empty" });
-      dayCells.push(emptyCell);
-    }
-    const today = /* @__PURE__ */ new Date();
-    today.setHours(0, 0, 0, 0);
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dateKey = this.dateToKey(date);
-      const dayCell = row.createEl("td", { cls: "day-cell" });
-      const dayIndex = startingDayOfWeek + day - 1;
-      const barsAbove = occupiedRows.filter((o) => o.start <= dayIndex && o.end > dayIndex).length;
-      if (barsAbove > 0) {
-        dayCell.style.paddingTop = `${topPadding}px`;
-      }
-      dayCells.push(dayCell);
-      const dayNumber = dayCell.createEl("a", {
-        text: String(day).padStart(2, "0"),
-        cls: "day-number day-number-link"
-      });
-      dayNumber.onclick = async (e) => {
-        e.preventDefault();
-        await this.openOrCreateDailyNote(date);
-      };
-      const notes = notesMap.get(dateKey);
-      if (notes && notes.length > 0) {
-        const notesContainer = dayCell.createDiv({ cls: "day-notes" });
-        const singleDayNotes = notes.filter((n) => !n.isMultiDay && this.shouldShowNote(n.file));
-        singleDayNotes.forEach((noteInfo) => {
-          const noteLink = notesContainer.createEl("a", {
-            text: this.getDisplayName(noteInfo.file),
-            cls: "note-link internal-link",
-            href: "#"
-          });
-          noteLink.setAttr("data-href", noteInfo.file.path);
-          noteLink.addEventListener("mouseenter", (event) => {
-            this.showTooltip(noteInfo.file.basename, event);
-          });
-          noteLink.addEventListener("mouseleave", () => {
-            this.hideTooltip();
-          });
-          noteLink.addEventListener("mouseover", (event) => {
-            this.app.workspace.trigger("hover-link", {
-              event,
-              source: VIEW_TYPE_CALENDAR,
-              hoverParent: this,
-              targetEl: noteLink,
-              linktext: noteInfo.file.path
-            });
-          });
-          noteLink.onclick = (e) => {
-            e.preventDefault();
-            this.app.workspace.getLeaf(false).openFile(noteInfo.file);
-          };
-        });
-      }
-      if (date.getTime() === today.getTime()) {
-        dayCell.addClass("today");
-      }
-    }
-    const cellsUsed = startingDayOfWeek + daysInMonth;
-    const remainingCells = maxDayCells - cellsUsed;
-    for (let i = 0; i < remainingCells; i++) {
-      const emptyCell = row.createEl("td", { cls: "day-cell empty" });
-      dayCells.push(emptyCell);
-    }
-    activeMultiDayEntries.forEach((entry) => {
-      const pos = barPositions.get(entry.file.path + "-" + entry.month);
-      if (!pos) return;
-      const firstDayCell = dayCells[pos.startCol];
-      if (firstDayCell && firstDayCell.classList.contains("day-cell")) {
-        const multiDayBar = firstDayCell.createEl("div", {
-          cls: "multi-day-bar"
-        });
-        multiDayBar.style.top = `${20 + pos.rowIndex * 16}px`;
-        multiDayBar.dataset.span = pos.span.toString();
-        const noteLink = multiDayBar.createEl("a", {
-          text: this.getDisplayName(entry.file),
-          cls: "multi-day-link internal-link",
-          href: "#"
-        });
-        noteLink.setAttr("data-href", entry.file.path);
-        noteLink.addEventListener("mouseenter", (event) => {
-          this.showTooltip(entry.file.basename, event);
-        });
-        noteLink.addEventListener("mouseleave", () => {
-          this.hideTooltip();
-        });
-        noteLink.addEventListener("mouseover", (event) => {
-          this.app.workspace.trigger("hover-link", {
-            event,
-            source: VIEW_TYPE_CALENDAR,
-            hoverParent: this,
-            targetEl: noteLink,
-            linktext: entry.file.path
-          });
-        });
-        noteLink.onclick = (e) => {
-          e.preventDefault();
-          this.app.workspace.getLeaf(false).openFile(entry.file);
-        };
-        setTimeout(() => {
-          if (firstDayCell && firstDayCell.parentElement) {
-            const row2 = firstDayCell.parentElement;
-            const cells = Array.from(row2.querySelectorAll(".day-cell"));
-            const startIndex = cells.indexOf(firstDayCell);
-            if (startIndex >= 0 && startIndex + pos.span - 1 < cells.length) {
-              const lastCell = cells[startIndex + pos.span - 1];
-              const firstCellRect = firstDayCell.getBoundingClientRect();
-              const lastCellRect = lastCell.getBoundingClientRect();
-              const totalWidth = lastCellRect.right - firstCellRect.left - 6;
-              multiDayBar.style.width = `${totalWidth}px`;
-            }
-          }
-        }, 0);
-      }
-    });
-    row.createEl("td", { text: monthName, cls: "month-label-right" });
-  }
-  async onClose() {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-    this.hideTooltip();
-  }
-  showTooltip(text, event) {
-    this.hideTooltip();
-    this.tooltip = document.body.createEl("div", {
-      cls: "lc-tooltip",
-      text
-    });
-    const x = event.clientX + 10;
-    const y = event.clientY + 10;
-    this.tooltip.style.left = `${x}px`;
-    this.tooltip.style.top = `${y}px`;
-  }
-  hideTooltip() {
-    if (this.tooltip) {
-      this.tooltip.remove();
-      this.tooltip = null;
-    }
-  }
-};
-
 // src/SettingsTab.ts
 var import_obsidian3 = require("obsidian");
 
 // src/FolderSuggest.ts
-var import_obsidian2 = require("obsidian");
+var import_obsidian = require("obsidian");
 var FolderSuggest = class {
   constructor(app, inputEl) {
     this.suggestions = null;
@@ -735,7 +114,7 @@ var FolderSuggest = class {
       if (folder.path) folders.push(folder.path);
       if (folder.children) {
         for (const child of folder.children) {
-          if (child instanceof import_obsidian2.TFolder) {
+          if (child instanceof import_obsidian.TFolder) {
             recurse(child);
           }
         }
@@ -789,30 +168,2457 @@ var FolderSuggest = class {
   }
 };
 
+// src/IconSuggest.ts
+var import_obsidian2 = require("obsidian");
+var IconSuggest = class {
+  constructor(inputEl, previewEl) {
+    this.previewEl = null;
+    this.suggestions = null;
+    this.allIcons = [];
+    this.inputEl = inputEl;
+    this.previewEl = previewEl || null;
+    this.allIcons = this.buildIconLibrary();
+    this.inputEl.addEventListener("input", () => {
+      this.updateSuggestions();
+      this.updatePreview();
+    });
+    this.inputEl.addEventListener("focus", () => this.updateSuggestions());
+    this.inputEl.addEventListener("blur", () => {
+      setTimeout(() => this.closeSuggestions(), 200);
+    });
+    if (this.previewEl && this.inputEl.value) {
+      this.updatePreview();
+    }
+  }
+  /**
+   * Build comprehensive library of emojis and Lucide icons
+   */
+  buildIconLibrary() {
+    const items = [];
+    const emojis = [
+      // Smileys & Emotion
+      { emoji: "\u{1F600}", keywords: ["smile", "happy", "grin", "face"], category: "smileys" },
+      { emoji: "\u{1F603}", keywords: ["smile", "happy", "joy", "face"], category: "smileys" },
+      { emoji: "\u{1F604}", keywords: ["smile", "happy", "laugh", "face"], category: "smileys" },
+      { emoji: "\u{1F601}", keywords: ["grin", "smile", "happy", "face"], category: "smileys" },
+      { emoji: "\u{1F60A}", keywords: ["smile", "blush", "happy", "face"], category: "smileys" },
+      { emoji: "\u{1F642}", keywords: ["smile", "happy", "face"], category: "smileys" },
+      { emoji: "\u{1F609}", keywords: ["wink", "flirt", "face"], category: "smileys" },
+      { emoji: "\u{1F60D}", keywords: ["love", "heart", "eyes", "face"], category: "smileys" },
+      { emoji: "\u{1F970}", keywords: ["love", "hearts", "smile", "face"], category: "smileys" },
+      { emoji: "\u{1F618}", keywords: ["kiss", "love", "face"], category: "smileys" },
+      { emoji: "\u{1F617}", keywords: ["kiss", "face"], category: "smileys" },
+      { emoji: "\u{1F619}", keywords: ["kiss", "smile", "face"], category: "smileys" },
+      { emoji: "\u{1F61A}", keywords: ["kiss", "closed", "eyes", "face"], category: "smileys" },
+      { emoji: "\u263A\uFE0F", keywords: ["smile", "happy", "face"], category: "smileys" },
+      { emoji: "\u{1F917}", keywords: ["hug", "smile", "face"], category: "smileys" },
+      { emoji: "\u{1F929}", keywords: ["star", "eyes", "excited", "face"], category: "smileys" },
+      { emoji: "\u{1F914}", keywords: ["think", "hmm", "face"], category: "smileys" },
+      { emoji: "\u{1F610}", keywords: ["neutral", "meh", "face"], category: "smileys" },
+      { emoji: "\u{1F611}", keywords: ["expressionless", "meh", "face"], category: "smileys" },
+      { emoji: "\u{1F636}", keywords: ["silence", "quiet", "face"], category: "smileys" },
+      { emoji: "\u{1F60F}", keywords: ["smirk", "smug", "face"], category: "smileys" },
+      { emoji: "\u{1F612}", keywords: ["unamused", "meh", "face"], category: "smileys" },
+      { emoji: "\u{1F644}", keywords: ["eye", "roll", "annoyed", "face"], category: "smileys" },
+      { emoji: "\u{1F62C}", keywords: ["grimace", "awkward", "face"], category: "smileys" },
+      { emoji: "\u{1F614}", keywords: ["sad", "pensive", "face"], category: "smileys" },
+      { emoji: "\u{1F62A}", keywords: ["sleepy", "tired", "face"], category: "smileys" },
+      { emoji: "\u{1F924}", keywords: ["drool", "sleep", "face"], category: "smileys" },
+      { emoji: "\u{1F634}", keywords: ["sleep", "zzz", "face"], category: "smileys" },
+      { emoji: "\u{1F637}", keywords: ["mask", "sick", "face"], category: "smileys" },
+      { emoji: "\u{1F912}", keywords: ["sick", "thermometer", "face"], category: "smileys" },
+      { emoji: "\u{1F915}", keywords: ["hurt", "bandage", "face"], category: "smileys" },
+      { emoji: "\u{1F922}", keywords: ["nausea", "sick", "face"], category: "smileys" },
+      { emoji: "\u{1F92E}", keywords: ["vomit", "sick", "face"], category: "smileys" },
+      { emoji: "\u{1F927}", keywords: ["sneeze", "sick", "face"], category: "smileys" },
+      { emoji: "\u{1F975}", keywords: ["hot", "heat", "face"], category: "smileys" },
+      { emoji: "\u{1F976}", keywords: ["cold", "freeze", "face"], category: "smileys" },
+      { emoji: "\u{1F60E}", keywords: ["cool", "sunglasses", "face"], category: "smileys" },
+      { emoji: "\u{1F913}", keywords: ["nerd", "geek", "glasses", "face"], category: "smileys" },
+      { emoji: "\u{1F9D0}", keywords: ["monocle", "inspect", "face"], category: "smileys" },
+      { emoji: "\u{1F615}", keywords: ["confused", "unsure", "face"], category: "smileys" },
+      { emoji: "\u{1F61F}", keywords: ["worried", "sad", "face"], category: "smileys" },
+      { emoji: "\u{1F641}", keywords: ["frown", "sad", "face"], category: "smileys" },
+      { emoji: "\u2639\uFE0F", keywords: ["frown", "sad", "face"], category: "smileys" },
+      { emoji: "\u{1F62E}", keywords: ["wow", "surprised", "face"], category: "smileys" },
+      { emoji: "\u{1F62F}", keywords: ["hushed", "surprised", "face"], category: "smileys" },
+      { emoji: "\u{1F632}", keywords: ["shocked", "surprised", "face"], category: "smileys" },
+      { emoji: "\u{1F633}", keywords: ["flushed", "embarrassed", "face"], category: "smileys" },
+      { emoji: "\u{1F97A}", keywords: ["pleading", "puppy", "eyes", "face"], category: "smileys" },
+      { emoji: "\u{1F626}", keywords: ["frown", "open", "mouth", "face"], category: "smileys" },
+      { emoji: "\u{1F627}", keywords: ["anguish", "face"], category: "smileys" },
+      { emoji: "\u{1F628}", keywords: ["fear", "scared", "face"], category: "smileys" },
+      { emoji: "\u{1F630}", keywords: ["anxious", "sweat", "face"], category: "smileys" },
+      { emoji: "\u{1F625}", keywords: ["sad", "relieved", "face"], category: "smileys" },
+      { emoji: "\u{1F622}", keywords: ["cry", "sad", "tear", "face"], category: "smileys" },
+      { emoji: "\u{1F62D}", keywords: ["sob", "cry", "sad", "face"], category: "smileys" },
+      { emoji: "\u{1F631}", keywords: ["scream", "fear", "face"], category: "smileys" },
+      { emoji: "\u{1F616}", keywords: ["confound", "face"], category: "smileys" },
+      { emoji: "\u{1F623}", keywords: ["persevere", "face"], category: "smileys" },
+      { emoji: "\u{1F61E}", keywords: ["disappointed", "sad", "face"], category: "smileys" },
+      { emoji: "\u{1F613}", keywords: ["sweat", "face"], category: "smileys" },
+      { emoji: "\u{1F629}", keywords: ["weary", "tired", "face"], category: "smileys" },
+      { emoji: "\u{1F62B}", keywords: ["tired", "face"], category: "smileys" },
+      { emoji: "\u{1F971}", keywords: ["yawn", "tired", "face"], category: "smileys" },
+      { emoji: "\u{1F624}", keywords: ["triumph", "face"], category: "smileys" },
+      { emoji: "\u{1F621}", keywords: ["angry", "mad", "face"], category: "smileys" },
+      { emoji: "\u{1F620}", keywords: ["angry", "face"], category: "smileys" },
+      { emoji: "\u{1F92C}", keywords: ["swear", "curse", "face"], category: "smileys" },
+      { emoji: "\u{1F608}", keywords: ["devil", "smile", "face"], category: "smileys" },
+      { emoji: "\u{1F47F}", keywords: ["devil", "angry", "face"], category: "smileys" },
+      { emoji: "\u{1F480}", keywords: ["skull", "death", "dead"], category: "smileys" },
+      { emoji: "\u2620\uFE0F", keywords: ["skull", "crossbones", "death"], category: "smileys" },
+      // Hearts & Love
+      { emoji: "\u2764\uFE0F", keywords: ["heart", "love", "red"], category: "hearts" },
+      { emoji: "\u{1F9E1}", keywords: ["heart", "orange", "love"], category: "hearts" },
+      { emoji: "\u{1F49B}", keywords: ["heart", "yellow", "love"], category: "hearts" },
+      { emoji: "\u{1F49A}", keywords: ["heart", "green", "love"], category: "hearts" },
+      { emoji: "\u{1F499}", keywords: ["heart", "blue", "love"], category: "hearts" },
+      { emoji: "\u{1F49C}", keywords: ["heart", "purple", "love"], category: "hearts" },
+      { emoji: "\u{1F5A4}", keywords: ["heart", "black", "love"], category: "hearts" },
+      { emoji: "\u{1F90D}", keywords: ["heart", "white", "love"], category: "hearts" },
+      { emoji: "\u{1F90E}", keywords: ["heart", "brown", "love"], category: "hearts" },
+      { emoji: "\u{1F494}", keywords: ["broken", "heart", "sad"], category: "hearts" },
+      { emoji: "\u2763\uFE0F", keywords: ["heart", "exclamation", "love"], category: "hearts" },
+      { emoji: "\u{1F495}", keywords: ["two", "hearts", "love"], category: "hearts" },
+      { emoji: "\u{1F49E}", keywords: ["revolving", "hearts", "love"], category: "hearts" },
+      { emoji: "\u{1F493}", keywords: ["beating", "heart", "love"], category: "hearts" },
+      { emoji: "\u{1F497}", keywords: ["growing", "heart", "love"], category: "hearts" },
+      { emoji: "\u{1F496}", keywords: ["sparkling", "heart", "love"], category: "hearts" },
+      { emoji: "\u{1F498}", keywords: ["arrow", "heart", "cupid", "love"], category: "hearts" },
+      { emoji: "\u{1F49D}", keywords: ["gift", "heart", "love"], category: "hearts" },
+      // Hands & Body
+      { emoji: "\u{1F44D}", keywords: ["thumbs", "up", "yes", "like", "good"], category: "hands" },
+      { emoji: "\u{1F44E}", keywords: ["thumbs", "down", "no", "bad"], category: "hands" },
+      { emoji: "\u{1F44A}", keywords: ["fist", "punch", "bump"], category: "hands" },
+      { emoji: "\u270A", keywords: ["fist", "raised", "power"], category: "hands" },
+      { emoji: "\u{1F91B}", keywords: ["fist", "left", "bump"], category: "hands" },
+      { emoji: "\u{1F91C}", keywords: ["fist", "right", "bump"], category: "hands" },
+      { emoji: "\u{1F44F}", keywords: ["clap", "applause", "hands"], category: "hands" },
+      { emoji: "\u{1F64C}", keywords: ["raised", "hands", "celebrate"], category: "hands" },
+      { emoji: "\u{1F450}", keywords: ["open", "hands"], category: "hands" },
+      { emoji: "\u{1F932}", keywords: ["palms", "together", "pray"], category: "hands" },
+      { emoji: "\u{1F91D}", keywords: ["handshake", "deal", "agreement"], category: "hands" },
+      { emoji: "\u{1F64F}", keywords: ["pray", "thanks", "please", "hands"], category: "hands" },
+      { emoji: "\u270D\uFE0F", keywords: ["write", "hand", "pen"], category: "hands" },
+      { emoji: "\u270B", keywords: ["hand", "stop", "raised"], category: "hands" },
+      { emoji: "\u{1F91A}", keywords: ["raised", "back", "hand"], category: "hands" },
+      { emoji: "\u{1F590}\uFE0F", keywords: ["hand", "fingers", "splayed"], category: "hands" },
+      { emoji: "\u270C\uFE0F", keywords: ["victory", "peace", "hand"], category: "hands" },
+      { emoji: "\u{1F91E}", keywords: ["fingers", "crossed", "luck"], category: "hands" },
+      { emoji: "\u{1F91F}", keywords: ["love", "you", "hand"], category: "hands" },
+      { emoji: "\u{1F918}", keywords: ["rock", "on", "horns", "hand"], category: "hands" },
+      { emoji: "\u{1F44C}", keywords: ["ok", "hand", "perfect"], category: "hands" },
+      { emoji: "\u{1F90C}", keywords: ["pinched", "fingers", "hand"], category: "hands" },
+      { emoji: "\u{1F448}", keywords: ["point", "left", "hand"], category: "hands" },
+      { emoji: "\u{1F449}", keywords: ["point", "right", "hand"], category: "hands" },
+      { emoji: "\u{1F446}", keywords: ["point", "up", "hand"], category: "hands" },
+      { emoji: "\u{1F447}", keywords: ["point", "down", "hand"], category: "hands" },
+      { emoji: "\u261D\uFE0F", keywords: ["point", "up", "index", "hand"], category: "hands" },
+      { emoji: "\u{1F595}", keywords: ["middle", "finger", "hand"], category: "hands" },
+      { emoji: "\u{1F4AA}", keywords: ["muscle", "strong", "flex", "bicep"], category: "hands" },
+      // Nature & Weather
+      { emoji: "\u{1F31E}", keywords: ["sun", "face", "bright", "weather"], category: "nature" },
+      { emoji: "\u{1F31D}", keywords: ["moon", "face", "full", "night"], category: "nature" },
+      { emoji: "\u{1F31B}", keywords: ["moon", "face", "quarter", "night"], category: "nature" },
+      { emoji: "\u{1F31C}", keywords: ["moon", "face", "quarter", "night"], category: "nature" },
+      { emoji: "\u{1F31A}", keywords: ["moon", "face", "new", "dark"], category: "nature" },
+      { emoji: "\u{1F315}", keywords: ["moon", "full", "night"], category: "nature" },
+      { emoji: "\u{1F316}", keywords: ["moon", "waning", "night"], category: "nature" },
+      { emoji: "\u{1F317}", keywords: ["moon", "quarter", "night"], category: "nature" },
+      { emoji: "\u{1F318}", keywords: ["moon", "crescent", "night"], category: "nature" },
+      { emoji: "\u{1F311}", keywords: ["moon", "new", "dark"], category: "nature" },
+      { emoji: "\u{1F312}", keywords: ["moon", "waxing", "night"], category: "nature" },
+      { emoji: "\u{1F313}", keywords: ["moon", "quarter", "night"], category: "nature" },
+      { emoji: "\u{1F314}", keywords: ["moon", "waxing", "night"], category: "nature" },
+      { emoji: "\u2B50", keywords: ["star", "night", "favorite"], category: "nature" },
+      { emoji: "\u{1F31F}", keywords: ["star", "glowing", "sparkle"], category: "nature" },
+      { emoji: "\u2728", keywords: ["sparkles", "shine", "magic"], category: "nature" },
+      { emoji: "\u26A1", keywords: ["lightning", "bolt", "zap", "electric"], category: "nature" },
+      { emoji: "\u2604\uFE0F", keywords: ["comet", "space"], category: "nature" },
+      { emoji: "\u{1F4AB}", keywords: ["dizzy", "star"], category: "nature" },
+      { emoji: "\u{1F525}", keywords: ["fire", "flame", "hot", "burn"], category: "nature" },
+      { emoji: "\u{1F4A7}", keywords: ["droplet", "water", "drop"], category: "nature" },
+      { emoji: "\u{1F30A}", keywords: ["wave", "water", "ocean", "sea"], category: "nature" },
+      { emoji: "\u{1F308}", keywords: ["rainbow", "colors", "weather"], category: "nature" },
+      { emoji: "\u2600\uFE0F", keywords: ["sun", "sunny", "weather"], category: "nature" },
+      { emoji: "\u26C5", keywords: ["cloud", "sun", "weather"], category: "nature" },
+      { emoji: "\u2601\uFE0F", keywords: ["cloud", "weather"], category: "nature" },
+      { emoji: "\u{1F324}\uFE0F", keywords: ["sun", "cloud", "weather"], category: "nature" },
+      { emoji: "\u26C8\uFE0F", keywords: ["storm", "cloud", "lightning", "weather"], category: "nature" },
+      { emoji: "\u{1F327}\uFE0F", keywords: ["rain", "cloud", "weather"], category: "nature" },
+      { emoji: "\u26C4", keywords: ["snowman", "snow", "winter"], category: "nature" },
+      { emoji: "\u2744\uFE0F", keywords: ["snowflake", "snow", "cold", "winter"], category: "nature" },
+      { emoji: "\u{1F32C}\uFE0F", keywords: ["wind", "blow", "weather"], category: "nature" },
+      { emoji: "\u{1F4A8}", keywords: ["dash", "wind", "fast"], category: "nature" },
+      { emoji: "\u{1F32A}\uFE0F", keywords: ["tornado", "cyclone", "weather"], category: "nature" },
+      { emoji: "\u{1F32B}\uFE0F", keywords: ["fog", "weather"], category: "nature" },
+      { emoji: "\u{1F332}", keywords: ["tree", "evergreen", "pine", "nature"], category: "nature" },
+      { emoji: "\u{1F333}", keywords: ["tree", "deciduous", "nature"], category: "nature" },
+      { emoji: "\u{1F334}", keywords: ["palm", "tree", "tropical"], category: "nature" },
+      { emoji: "\u{1F331}", keywords: ["seedling", "plant", "grow"], category: "nature" },
+      { emoji: "\u{1F33F}", keywords: ["herb", "leaf", "plant"], category: "nature" },
+      { emoji: "\u2618\uFE0F", keywords: ["shamrock", "clover", "luck"], category: "nature" },
+      { emoji: "\u{1F340}", keywords: ["clover", "four", "leaf", "luck"], category: "nature" },
+      { emoji: "\u{1F339}", keywords: ["rose", "flower", "red"], category: "nature" },
+      { emoji: "\u{1F33A}", keywords: ["hibiscus", "flower"], category: "nature" },
+      { emoji: "\u{1F33B}", keywords: ["sunflower", "flower"], category: "nature" },
+      { emoji: "\u{1F33C}", keywords: ["blossom", "flower"], category: "nature" },
+      { emoji: "\u{1F337}", keywords: ["tulip", "flower"], category: "nature" },
+      // Food & Drink
+      { emoji: "\u{1F355}", keywords: ["pizza", "food"], category: "food" },
+      { emoji: "\u{1F354}", keywords: ["burger", "hamburger", "food"], category: "food" },
+      { emoji: "\u{1F35F}", keywords: ["fries", "french", "food"], category: "food" },
+      { emoji: "\u{1F32D}", keywords: ["hotdog", "food"], category: "food" },
+      { emoji: "\u{1F37F}", keywords: ["popcorn", "food", "snack"], category: "food" },
+      { emoji: "\u{1F953}", keywords: ["bacon", "food"], category: "food" },
+      { emoji: "\u{1F95A}", keywords: ["egg", "food"], category: "food" },
+      { emoji: "\u{1F373}", keywords: ["cooking", "egg", "food"], category: "food" },
+      { emoji: "\u{1F95E}", keywords: ["pancakes", "food"], category: "food" },
+      { emoji: "\u{1F9C7}", keywords: ["waffle", "food"], category: "food" },
+      { emoji: "\u{1F35E}", keywords: ["bread", "food"], category: "food" },
+      { emoji: "\u{1F950}", keywords: ["croissant", "food"], category: "food" },
+      { emoji: "\u{1F956}", keywords: ["baguette", "bread", "food"], category: "food" },
+      { emoji: "\u{1F9C0}", keywords: ["cheese", "food"], category: "food" },
+      { emoji: "\u{1F957}", keywords: ["salad", "food", "healthy"], category: "food" },
+      { emoji: "\u{1F35D}", keywords: ["spaghetti", "pasta", "food"], category: "food" },
+      { emoji: "\u{1F35C}", keywords: ["ramen", "noodles", "food"], category: "food" },
+      { emoji: "\u{1F372}", keywords: ["stew", "food"], category: "food" },
+      { emoji: "\u{1F35B}", keywords: ["curry", "rice", "food"], category: "food" },
+      { emoji: "\u{1F363}", keywords: ["sushi", "food"], category: "food" },
+      { emoji: "\u{1F371}", keywords: ["bento", "box", "food"], category: "food" },
+      { emoji: "\u{1F364}", keywords: ["shrimp", "food"], category: "food" },
+      { emoji: "\u{1F359}", keywords: ["rice", "ball", "food"], category: "food" },
+      { emoji: "\u{1F35A}", keywords: ["rice", "food"], category: "food" },
+      { emoji: "\u{1F358}", keywords: ["cracker", "rice", "food"], category: "food" },
+      { emoji: "\u{1F95F}", keywords: ["dumpling", "food"], category: "food" },
+      { emoji: "\u{1F362}", keywords: ["oden", "food"], category: "food" },
+      { emoji: "\u{1F361}", keywords: ["dango", "food"], category: "food" },
+      { emoji: "\u{1F367}", keywords: ["shaved", "ice", "dessert"], category: "food" },
+      { emoji: "\u{1F368}", keywords: ["ice", "cream", "dessert"], category: "food" },
+      { emoji: "\u{1F366}", keywords: ["soft", "ice", "cream", "dessert"], category: "food" },
+      { emoji: "\u{1F967}", keywords: ["pie", "dessert"], category: "food" },
+      { emoji: "\u{1F370}", keywords: ["cake", "dessert"], category: "food" },
+      { emoji: "\u{1F382}", keywords: ["birthday", "cake", "dessert"], category: "food" },
+      { emoji: "\u{1F9C1}", keywords: ["cupcake", "dessert"], category: "food" },
+      { emoji: "\u{1F36E}", keywords: ["custard", "pudding", "dessert"], category: "food" },
+      { emoji: "\u{1F36D}", keywords: ["lollipop", "candy"], category: "food" },
+      { emoji: "\u{1F36C}", keywords: ["candy", "sweet"], category: "food" },
+      { emoji: "\u{1F36B}", keywords: ["chocolate", "bar", "candy"], category: "food" },
+      { emoji: "\u{1F369}", keywords: ["doughnut", "donut", "dessert"], category: "food" },
+      { emoji: "\u{1F36A}", keywords: ["cookie", "dessert"], category: "food" },
+      { emoji: "\u{1F36F}", keywords: ["honey", "pot"], category: "food" },
+      { emoji: "\u{1F34E}", keywords: ["apple", "red", "fruit"], category: "food" },
+      { emoji: "\u{1F34F}", keywords: ["apple", "green", "fruit"], category: "food" },
+      { emoji: "\u{1F34A}", keywords: ["orange", "tangerine", "fruit"], category: "food" },
+      { emoji: "\u{1F34B}", keywords: ["lemon", "fruit"], category: "food" },
+      { emoji: "\u{1F34C}", keywords: ["banana", "fruit"], category: "food" },
+      { emoji: "\u{1F349}", keywords: ["watermelon", "fruit"], category: "food" },
+      { emoji: "\u{1F347}", keywords: ["grapes", "fruit"], category: "food" },
+      { emoji: "\u{1F353}", keywords: ["strawberry", "fruit"], category: "food" },
+      { emoji: "\u{1F348}", keywords: ["melon", "fruit"], category: "food" },
+      { emoji: "\u{1F352}", keywords: ["cherries", "fruit"], category: "food" },
+      { emoji: "\u{1F351}", keywords: ["peach", "fruit"], category: "food" },
+      { emoji: "\u{1F96D}", keywords: ["mango", "fruit"], category: "food" },
+      { emoji: "\u{1F34D}", keywords: ["pineapple", "fruit"], category: "food" },
+      { emoji: "\u{1F965}", keywords: ["coconut", "fruit"], category: "food" },
+      { emoji: "\u{1F95D}", keywords: ["kiwi", "fruit"], category: "food" },
+      { emoji: "\u2615", keywords: ["coffee", "drink", "hot"], category: "food" },
+      { emoji: "\u{1F375}", keywords: ["tea", "drink", "hot"], category: "food" },
+      { emoji: "\u{1F9C3}", keywords: ["juice", "box", "drink"], category: "food" },
+      { emoji: "\u{1F964}", keywords: ["cup", "straw", "drink"], category: "food" },
+      { emoji: "\u{1F376}", keywords: ["sake", "drink"], category: "food" },
+      { emoji: "\u{1F37A}", keywords: ["beer", "drink"], category: "food" },
+      { emoji: "\u{1F37B}", keywords: ["beers", "cheers", "drink"], category: "food" },
+      { emoji: "\u{1F377}", keywords: ["wine", "glass", "drink"], category: "food" },
+      { emoji: "\u{1F942}", keywords: ["champagne", "glasses", "cheers", "drink"], category: "food" },
+      { emoji: "\u{1F378}", keywords: ["cocktail", "drink"], category: "food" },
+      { emoji: "\u{1F379}", keywords: ["tropical", "drink"], category: "food" },
+      // Activities & Sports
+      { emoji: "\u26BD", keywords: ["soccer", "ball", "sport"], category: "activities" },
+      { emoji: "\u{1F3C0}", keywords: ["basketball", "ball", "sport"], category: "activities" },
+      { emoji: "\u{1F3C8}", keywords: ["football", "american", "ball", "sport"], category: "activities" },
+      { emoji: "\u26BE", keywords: ["baseball", "ball", "sport"], category: "activities" },
+      { emoji: "\u{1F94E}", keywords: ["softball", "ball", "sport"], category: "activities" },
+      { emoji: "\u{1F3BE}", keywords: ["tennis", "ball", "sport"], category: "activities" },
+      { emoji: "\u{1F3D0}", keywords: ["volleyball", "ball", "sport"], category: "activities" },
+      { emoji: "\u{1F3C9}", keywords: ["rugby", "ball", "sport"], category: "activities" },
+      { emoji: "\u{1F3B1}", keywords: ["pool", "8", "ball", "sport"], category: "activities" },
+      { emoji: "\u{1F3D3}", keywords: ["ping", "pong", "table", "tennis", "sport"], category: "activities" },
+      { emoji: "\u{1F3F8}", keywords: ["badminton", "sport"], category: "activities" },
+      { emoji: "\u{1F945}", keywords: ["goal", "net", "sport"], category: "activities" },
+      { emoji: "\u{1F3D2}", keywords: ["hockey", "ice", "sport"], category: "activities" },
+      { emoji: "\u{1F3D1}", keywords: ["hockey", "field", "sport"], category: "activities" },
+      { emoji: "\u{1F94D}", keywords: ["lacrosse", "sport"], category: "activities" },
+      { emoji: "\u{1F3CF}", keywords: ["cricket", "sport"], category: "activities" },
+      { emoji: "\u{1F3AF}", keywords: ["dart", "target", "bullseye"], category: "activities" },
+      { emoji: "\u{1F3AE}", keywords: ["game", "controller", "video"], category: "activities" },
+      { emoji: "\u{1F3B2}", keywords: ["dice", "game"], category: "activities" },
+      { emoji: "\u{1F3AD}", keywords: ["theater", "masks", "drama"], category: "activities" },
+      { emoji: "\u{1F3A8}", keywords: ["art", "palette", "paint"], category: "activities" },
+      { emoji: "\u{1F3AC}", keywords: ["movie", "clapper", "film"], category: "activities" },
+      { emoji: "\u{1F3A4}", keywords: ["microphone", "sing", "music"], category: "activities" },
+      { emoji: "\u{1F3A7}", keywords: ["headphones", "music"], category: "activities" },
+      { emoji: "\u{1F3BC}", keywords: ["music", "score"], category: "activities" },
+      { emoji: "\u{1F3B9}", keywords: ["keyboard", "piano", "music"], category: "activities" },
+      { emoji: "\u{1F941}", keywords: ["drum", "music"], category: "activities" },
+      { emoji: "\u{1F3B7}", keywords: ["saxophone", "music"], category: "activities" },
+      { emoji: "\u{1F3BA}", keywords: ["trumpet", "music"], category: "activities" },
+      { emoji: "\u{1F3B8}", keywords: ["guitar", "music"], category: "activities" },
+      { emoji: "\u{1F3BB}", keywords: ["violin", "music"], category: "activities" },
+      // Objects & Symbols
+      { emoji: "\u{1F4F1}", keywords: ["phone", "mobile", "cell"], category: "objects" },
+      { emoji: "\u{1F4BB}", keywords: ["laptop", "computer"], category: "objects" },
+      { emoji: "\u2328\uFE0F", keywords: ["keyboard", "computer"], category: "objects" },
+      { emoji: "\u{1F5A5}\uFE0F", keywords: ["desktop", "computer"], category: "objects" },
+      { emoji: "\u{1F5A8}\uFE0F", keywords: ["printer"], category: "objects" },
+      { emoji: "\u{1F5B1}\uFE0F", keywords: ["mouse", "computer"], category: "objects" },
+      { emoji: "\u{1F4F7}", keywords: ["camera", "photo"], category: "objects" },
+      { emoji: "\u{1F4F8}", keywords: ["camera", "flash", "photo"], category: "objects" },
+      { emoji: "\u{1F4F9}", keywords: ["video", "camera"], category: "objects" },
+      { emoji: "\u{1F3A5}", keywords: ["movie", "camera", "film"], category: "objects" },
+      { emoji: "\u{1F4DE}", keywords: ["phone", "telephone"], category: "objects" },
+      { emoji: "\u260E\uFE0F", keywords: ["telephone", "phone"], category: "objects" },
+      { emoji: "\u{1F4FA}", keywords: ["tv", "television"], category: "objects" },
+      { emoji: "\u{1F4FB}", keywords: ["radio"], category: "objects" },
+      { emoji: "\u23F0", keywords: ["alarm", "clock", "time"], category: "objects" },
+      { emoji: "\u23F1\uFE0F", keywords: ["stopwatch", "timer"], category: "objects" },
+      { emoji: "\u23F2\uFE0F", keywords: ["timer", "clock"], category: "objects" },
+      { emoji: "\u231A", keywords: ["watch", "time"], category: "objects" },
+      { emoji: "\u{1F4C5}", keywords: ["calendar", "date"], category: "objects" },
+      { emoji: "\u{1F4C6}", keywords: ["calendar", "tear-off", "date"], category: "objects" },
+      { emoji: "\u{1F4DD}", keywords: ["memo", "note", "pencil", "write"], category: "objects" },
+      { emoji: "\u270F\uFE0F", keywords: ["pencil", "write"], category: "objects" },
+      { emoji: "\u2712\uFE0F", keywords: ["pen", "black", "write"], category: "objects" },
+      { emoji: "\u{1F58A}\uFE0F", keywords: ["pen", "write"], category: "objects" },
+      { emoji: "\u{1F58B}\uFE0F", keywords: ["pen", "fountain", "write"], category: "objects" },
+      { emoji: "\u{1F4D4}", keywords: ["notebook", "decorative", "write"], category: "objects" },
+      { emoji: "\u{1F4D5}", keywords: ["book", "closed", "red"], category: "objects" },
+      { emoji: "\u{1F4D6}", keywords: ["book", "open", "read"], category: "objects" },
+      { emoji: "\u{1F4D7}", keywords: ["book", "green"], category: "objects" },
+      { emoji: "\u{1F4D8}", keywords: ["book", "blue"], category: "objects" },
+      { emoji: "\u{1F4D9}", keywords: ["book", "orange"], category: "objects" },
+      { emoji: "\u{1F4DA}", keywords: ["books", "stack", "library"], category: "objects" },
+      { emoji: "\u{1F4D3}", keywords: ["notebook"], category: "objects" },
+      { emoji: "\u{1F4D2}", keywords: ["ledger", "notebook"], category: "objects" },
+      { emoji: "\u{1F4C3}", keywords: ["page", "curl"], category: "objects" },
+      { emoji: "\u{1F4C4}", keywords: ["page", "document"], category: "objects" },
+      { emoji: "\u{1F4F0}", keywords: ["newspaper", "news"], category: "objects" },
+      { emoji: "\u{1F5DE}\uFE0F", keywords: ["newspaper", "rolled"], category: "objects" },
+      { emoji: "\u{1F4D1}", keywords: ["bookmark", "tabs"], category: "objects" },
+      { emoji: "\u{1F516}", keywords: ["bookmark"], category: "objects" },
+      { emoji: "\u{1F4B0}", keywords: ["money", "bag", "dollar"], category: "objects" },
+      { emoji: "\u{1F4B5}", keywords: ["dollar", "bill", "money"], category: "objects" },
+      { emoji: "\u{1F4B4}", keywords: ["yen", "bill", "money"], category: "objects" },
+      { emoji: "\u{1F4B6}", keywords: ["euro", "bill", "money"], category: "objects" },
+      { emoji: "\u{1F4B7}", keywords: ["pound", "bill", "money"], category: "objects" },
+      { emoji: "\u{1F4B3}", keywords: ["credit", "card"], category: "objects" },
+      { emoji: "\u{1F48E}", keywords: ["gem", "diamond", "jewel"], category: "objects" },
+      { emoji: "\u2699\uFE0F", keywords: ["gear", "settings", "cog"], category: "objects" },
+      { emoji: "\u{1F527}", keywords: ["wrench", "tool"], category: "objects" },
+      { emoji: "\u{1F528}", keywords: ["hammer", "tool"], category: "objects" },
+      { emoji: "\u2692\uFE0F", keywords: ["hammer", "pick", "tool"], category: "objects" },
+      { emoji: "\u{1F6E0}\uFE0F", keywords: ["tools", "hammer", "wrench"], category: "objects" },
+      { emoji: "\u{1F529}", keywords: ["nut", "bolt"], category: "objects" },
+      { emoji: "\u26A1", keywords: ["lightning", "zap", "electric", "fast"], category: "objects" },
+      { emoji: "\u{1F525}", keywords: ["fire", "flame", "hot"], category: "objects" },
+      { emoji: "\u{1F4A1}", keywords: ["bulb", "light", "idea"], category: "objects" },
+      { emoji: "\u{1F526}", keywords: ["flashlight", "torch"], category: "objects" },
+      { emoji: "\u{1F514}", keywords: ["bell", "notification"], category: "objects" },
+      { emoji: "\u{1F515}", keywords: ["bell", "slash", "mute"], category: "objects" },
+      { emoji: "\u{1F4E2}", keywords: ["loudspeaker", "announcement"], category: "objects" },
+      { emoji: "\u{1F4E3}", keywords: ["megaphone", "cheering"], category: "objects" },
+      { emoji: "\u{1F4EF}", keywords: ["horn", "postal"], category: "objects" },
+      { emoji: "\u{1F3BA}", keywords: ["trumpet", "horn"], category: "objects" },
+      { emoji: "\u{1F511}", keywords: ["key", "lock"], category: "objects" },
+      { emoji: "\u{1F5DD}\uFE0F", keywords: ["key", "old"], category: "objects" },
+      { emoji: "\u{1F510}", keywords: ["locked", "key"], category: "objects" },
+      { emoji: "\u{1F512}", keywords: ["locked", "lock"], category: "objects" },
+      { emoji: "\u{1F513}", keywords: ["unlocked", "open"], category: "objects" },
+      // Symbols & Arrows
+      { emoji: "\u2705", keywords: ["check", "mark", "green", "done", "yes"], category: "symbols" },
+      { emoji: "\u2714\uFE0F", keywords: ["check", "mark", "done", "yes"], category: "symbols" },
+      { emoji: "\u274C", keywords: ["x", "cross", "mark", "no", "wrong"], category: "symbols" },
+      { emoji: "\u274E", keywords: ["x", "cross", "mark", "button", "no"], category: "symbols" },
+      { emoji: "\u2B55", keywords: ["circle", "o", "hollow"], category: "symbols" },
+      { emoji: "\u2795", keywords: ["plus", "add", "heavy"], category: "symbols" },
+      { emoji: "\u2796", keywords: ["minus", "subtract", "heavy"], category: "symbols" },
+      { emoji: "\u2797", keywords: ["divide", "division", "heavy"], category: "symbols" },
+      { emoji: "\u2716\uFE0F", keywords: ["multiply", "multiplication", "heavy", "x"], category: "symbols" },
+      { emoji: "\u{1F7F0}", keywords: ["equals", "heavy"], category: "symbols" },
+      { emoji: "\u203C\uFE0F", keywords: ["exclamation", "double", "mark"], category: "symbols" },
+      { emoji: "\u2049\uFE0F", keywords: ["question", "exclamation", "mark"], category: "symbols" },
+      { emoji: "\u2753", keywords: ["question", "mark", "red"], category: "symbols" },
+      { emoji: "\u2754", keywords: ["question", "mark", "white"], category: "symbols" },
+      { emoji: "\u2755", keywords: ["exclamation", "mark", "white"], category: "symbols" },
+      { emoji: "\u2757", keywords: ["exclamation", "mark", "red"], category: "symbols" },
+      { emoji: "\u26A0\uFE0F", keywords: ["warning", "caution"], category: "symbols" },
+      { emoji: "\u{1F6AB}", keywords: ["prohibited", "forbidden", "no"], category: "symbols" },
+      { emoji: "\u{1F51E}", keywords: ["no", "under", "18", "adult"], category: "symbols" },
+      { emoji: "\u2622\uFE0F", keywords: ["radioactive", "radiation"], category: "symbols" },
+      { emoji: "\u2623\uFE0F", keywords: ["biohazard", "danger"], category: "symbols" },
+      { emoji: "\u2B06\uFE0F", keywords: ["arrow", "up", "north"], category: "symbols" },
+      { emoji: "\u2197\uFE0F", keywords: ["arrow", "up", "right", "northeast"], category: "symbols" },
+      { emoji: "\u27A1\uFE0F", keywords: ["arrow", "right", "east"], category: "symbols" },
+      { emoji: "\u2198\uFE0F", keywords: ["arrow", "down", "right", "southeast"], category: "symbols" },
+      { emoji: "\u2B07\uFE0F", keywords: ["arrow", "down", "south"], category: "symbols" },
+      { emoji: "\u2199\uFE0F", keywords: ["arrow", "down", "left", "southwest"], category: "symbols" },
+      { emoji: "\u2B05\uFE0F", keywords: ["arrow", "left", "west"], category: "symbols" },
+      { emoji: "\u2196\uFE0F", keywords: ["arrow", "up", "left", "northwest"], category: "symbols" },
+      { emoji: "\u2195\uFE0F", keywords: ["arrow", "up", "down"], category: "symbols" },
+      { emoji: "\u2194\uFE0F", keywords: ["arrow", "left", "right"], category: "symbols" },
+      { emoji: "\u21A9\uFE0F", keywords: ["arrow", "left", "curve"], category: "symbols" },
+      { emoji: "\u21AA\uFE0F", keywords: ["arrow", "right", "curve"], category: "symbols" },
+      { emoji: "\u2934\uFE0F", keywords: ["arrow", "up", "curve"], category: "symbols" },
+      { emoji: "\u2935\uFE0F", keywords: ["arrow", "down", "curve"], category: "symbols" },
+      { emoji: "\u{1F503}", keywords: ["arrows", "clockwise", "vertical"], category: "symbols" },
+      { emoji: "\u{1F504}", keywords: ["arrows", "counterclockwise", "button"], category: "symbols" },
+      { emoji: "\u{1F519}", keywords: ["back", "arrow"], category: "symbols" },
+      { emoji: "\u{1F51A}", keywords: ["end", "arrow"], category: "symbols" },
+      { emoji: "\u{1F51B}", keywords: ["on", "arrow"], category: "symbols" },
+      { emoji: "\u{1F51C}", keywords: ["soon", "arrow"], category: "symbols" },
+      { emoji: "\u{1F51D}", keywords: ["top", "arrow", "up"], category: "symbols" },
+      { emoji: "\u267B\uFE0F", keywords: ["recycle", "symbol"], category: "symbols" },
+      { emoji: "\u269C\uFE0F", keywords: ["fleur-de-lis"], category: "symbols" },
+      { emoji: "\u{1F531}", keywords: ["trident", "emblem"], category: "symbols" },
+      { emoji: "\u{1F4DB}", keywords: ["name", "badge"], category: "symbols" },
+      { emoji: "\u2B50", keywords: ["star", "white", "medium"], category: "symbols" },
+      { emoji: "\u{1F31F}", keywords: ["star", "glowing"], category: "symbols" },
+      { emoji: "\u{1F4AB}", keywords: ["dizzy", "star"], category: "symbols" },
+      { emoji: "\u2728", keywords: ["sparkles", "shine"], category: "symbols" },
+      { emoji: "\u26A1", keywords: ["lightning", "bolt", "zap"], category: "symbols" },
+      { emoji: "\u2604\uFE0F", keywords: ["comet"], category: "symbols" },
+      { emoji: "\u{1F4A5}", keywords: ["collision", "boom", "bang"], category: "symbols" },
+      { emoji: "\u{1F506}", keywords: ["bright", "button"], category: "symbols" },
+      { emoji: "\u{1F505}", keywords: ["dim", "button"], category: "symbols" },
+      { emoji: "\u{1F4A4}", keywords: ["zzz", "sleep"], category: "symbols" },
+      { emoji: "\u{1F4A2}", keywords: ["anger", "symbol"], category: "symbols" },
+      { emoji: "\u{1F4AC}", keywords: ["speech", "balloon", "chat"], category: "symbols" },
+      { emoji: "\u{1F4AD}", keywords: ["thought", "balloon"], category: "symbols" },
+      { emoji: "\u{1F5EF}\uFE0F", keywords: ["anger", "balloon"], category: "symbols" },
+      // Travel & Places
+      { emoji: "\u{1F697}", keywords: ["car", "automobile", "vehicle"], category: "travel" },
+      { emoji: "\u{1F695}", keywords: ["taxi", "car", "vehicle"], category: "travel" },
+      { emoji: "\u{1F699}", keywords: ["suv", "car", "vehicle"], category: "travel" },
+      { emoji: "\u{1F68C}", keywords: ["bus", "vehicle"], category: "travel" },
+      { emoji: "\u{1F68E}", keywords: ["trolleybus", "vehicle"], category: "travel" },
+      { emoji: "\u{1F3CE}\uFE0F", keywords: ["race", "car", "vehicle"], category: "travel" },
+      { emoji: "\u{1F693}", keywords: ["police", "car", "vehicle"], category: "travel" },
+      { emoji: "\u{1F691}", keywords: ["ambulance", "vehicle"], category: "travel" },
+      { emoji: "\u{1F692}", keywords: ["fire", "engine", "truck"], category: "travel" },
+      { emoji: "\u{1F690}", keywords: ["minibus", "vehicle"], category: "travel" },
+      { emoji: "\u{1F69A}", keywords: ["truck", "delivery", "vehicle"], category: "travel" },
+      { emoji: "\u{1F69B}", keywords: ["truck", "articulated", "vehicle"], category: "travel" },
+      { emoji: "\u{1F69C}", keywords: ["tractor", "vehicle"], category: "travel" },
+      { emoji: "\u{1F3CD}\uFE0F", keywords: ["motorcycle", "vehicle"], category: "travel" },
+      { emoji: "\u{1F6F5}", keywords: ["scooter", "motor", "vehicle"], category: "travel" },
+      { emoji: "\u{1F6B2}", keywords: ["bike", "bicycle", "vehicle"], category: "travel" },
+      { emoji: "\u{1F6F4}", keywords: ["scooter", "kick", "vehicle"], category: "travel" },
+      { emoji: "\u2708\uFE0F", keywords: ["airplane", "plane", "flight"], category: "travel" },
+      { emoji: "\u{1F6EB}", keywords: ["airplane", "departure", "takeoff"], category: "travel" },
+      { emoji: "\u{1F6EC}", keywords: ["airplane", "arrival", "landing"], category: "travel" },
+      { emoji: "\u{1F681}", keywords: ["helicopter", "vehicle"], category: "travel" },
+      { emoji: "\u{1F682}", keywords: ["train", "locomotive", "vehicle"], category: "travel" },
+      { emoji: "\u{1F686}", keywords: ["train", "vehicle"], category: "travel" },
+      { emoji: "\u{1F687}", keywords: ["metro", "subway", "train"], category: "travel" },
+      { emoji: "\u{1F68A}", keywords: ["tram", "vehicle"], category: "travel" },
+      { emoji: "\u{1F69D}", keywords: ["monorail", "vehicle"], category: "travel" },
+      { emoji: "\u{1F684}", keywords: ["train", "bullet", "high-speed"], category: "travel" },
+      { emoji: "\u{1F685}", keywords: ["train", "bullet", "high-speed"], category: "travel" },
+      { emoji: "\u{1F688}", keywords: ["train", "light", "rail"], category: "travel" },
+      { emoji: "\u{1F69E}", keywords: ["train", "mountain", "railway"], category: "travel" },
+      { emoji: "\u{1F68B}", keywords: ["tram", "car"], category: "travel" },
+      { emoji: "\u{1F683}", keywords: ["train", "railway", "car"], category: "travel" },
+      { emoji: "\u{1F69F}", keywords: ["railway", "suspension"], category: "travel" },
+      { emoji: "\u{1F6A0}", keywords: ["cable", "car", "mountain"], category: "travel" },
+      { emoji: "\u{1F6A1}", keywords: ["aerial", "tramway"], category: "travel" },
+      { emoji: "\u{1F6A2}", keywords: ["ship", "boat"], category: "travel" },
+      { emoji: "\u26F5", keywords: ["sailboat", "boat"], category: "travel" },
+      { emoji: "\u{1F6F6}", keywords: ["canoe", "boat"], category: "travel" },
+      { emoji: "\u{1F6A4}", keywords: ["speedboat", "boat"], category: "travel" },
+      { emoji: "\u{1F6F3}\uFE0F", keywords: ["ship", "passenger"], category: "travel" },
+      { emoji: "\u26F4\uFE0F", keywords: ["ferry", "boat"], category: "travel" },
+      { emoji: "\u{1F6E5}\uFE0F", keywords: ["boat", "motor"], category: "travel" },
+      { emoji: "\u{1F680}", keywords: ["rocket", "space", "launch"], category: "travel" },
+      { emoji: "\u{1F6F8}", keywords: ["ufo", "flying", "saucer"], category: "travel" },
+      { emoji: "\u23F1\uFE0F", keywords: ["stopwatch", "timer"], category: "travel" },
+      { emoji: "\u23F0", keywords: ["alarm", "clock"], category: "travel" },
+      { emoji: "\u23F2\uFE0F", keywords: ["timer", "clock"], category: "travel" },
+      { emoji: "\u{1F550}", keywords: ["clock", "one", "time"], category: "travel" },
+      { emoji: "\u{1F3E0}", keywords: ["house", "home"], category: "travel" },
+      { emoji: "\u{1F3E1}", keywords: ["house", "garden", "home"], category: "travel" },
+      { emoji: "\u{1F3E2}", keywords: ["building", "office"], category: "travel" },
+      { emoji: "\u{1F3E3}", keywords: ["post", "office"], category: "travel" },
+      { emoji: "\u{1F3E4}", keywords: ["post", "office", "european"], category: "travel" },
+      { emoji: "\u{1F3E5}", keywords: ["hospital", "medical"], category: "travel" },
+      { emoji: "\u{1F3E6}", keywords: ["bank", "building"], category: "travel" },
+      { emoji: "\u{1F3E8}", keywords: ["hotel", "building"], category: "travel" },
+      { emoji: "\u{1F3E9}", keywords: ["hotel", "love"], category: "travel" },
+      { emoji: "\u{1F3EA}", keywords: ["store", "convenience"], category: "travel" },
+      { emoji: "\u{1F3EB}", keywords: ["school", "building"], category: "travel" },
+      { emoji: "\u{1F3EC}", keywords: ["store", "department"], category: "travel" },
+      { emoji: "\u{1F3ED}", keywords: ["factory", "building"], category: "travel" },
+      { emoji: "\u{1F3EF}", keywords: ["castle", "japanese"], category: "travel" },
+      { emoji: "\u{1F3F0}", keywords: ["castle", "european"], category: "travel" },
+      { emoji: "\u{1F492}", keywords: ["wedding", "chapel"], category: "travel" },
+      { emoji: "\u{1F5FC}", keywords: ["tower", "tokyo"], category: "travel" },
+      { emoji: "\u{1F5FD}", keywords: ["statue", "liberty"], category: "travel" },
+      { emoji: "\u26EA", keywords: ["church", "christian"], category: "travel" },
+      { emoji: "\u{1F54C}", keywords: ["mosque", "islam"], category: "travel" },
+      { emoji: "\u{1F6D5}", keywords: ["temple", "hindu"], category: "travel" },
+      { emoji: "\u{1F54D}", keywords: ["synagogue", "jewish"], category: "travel" }
+    ];
+    emojis.forEach(({ emoji, keywords, category }) => {
+      items.push({
+        value: emoji,
+        type: "emoji",
+        keywords,
+        category
+      });
+    });
+    const lucideIcons = this.getLucideIcons();
+    lucideIcons.forEach((iconName) => {
+      if (!(0, import_obsidian2.getIcon)(iconName)) return;
+      const keywords = iconName.split("-");
+      items.push({
+        value: iconName,
+        type: "lucide",
+        keywords,
+        category: "lucide"
+      });
+    });
+    return items;
+  }
+  /**
+   * Get comprehensive list of Lucide icon names
+   * Full library from https://lucide.dev/icons/
+   */
+  getLucideIcons() {
+    return [
+      "a-arrow-down",
+      "a-arrow-up",
+      "a-large-small",
+      "accessibility",
+      "activity",
+      "air-vent",
+      "airplay",
+      "alarm-check",
+      "alarm-clock",
+      "alarm-clock-check",
+      "alarm-clock-minus",
+      "alarm-clock-off",
+      "alarm-clock-plus",
+      "alarm-minus",
+      "alarm-plus",
+      "alarm-smoke",
+      "album",
+      "alert-circle",
+      "alert-octagon",
+      "alert-triangle",
+      "align-center",
+      "align-center-horizontal",
+      "align-center-vertical",
+      "align-end-horizontal",
+      "align-end-vertical",
+      "align-horizontal-distribute-center",
+      "align-horizontal-distribute-end",
+      "align-horizontal-distribute-start",
+      "align-horizontal-justify-center",
+      "align-horizontal-justify-end",
+      "align-horizontal-justify-start",
+      "align-horizontal-space-around",
+      "align-horizontal-space-between",
+      "align-justify",
+      "align-left",
+      "align-right",
+      "align-start-horizontal",
+      "align-start-vertical",
+      "align-vertical-distribute-center",
+      "align-vertical-distribute-end",
+      "align-vertical-distribute-start",
+      "align-vertical-justify-center",
+      "align-vertical-justify-end",
+      "align-vertical-justify-start",
+      "align-vertical-space-around",
+      "align-vertical-space-between",
+      "ambulance",
+      "ampersand",
+      "ampersands",
+      "anchor",
+      "angry",
+      "annoyed",
+      "antenna",
+      "anvil",
+      "aperture",
+      "app-window",
+      "app-window-mac",
+      "apple",
+      "archive",
+      "archive-restore",
+      "archive-x",
+      "area-chart",
+      "armchair",
+      "arrow-big-down",
+      "arrow-big-down-dash",
+      "arrow-big-left",
+      "arrow-big-left-dash",
+      "arrow-big-right",
+      "arrow-big-right-dash",
+      "arrow-big-up",
+      "arrow-big-up-dash",
+      "arrow-down",
+      "arrow-down-0-1",
+      "arrow-down-1-0",
+      "arrow-down-a-z",
+      "arrow-down-circle",
+      "arrow-down-from-line",
+      "arrow-down-left",
+      "arrow-down-left-from-circle",
+      "arrow-down-left-from-square",
+      "arrow-down-narrow-wide",
+      "arrow-down-right",
+      "arrow-down-right-from-circle",
+      "arrow-down-right-from-square",
+      "arrow-down-square",
+      "arrow-down-to-dot",
+      "arrow-down-to-line",
+      "arrow-down-up",
+      "arrow-down-wide-narrow",
+      "arrow-down-z-a",
+      "arrow-left",
+      "arrow-left-circle",
+      "arrow-left-from-line",
+      "arrow-left-right",
+      "arrow-left-square",
+      "arrow-left-to-line",
+      "arrow-right",
+      "arrow-right-circle",
+      "arrow-right-from-line",
+      "arrow-right-left",
+      "arrow-right-square",
+      "arrow-right-to-line",
+      "arrow-up",
+      "arrow-up-0-1",
+      "arrow-up-1-0",
+      "arrow-up-a-z",
+      "arrow-up-circle",
+      "arrow-up-down",
+      "arrow-up-from-dot",
+      "arrow-up-from-line",
+      "arrow-up-left",
+      "arrow-up-left-from-circle",
+      "arrow-up-left-from-square",
+      "arrow-up-narrow-wide",
+      "arrow-up-right",
+      "arrow-up-right-from-circle",
+      "arrow-up-right-from-square",
+      "arrow-up-square",
+      "arrow-up-to-line",
+      "arrow-up-wide-narrow",
+      "arrow-up-z-a",
+      "arrows-up-from-line",
+      "asterisk",
+      "at-sign",
+      "atom",
+      "audio-lines",
+      "audio-waveform",
+      "award",
+      "axe",
+      "axis-3d",
+      "baby",
+      "backpack",
+      "badge",
+      "badge-alert",
+      "badge-cent",
+      "badge-check",
+      "badge-dollar-sign",
+      "badge-euro",
+      "badge-help",
+      "badge-indian-rupee",
+      "badge-info",
+      "badge-japanese-yen",
+      "badge-minus",
+      "badge-percent",
+      "badge-plus",
+      "badge-pound-sterling",
+      "badge-russian-ruble",
+      "badge-swiss-franc",
+      "badge-x",
+      "baggage-claim",
+      "ban",
+      "banana",
+      "banknote",
+      "bar-chart",
+      "bar-chart-2",
+      "bar-chart-3",
+      "bar-chart-4",
+      "bar-chart-big",
+      "bar-chart-horizontal",
+      "bar-chart-horizontal-big",
+      "barcode",
+      "baseline",
+      "bath",
+      "battery",
+      "battery-charging",
+      "battery-full",
+      "battery-low",
+      "battery-medium",
+      "battery-warning",
+      "beaker",
+      "bean",
+      "bean-off",
+      "bed",
+      "bed-double",
+      "bed-single",
+      "beef",
+      "beer",
+      "beer-off",
+      "bell",
+      "bell-dot",
+      "bell-electric",
+      "bell-minus",
+      "bell-off",
+      "bell-plus",
+      "bell-ring",
+      "between-horizontal-end",
+      "between-horizontal-start",
+      "between-vertical-end",
+      "between-vertical-start",
+      "bicycle",
+      "bike",
+      "binary",
+      "binoculars",
+      "biohazard",
+      "bird",
+      "bitcoin",
+      "blend",
+      "blinds",
+      "blocks",
+      "bluetooth",
+      "bluetooth-connected",
+      "bluetooth-off",
+      "bluetooth-searching",
+      "bold",
+      "bolt",
+      "bomb",
+      "bone",
+      "book",
+      "book-a",
+      "book-audio",
+      "book-check",
+      "book-copy",
+      "book-dashed",
+      "book-down",
+      "book-headphones",
+      "book-heart",
+      "book-image",
+      "book-key",
+      "book-lock",
+      "book-marked",
+      "book-minus",
+      "book-open",
+      "book-open-check",
+      "book-open-text",
+      "book-plus",
+      "book-text",
+      "book-type",
+      "book-up",
+      "book-up-2",
+      "book-user",
+      "book-x",
+      "bookmark",
+      "bookmark-check",
+      "bookmark-minus",
+      "bookmark-plus",
+      "bookmark-x",
+      "boom-box",
+      "bot",
+      "bot-message-square",
+      "box",
+      "box-select",
+      "boxes",
+      "braces",
+      "brackets",
+      "brain",
+      "brain-circuit",
+      "brain-cog",
+      "brick-wall",
+      "briefcase",
+      "briefcase-business",
+      "briefcase-conveyor-belt",
+      "briefcase-medical",
+      "bring-to-front",
+      "brush",
+      "bug",
+      "bug-off",
+      "bug-play",
+      "building",
+      "building-2",
+      "bus",
+      "bus-front",
+      "cable",
+      "cable-car",
+      "cake",
+      "cake-slice",
+      "calculator",
+      "calendar",
+      "calendar-arrow-down",
+      "calendar-arrow-up",
+      "calendar-check",
+      "calendar-check-2",
+      "calendar-clock",
+      "calendar-cog",
+      "calendar-days",
+      "calendar-fold",
+      "calendar-heart",
+      "calendar-minus",
+      "calendar-minus-2",
+      "calendar-off",
+      "calendar-plus",
+      "calendar-plus-2",
+      "calendar-range",
+      "calendar-search",
+      "calendar-sync",
+      "calendar-x",
+      "calendar-x-2",
+      "camera",
+      "camera-off",
+      "camping-tent",
+      "candy",
+      "candy-cane",
+      "candy-off",
+      "cannabis",
+      "captions",
+      "captions-off",
+      "car",
+      "car-front",
+      "car-taxi-front",
+      "caravan",
+      "carrot",
+      "case-lower",
+      "case-sensitive",
+      "case-upper",
+      "cassette-tape",
+      "cast",
+      "castle",
+      "cat",
+      "cctv",
+      "check",
+      "check-check",
+      "check-circle",
+      "check-circle-2",
+      "check-square",
+      "check-square-2",
+      "chef-hat",
+      "cherry",
+      "chevron-down",
+      "chevron-down-circle",
+      "chevron-down-square",
+      "chevron-first",
+      "chevron-last",
+      "chevron-left",
+      "chevron-left-circle",
+      "chevron-left-square",
+      "chevron-right",
+      "chevron-right-circle",
+      "chevron-right-square",
+      "chevron-up",
+      "chevron-up-circle",
+      "chevron-up-square",
+      "chevrons-down",
+      "chevrons-down-up",
+      "chevrons-left",
+      "chevrons-left-right",
+      "chevrons-left-right-ellipsis",
+      "chevrons-right",
+      "chevrons-right-left",
+      "chevrons-up",
+      "chevrons-up-down",
+      "chrome",
+      "church",
+      "cigarette",
+      "cigarette-off",
+      "circle",
+      "circle-alert",
+      "circle-arrow-down",
+      "circle-arrow-left",
+      "circle-arrow-out-down-left",
+      "circle-arrow-out-down-right",
+      "circle-arrow-out-up-left",
+      "circle-arrow-out-up-right",
+      "circle-arrow-right",
+      "circle-arrow-up",
+      "circle-check",
+      "circle-check-big",
+      "circle-chevron-down",
+      "circle-chevron-left",
+      "circle-chevron-right",
+      "circle-chevron-up",
+      "circle-dashed",
+      "circle-divide",
+      "circle-dollar-sign",
+      "circle-dot",
+      "circle-dot-dashed",
+      "circle-ellipsis",
+      "circle-equal",
+      "circle-fading-arrow-up",
+      "circle-fading-plus",
+      "circle-gauge",
+      "circle-help",
+      "circle-minus",
+      "circle-off",
+      "circle-parking",
+      "circle-parking-off",
+      "circle-pause",
+      "circle-percent",
+      "circle-play",
+      "circle-plus",
+      "circle-power",
+      "circle-slash",
+      "circle-slash-2",
+      "circle-stop",
+      "circle-user",
+      "circle-user-round",
+      "circle-x",
+      "circuit-board",
+      "citrus",
+      "clapperboard",
+      "clipboard",
+      "clipboard-check",
+      "clipboard-copy",
+      "clipboard-edit",
+      "clipboard-list",
+      "clipboard-minus",
+      "clipboard-paste",
+      "clipboard-pen",
+      "clipboard-pen-line",
+      "clipboard-plus",
+      "clipboard-signature",
+      "clipboard-type",
+      "clipboard-x",
+      "clock",
+      "clock-1",
+      "clock-10",
+      "clock-11",
+      "clock-12",
+      "clock-2",
+      "clock-3",
+      "clock-4",
+      "clock-5",
+      "clock-6",
+      "clock-7",
+      "clock-8",
+      "clock-9",
+      "clock-alert",
+      "clock-arrow-down",
+      "clock-arrow-up",
+      "cloud",
+      "cloud-cog",
+      "cloud-download",
+      "cloud-drizzle",
+      "cloud-fog",
+      "cloud-hail",
+      "cloud-lightning",
+      "cloud-moon",
+      "cloud-moon-rain",
+      "cloud-off",
+      "cloud-rain",
+      "cloud-rain-wind",
+      "cloud-snow",
+      "cloud-sun",
+      "cloud-sun-rain",
+      "cloud-upload",
+      "cloudy",
+      "clover",
+      "club",
+      "code",
+      "code-2",
+      "code-xml",
+      "codepen",
+      "codesandbox",
+      "coffee",
+      "cog",
+      "coins",
+      "columns-2",
+      "columns-3",
+      "columns-4",
+      "combine",
+      "command",
+      "compass",
+      "component",
+      "computer",
+      "concierge-bell",
+      "cone",
+      "construction",
+      "contact",
+      "contact-round",
+      "container",
+      "contrast",
+      "cookie",
+      "cooking-pot",
+      "copy",
+      "copy-check",
+      "copy-minus",
+      "copy-plus",
+      "copy-slash",
+      "copy-x",
+      "copyleft",
+      "copyright",
+      "corner-down-left",
+      "corner-down-right",
+      "corner-left-down",
+      "corner-left-up",
+      "corner-right-down",
+      "corner-right-up",
+      "corner-up-left",
+      "corner-up-right",
+      "cpu",
+      "creative-commons",
+      "credit-card",
+      "croissant",
+      "crop",
+      "cross",
+      "crosshair",
+      "crown",
+      "cuboid",
+      "cup-soda",
+      "currency",
+      "cylinder",
+      "database",
+      "database-backup",
+      "database-zap",
+      "delete",
+      "dessert",
+      "diameter",
+      "diamond",
+      "diamond-minus",
+      "diamond-percent",
+      "diamond-plus",
+      "dice-1",
+      "dice-2",
+      "dice-3",
+      "dice-4",
+      "dice-5",
+      "dice-6",
+      "dices",
+      "diff",
+      "disc",
+      "disc-2",
+      "disc-3",
+      "disc-album",
+      "divide",
+      "divide-circle",
+      "divide-square",
+      "dna",
+      "dna-off",
+      "dock",
+      "dog",
+      "dollar-sign",
+      "donut",
+      "door-closed",
+      "door-open",
+      "dot",
+      "download",
+      "download-cloud",
+      "drafting-compass",
+      "drama",
+      "dribbble",
+      "drill",
+      "droplet",
+      "droplets",
+      "drumstick",
+      "dumbbell",
+      "ear",
+      "ear-off",
+      "earth",
+      "earth-lock",
+      "eclipse",
+      "egg",
+      "egg-fried",
+      "egg-off",
+      "ellipsis",
+      "ellipsis-vertical",
+      "equal",
+      "equal-not",
+      "eraser",
+      "euro",
+      "expand",
+      "external-link",
+      "eye",
+      "eye-closed",
+      "eye-off",
+      "facebook",
+      "factory",
+      "fan",
+      "fast-forward",
+      "feather",
+      "fence",
+      "ferris-wheel",
+      "figma",
+      "file",
+      "file-archive",
+      "file-audio",
+      "file-audio-2",
+      "file-axis-3d",
+      "file-badge",
+      "file-badge-2",
+      "file-bar-chart",
+      "file-bar-chart-2",
+      "file-box",
+      "file-check",
+      "file-check-2",
+      "file-clock",
+      "file-code",
+      "file-code-2",
+      "file-cog",
+      "file-diff",
+      "file-digit",
+      "file-down",
+      "file-edit",
+      "file-heart",
+      "file-image",
+      "file-input",
+      "file-json",
+      "file-json-2",
+      "file-key",
+      "file-key-2",
+      "file-line-chart",
+      "file-lock",
+      "file-lock-2",
+      "file-minus",
+      "file-minus-2",
+      "file-music",
+      "file-output",
+      "file-pen",
+      "file-pen-line",
+      "file-pie-chart",
+      "file-plus",
+      "file-plus-2",
+      "file-question",
+      "file-scan",
+      "file-search",
+      "file-search-2",
+      "file-signature",
+      "file-sliders",
+      "file-spreadsheet",
+      "file-stack",
+      "file-symlink",
+      "file-terminal",
+      "file-text",
+      "file-type",
+      "file-type-2",
+      "file-up",
+      "file-user",
+      "file-video",
+      "file-video-2",
+      "file-volume",
+      "file-volume-2",
+      "file-warning",
+      "file-x",
+      "file-x-2",
+      "files",
+      "film",
+      "filter",
+      "filter-x",
+      "fingerprint",
+      "fire-extinguisher",
+      "fish",
+      "fish-off",
+      "fish-symbol",
+      "flag",
+      "flag-off",
+      "flag-triangle-left",
+      "flag-triangle-right",
+      "flame",
+      "flame-kindling",
+      "flashlight",
+      "flashlight-off",
+      "flask-conical",
+      "flask-conical-off",
+      "flask-round",
+      "flip-horizontal",
+      "flip-horizontal-2",
+      "flip-vertical",
+      "flip-vertical-2",
+      "flower",
+      "flower-2",
+      "focus",
+      "fold-horizontal",
+      "fold-vertical",
+      "folder",
+      "folder-archive",
+      "folder-check",
+      "folder-clock",
+      "folder-closed",
+      "folder-cog",
+      "folder-dot",
+      "folder-down",
+      "folder-edit",
+      "folder-git",
+      "folder-git-2",
+      "folder-heart",
+      "folder-input",
+      "folder-kanban",
+      "folder-key",
+      "folder-lock",
+      "folder-minus",
+      "folder-open",
+      "folder-open-dot",
+      "folder-output",
+      "folder-pen",
+      "folder-plus",
+      "folder-root",
+      "folder-search",
+      "folder-search-2",
+      "folder-symlink",
+      "folder-sync",
+      "folder-tree",
+      "folder-up",
+      "folder-x",
+      "folders",
+      "footprints",
+      "forklift",
+      "form-input",
+      "forward",
+      "frame",
+      "framer",
+      "frown",
+      "fuel",
+      "fullscreen",
+      "function-square",
+      "gallery-horizontal",
+      "gallery-horizontal-end",
+      "gallery-thumbnails",
+      "gallery-vertical",
+      "gallery-vertical-end",
+      "gamepad",
+      "gamepad-2",
+      "gauge",
+      "gauge-circle",
+      "gavel",
+      "gem",
+      "ghost",
+      "gift",
+      "git-branch",
+      "git-branch-plus",
+      "git-commit-horizontal",
+      "git-commit-vertical",
+      "git-compare",
+      "git-compare-arrows",
+      "git-fork",
+      "git-graph",
+      "git-merge",
+      "git-pull-request",
+      "git-pull-request-arrow",
+      "git-pull-request-closed",
+      "git-pull-request-create",
+      "git-pull-request-create-arrow",
+      "git-pull-request-draft",
+      "github",
+      "gitlab",
+      "glass-water",
+      "glasses",
+      "globe",
+      "globe-2",
+      "globe-lock",
+      "goal",
+      "grab",
+      "graduation-cap",
+      "grape",
+      "grid-2x2",
+      "grid-2x2-check",
+      "grid-2x2-plus",
+      "grid-2x2-x",
+      "grid-3x3",
+      "grip",
+      "grip-horizontal",
+      "grip-vertical",
+      "group",
+      "guitar",
+      "ham",
+      "hammer",
+      "hand",
+      "hand-coins",
+      "hand-heart",
+      "hand-helping",
+      "hand-metal",
+      "hand-platter",
+      "handshake",
+      "hard-drive",
+      "hard-drive-download",
+      "hard-drive-upload",
+      "hard-hat",
+      "hash",
+      "haze",
+      "hdmi-port",
+      "heading",
+      "heading-1",
+      "heading-2",
+      "heading-3",
+      "heading-4",
+      "heading-5",
+      "heading-6",
+      "headphone-off",
+      "headphones",
+      "headset",
+      "heart",
+      "heart-crack",
+      "heart-handshake",
+      "heart-off",
+      "heart-pulse",
+      "heater",
+      "help-circle",
+      "hexagon",
+      "highlighter",
+      "history",
+      "hop",
+      "hop-off",
+      "hospital",
+      "hotel",
+      "hourglass",
+      "house",
+      "house-plus",
+      "ice-cream",
+      "ice-cream-bowl",
+      "ice-cream-cone",
+      "image",
+      "image-down",
+      "image-minus",
+      "image-off",
+      "image-play",
+      "image-plus",
+      "image-up",
+      "images",
+      "import",
+      "inbox",
+      "indent-decrease",
+      "indent-increase",
+      "indian-rupee",
+      "infinity",
+      "info",
+      "inspection-panel",
+      "instagram",
+      "italic",
+      "iteration-ccw",
+      "iteration-cw",
+      "japanese-yen",
+      "joystick",
+      "kanban",
+      "key",
+      "key-round",
+      "key-square",
+      "keyboard",
+      "keyboard-music",
+      "keyboard-off",
+      "lamp",
+      "lamp-ceiling",
+      "lamp-desk",
+      "lamp-floor",
+      "lamp-wall-down",
+      "lamp-wall-up",
+      "land-plot",
+      "landmark",
+      "languages",
+      "laptop",
+      "laptop-2",
+      "laptop-minimal",
+      "lasso",
+      "lasso-select",
+      "laugh",
+      "layers",
+      "layers-2",
+      "layers-3",
+      "layout",
+      "layout-dashboard",
+      "layout-grid",
+      "layout-list",
+      "layout-panel-left",
+      "layout-panel-top",
+      "layout-template",
+      "leaf",
+      "leafy-green",
+      "lectern",
+      "library",
+      "library-big",
+      "library-square",
+      "life-buoy",
+      "ligature",
+      "lightbulb",
+      "lightbulb-off",
+      "line-chart",
+      "link",
+      "link-2",
+      "link-2-off",
+      "linkedin",
+      "list",
+      "list-check",
+      "list-checks",
+      "list-collapse",
+      "list-end",
+      "list-filter",
+      "list-minus",
+      "list-music",
+      "list-ordered",
+      "list-plus",
+      "list-restart",
+      "list-start",
+      "list-todo",
+      "list-tree",
+      "list-video",
+      "list-x",
+      "loader",
+      "loader-circle",
+      "loader-pinwheel",
+      "locate",
+      "locate-fixed",
+      "locate-off",
+      "lock",
+      "lock-keyhole",
+      "lock-keyhole-open",
+      "lock-open",
+      "log-in",
+      "log-out",
+      "logs",
+      "lollipop",
+      "luggage",
+      "magnet",
+      "mail",
+      "mail-check",
+      "mail-minus",
+      "mail-open",
+      "mail-plus",
+      "mail-question",
+      "mail-search",
+      "mail-warning",
+      "mail-x",
+      "mailbox",
+      "mails",
+      "map",
+      "map-pin",
+      "map-pin-off",
+      "map-pinned",
+      "martini",
+      "maximize",
+      "maximize-2",
+      "medal",
+      "megaphone",
+      "megaphone-off",
+      "meh",
+      "memory-stick",
+      "menu",
+      "merge",
+      "message-circle",
+      "message-circle-code",
+      "message-circle-dashed",
+      "message-circle-heart",
+      "message-circle-more",
+      "message-circle-off",
+      "message-circle-plus",
+      "message-circle-question",
+      "message-circle-reply",
+      "message-circle-warning",
+      "message-circle-x",
+      "message-square",
+      "message-square-code",
+      "message-square-dashed",
+      "message-square-diff",
+      "message-square-dot",
+      "message-square-heart",
+      "message-square-more",
+      "message-square-off",
+      "message-square-plus",
+      "message-square-quote",
+      "message-square-reply",
+      "message-square-share",
+      "message-square-text",
+      "message-square-warning",
+      "message-square-x",
+      "messages-square",
+      "mic",
+      "mic-off",
+      "mic-vocal",
+      "microchip",
+      "microscope",
+      "microwave",
+      "milestone",
+      "milk",
+      "milk-off",
+      "minimize",
+      "minimize-2",
+      "minus",
+      "minus-circle",
+      "minus-square",
+      "monitor",
+      "monitor-check",
+      "monitor-dot",
+      "monitor-down",
+      "monitor-off",
+      "monitor-pause",
+      "monitor-play",
+      "monitor-smartphone",
+      "monitor-speaker",
+      "monitor-stop",
+      "monitor-up",
+      "monitor-x",
+      "moon",
+      "moon-star",
+      "more-horizontal",
+      "more-vertical",
+      "mountain",
+      "mountain-snow",
+      "mouse",
+      "mouse-off",
+      "mouse-pointer",
+      "mouse-pointer-2",
+      "mouse-pointer-click",
+      "mouse-pointer-square",
+      "mouse-pointer-square-dashed",
+      "move",
+      "move-3d",
+      "move-diagonal",
+      "move-diagonal-2",
+      "move-down",
+      "move-down-left",
+      "move-down-right",
+      "move-horizontal",
+      "move-left",
+      "move-right",
+      "move-up",
+      "move-up-left",
+      "move-up-right",
+      "move-vertical",
+      "music",
+      "music-2",
+      "music-3",
+      "music-4",
+      "navigation",
+      "navigation-2",
+      "navigation-2-off",
+      "navigation-off",
+      "network",
+      "newspaper",
+      "nfc",
+      "notebook",
+      "notebook-pen",
+      "notebook-tabs",
+      "notebook-text",
+      "notepad-text",
+      "notepad-text-dashed",
+      "npm",
+      "nut",
+      "nut-off",
+      "octagon",
+      "octagon-alert",
+      "octagon-pause",
+      "octagon-x",
+      "omega",
+      "option",
+      "orbit",
+      "origami",
+      "package",
+      "package-2",
+      "package-check",
+      "package-minus",
+      "package-open",
+      "package-plus",
+      "package-search",
+      "package-x",
+      "paint-bucket",
+      "paint-roller",
+      "paintbrush",
+      "paintbrush-2",
+      "paintbrush-vertical",
+      "palette",
+      "palmtree",
+      "panel-bottom",
+      "panel-bottom-close",
+      "panel-bottom-dashed",
+      "panel-bottom-open",
+      "panel-left",
+      "panel-left-close",
+      "panel-left-dashed",
+      "panel-left-open",
+      "panel-right",
+      "panel-right-close",
+      "panel-right-dashed",
+      "panel-right-open",
+      "panel-top",
+      "panel-top-close",
+      "panel-top-dashed",
+      "panel-top-open",
+      "panels-left-bottom",
+      "panels-right-bottom",
+      "panels-top-left",
+      "paperclip",
+      "parentheses",
+      "parking-circle",
+      "parking-circle-off",
+      "parking-meter",
+      "parking-square",
+      "parking-square-off",
+      "party-popper",
+      "pause",
+      "pause-circle",
+      "pause-octagon",
+      "paw-print",
+      "pc-case",
+      "pen",
+      "pen-line",
+      "pen-off",
+      "pen-tool",
+      "pencil",
+      "pencil-line",
+      "pencil-off",
+      "pencil-ruler",
+      "pentagon",
+      "percent",
+      "percent-circle",
+      "percent-diamond",
+      "percent-square",
+      "person-standing",
+      "phone",
+      "phone-call",
+      "phone-forwarded",
+      "phone-incoming",
+      "phone-missed",
+      "phone-off",
+      "phone-outgoing",
+      "pi",
+      "pi-square",
+      "piano",
+      "pickaxe",
+      "picture-in-picture",
+      "picture-in-picture-2",
+      "pie-chart",
+      "pig",
+      "piggy-bank",
+      "pilcrow",
+      "pilcrow-left",
+      "pilcrow-right",
+      "pilcrow-square",
+      "pill",
+      "pin",
+      "pin-off",
+      "pipette",
+      "pizza",
+      "plane",
+      "plane-landing",
+      "plane-takeoff",
+      "play",
+      "play-circle",
+      "play-square",
+      "plug",
+      "plug-2",
+      "plug-zap",
+      "plug-zap-2",
+      "plus",
+      "plus-circle",
+      "plus-square",
+      "pocket",
+      "pocket-knife",
+      "podcast",
+      "pointer",
+      "pointer-off",
+      "popcorn",
+      "popsicle",
+      "pound-sterling",
+      "power",
+      "power-circle",
+      "power-off",
+      "power-square",
+      "presentation",
+      "printer",
+      "printer-check",
+      "projector",
+      "proportions",
+      "puzzle",
+      "pyramid",
+      "qr-code",
+      "quote",
+      "rabbit",
+      "radar",
+      "radiation",
+      "radical",
+      "radio",
+      "radio-receiver",
+      "radio-tower",
+      "radius",
+      "rail-symbol",
+      "rainbow",
+      "rat",
+      "ratio",
+      "receipt",
+      "receipt-cent",
+      "receipt-euro",
+      "receipt-indian-rupee",
+      "receipt-japanese-yen",
+      "receipt-pound-sterling",
+      "receipt-russian-ruble",
+      "receipt-swiss-franc",
+      "receipt-text",
+      "rectangle-ellipsis",
+      "rectangle-horizontal",
+      "rectangle-vertical",
+      "recycle",
+      "redo",
+      "redo-2",
+      "redo-dot",
+      "refresh-ccw",
+      "refresh-ccw-dot",
+      "refresh-cw",
+      "refresh-cw-off",
+      "refrigerator",
+      "regex",
+      "remove-formatting",
+      "repeat",
+      "repeat-1",
+      "repeat-2",
+      "replace",
+      "replace-all",
+      "reply",
+      "reply-all",
+      "rewind",
+      "ribbon",
+      "rocket",
+      "rocking-chair",
+      "roller-coaster",
+      "rotate-3d",
+      "rotate-ccw",
+      "rotate-ccw-square",
+      "rotate-cw",
+      "rotate-cw-square",
+      "route",
+      "route-off",
+      "router",
+      "rows-2",
+      "rows-3",
+      "rows-4",
+      "rss",
+      "ruler",
+      "russian-ruble",
+      "sailboat",
+      "salad",
+      "sandwich",
+      "satellite",
+      "satellite-dish",
+      "save",
+      "save-all",
+      "save-off",
+      "scale",
+      "scale-3d",
+      "scaling",
+      "scan",
+      "scan-barcode",
+      "scan-eye",
+      "scan-face",
+      "scan-line",
+      "scan-qr-code",
+      "scan-search",
+      "scan-text",
+      "scatter-chart",
+      "school",
+      "scissors",
+      "scissors-line-dashed",
+      "screen-share",
+      "screen-share-off",
+      "scroll",
+      "scroll-text",
+      "search",
+      "search-check",
+      "search-code",
+      "search-slash",
+      "search-x",
+      "section",
+      "send",
+      "send-horizontal",
+      "send-to-back",
+      "separator-horizontal",
+      "separator-vertical",
+      "server",
+      "server-cog",
+      "server-crash",
+      "server-off",
+      "settings",
+      "settings-2",
+      "shapes",
+      "share",
+      "share-2",
+      "sheet",
+      "shell",
+      "shield",
+      "shield-alert",
+      "shield-ban",
+      "shield-check",
+      "shield-ellipsis",
+      "shield-half",
+      "shield-minus",
+      "shield-off",
+      "shield-plus",
+      "shield-question",
+      "shield-x",
+      "ship",
+      "ship-wheel",
+      "shirt",
+      "shopping-bag",
+      "shopping-basket",
+      "shopping-cart",
+      "shovel",
+      "shower-head",
+      "shrink",
+      "shrub",
+      "shuffle",
+      "sigma",
+      "sigma-square",
+      "signal",
+      "signal-high",
+      "signal-low",
+      "signal-medium",
+      "signal-zero",
+      "signature",
+      "signpost",
+      "signpost-big",
+      "siren",
+      "skip-back",
+      "skip-forward",
+      "skull",
+      "slack",
+      "slash",
+      "slice",
+      "sliders",
+      "sliders-horizontal",
+      "sliders-vertical",
+      "smartphone",
+      "smartphone-charging",
+      "smartphone-nfc",
+      "smile",
+      "smile-plus",
+      "snail",
+      "snowflake",
+      "sofa",
+      "sort-asc",
+      "sort-desc",
+      "soup",
+      "space",
+      "spade",
+      "sparkle",
+      "sparkles",
+      "speaker",
+      "speech",
+      "spell-check",
+      "spell-check-2",
+      "spline",
+      "split",
+      "split-square-horizontal",
+      "split-square-vertical",
+      "spray-can",
+      "sprout",
+      "square",
+      "square-activity",
+      "square-alert",
+      "square-arrow-down",
+      "square-arrow-down-left",
+      "square-arrow-down-right",
+      "square-arrow-left",
+      "square-arrow-out-down-left",
+      "square-arrow-out-down-right",
+      "square-arrow-out-up-left",
+      "square-arrow-out-up-right",
+      "square-arrow-right",
+      "square-arrow-up",
+      "square-arrow-up-left",
+      "square-arrow-up-right",
+      "square-asterisk",
+      "square-bottom-dashed-scissors",
+      "square-chart-gantt",
+      "square-check",
+      "square-check-big",
+      "square-chevron-down",
+      "square-chevron-left",
+      "square-chevron-right",
+      "square-chevron-up",
+      "square-code",
+      "square-dashed",
+      "square-dashed-bottom",
+      "square-dashed-bottom-code",
+      "square-dashed-kanban",
+      "square-dashed-mouse-pointer",
+      "square-divide",
+      "square-dot",
+      "square-equal",
+      "square-function",
+      "square-kanban",
+      "square-library",
+      "square-m",
+      "square-menu",
+      "square-minus",
+      "square-mouse-pointer",
+      "square-parking",
+      "square-parking-off",
+      "square-pen",
+      "square-percent",
+      "square-pi",
+      "square-pilcrow",
+      "square-play",
+      "square-plus",
+      "square-power",
+      "square-radical",
+      "square-scissors",
+      "square-sigma",
+      "square-slash",
+      "square-split-horizontal",
+      "square-split-vertical",
+      "square-square",
+      "square-stack",
+      "square-terminal",
+      "square-user",
+      "square-user-round",
+      "square-x",
+      "squircle",
+      "squirrel",
+      "stamp",
+      "star",
+      "star-half",
+      "star-off",
+      "stars",
+      "step-back",
+      "step-forward",
+      "stethoscope",
+      "sticker",
+      "sticky-note",
+      "store",
+      "stretch-horizontal",
+      "stretch-vertical",
+      "strikethrough",
+      "subscript",
+      "subtitles",
+      "sun",
+      "sun-dim",
+      "sun-medium",
+      "sun-moon",
+      "sun-snow",
+      "sunrise",
+      "sunset",
+      "superscript",
+      "swatch-book",
+      "swiss-franc",
+      "switch-camera",
+      "sword",
+      "swords",
+      "syringe",
+      "table",
+      "table-2",
+      "table-cells-merge",
+      "table-cells-split",
+      "table-columns-split",
+      "table-of-contents",
+      "table-properties",
+      "table-rows-split",
+      "tablet",
+      "tablet-smartphone",
+      "tablets",
+      "tag",
+      "tags",
+      "tally-1",
+      "tally-2",
+      "tally-3",
+      "tally-4",
+      "tally-5",
+      "tangent",
+      "target",
+      "telescope",
+      "tent",
+      "tent-tree",
+      "terminal",
+      "test-tube",
+      "test-tube-diagonal",
+      "test-tubes",
+      "text",
+      "text-cursor",
+      "text-cursor-input",
+      "text-quote",
+      "text-search",
+      "text-select",
+      "theater",
+      "thermometer",
+      "thermometer-snowflake",
+      "thermometer-sun",
+      "thumbs-down",
+      "thumbs-up",
+      "ticket",
+      "ticket-check",
+      "ticket-minus",
+      "ticket-percent",
+      "ticket-plus",
+      "ticket-slash",
+      "ticket-x",
+      "tickets",
+      "tickets-plane",
+      "timer",
+      "timer-off",
+      "timer-reset",
+      "toggle-left",
+      "toggle-right",
+      "toilet",
+      "tornado",
+      "torus",
+      "touchpad",
+      "touchpad-off",
+      "tower-control",
+      "toy-brick",
+      "tractor",
+      "traffic-cone",
+      "train-front",
+      "train-front-tunnel",
+      "train-track",
+      "tram-front",
+      "trash",
+      "trash-2",
+      "tree-deciduous",
+      "tree-palm",
+      "tree-pine",
+      "trees",
+      "trello",
+      "trending-down",
+      "trending-up",
+      "trending-up-down",
+      "triangle",
+      "triangle-alert",
+      "triangle-right",
+      "trophy",
+      "truck",
+      "turtle",
+      "tv",
+      "tv-2",
+      "tv-minimal",
+      "tv-minimal-play",
+      "twitch",
+      "twitter",
+      "type",
+      "type-outline",
+      "umbrella",
+      "umbrella-off",
+      "underline",
+      "undo",
+      "undo-2",
+      "undo-dot",
+      "unfold-horizontal",
+      "unfold-vertical",
+      "ungroup",
+      "university",
+      "unlink",
+      "unlink-2",
+      "unplug",
+      "upload",
+      "upload-cloud",
+      "usb",
+      "user",
+      "user-check",
+      "user-circle",
+      "user-cog",
+      "user-minus",
+      "user-pen",
+      "user-plus",
+      "user-round",
+      "user-round-check",
+      "user-round-cog",
+      "user-round-minus",
+      "user-round-pen",
+      "user-round-plus",
+      "user-round-search",
+      "user-round-x",
+      "user-search",
+      "user-x",
+      "users",
+      "users-round",
+      "utensils",
+      "utensils-crossed",
+      "utility-pole",
+      "variable",
+      "vegan",
+      "venetian-mask",
+      "vibrate",
+      "vibrate-off",
+      "video",
+      "video-off",
+      "videotape",
+      "view",
+      "voicemail",
+      "volume",
+      "volume-1",
+      "volume-2",
+      "volume-off",
+      "volume-x",
+      "vote",
+      "wallet",
+      "wallet-cards",
+      "wallet-minimal",
+      "wallpaper",
+      "wand",
+      "wand-sparkles",
+      "warehouse",
+      "washing-machine",
+      "watch",
+      "waves",
+      "waves-ladder",
+      "waypoints",
+      "webcam",
+      "webhook",
+      "webhook-off",
+      "weight",
+      "wheat",
+      "wheat-off",
+      "whole-word",
+      "wifi",
+      "wifi-high",
+      "wifi-low",
+      "wifi-off",
+      "wifi-zero",
+      "wind",
+      "wind-arrow-down",
+      "wine",
+      "wine-off",
+      "workflow",
+      "worm",
+      "wrap-text",
+      "wrench",
+      "x",
+      "x-circle",
+      "x-octagon",
+      "x-square",
+      "youtube",
+      "zap",
+      "zap-off",
+      "zoom-in",
+      "zoom-out"
+    ];
+  }
+  updateSuggestions() {
+    const query = this.inputEl.value.toLowerCase().trim();
+    if (!query) {
+      this.closeSuggestions();
+      return;
+    }
+    const matches = this.allIcons.filter((icon) => {
+      return icon.keywords.some(
+        (keyword) => keyword.toLowerCase().includes(query)
+      );
+    }).slice(0, 20);
+    this.showSuggestions(matches);
+  }
+  showSuggestions(icons) {
+    var _a;
+    this.closeSuggestions();
+    if (icons.length === 0) return;
+    this.suggestions = document.createElement("div");
+    this.suggestions.className = "suggestion-container";
+    this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 350px; overflow-y: auto;";
+    icons.forEach((iconItem) => {
+      var _a2;
+      const item = document.createElement("div");
+      item.className = "suggestion-item";
+      item.style.cssText = "padding: 6px 10px; cursor: pointer; border-radius: 3px; display: flex; align-items: center; gap: 10px;";
+      const preview = document.createElement("span");
+      preview.style.cssText = "width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px;";
+      if (iconItem.type === "emoji") {
+        preview.textContent = iconItem.value;
+      } else {
+        (0, import_obsidian2.setIcon)(preview, iconItem.value);
+      }
+      item.appendChild(preview);
+      const textSpan = document.createElement("span");
+      if (iconItem.type === "emoji") {
+        textSpan.textContent = iconItem.keywords.join(", ");
+        textSpan.style.cssText = "font-size: 0.9em; color: var(--text-muted);";
+      } else {
+        textSpan.textContent = iconItem.value;
+        textSpan.style.cssText = "font-family: var(--font-monospace); font-size: 0.85em;";
+      }
+      item.appendChild(textSpan);
+      const badge = document.createElement("span");
+      badge.textContent = iconItem.type;
+      badge.style.cssText = `
+                margin-left: auto;
+                font-size: 0.7em;
+                padding: 2px 6px;
+                border-radius: 3px;
+                background: ${iconItem.type === "emoji" ? "var(--color-green)" : "var(--color-blue)"};
+                color: white;
+                opacity: 0.7;
+            `;
+      item.appendChild(badge);
+      item.addEventListener("mouseenter", () => {
+        item.style.background = "var(--background-modifier-hover)";
+      });
+      item.addEventListener("mouseleave", () => {
+        item.style.background = "";
+      });
+      item.addEventListener("click", () => {
+        this.inputEl.value = iconItem.value;
+        this.inputEl.dataset.iconType = iconItem.type;
+        this.inputEl.dispatchEvent(new Event("input"));
+        this.updatePreview();
+        this.closeSuggestions();
+      });
+      (_a2 = this.suggestions) == null ? void 0 : _a2.appendChild(item);
+    });
+    const footer = document.createElement("div");
+    footer.style.cssText = `
+            padding: 8px 10px;
+            margin-top: 4px;
+            border-top: 1px solid var(--background-modifier-border);
+            font-size: 0.75em;
+            color: var(--text-muted);
+            text-align: center;
+        `;
+    footer.innerHTML = '\u{1F4A1} Browse all Lucide icons at <a href="https://lucide.dev/icons/" target="_blank" style="color: var(--text-accent); text-decoration: underline;">lucide.dev/icons</a>';
+    (_a = this.suggestions) == null ? void 0 : _a.appendChild(footer);
+    const rect = this.inputEl.getBoundingClientRect();
+    this.suggestions.style.top = rect.bottom + 2 + "px";
+    this.suggestions.style.left = rect.left + "px";
+    this.suggestions.style.width = Math.max(rect.width, 300) + "px";
+    document.body.appendChild(this.suggestions);
+  }
+  updatePreview() {
+    if (!this.previewEl) return;
+    this.previewEl.empty();
+    const value = this.inputEl.value.trim();
+    if (!value) return;
+    const iconType = this.inputEl.dataset.iconType;
+    if (iconType === "emoji" || value.length <= 2) {
+      this.previewEl.textContent = value;
+      this.previewEl.style.fontSize = "20px";
+    } else {
+      try {
+        (0, import_obsidian2.setIcon)(this.previewEl, value);
+        this.previewEl.style.fontSize = "";
+      } catch (e) {
+        this.previewEl.textContent = "?";
+        this.previewEl.style.fontSize = "16px";
+      }
+    }
+  }
+  closeSuggestions() {
+    if (this.suggestions) {
+      this.suggestions.remove();
+      this.suggestions = null;
+    }
+  }
+};
+
 // src/SettingsTab.ts
+function getValidOperators(property) {
+  if (property === "file.tags") {
+    return [
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" },
+      { value: "exists", label: "exists" },
+      { value: "doesNotExist", label: "does not exist" }
+    ];
+  } else if (property === "file.name" || property === "file.basename") {
+    return [
+      { value: "is", label: "is" },
+      { value: "isNot", label: "is not" },
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" },
+      { value: "startsWith", label: "starts with" },
+      { value: "endsWith", label: "ends with" },
+      { value: "matches", label: "matches regex" },
+      { value: "matchesDatePattern", label: "matches date pattern" }
+    ];
+  } else if (property === "file.folder" || property === "file.path" || property === "file.ext") {
+    return [
+      { value: "is", label: "is" },
+      { value: "isNot", label: "is not" },
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" },
+      { value: "startsWith", label: "starts with" },
+      { value: "endsWith", label: "ends with" },
+      { value: "matches", label: "matches regex" }
+    ];
+  } else {
+    return [
+      { value: "is", label: "is" },
+      { value: "isNot", label: "is not" },
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" },
+      { value: "startsWith", label: "starts with" },
+      { value: "endsWith", label: "ends with" },
+      { value: "matches", label: "matches regex" },
+      { value: "exists", label: "exists" },
+      { value: "doesNotExist", label: "does not exist" }
+    ];
+  }
+}
 var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
+    this.expandedCategories = /* @__PURE__ */ new Set();
+    this.isPalettesExpanded = false;
+    this.paletteEditModes = /* @__PURE__ */ new Map();
+    this.activeTab = "basic";
     this.plugin = plugin;
+  }
+  /**
+   * IMPORTANT: This helper method is used in multiple places (Categories settings AND CategoryEditModal).
+   * When making changes to this method, always evaluate if the change should apply to both locations.
+   * Current usage locations:
+   * 1. Categories section - within each category's collapsible content (line ~1618)
+   * 2. CategoryEditModal conditions section (line ~2461)
+   */
+  renderConditionsInfoIcon(container) {
+    const infoIcon = container.createEl("span");
+    (0, import_obsidian3.setIcon)(infoIcon, "info");
+    infoIcon.style.cssText = "cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;";
+    infoIcon.title = "Click to see examples";
+    let popover = null;
+    const closePopover = () => {
+      if (popover) {
+        popover.remove();
+        popover = null;
+      }
+    };
+    infoIcon.onclick = (e) => {
+      e.preventDefault();
+      if (popover) {
+        closePopover();
+        return;
+      }
+      popover = document.body.createDiv();
+      popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px;";
+      const closeBtn = popover.createEl("button");
+      closeBtn.textContent = "\xD7";
+      closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
+      closeBtn.title = "Close";
+      closeBtn.onmouseenter = () => {
+        closeBtn.style.background = "var(--background-modifier-hover)";
+      };
+      closeBtn.onmouseleave = () => {
+        closeBtn.style.background = "transparent";
+      };
+      closeBtn.onclick = (e2) => {
+        e2.preventDefault();
+        closePopover();
+      };
+      popover.createEl("div", {
+        text: "Examples:",
+        attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--text-normal); padding-right: 20px;" }
+      });
+      popover.createEl("div", {
+        text: '\u2022 Property "category" is "school"',
+        attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
+      });
+      popover.createEl("div", {
+        text: '\u2022 File tags has tag "holidays"',
+        attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
+      });
+      popover.createEl("div", {
+        text: '\u2022 File name contains "meeting"',
+        attr: { style: "margin-left: 8px; color: var(--text-muted); font-size: 0.9em;" }
+      });
+      const iconRect = infoIcon.getBoundingClientRect();
+      popover.style.top = iconRect.bottom + 6 + "px";
+      popover.style.left = iconRect.left + "px";
+      setTimeout(() => {
+        if (popover) {
+          const popoverRect = popover.getBoundingClientRect();
+          if (popoverRect.right > window.innerWidth) {
+            popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+          }
+          if (popoverRect.bottom > window.innerHeight) {
+            popover.style.top = iconRect.top - popoverRect.height - 6 + "px";
+          }
+        }
+      }, 0);
+      const closeHandler = (e2) => {
+        if (popover && !popover.contains(e2.target) && !infoIcon.contains(e2.target)) {
+          closePopover();
+          document.removeEventListener("click", closeHandler);
+        }
+      };
+      setTimeout(() => {
+        document.addEventListener("click", closeHandler);
+      }, 0);
+      const escHandler = (e2) => {
+        if (e2.key === "Escape") {
+          closePopover();
+          document.removeEventListener("keydown", escHandler);
+        }
+      };
+      document.addEventListener("keydown", escHandler);
+    };
   }
   display() {
     const { containerEl } = this;
+    const scrollTop = containerEl.scrollTop;
     containerEl.empty();
     containerEl.createEl("h2", { text: "Linear Calendar Settings" });
     this.renderDevelopmentNotice(containerEl);
-    this.renderCalendarAppearanceSection(containerEl);
-    this.renderDivider(containerEl);
-    this.renderDateExtractionSection(containerEl);
-    this.renderDivider(containerEl);
-    this.renderFiltersSection(containerEl);
-    this.renderDivider(containerEl);
-    this.renderDailyNotesSection(containerEl);
-    this.renderDivider(containerEl);
-    this.renderExperimentalSection(containerEl);
+    this.renderTabs(containerEl);
+    const contentEl = containerEl.createDiv();
+    contentEl.style.cssText = "margin-top: 20px;";
+    if (this.activeTab === "basic") {
+      this.renderCalendarAppearanceSection(contentEl);
+      this.renderDivider(contentEl);
+      this.renderDateExtractionSection(contentEl);
+      this.renderDivider(contentEl);
+      this.renderFiltersSection(contentEl);
+    } else if (this.activeTab === "categories") {
+      this.renderColorCategoriesSection(contentEl);
+    } else if (this.activeTab === "daily-notes") {
+      this.renderDailyNotesSection(contentEl);
+    } else if (this.activeTab === "experimental") {
+      this.renderExperimentalSection(contentEl);
+    }
+    setTimeout(() => {
+      containerEl.scrollTop = scrollTop;
+    }, 0);
+  }
+  renderTabs(containerEl) {
+    const tabsContainer = containerEl.createDiv();
+    tabsContainer.style.cssText = "display: flex; gap: 4px; border-bottom: 2px solid var(--background-modifier-border); margin-top: 20px;";
+    const tabs = [
+      { id: "basic", label: "Basic Settings" },
+      { id: "categories", label: "Categories (Colors & Icons)" },
+      { id: "daily-notes", label: "Daily Notes" },
+      { id: "experimental", label: "Experimental" }
+    ];
+    tabs.forEach((tab) => {
+      const tabBtn = tabsContainer.createEl("button");
+      const isActive = this.activeTab === tab.id;
+      tabBtn.textContent = tab.label;
+      tabBtn.style.cssText = `
+                padding: 10px 16px;
+                background: ${isActive ? "var(--background-primary)" : "var(--background-secondary)"};
+                border: none;
+                border-bottom: 2px solid ${isActive ? "var(--interactive-accent)" : "transparent"};
+                cursor: pointer;
+                font-size: 0.95em;
+                font-weight: ${isActive ? "600" : "400"};
+                color: ${isActive ? "var(--text-normal)" : "var(--text-muted)"};
+                transition: all 0.2s;
+                margin-bottom: -2px;
+            `;
+      tabBtn.addEventListener("click", () => {
+        this.activeTab = tab.id;
+        this.display();
+      });
+      tabBtn.addEventListener("mouseenter", () => {
+        if (!isActive) {
+          tabBtn.style.background = "var(--background-modifier-hover)";
+          tabBtn.style.color = "var(--text-normal)";
+        }
+      });
+      tabBtn.addEventListener("mouseleave", () => {
+        if (!isActive) {
+          tabBtn.style.background = "var(--background-secondary)";
+          tabBtn.style.color = "var(--text-muted)";
+        }
+      });
+    });
   }
   renderDevelopmentNotice(containerEl) {
     const noticeEl = containerEl.createDiv();
-    noticeEl.style.cssText = "background: var(--background-secondary); border-left: 4px solid var(--interactive-accent); padding: 15px 20px; margin: 15px 0 20px 0; border-radius: 3px;";
+    noticeEl.style.cssText = "background: var(--background-secondary); border-left: 4px solid var(--interactive-accent); padding: 15px 20px; margin: 15px 0 12px 0; border-radius: 3px;";
     const titleEl = noticeEl.createEl("div");
     titleEl.style.cssText = "font-weight: 600; margin-bottom: 8px; color: var(--text-normal);";
     titleEl.textContent = "\u26A0\uFE0F Early Development";
@@ -821,6 +2627,29 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     textEl.innerHTML = `
             This plugin is in early development and may undergo significant changes. The core functionality\u2014how notes are recognized and dates are extracted\u2014will remain stable. If you use properties or dates in filenames, these will continue to work.<br><br>
             New features are actively being developed. If you encounter any issues or have feedback, please reach out via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or via <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
+        `;
+    const feedbackBox = containerEl.createDiv();
+    feedbackBox.style.cssText = "background: var(--background-primary); border: 2px solid var(--interactive-accent); padding: 15px 20px; margin: 0 0 20px 0; border-radius: 6px;";
+    const feedbackTitle = feedbackBox.createEl("div");
+    feedbackTitle.style.cssText = "font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;";
+    feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.3.0";
+    const feedbackList = feedbackBox.createEl("ul");
+    feedbackList.style.cssText = "margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
+    feedbackList.innerHTML = `
+            <li>Are the notes displaying on the right day?</li>
+            <li>Are the color categories working as you would like?</li>
+            <li>Did switching from an older version to the new one go smoothly?</li>
+            <li>Is there anything weird, annoying, unexpected happening?</li>
+        `;
+    const feedbackFooter = feedbackBox.createEl("div");
+    feedbackFooter.style.cssText = "font-size: 0.95em; color: var(--text-muted); margin-top: 8px;";
+    const footerText = feedbackFooter.createEl("div");
+    footerText.style.cssText = "font-style: italic; margin-bottom: 6px;";
+    footerText.textContent = "Help me improve the plugin! It means a lot to me \u2728\u{1F988}";
+    const footerLinks = feedbackFooter.createEl("div");
+    footerLinks.style.cssText = "font-size: 0.9em;";
+    footerLinks.innerHTML = `
+            Share feedback via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
         `;
   }
   renderDivider(containerEl) {
@@ -844,6 +2673,21 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
           await this.plugin.saveSettings();
         }
       }));
+    }
+    new import_obsidian3.Setting(containerEl).setName("Column alignment").setDesc("Choose how to align the calendar columns: by weekday or by date (all 1st days align, all 2nd days align, etc.)").addDropdown((dropdown) => {
+      dropdown.addOption("weekday", "Align by weekday").addOption("date", "Align by date").setValue(this.plugin.settings.columnAlignment).onChange(async (value) => {
+        this.plugin.settings.columnAlignment = value;
+        await this.plugin.saveSettings();
+        this.display();
+      });
+    });
+    if (this.plugin.settings.columnAlignment === "weekday") {
+      new import_obsidian3.Setting(containerEl).setName("Week starts on").setDesc("Choose which day the week starts on").addDropdown((dropdown) => {
+        dropdown.addOption("0", "Sunday").addOption("1", "Monday").addOption("2", "Tuesday").addOption("3", "Wednesday").addOption("4", "Thursday").addOption("5", "Friday").addOption("6", "Saturday").setValue(String(this.plugin.settings.weekStartDay)).onChange(async (value) => {
+          this.plugin.settings.weekStartDay = parseInt(value);
+          await this.plugin.saveSettings();
+        });
+      });
     }
   }
   renderDateExtractionSection(containerEl) {
@@ -1243,7 +3087,8 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       { value: "file.folder", label: "Folder" },
       { value: "file.path", label: "File path" },
       { value: "file.ext", label: "Extension" },
-      { value: "custom", label: "Custom property..." }
+      { value: "file.tags", label: "File tags" },
+      { value: "custom", label: "Property" }
     ];
     properties.forEach((prop) => {
       const option = propertySelect.createEl("option", {
@@ -1256,7 +3101,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     });
     propertySelect.onchange = async (e) => {
       if (e.target.value === "custom") {
-        condition.property = "";
+        condition.property = "category";
       } else {
         condition.property = e.target.value;
       }
@@ -1277,19 +3122,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     }
     const operatorSelect = condEl.createEl("select");
     operatorSelect.style.cssText = "padding: 4px 8px;";
-    const operators = [
-      { value: "is", label: "is" },
-      { value: "isNot", label: "is not" },
-      { value: "contains", label: "contains" },
-      { value: "doesNotContain", label: "does not contain" },
-      { value: "startsWith", label: "starts with" },
-      { value: "endsWith", label: "ends with" },
-      { value: "matches", label: "matches regex" },
-      { value: "exists", label: "exists" },
-      { value: "doesNotExist", label: "does not exist" },
-      { value: "hasTag", label: "has tag" },
-      { value: "matchesDatePattern", label: "matches date pattern" }
-    ];
+    const operators = getValidOperators(condition.property);
     operators.forEach((op) => {
       const option = operatorSelect.createEl("option", {
         text: op.label,
@@ -1396,11 +3229,11 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
   }
   renderExperimentalSection(containerEl) {
     const headerContainer = containerEl.createDiv();
-    headerContainer.style.cssText = "display: flex; align-items: center; gap: 10px; margin-bottom: 10px;";
+    headerContainer.style.cssText = "display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;";
     headerContainer.createEl("h3", { text: "Note Title Display" });
     const badge = headerContainer.createEl("span");
     badge.textContent = "Experimental";
-    badge.style.cssText = "background: var(--interactive-accent); color: var(--text-on-accent); padding: 2px 8px; border-radius: 3px; font-size: 0.75em; font-weight: 600;";
+    badge.style.cssText = "background: var(--interactive-accent); color: var(--text-on-accent); padding: 3px 8px; border-radius: 3px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;";
     const desc = containerEl.createEl("p", {
       cls: "setting-item-description",
       text: "Test different ways to display note titles in calendar cells. These features are experimental and may change."
@@ -1435,10 +3268,2053 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       await this.plugin.saveSettings();
     }));
   }
+  renderColorCategoriesSection(containerEl) {
+    const config = this.plugin.settings.colorCategories;
+    containerEl.createEl("h3", { text: "Color Categories" });
+    const descEl = containerEl.createDiv();
+    descEl.style.cssText = "color: var(--text-muted); margin-bottom: 15px;";
+    descEl.innerHTML = "Visually organize notes with colors and icons based on conditions. Categories are checked in order, first match wins.";
+    new import_obsidian3.Setting(containerEl).setName("Enable color categories").setDesc("Turn the color categories feature on or off.").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+      config.enabled = value;
+      await this.plugin.saveSettings();
+      this.display();
+    }));
+    if (!config.enabled) {
+      const disabledMsg = containerEl.createDiv();
+      disabledMsg.style.cssText = "color: var(--text-muted); font-style: italic; padding: 20px; text-align: center;";
+      disabledMsg.textContent = "Color categories are currently disabled.";
+      return;
+    }
+    const settingsSection = containerEl.createDiv();
+    settingsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 6px; margin-bottom: 20px;";
+    const settingsHeader = settingsSection.createEl("h4", { text: "Category Settings" });
+    settingsHeader.style.cssText = "margin-top: 0; margin-bottom: 12px; font-size: 1em; color: var(--text-normal);";
+    new import_obsidian3.Setting(settingsSection).setName("Show category index").setDesc("Display a row at the top of the calendar showing all categories as clickable chips.").addToggle((toggle) => toggle.setValue(config.showCategoryIndex).onChange(async (value) => {
+      config.showCategoryIndex = value;
+      await this.plugin.saveSettings();
+    }));
+    new import_obsidian3.Setting(settingsSection).setName("Show icons in calendar").setDesc("Display category icons before note titles in the calendar. Turn off to show only colors.").addToggle((toggle) => toggle.setValue(config.showIconsInCalendar).onChange(async (value) => {
+      config.showIconsInCalendar = value;
+      await this.plugin.saveSettings();
+    }));
+    const defaultColorSetting = new import_obsidian3.Setting(settingsSection).setName("Default color").setDesc("Color for notes that don't match any category.");
+    const defaultColorContainer = defaultColorSetting.controlEl.createDiv();
+    defaultColorContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
+    if (config.defaultCategoryColor !== null) {
+      this.renderColorPicker(
+        defaultColorContainer,
+        config.defaultCategoryColor || "#6366f1",
+        async (newColor) => {
+          config.defaultCategoryColor = newColor;
+          await this.plugin.saveSettings();
+        },
+        "defaultColor"
+      );
+    } else {
+      const themeAccentNote = defaultColorContainer.createDiv();
+      themeAccentNote.textContent = "Using theme accent color";
+      themeAccentNote.style.cssText = "color: var(--text-muted); font-size: 0.9em; font-style: italic;";
+    }
+    const toggleRow = defaultColorContainer.createDiv();
+    toggleRow.style.cssText = "margin-top: 4px;";
+    const toggleBtn = toggleRow.createEl("button");
+    toggleBtn.textContent = config.defaultCategoryColor === null ? "Use custom color" : "Use theme accent";
+    toggleBtn.style.cssText = "padding: 4px 12px; cursor: pointer; font-size: 0.9em;";
+    toggleBtn.onclick = async () => {
+      if (config.defaultCategoryColor === null) {
+        config.defaultCategoryColor = "#6366f1";
+      } else {
+        config.defaultCategoryColor = null;
+      }
+      await this.plugin.saveSettings();
+      this.display();
+    };
+    this.renderColorPalettes(containerEl);
+    const separator = containerEl.createDiv();
+    separator.style.cssText = "height: 1px; background: var(--background-modifier-border); margin: 30px 0 25px 0;";
+    const categoriesHeader = containerEl.createDiv();
+    categoriesHeader.style.cssText = "margin-bottom: 15px;";
+    const categoryTitle = categoriesHeader.createEl("h4", { text: "Your Categories" });
+    categoryTitle.style.cssText = "margin: 0 0 6px 0; font-size: 1.1em; color: var(--text-normal);";
+    const categoryDesc = categoriesHeader.createDiv();
+    categoryDesc.style.cssText = "color: var(--text-muted); font-size: 0.95em;";
+    categoryDesc.textContent = "Create and organize your color categories. Each category can have conditions that determine which notes match.";
+    const categoriesContainer = containerEl.createDiv();
+    categoriesContainer.style.cssText = "background: var(--background-primary); border: 2px solid var(--background-modifier-border); border-radius: 8px; padding: 12px; margin-top: 12px;";
+    if (config.categories.length > 0) {
+      const hintEl = categoriesContainer.createDiv();
+      hintEl.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-bottom: 12px; padding: 6px 10px; background: var(--background-secondary); border-radius: 4px;";
+      hintEl.textContent = "\u22EE\u22EE Drag to reorder priority \u2014 first match wins";
+    } else {
+      const emptyState = categoriesContainer.createDiv();
+      emptyState.style.cssText = "color: var(--text-muted); font-style: italic; text-align: center; padding: 30px 20px;";
+      emptyState.textContent = 'No categories yet. Click "+ Add category" below to create your first one.';
+    }
+    this.renderCategoriesList(categoriesContainer);
+    const addBtn = containerEl.createEl("button", { text: "+ Add category" });
+    addBtn.style.cssText = "margin-top: 12px; padding: 8px 16px; cursor: pointer; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 4px; font-weight: 500;";
+    addBtn.onmouseenter = () => {
+      addBtn.style.opacity = "0.9";
+    };
+    addBtn.onmouseleave = () => {
+      addBtn.style.opacity = "1";
+    };
+    addBtn.onclick = async () => {
+      const newCategory = {
+        id: Date.now().toString(),
+        name: "New Category",
+        color: "#6366f1",
+        iconType: null,
+        iconValue: "",
+        conditions: [],
+        matchMode: "all",
+        enabled: true
+      };
+      config.categories.push(newCategory);
+      await this.plugin.saveSettings();
+      this.display();
+    };
+  }
+  renderCategoriesList(container) {
+    const config = this.plugin.settings.colorCategories;
+    let draggedIndex = null;
+    config.categories.forEach((category, index) => {
+      this.renderCategoryItem(container, category, index, {
+        onDragStart: () => {
+          draggedIndex = index;
+        },
+        onDragEnd: () => {
+          draggedIndex = null;
+        },
+        onDragOver: (targetIndex) => {
+          if (draggedIndex !== null && draggedIndex !== targetIndex) {
+            const [removed] = config.categories.splice(draggedIndex, 1);
+            config.categories.splice(targetIndex, 0, removed);
+            draggedIndex = targetIndex;
+            this.plugin.saveSettings();
+            this.display();
+          }
+        }
+      });
+    });
+  }
+  renderCategoryItem(container, category, index, dragHandlers) {
+    const config = this.plugin.settings.colorCategories;
+    const itemEl = container.createDiv();
+    itemEl.style.cssText = "margin-bottom: 12px; border: 1px solid var(--background-modifier-border); border-radius: 5px; background: var(--background-secondary);";
+    itemEl.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      itemEl.style.border = "2px solid var(--interactive-accent)";
+    });
+    itemEl.addEventListener("dragleave", () => {
+      itemEl.style.border = "1px solid var(--background-modifier-border)";
+    });
+    itemEl.addEventListener("drop", (e) => {
+      e.preventDefault();
+      itemEl.style.border = "1px solid var(--background-modifier-border)";
+      dragHandlers.onDragOver(index);
+    });
+    const isExpanded = this.expandedCategories.has(category.id);
+    const header = itemEl.createDiv();
+    header.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer;";
+    const dragHandle = header.createEl("span", { text: "\u22EE\u22EE" });
+    dragHandle.style.cssText = "cursor: grab; opacity: 0.5; user-select: none;";
+    dragHandle.draggable = true;
+    dragHandle.addEventListener("dragstart", (e) => {
+      var _a;
+      dragHandle.style.cursor = "grabbing";
+      itemEl.style.opacity = "0.5";
+      dragHandlers.onDragStart();
+      (_a = e.dataTransfer) == null ? void 0 : _a.setData("text/plain", "");
+    });
+    dragHandle.addEventListener("dragend", () => {
+      dragHandle.style.cursor = "grab";
+      itemEl.style.opacity = "1";
+      itemEl.style.border = "1px solid var(--background-modifier-border)";
+      dragHandlers.onDragEnd();
+    });
+    const chevron = header.createEl("span", { text: "\u203A" });
+    chevron.style.cssText = "transition: transform 0.2s; font-size: 1.2em; user-select: none;";
+    if (isExpanded) {
+      chevron.style.transform = "rotate(90deg)";
+    }
+    const capsule = header.createEl("div");
+    capsule.style.cssText = `display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; background: ${category.color}; color: #ffffff; flex: 1;`;
+    capsule.dataset.categoryId = category.id;
+    const iconPreview = capsule.createEl("span", { cls: "category-header-icon" });
+    iconPreview.style.cssText = "flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;";
+    if (category.iconType && category.iconValue) {
+      if (category.iconType === "emoji") {
+        iconPreview.textContent = category.iconValue;
+      } else {
+        (0, import_obsidian3.setIcon)(iconPreview, category.iconValue);
+        iconPreview.style.color = "#ffffff";
+      }
+    }
+    const nameSpan = capsule.createEl("span", { text: category.name });
+    nameSpan.style.cssText = "font-weight: 500;";
+    const countSpan = header.createEl("span", {
+      text: category.conditions.length === 1 ? "1 condition" : `${category.conditions.length} conditions`
+    });
+    countSpan.style.cssText = "font-size: 0.85em; color: var(--text-muted);";
+    const enabledCheckbox = header.createEl("input", { type: "checkbox" });
+    enabledCheckbox.checked = category.enabled;
+    enabledCheckbox.style.cssText = "cursor: pointer;";
+    enabledCheckbox.onclick = async (e) => {
+      e.stopPropagation();
+      category.enabled = enabledCheckbox.checked;
+      await this.plugin.saveSettings();
+    };
+    const deleteBtn = header.createEl("button", { text: "\xD7" });
+    deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.3em; background: transparent; border: none;";
+    deleteBtn.onclick = async (e) => {
+      e.stopPropagation();
+      config.categories.splice(index, 1);
+      await this.plugin.saveSettings();
+      this.display();
+    };
+    header.onclick = (e) => {
+      if (e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
+        if (isExpanded) {
+          this.expandedCategories.delete(category.id);
+        } else {
+          this.expandedCategories.add(category.id);
+        }
+        this.display();
+      }
+    };
+    if (isExpanded) {
+      const content = itemEl.createDiv();
+      content.style.cssText = "padding: 15px; border-top: 1px solid var(--background-modifier-border);";
+      const nameLabel = content.createEl("label");
+      nameLabel.style.cssText = "display: block; margin-bottom: 10px;";
+      nameLabel.createEl("div", { text: "Category name:", cls: "setting-item-name" });
+      const nameInput = nameLabel.createEl("input", { type: "text", value: category.name });
+      nameInput.style.cssText = "width: 100%; padding: 6px; margin-top: 5px;";
+      nameInput.onchange = async () => {
+        category.name = nameInput.value;
+        await this.plugin.saveSettings();
+        this.display();
+      };
+      const colorSection = content.createDiv();
+      colorSection.style.cssText = "margin-bottom: 15px;";
+      colorSection.createEl("div", { text: "Color:", cls: "setting-item-name" });
+      const colorPickerWrapper = colorSection.createDiv();
+      colorPickerWrapper.style.cssText = "margin-top: 8px;";
+      this.renderColorPicker(
+        colorPickerWrapper,
+        category.color,
+        async (newColor) => {
+          category.color = newColor;
+          await this.plugin.saveSettings();
+          this.display();
+        },
+        `category_${category.id}`
+      );
+      const useIconContainer = content.createEl("div");
+      useIconContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 10px;";
+      const useIconCheckbox = useIconContainer.createEl("input", { type: "checkbox" });
+      useIconCheckbox.checked = category.iconType !== null;
+      useIconCheckbox.style.cssText = "cursor: pointer;";
+      useIconCheckbox.onchange = async () => {
+        if (useIconCheckbox.checked) {
+          category.iconType = "emoji";
+          category.iconValue = "\u2B50";
+        } else {
+          category.iconType = null;
+          category.iconValue = "";
+        }
+        await this.plugin.saveSettings();
+        this.display();
+      };
+      useIconContainer.createEl("span", { text: "Use icon", cls: "setting-item-name" });
+      if (category.iconType !== null) {
+        const iconSettings = content.createDiv();
+        iconSettings.style.cssText = "margin-left: 25px; margin-bottom: 15px;";
+        const iconLabel = iconSettings.createEl("div");
+        iconLabel.style.cssText = "margin-bottom: 8px; color: var(--text-muted); font-size: 0.9em;";
+        iconLabel.textContent = "Search for emoji or Lucide icon:";
+        const iconInputContainer = iconSettings.createDiv();
+        iconInputContainer.style.cssText = "display: flex; gap: 10px; align-items: center;";
+        const iconPreviewEl = iconInputContainer.createEl("div");
+        iconPreviewEl.style.cssText = "width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--background-modifier-border); border-radius: 3px; font-size: 1.2em; flex-shrink: 0;";
+        if (category.iconValue) {
+          if (category.iconType === "emoji") {
+            iconPreviewEl.textContent = category.iconValue;
+          } else {
+            (0, import_obsidian3.setIcon)(iconPreviewEl, category.iconValue);
+          }
+        }
+        const iconInput = iconInputContainer.createEl("input", {
+          type: "text",
+          value: category.iconValue,
+          attr: { placeholder: "Type to search icons..." }
+        });
+        iconInput.style.cssText = "flex: 1; padding: 6px;";
+        if (category.iconType) {
+          iconInput.dataset.iconType = category.iconType;
+        }
+        const saveIconValue = async () => {
+          category.iconValue = iconInput.value;
+          if (iconInput.dataset.iconType) {
+            category.iconType = iconInput.dataset.iconType;
+          }
+          await this.plugin.saveSettings();
+          const capsule2 = document.querySelector(`[data-category-id="${category.id}"]`);
+          if (capsule2) {
+            const headerIcon = capsule2.querySelector(".category-header-icon");
+            if (headerIcon) {
+              headerIcon.empty();
+              if (category.iconType && category.iconValue) {
+                if (category.iconType === "emoji") {
+                  headerIcon.textContent = category.iconValue;
+                } else {
+                  (0, import_obsidian3.setIcon)(headerIcon, category.iconValue);
+                  headerIcon.style.color = "#ffffff";
+                }
+              }
+            }
+          }
+        };
+        iconInput.addEventListener("input", saveIconValue);
+        new IconSuggest(iconInput, iconPreviewEl);
+      }
+      const conditionsHeader = content.createDiv();
+      conditionsHeader.style.cssText = "display: flex; align-items: center; gap: 8px; margin-top: 15px; margin-bottom: 10px;";
+      conditionsHeader.createEl("div", {
+        text: "Conditions:",
+        attr: { style: "font-weight: 500; margin: 0;" }
+      });
+      this.renderConditionsInfoIcon(conditionsHeader);
+      if (category.conditions.length > 1) {
+        const matchModeToggle = content.createDiv();
+        matchModeToggle.style.cssText = "display: flex; align-items: center; gap: 8px; font-size: 0.9em; margin-bottom: 10px;";
+        const matchModeLabel = matchModeToggle.createEl("span", { text: "Match:" });
+        matchModeLabel.style.cssText = "color: var(--text-muted);";
+        const matchModeSelect = matchModeToggle.createEl("select");
+        matchModeSelect.style.cssText = "padding: 3px 6px;";
+        matchModeSelect.createEl("option", { text: "All (AND)", value: "all" });
+        matchModeSelect.createEl("option", { text: "Any (OR)", value: "any" });
+        matchModeSelect.value = category.matchMode || "all";
+        matchModeSelect.onchange = async () => {
+          category.matchMode = matchModeSelect.value;
+          await this.plugin.saveSettings();
+        };
+      }
+      const conditionsContainer = content.createDiv();
+      conditionsContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
+      if (category.conditions.length === 0) {
+        const emptyMsg = conditionsContainer.createDiv();
+        emptyMsg.style.cssText = "color: var(--text-muted); font-style: italic; padding: 10px;";
+        emptyMsg.textContent = "No conditions yet. Add at least one condition for this category to match notes.";
+      } else {
+        category.conditions.forEach((condition, condIndex) => {
+          this.renderCategoryCondition(conditionsContainer, category, condition, condIndex);
+        });
+      }
+      const addCondBtn = content.createEl("button", { text: "+ Add condition" });
+      addCondBtn.style.cssText = "margin-top: 8px; padding: 4px 12px; cursor: pointer;";
+      addCondBtn.onclick = async () => {
+        category.conditions.push({
+          property: "file.name",
+          operator: "contains",
+          value: ""
+        });
+        await this.plugin.saveSettings();
+        this.display();
+      };
+    }
+  }
+  renderCategoryCondition(container, category, condition, condIndex) {
+    const condEl = container.createDiv();
+    condEl.style.cssText = "display: flex; gap: 5px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; padding: 8px; background: var(--background-primary); border-radius: 3px;";
+    const propertySelect = condEl.createEl("select");
+    propertySelect.style.cssText = "padding: 4px 8px;";
+    const properties = [
+      { value: "file.name", label: "File name" },
+      { value: "file.basename", label: "File basename" },
+      { value: "file.folder", label: "Folder" },
+      { value: "file.path", label: "File path" },
+      { value: "file.ext", label: "Extension" },
+      { value: "file.tags", label: "File tags" },
+      { value: "custom", label: "Property" }
+    ];
+    properties.forEach((prop) => {
+      const option = propertySelect.createEl("option", {
+        text: prop.label,
+        value: prop.value
+      });
+      if (condition.property === prop.value || prop.value === "custom" && !properties.find((p) => p.value === condition.property)) {
+        option.selected = true;
+      }
+    });
+    propertySelect.onchange = async (e) => {
+      if (e.target.value === "custom") {
+        condition.property = "category";
+      } else {
+        condition.property = e.target.value;
+      }
+      await this.plugin.saveSettings();
+      this.display();
+    };
+    if (propertySelect.value === "custom" || !properties.find((p) => p.value === condition.property)) {
+      const customInput = condEl.createEl("input", {
+        type: "text",
+        attr: { placeholder: "property name" },
+        value: condition.property
+      });
+      customInput.style.cssText = "padding: 4px 8px; width: 120px;";
+      customInput.onchange = async (e) => {
+        condition.property = e.target.value;
+        await this.plugin.saveSettings();
+      };
+    }
+    const operatorSelect = condEl.createEl("select");
+    operatorSelect.style.cssText = "padding: 4px 8px;";
+    const operators = getValidOperators(condition.property);
+    operators.forEach((op) => {
+      const option = operatorSelect.createEl("option", {
+        text: op.label,
+        value: op.value
+      });
+      if (condition.operator === op.value) {
+        option.selected = true;
+      }
+    });
+    operatorSelect.onchange = async (e) => {
+      condition.operator = e.target.value;
+      await this.plugin.saveSettings();
+      this.display();
+    };
+    if (!["exists", "doesNotExist"].includes(condition.operator)) {
+      const valueInput = condEl.createEl("input", {
+        type: "text",
+        attr: { placeholder: "value" },
+        value: condition.value || ""
+      });
+      valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
+      valueInput.onchange = async (e) => {
+        condition.value = e.target.value;
+        await this.plugin.saveSettings();
+      };
+    }
+    if (condition.property === "file.folder" && condition.operator === "is") {
+      const subfolderLabel = condEl.createEl("label");
+      subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+      const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
+      subfolderCheckbox.checked = condition.includeSubfolders || false;
+      subfolderCheckbox.onchange = async (e) => {
+        condition.includeSubfolders = e.target.checked;
+        await this.plugin.saveSettings();
+      };
+      subfolderLabel.createEl("span", { text: "Include subfolders" });
+    }
+    if (condition.operator === "matchesDatePattern") {
+      const requireTextLabel = condEl.createEl("label");
+      requireTextLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+      const requireTextCheckbox = requireTextLabel.createEl("input", { type: "checkbox" });
+      requireTextCheckbox.checked = condition.requireAdditionalText || false;
+      requireTextCheckbox.onchange = async (e) => {
+        condition.requireAdditionalText = e.target.checked;
+        await this.plugin.saveSettings();
+      };
+      requireTextLabel.createEl("span", { text: "and has text after date" });
+    }
+    const deleteBtn = condEl.createEl("button", { text: "\xD7" });
+    deleteBtn.style.cssText = "padding: 2px 10px; cursor: pointer; font-size: 1.2em;";
+    deleteBtn.onclick = async () => {
+      category.conditions.splice(condIndex, 1);
+      await this.plugin.saveSettings();
+      this.display();
+    };
+  }
+  renderColorPalettes(containerEl) {
+    const config = this.plugin.settings.colorCategories;
+    const palettesSectionContainer = containerEl.createDiv();
+    palettesSectionContainer.style.cssText = "margin-top: 20px; border: 1px solid var(--background-modifier-border); border-radius: 4px; overflow: hidden;";
+    const palettesHeader = palettesSectionContainer.createDiv();
+    palettesHeader.style.cssText = "padding: 12px; background: var(--background-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;";
+    const chevron = palettesHeader.createEl("span", { text: "\u203A" });
+    chevron.style.cssText = "font-size: 1.2em; transition: transform 0.2s; display: inline-block;";
+    const icon = palettesHeader.createEl("span");
+    icon.style.cssText = "display: flex; align-items: center; margin-right: 4px;";
+    (0, import_obsidian3.setIcon)(icon, "palette");
+    palettesHeader.createEl("strong", { text: "Color Palettes" });
+    const headerDesc = palettesHeader.createEl("span", { text: "(optional - create reusable color sets)" });
+    headerDesc.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-left: 8px;";
+    const palettesContent = palettesSectionContainer.createDiv();
+    palettesContent.style.cssText = "padding: 15px; display: none;";
+    palettesHeader.onclick = () => {
+      this.isPalettesExpanded = !this.isPalettesExpanded;
+      palettesContent.style.display = this.isPalettesExpanded ? "block" : "none";
+      chevron.style.transform = this.isPalettesExpanded ? "rotate(90deg)" : "rotate(0deg)";
+    };
+    if (this.isPalettesExpanded) {
+      palettesContent.style.display = "block";
+      chevron.style.transform = "rotate(90deg)";
+    }
+    const desc = palettesContent.createDiv();
+    desc.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-bottom: 15px;";
+    desc.textContent = "Create custom color palettes to quickly assign colors to categories. Palettes can be shared by copying/pasting the palette text when viewed in source mode.";
+    config.colorPalettes.forEach((palette, index) => {
+      this.renderPalette(palettesContent, palette, index);
+    });
+    const addPaletteBtn = palettesContent.createEl("button", { text: "+ Add Palette" });
+    addPaletteBtn.style.cssText = "padding: 6px 16px; cursor: pointer; margin-top: 10px;";
+    addPaletteBtn.onclick = async () => {
+      const newPalette = {
+        name: "New Palette",
+        colors: [
+          { name: "Red", hex: "#ef4444" },
+          { name: "Blue", hex: "#3b82f6" },
+          { name: "Green", hex: "#10b981" }
+        ]
+      };
+      config.colorPalettes.push(newPalette);
+      await this.plugin.saveSettings();
+      this.display();
+    };
+  }
+  renderPalette(container, palette, paletteIndex) {
+    const config = this.plugin.settings.colorCategories;
+    const paletteEl = container.createDiv();
+    paletteEl.style.cssText = "border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 12px; margin-bottom: 12px; background: var(--background-primary);";
+    const paletteHeader = paletteEl.createDiv();
+    paletteHeader.style.cssText = "display: flex; align-items: center; gap: 10px; margin-bottom: 12px;";
+    const nameInput = paletteHeader.createEl("input", {
+      type: "text",
+      value: palette.name,
+      attr: { placeholder: "Palette name" }
+    });
+    nameInput.style.cssText = "flex: 1; padding: 4px 8px; font-weight: 500;";
+    nameInput.oninput = async () => {
+      palette.name = nameInput.value;
+      await this.plugin.saveSettings();
+    };
+    const currentMode = this.paletteEditModes.get(paletteIndex) || "visual";
+    const modeToggleBtn = paletteHeader.createEl("button");
+    modeToggleBtn.textContent = currentMode === "visual" ? "Source" : "Visual";
+    modeToggleBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 0.85em;";
+    modeToggleBtn.title = currentMode === "visual" ? "Switch to source mode" : "Switch to visual mode";
+    const deleteBtn = paletteHeader.createEl("button", { text: "\xD7" });
+    deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: var(--background-modifier-error); color: var(--text-on-accent);";
+    deleteBtn.onclick = async () => {
+      config.colorPalettes.splice(paletteIndex, 1);
+      this.paletteEditModes.delete(paletteIndex);
+      await this.plugin.saveSettings();
+      this.display();
+    };
+    const editorContainer = paletteEl.createDiv();
+    const renderEditor = () => {
+      editorContainer.empty();
+      const mode = this.paletteEditModes.get(paletteIndex) || "visual";
+      if (mode === "visual") {
+        const colorsContainer = editorContainer.createDiv();
+        colorsContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
+        palette.colors.forEach((color, colorIndex) => {
+          const colorRow = colorsContainer.createDiv();
+          colorRow.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--background-secondary); border-radius: 4px;";
+          const colorPicker = colorRow.createEl("input", { type: "color", value: color.hex });
+          colorPicker.style.cssText = "width: 50px; height: 32px; cursor: pointer; border-radius: 4px;";
+          colorPicker.onchange = async (e) => {
+            color.hex = e.target.value.toLowerCase();
+            await this.plugin.saveSettings();
+          };
+          const hexDisplay = colorRow.createEl("code");
+          hexDisplay.textContent = color.hex.toUpperCase();
+          hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.85em; min-width: 70px;";
+          colorPicker.oninput = () => {
+            hexDisplay.textContent = colorPicker.value.toUpperCase();
+          };
+          const nameInput2 = colorRow.createEl("input", {
+            type: "text",
+            value: color.name,
+            attr: { placeholder: "Color name" }
+          });
+          nameInput2.style.cssText = "flex: 1; padding: 4px 8px;";
+          nameInput2.oninput = async () => {
+            color.name = nameInput2.value;
+            await this.plugin.saveSettings();
+          };
+          const deleteColorBtn = colorRow.createEl("button", { text: "\xD7" });
+          deleteColorBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.1em;";
+          deleteColorBtn.onclick = async () => {
+            palette.colors.splice(colorIndex, 1);
+            await this.plugin.saveSettings();
+            renderEditor();
+          };
+        });
+        const addColorBtn = editorContainer.createEl("button", { text: "+ Add Color" });
+        addColorBtn.style.cssText = "padding: 6px 12px; cursor: pointer; margin-top: 8px; font-size: 0.9em;";
+        addColorBtn.onclick = async () => {
+          palette.colors.push({ name: "New Color", hex: "#3b82f6" });
+          await this.plugin.saveSettings();
+          renderEditor();
+        };
+      } else {
+        const sourceLabel = editorContainer.createDiv();
+        sourceLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 6px;";
+        sourceLabel.textContent = "Text format (ColorName: #hexcode, one per line):";
+        const paletteText = editorContainer.createEl("textarea");
+        paletteText.style.cssText = "width: 100%; min-height: 120px; font-family: monospace; font-size: 0.85em; padding: 8px; resize: vertical;";
+        paletteText.value = this.paletteTOText(palette);
+        let typingTimer;
+        paletteText.oninput = () => {
+          clearTimeout(typingTimer);
+          typingTimer = setTimeout(async () => {
+            const parsed = this.textToPalette(paletteText.value, palette.name);
+            if (parsed) {
+              palette.colors = parsed.colors;
+              await this.plugin.saveSettings();
+            }
+          }, 500);
+        };
+      }
+    };
+    modeToggleBtn.onclick = () => {
+      const currentMode2 = this.paletteEditModes.get(paletteIndex) || "visual";
+      const newMode = currentMode2 === "visual" ? "source" : "visual";
+      this.paletteEditModes.set(paletteIndex, newMode);
+      modeToggleBtn.textContent = newMode === "visual" ? "Source" : "Visual";
+      modeToggleBtn.title = newMode === "visual" ? "Switch to source mode" : "Switch to visual mode";
+      renderEditor();
+    };
+    renderEditor();
+  }
+  paletteTOText(palette) {
+    return palette.colors.map((c) => `${c.name}: ${c.hex}`).join("\n");
+  }
+  textToPalette(text, fallbackName) {
+    const lines = text.split("\n").filter((l) => l.trim());
+    const colors = [];
+    for (const line of lines) {
+      const match = line.match(/^(.+?):\s*(#[0-9a-fA-F]{6})$/);
+      if (match) {
+        colors.push({ name: match[1].trim(), hex: match[2].toLowerCase() });
+      } else {
+        return null;
+      }
+    }
+    if (colors.length === 0) return null;
+    return { name: fallbackName, colors };
+  }
+  /**
+   * Render a color picker with optional palette selection popover
+   */
+  renderColorPicker(container, currentColor, onColorChange, dropdownId) {
+    const config = this.plugin.settings.colorCategories;
+    const colorPickerContainer = container.createDiv();
+    colorPickerContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
+    const colorInput = colorPickerContainer.createEl("input", { type: "color", value: currentColor });
+    colorInput.style.cssText = "width: 60px; height: 32px; cursor: pointer; border-radius: 4px;";
+    colorInput.onchange = async (e) => {
+      await onColorChange(e.target.value);
+    };
+    const hexDisplay = colorPickerContainer.createEl("code");
+    hexDisplay.textContent = currentColor.toUpperCase();
+    hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.9em;";
+    colorInput.oninput = () => {
+      hexDisplay.textContent = colorInput.value.toUpperCase();
+    };
+    if (config.colorPalettes && config.colorPalettes.length > 0) {
+      const paletteBtn = colorPickerContainer.createEl("button");
+      paletteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;";
+      (0, import_obsidian3.setIcon)(paletteBtn, "palette");
+      paletteBtn.title = "Open Color Palettes";
+      let popover = null;
+      const closePopover = () => {
+        if (popover) {
+          popover.remove();
+          popover = null;
+        }
+      };
+      paletteBtn.onclick = (e) => {
+        e.preventDefault();
+        if (popover) {
+          closePopover();
+          return;
+        }
+        popover = document.body.createDiv();
+        popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;";
+        const closeBtn = popover.createEl("button");
+        closeBtn.textContent = "\xD7";
+        closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
+        closeBtn.title = "Close";
+        closeBtn.onmouseenter = () => {
+          closeBtn.style.background = "var(--background-modifier-hover)";
+        };
+        closeBtn.onmouseleave = () => {
+          closeBtn.style.background = "transparent";
+        };
+        closeBtn.onclick = (e2) => {
+          e2.preventDefault();
+          closePopover();
+        };
+        const btnRect = paletteBtn.getBoundingClientRect();
+        popover.style.top = btnRect.bottom + 6 + "px";
+        popover.style.left = btnRect.left + "px";
+        setTimeout(() => {
+          if (popover) {
+            const popoverRect = popover.getBoundingClientRect();
+            if (popoverRect.right > window.innerWidth) {
+              popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+            }
+            if (popoverRect.bottom > window.innerHeight) {
+              popover.style.top = btnRect.top - popoverRect.height - 6 + "px";
+            }
+          }
+        }, 0);
+        config.colorPalettes.forEach((palette, idx) => {
+          const paletteSection = popover.createDiv();
+          paletteSection.style.cssText = idx > 0 ? "margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);" : "margin-top: 4px;";
+          const paletteName = paletteSection.createEl("div", { text: palette.name });
+          paletteName.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;";
+          const swatchesGrid = paletteSection.createDiv();
+          swatchesGrid.style.cssText = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;";
+          palette.colors.forEach((colorEntry) => {
+            const swatch = swatchesGrid.createEl("button");
+            const isSelected = currentColor.toLowerCase() === colorEntry.hex.toLowerCase();
+            swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
+            swatch.title = `${colorEntry.name}
+${colorEntry.hex}`;
+            swatch.onclick = async (e2) => {
+              e2.preventDefault();
+              colorInput.value = colorEntry.hex;
+              hexDisplay.textContent = colorEntry.hex.toUpperCase();
+              await onColorChange(colorEntry.hex);
+              closePopover();
+            };
+            swatch.onmouseenter = () => {
+              swatch.style.transform = "scale(1.08)";
+              swatch.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+            };
+            swatch.onmouseleave = () => {
+              swatch.style.transform = "scale(1)";
+              swatch.style.boxShadow = "none";
+            };
+          });
+        });
+        const closeHandler = (e2) => {
+          if (popover && !popover.contains(e2.target) && !paletteBtn.contains(e2.target)) {
+            closePopover();
+            document.removeEventListener("click", closeHandler);
+          }
+        };
+        setTimeout(() => {
+          document.addEventListener("click", closeHandler);
+        }, 0);
+        const keyHandler = (e2) => {
+          if (e2.key === "Escape" && popover) {
+            closePopover();
+            document.removeEventListener("keydown", keyHandler);
+          }
+        };
+        document.addEventListener("keydown", keyHandler);
+      };
+    }
+  }
+};
+var CategoryEditModal = class extends import_obsidian3.Modal {
+  constructor(app, plugin, category, onSave) {
+    super(app);
+    this.plugin = plugin;
+    this.category = category;
+    this.onSave = onSave;
+  }
+  /**
+   * IMPORTANT: This method is duplicated from CalendarSettingTab.renderConditionsInfoIcon().
+   * When making changes here, apply the same changes to CalendarSettingTab.renderConditionsInfoIcon().
+   * This ensures both main settings and modal have consistent info icon behavior.
+   */
+  renderConditionsInfoIcon(container) {
+    const infoIcon = container.createEl("span");
+    (0, import_obsidian3.setIcon)(infoIcon, "info");
+    infoIcon.style.cssText = "cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;";
+    infoIcon.title = "Click to see examples";
+    let popover = null;
+    const closePopover = () => {
+      if (popover) {
+        popover.remove();
+        popover = null;
+      }
+    };
+    infoIcon.onclick = (e) => {
+      e.preventDefault();
+      if (popover) {
+        closePopover();
+        return;
+      }
+      popover = document.body.createDiv();
+      popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px;";
+      const closeBtn = popover.createEl("button");
+      closeBtn.textContent = "\xD7";
+      closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
+      closeBtn.title = "Close";
+      closeBtn.onmouseenter = () => {
+        closeBtn.style.background = "var(--background-modifier-hover)";
+      };
+      closeBtn.onmouseleave = () => {
+        closeBtn.style.background = "transparent";
+      };
+      closeBtn.onclick = (e2) => {
+        e2.preventDefault();
+        closePopover();
+      };
+      popover.createEl("div", {
+        text: "Examples:",
+        attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--text-normal); padding-right: 20px;" }
+      });
+      popover.createEl("div", {
+        text: '\u2022 Property "category" is "school"',
+        attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
+      });
+      popover.createEl("div", {
+        text: '\u2022 File tags has tag "holidays"',
+        attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
+      });
+      popover.createEl("div", {
+        text: '\u2022 File name contains "meeting"',
+        attr: { style: "margin-left: 8px; color: var(--text-muted); font-size: 0.9em;" }
+      });
+      const iconRect = infoIcon.getBoundingClientRect();
+      popover.style.top = iconRect.bottom + 6 + "px";
+      popover.style.left = iconRect.left + "px";
+      setTimeout(() => {
+        if (popover) {
+          const popoverRect = popover.getBoundingClientRect();
+          if (popoverRect.right > window.innerWidth) {
+            popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+          }
+          if (popoverRect.bottom > window.innerHeight) {
+            popover.style.top = iconRect.top - popoverRect.height - 6 + "px";
+          }
+        }
+      }, 0);
+      const closeHandler = (e2) => {
+        if (popover && !popover.contains(e2.target) && !infoIcon.contains(e2.target)) {
+          closePopover();
+          document.removeEventListener("click", closeHandler);
+        }
+      };
+      setTimeout(() => {
+        document.addEventListener("click", closeHandler);
+      }, 0);
+      const escHandler = (e2) => {
+        if (e2.key === "Escape") {
+          closePopover();
+          document.removeEventListener("keydown", escHandler);
+        }
+      };
+      document.addEventListener("keydown", escHandler);
+    };
+  }
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.createEl("h2", { text: "Edit Category" });
+    new import_obsidian3.Setting(contentEl).setName("Category name").addText((text) => text.setValue(this.category.name).onChange(async (value) => {
+      this.category.name = value;
+      await this.plugin.saveSettings();
+      this.onSave();
+    }));
+    contentEl.createEl("div", {
+      attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+    });
+    const colorSetting = new import_obsidian3.Setting(contentEl).setName("Color").setDesc("Choose a color for this category");
+    this.renderColorPickerInModal(colorSetting.controlEl);
+    contentEl.createEl("div", {
+      attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+    });
+    const useIconSetting = contentEl.createDiv();
+    useIconSetting.style.cssText = "display: flex; flex-direction: column; gap: 4px; padding: 12px 0;";
+    const useIconHeader = useIconSetting.createDiv();
+    useIconHeader.style.cssText = "display: flex; align-items: center; gap: 10px;";
+    const useIconCheckbox = useIconHeader.createEl("input", { type: "checkbox" });
+    useIconCheckbox.checked = this.category.iconType !== null;
+    useIconCheckbox.style.cssText = "cursor: pointer;";
+    useIconCheckbox.onchange = async () => {
+      if (useIconCheckbox.checked) {
+        this.category.iconType = "emoji";
+        this.category.iconValue = "\u2B50";
+      } else {
+        this.category.iconType = null;
+        this.category.iconValue = "";
+      }
+      await this.plugin.saveSettings();
+      this.onSave();
+      this.onOpen();
+    };
+    const useIconLabel = useIconHeader.createEl("div");
+    useIconLabel.style.cssText = "font-weight: 500;";
+    useIconLabel.textContent = "Use icon";
+    const useIconDesc = useIconSetting.createEl("div");
+    useIconDesc.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-left: 24px;";
+    useIconDesc.textContent = "Add an emoji or Lucide icon to this category";
+    if (this.category.iconType !== null) {
+      const iconSetting = new import_obsidian3.Setting(contentEl).setName("Icon").setDesc("Search for emoji or Lucide icon");
+      const inputContainer = iconSetting.controlEl.createDiv();
+      inputContainer.style.cssText = "display: flex; gap: 10px; align-items: center; width: 100%;";
+      const iconInput = inputContainer.createEl("input", {
+        type: "text",
+        value: this.category.iconValue,
+        attr: { placeholder: "Type to search icons..." }
+      });
+      iconInput.style.cssText = "flex: 1; padding: 6px;";
+      if (this.category.iconType) {
+        iconInput.dataset.iconType = this.category.iconType;
+      }
+      const saveIconValue = async () => {
+        this.category.iconValue = iconInput.value;
+        if (iconInput.dataset.iconType) {
+          this.category.iconType = iconInput.dataset.iconType;
+        }
+        await this.plugin.saveSettings();
+        this.onSave();
+      };
+      iconInput.addEventListener("input", saveIconValue);
+      const iconPreviewEl = inputContainer.createEl("div");
+      iconPreviewEl.style.cssText = "width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--background-modifier-border); border-radius: 3px; font-size: 1.2em;";
+      if (this.category.iconValue) {
+        if (this.category.iconType === "emoji") {
+          iconPreviewEl.textContent = this.category.iconValue;
+        } else {
+          (0, import_obsidian3.setIcon)(iconPreviewEl, this.category.iconValue);
+        }
+      }
+      new IconSuggest(iconInput, iconPreviewEl);
+    }
+    new import_obsidian3.Setting(contentEl).setName("Enabled").setDesc("Toggle this category on/off without deleting it").addToggle((toggle) => toggle.setValue(this.category.enabled).onChange(async (value) => {
+      this.category.enabled = value;
+      await this.plugin.saveSettings();
+      this.onSave();
+    }));
+    contentEl.createEl("div", {
+      attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 20px 0;" }
+    });
+    const conditionsHeader = contentEl.createDiv();
+    conditionsHeader.style.cssText = "display: flex; align-items: center; gap: 8px; margin-top: 0; margin-bottom: 10px;";
+    conditionsHeader.createEl("h3", { text: "Conditions", attr: { style: "margin: 0;" } });
+    this.renderConditionsInfoIcon(conditionsHeader);
+    new import_obsidian3.Setting(contentEl).setName("Match mode").setDesc("Choose how conditions should be evaluated").addDropdown((dropdown) => dropdown.addOption("all", "AND - All conditions must match").addOption("any", "OR - Any condition can match").setValue(this.category.matchMode).onChange(async (value) => {
+      this.category.matchMode = value;
+      await this.plugin.saveSettings();
+      this.onSave();
+    }));
+    const conditionsContainer = contentEl.createDiv();
+    conditionsContainer.style.cssText = "max-height: 300px; overflow-y: auto;";
+    if (this.category.conditions.length === 0) {
+      conditionsContainer.createEl("div", {
+        text: "No conditions yet. Add at least one condition for this category to match notes.",
+        attr: { style: "color: var(--text-muted); font-style: italic; padding: 10px;" }
+      });
+    } else {
+      this.category.conditions.forEach((condition, index) => {
+        this.renderCondition(conditionsContainer, condition, index);
+      });
+    }
+    new import_obsidian3.Setting(contentEl).addButton((btn) => btn.setButtonText("+ Add condition").onClick(async () => {
+      this.category.conditions.push({
+        property: "file.name",
+        operator: "contains",
+        value: ""
+      });
+      await this.plugin.saveSettings();
+      this.onSave();
+      this.onOpen();
+    }));
+    const footerSetting = new import_obsidian3.Setting(contentEl).setName("").setDesc("").addButton((btn) => btn.setIcon("trash").setTooltip("Delete category").onClick(async () => {
+      const confirmed = confirm(`Are you sure you want to delete the category "${this.category.name}"?`);
+      if (confirmed) {
+        const config = this.plugin.settings.colorCategories;
+        const index = config.categories.indexOf(this.category);
+        if (index > -1) {
+          config.categories.splice(index, 1);
+          await this.plugin.saveSettings();
+          this.onSave();
+          this.close();
+        }
+      }
+    })).addButton((btn) => btn.setButtonText("Close").setCta().onClick(() => this.close()));
+    footerSetting.settingEl.style.cssText = "border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;";
+  }
+  renderCondition(container, condition, condIndex) {
+    const condEl = container.createDiv();
+    condEl.style.cssText = "display: flex; gap: 5px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; padding: 10px; background: var(--background-primary); border-radius: 3px; border: 1px solid var(--background-modifier-border);";
+    const fieldsContainer = condEl.createDiv();
+    fieldsContainer.style.cssText = "display: flex; gap: 5px; flex-wrap: wrap; flex: 1; align-items: center;";
+    const propertySelect = fieldsContainer.createEl("select");
+    propertySelect.style.cssText = "padding: 4px 8px;";
+    const properties = [
+      { value: "file.name", label: "File name" },
+      { value: "file.basename", label: "File basename" },
+      { value: "file.folder", label: "Folder" },
+      { value: "file.path", label: "File path" },
+      { value: "file.ext", label: "Extension" },
+      { value: "file.tags", label: "File tags" },
+      { value: "custom", label: "Property" }
+    ];
+    properties.forEach((prop) => {
+      const option = propertySelect.createEl("option", {
+        text: prop.label,
+        value: prop.value
+      });
+      if (condition.property === prop.value || prop.value === "custom" && !properties.find((p) => p.value === condition.property)) {
+        option.selected = true;
+      }
+    });
+    propertySelect.onchange = async () => {
+      if (propertySelect.value === "custom") {
+        condition.property = "category";
+      } else {
+        condition.property = propertySelect.value;
+      }
+      await this.plugin.saveSettings();
+      this.onSave();
+      this.onOpen();
+    };
+    if (propertySelect.value === "custom" || !properties.find((p) => p.value === condition.property)) {
+      const customInput = fieldsContainer.createEl("input", {
+        type: "text",
+        attr: { placeholder: "property name" },
+        value: condition.property
+      });
+      customInput.style.cssText = "padding: 4px 8px; width: 120px;";
+      customInput.onchange = async () => {
+        condition.property = customInput.value;
+        await this.plugin.saveSettings();
+        this.onSave();
+      };
+    }
+    const operatorSelect = fieldsContainer.createEl("select");
+    operatorSelect.style.cssText = "padding: 4px 8px;";
+    const operators = getValidOperators(condition.property);
+    operators.forEach((op) => {
+      const option = operatorSelect.createEl("option", {
+        text: op.label,
+        value: op.value
+      });
+      if (condition.operator === op.value) {
+        option.selected = true;
+      }
+    });
+    operatorSelect.onchange = async () => {
+      condition.operator = operatorSelect.value;
+      await this.plugin.saveSettings();
+      this.onSave();
+      this.onOpen();
+    };
+    if (!["exists", "doesNotExist"].includes(condition.operator)) {
+      const valueInput = fieldsContainer.createEl("input", {
+        type: "text",
+        attr: { placeholder: "value" },
+        value: condition.value || ""
+      });
+      valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
+      valueInput.onchange = async () => {
+        condition.value = valueInput.value;
+        await this.plugin.saveSettings();
+        this.onSave();
+      };
+    }
+    const deleteBtn = condEl.createEl("button", { text: "\xD7" });
+    deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: none;";
+    deleteBtn.onclick = async () => {
+      this.category.conditions.splice(condIndex, 1);
+      await this.plugin.saveSettings();
+      this.onSave();
+      this.onOpen();
+    };
+  }
+  renderColorPickerInModal(container) {
+    const config = this.plugin.settings.colorCategories;
+    const colorPickerContainer = container.createDiv();
+    colorPickerContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
+    const colorInput = colorPickerContainer.createEl("input", { type: "color", value: this.category.color });
+    colorInput.style.cssText = "width: 60px; height: 32px; cursor: pointer; border-radius: 4px;";
+    colorInput.onchange = async (e) => {
+      this.category.color = e.target.value;
+      await this.plugin.saveSettings();
+      this.onSave();
+    };
+    const hexDisplay = colorPickerContainer.createEl("code");
+    hexDisplay.textContent = this.category.color.toUpperCase();
+    hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.9em;";
+    colorInput.oninput = () => {
+      hexDisplay.textContent = colorInput.value.toUpperCase();
+    };
+    if (config.colorPalettes && config.colorPalettes.length > 0) {
+      const paletteBtn = colorPickerContainer.createEl("button");
+      paletteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;";
+      (0, import_obsidian3.setIcon)(paletteBtn, "palette");
+      paletteBtn.title = "Open Color Palettes";
+      let popover = null;
+      const closePopover = () => {
+        if (popover) {
+          popover.remove();
+          popover = null;
+        }
+      };
+      paletteBtn.onclick = (e) => {
+        e.preventDefault();
+        if (popover) {
+          closePopover();
+          return;
+        }
+        popover = document.body.createDiv();
+        popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;";
+        const closeBtn = popover.createEl("button");
+        closeBtn.textContent = "\xD7";
+        closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
+        closeBtn.title = "Close";
+        closeBtn.onmouseenter = () => {
+          closeBtn.style.background = "var(--background-modifier-hover)";
+        };
+        closeBtn.onmouseleave = () => {
+          closeBtn.style.background = "transparent";
+        };
+        closeBtn.onclick = (e2) => {
+          e2.preventDefault();
+          closePopover();
+        };
+        const btnRect = paletteBtn.getBoundingClientRect();
+        popover.style.top = btnRect.bottom + 6 + "px";
+        popover.style.left = btnRect.left + "px";
+        setTimeout(() => {
+          if (popover) {
+            const popoverRect = popover.getBoundingClientRect();
+            if (popoverRect.right > window.innerWidth) {
+              popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+            }
+            if (popoverRect.bottom > window.innerHeight) {
+              popover.style.top = btnRect.top - popoverRect.height - 6 + "px";
+            }
+          }
+        }, 0);
+        config.colorPalettes.forEach((palette, idx) => {
+          const paletteSection = popover.createDiv();
+          paletteSection.style.cssText = idx > 0 ? "margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);" : "margin-top: 4px;";
+          const paletteName = paletteSection.createEl("div", { text: palette.name });
+          paletteName.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;";
+          const swatchesGrid = paletteSection.createDiv();
+          swatchesGrid.style.cssText = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;";
+          palette.colors.forEach((colorEntry) => {
+            const swatch = swatchesGrid.createEl("button");
+            const isSelected = this.category.color.toLowerCase() === colorEntry.hex.toLowerCase();
+            swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
+            swatch.title = `${colorEntry.name}
+${colorEntry.hex}`;
+            swatch.onclick = async (e2) => {
+              e2.preventDefault();
+              colorInput.value = colorEntry.hex;
+              hexDisplay.textContent = colorEntry.hex.toUpperCase();
+              this.category.color = colorEntry.hex;
+              await this.plugin.saveSettings();
+              this.onSave();
+              closePopover();
+            };
+            swatch.onmouseenter = () => {
+              swatch.style.transform = "scale(1.08)";
+              swatch.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+            };
+            swatch.onmouseleave = () => {
+              swatch.style.transform = "scale(1)";
+              swatch.style.boxShadow = "none";
+            };
+          });
+        });
+        const closeHandler = (e2) => {
+          if (popover && !popover.contains(e2.target) && !paletteBtn.contains(e2.target)) {
+            closePopover();
+            document.removeEventListener("click", closeHandler);
+          }
+        };
+        setTimeout(() => {
+          document.addEventListener("click", closeHandler);
+        }, 0);
+        const escHandler = (e2) => {
+          if (e2.key === "Escape") {
+            closePopover();
+            document.removeEventListener("keydown", escHandler);
+          }
+        };
+        document.addEventListener("keydown", escHandler);
+      };
+    }
+  }
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+};
+
+// src/CalendarView.ts
+var LinearCalendarView = class extends import_obsidian4.ItemView {
+  constructor(leaf, plugin) {
+    super(leaf);
+    this.resizeObserver = null;
+    this.tooltip = null;
+    this.plugin = plugin;
+  }
+  getViewType() {
+    return VIEW_TYPE_CALENDAR;
+  }
+  getDisplayText() {
+    return "Linear Calendar";
+  }
+  getIcon() {
+    return "calendar-range";
+  }
+  async onOpen() {
+    const container = this.containerEl.children[1];
+    container.empty();
+    container.addClass("linear-calendar-container");
+    await this.renderCalendar(container);
+    this.resizeObserver = new ResizeObserver(() => {
+      this.updateMultiDayBarWidths(container);
+    });
+    this.resizeObserver.observe(container);
+    this.registerEvent(
+      this.app.workspace.on("active-leaf-change", (leaf) => {
+        if (leaf && leaf.view === this) {
+          this.reload();
+        }
+      })
+    );
+  }
+  async reload() {
+    const container = this.containerEl.children[1];
+    if (container) {
+      container.empty();
+      await this.renderCalendar(container);
+    }
+  }
+  updateMultiDayBarWidths(container) {
+    const bars = container.querySelectorAll(".multi-day-bar[data-span]");
+    bars.forEach((bar) => {
+      const span = parseInt(bar.dataset.span || "0");
+      const parentCell = bar.parentElement;
+      if (parentCell && parentCell.parentElement) {
+        const row = parentCell.parentElement;
+        const cells = Array.from(row.querySelectorAll(".day-cell"));
+        const startIndex = cells.indexOf(parentCell);
+        if (startIndex >= 0 && startIndex + span - 1 < cells.length) {
+          const lastCell = cells[startIndex + span - 1];
+          const firstCellRect = parentCell.getBoundingClientRect();
+          const lastCellRect = lastCell.getBoundingClientRect();
+          const totalWidth = lastCellRect.right - firstCellRect.left - 6;
+          bar.style.width = `${totalWidth}px`;
+        }
+      }
+    });
+  }
+  async renderCalendar(container) {
+    const year = this.plugin.settings.currentYear;
+    const header = container.createDiv({ cls: "calendar-header" });
+    const prevBtn = header.createEl("button", { text: "\u2190", cls: "year-nav-btn" });
+    header.createEl("span", { text: `${year}`, cls: "year-title" });
+    const nextBtn = header.createEl("button", { text: "\u2192", cls: "year-nav-btn" });
+    prevBtn.onclick = async () => {
+      this.plugin.settings.currentYear--;
+      await this.plugin.saveSettings();
+      container.empty();
+      await this.renderCalendar(container);
+    };
+    nextBtn.onclick = async () => {
+      this.plugin.settings.currentYear++;
+      await this.plugin.saveSettings();
+      container.empty();
+      await this.renderCalendar(container);
+    };
+    const notesWithDates = await this.getNotesWithDates();
+    const multiDayEntries = this.processMultiDayEntries(notesWithDates);
+    if (this.plugin.settings.colorCategories.enabled && this.plugin.settings.colorCategories.showCategoryIndex) {
+      this.renderCategoryIndexRow(container);
+    }
+    const calendarWrapper = container.createDiv({ cls: "calendar-wrapper" });
+    const exp = this.plugin.settings.experimental;
+    if (exp.multilineNotes) {
+      calendarWrapper.addClass("exp-multiline");
+    }
+    if (exp.verticalText) {
+      calendarWrapper.addClass("exp-vertical");
+    }
+    if (exp.compactFontSize) {
+      calendarWrapper.addClass("exp-compact");
+    }
+    if (exp.condensedLetters) {
+      calendarWrapper.addClass("exp-condensed");
+    }
+    if (this.plugin.settings.calendarWidth === "scrollable") {
+      calendarWrapper.addClass("calendar-scrollable");
+      calendarWrapper.style.overflowX = "auto";
+    } else {
+      calendarWrapper.removeClass("calendar-scrollable");
+      calendarWrapper.style.overflowX = "";
+    }
+    const calendarTable = calendarWrapper.createEl("table", { cls: "linear-calendar" });
+    if (this.plugin.settings.calendarWidth === "scrollable") {
+      calendarTable.style.minWidth = "max-content";
+      calendarTable.style.setProperty("--cell-min-width", `${this.plugin.settings.cellMinWidth}px`);
+    } else {
+      calendarTable.style.minWidth = "";
+      calendarTable.style.removeProperty("--cell-min-width");
+    }
+    const maxDayCells = 37;
+    const thead = calendarTable.createEl("thead");
+    const headerRow = thead.createEl("tr");
+    headerRow.createEl("th", { cls: "month-label-cell" });
+    if (this.plugin.settings.columnAlignment === "date") {
+      for (let i = 0; i < 31; i++) {
+        headerRow.createEl("th", {
+          text: String(i + 1).padStart(2, "0"),
+          cls: "weekday-header"
+        });
+      }
+    } else {
+      const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+      const startDay = this.plugin.settings.weekStartDay;
+      for (let i = 0; i < maxDayCells; i++) {
+        const dayIndex = (i + startDay) % 7;
+        headerRow.createEl("th", {
+          text: weekdays[dayIndex],
+          cls: "weekday-header"
+        });
+      }
+    }
+    headerRow.createEl("th", { cls: "month-label-cell-right" });
+    const tbody = calendarTable.createEl("tbody");
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ];
+    const cellsPerRow = this.plugin.settings.columnAlignment === "date" ? 31 : maxDayCells;
+    for (let month = 0; month < 12; month++) {
+      await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, cellsPerRow);
+    }
+    const footerRow = calendarTable.createEl("tfoot").createEl("tr");
+    footerRow.createEl("td", { cls: "month-label-cell" });
+    if (this.plugin.settings.columnAlignment === "date") {
+      for (let i = 0; i < 31; i++) {
+        footerRow.createEl("td", {
+          text: String(i + 1).padStart(2, "0"),
+          cls: "weekday-header"
+        });
+      }
+    } else {
+      const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+      const startDay = this.plugin.settings.weekStartDay;
+      for (let i = 0; i < maxDayCells; i++) {
+        const dayIndex = (i + startDay) % 7;
+        footerRow.createEl("td", {
+          text: weekdays[dayIndex],
+          cls: "weekday-header"
+        });
+      }
+    }
+    footerRow.createEl("td", { cls: "month-label-cell-right" });
+  }
+  async getNotesWithDates() {
+    var _a;
+    const notesMap = /* @__PURE__ */ new Map();
+    const files = this.app.vault.getMarkdownFiles();
+    for (const file of files) {
+      if (!this.filePassesFilter(file)) {
+        continue;
+      }
+      const dateInfo = await this.extractDateFromFile(file);
+      if (dateInfo.startDate && !isNaN(dateInfo.startDate.getTime())) {
+        const key = this.dateToKey(dateInfo.startDate);
+        if (!notesMap.has(key)) {
+          notesMap.set(key, []);
+        }
+        const noteInfo = {
+          file,
+          startDate: dateInfo.startDate,
+          endDate: dateInfo.endDate,
+          isMultiDay: !!dateInfo.endDate
+        };
+        (_a = notesMap.get(key)) == null ? void 0 : _a.push(noteInfo);
+      }
+    }
+    return notesMap;
+  }
+  filePassesFilter(file) {
+    const { filterMode, filterConditions } = this.plugin.settings;
+    if (filterMode === "none" || filterConditions.length === 0) {
+      return true;
+    }
+    const matchesConditions = filterConditions.every(
+      (condition) => this.evaluateCondition(file, condition)
+    );
+    return filterMode === "include" ? matchesConditions : !matchesConditions;
+  }
+  evaluateCondition(file, condition) {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    const { property, operator, value, includeSubfolders } = condition;
+    let actualValue;
+    if (property === "file.name") {
+      actualValue = file.name;
+    } else if (property === "file.basename") {
+      actualValue = file.basename;
+    } else if (property === "file.folder") {
+      actualValue = ((_a = file.parent) == null ? void 0 : _a.path) || "";
+    } else if (property === "file.path") {
+      actualValue = file.path;
+    } else if (property === "file.ext") {
+      actualValue = file.extension;
+    } else if (property === "file.tags") {
+      const cache = this.app.metadataCache.getFileCache(file);
+      const tags = ((_b = cache == null ? void 0 : cache.tags) == null ? void 0 : _b.map((t) => t.tag.substring(1))) || [];
+      const frontmatterTags = ((_c = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _c.tags) || [];
+      actualValue = [...tags, ...frontmatterTags];
+    } else if (property.startsWith("property:")) {
+      const propertyName = property.substring(9);
+      const cache = this.app.metadataCache.getFileCache(file);
+      actualValue = (_d = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _d[propertyName];
+    } else {
+      const cache = this.app.metadataCache.getFileCache(file);
+      actualValue = (_e = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _e[property];
+    }
+    switch (operator) {
+      case "is":
+        if (property === "file.folder" && includeSubfolders) {
+          const folderPath = value ? value + "/" : "";
+          return file.path.startsWith(folderPath) || ((_f = file.parent) == null ? void 0 : _f.path) === value;
+        }
+        return actualValue === value;
+      case "isNot":
+        return actualValue !== value;
+      case "contains":
+        if (typeof actualValue === "string") {
+          return actualValue.toLowerCase().includes(value.toLowerCase());
+        }
+        if (Array.isArray(actualValue)) {
+          return actualValue.some(
+            (item) => String(item).toLowerCase().includes(value.toLowerCase())
+          );
+        }
+        return false;
+      case "doesNotContain":
+        if (typeof actualValue === "string") {
+          return !actualValue.toLowerCase().includes(value.toLowerCase());
+        }
+        if (Array.isArray(actualValue)) {
+          return !actualValue.some(
+            (item) => String(item).toLowerCase().includes(value.toLowerCase())
+          );
+        }
+        return true;
+      case "startsWith":
+        if (typeof actualValue === "string") {
+          return actualValue.toLowerCase().startsWith(value.toLowerCase());
+        }
+        return false;
+      case "endsWith":
+        if (typeof actualValue === "string") {
+          return actualValue.toLowerCase().endsWith(value.toLowerCase());
+        }
+        return false;
+      case "matches":
+        try {
+          const regex = new RegExp(value);
+          return regex.test(actualValue);
+        } catch (e) {
+          return false;
+        }
+      case "exists":
+        return actualValue !== void 0 && actualValue !== null;
+      case "doesNotExist":
+        return actualValue === void 0 || actualValue === null;
+      case "hasTag":
+        const cache = this.app.metadataCache.getFileCache(file);
+        const tags = ((_g = cache == null ? void 0 : cache.tags) == null ? void 0 : _g.map((t) => t.tag.substring(1))) || [];
+        const frontmatterTags = ((_h = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _h.tags) || [];
+        const allTags = [...tags, ...frontmatterTags];
+        return allTags.some((tag) => tag.toLowerCase() === value.toLowerCase());
+      case "matchesDatePattern":
+        const datePattern = /^(\d{4}-\d{2}-\d{2})/;
+        const match = file.basename.match(datePattern);
+        if (!match) return false;
+        if (condition.requireAdditionalText) {
+          return file.basename.length > match[0].length;
+        }
+        return true;
+      default:
+        return false;
+    }
+  }
+  /**
+   * Get the color category that matches a file.
+   * Returns the first enabled category where all conditions match.
+   * Returns null if no category matches.
+   */
+  getCategoryForFile(file) {
+    const config = this.plugin.settings.colorCategories;
+    for (const category of config.categories) {
+      if (!category.enabled) continue;
+      if (category.conditions.length === 0) continue;
+      const matchMode = category.matchMode || "all";
+      const matches = matchMode === "all" ? category.conditions.every((c) => this.evaluateCondition(file, c)) : category.conditions.some((c) => this.evaluateCondition(file, c));
+      if (matches) return category;
+    }
+    return null;
+  }
+  /**
+   * Get the color to use for a file.
+   * Uses category color if file matches a category, otherwise uses default color.
+   */
+  getColorForFile(file) {
+    if (!this.plugin.settings.colorCategories.enabled) {
+      return "var(--interactive-accent)";
+    }
+    const category = this.getCategoryForFile(file);
+    if (category) return category.color;
+    const defaultColor = this.plugin.settings.colorCategories.defaultCategoryColor;
+    return defaultColor || "var(--interactive-accent)";
+  }
+  /**
+   * Get the icon to display for a file.
+   * Returns null if global setting is off, or if file doesn't match a category with an icon.
+   */
+  getIconForFile(file) {
+    if (!this.plugin.settings.colorCategories.enabled) {
+      return null;
+    }
+    if (!this.plugin.settings.colorCategories.showIconsInCalendar) {
+      return null;
+    }
+    const category = this.getCategoryForFile(file);
+    if (!category || !category.iconType) return null;
+    return { type: category.iconType, value: category.iconValue };
+  }
+  /**
+   * Parse a date string (YYYY-MM-DD) as a local date, not UTC.
+   * This prevents timezone issues where dates shift to the previous day.
+   */
+  parseLocalDate(dateStr) {
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (!match) return null;
+    const year = parseInt(match[1], 10);
+    const month = parseInt(match[2], 10) - 1;
+    const day = parseInt(match[3], 10);
+    const date = new Date(year, month, day);
+    return isNaN(date.getTime()) ? null : date;
+  }
+  async extractDateFromFile(file) {
+    var _a, _b;
+    const config = this.plugin.settings.dateExtraction;
+    const result = {
+      startDate: null,
+      endDate: null
+    };
+    const startSources = [];
+    if (config.startFromProperties.length > 0) {
+      for (const propName of config.startFromProperties) {
+        const cache = this.app.metadataCache.getFileCache(file);
+        const dateStr = (_a = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _a[propName];
+        if (dateStr) {
+          const date = this.parseLocalDate(dateStr);
+          if (date && !isNaN(date.getTime())) {
+            startSources.push({ type: "property", date });
+            break;
+          }
+        }
+      }
+    }
+    if (config.startFromFilename) {
+      const datePattern = /^(\d{4}-\d{2}-\d{2})/;
+      const match = file.basename.match(datePattern);
+      if (match) {
+        const date = this.parseLocalDate(match[1]);
+        if (date && !isNaN(date.getTime())) {
+          startSources.push({ type: "filename", date });
+        }
+      }
+    }
+    if (startSources.length > 0) {
+      if (startSources.length === 1) {
+        result.startDate = startSources[0].date;
+      } else {
+        const prioritySource = startSources.find((s) => s.type === config.startPriority);
+        result.startDate = (prioritySource == null ? void 0 : prioritySource.date) || startSources[0].date;
+      }
+    }
+    const endSources = [];
+    if (config.endFromProperties.length > 0) {
+      for (const propName of config.endFromProperties) {
+        const cache = this.app.metadataCache.getFileCache(file);
+        const dateStr = (_b = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _b[propName];
+        if (dateStr) {
+          const date = this.parseLocalDate(dateStr);
+          if (date && !isNaN(date.getTime())) {
+            endSources.push({ type: "property", date });
+            break;
+          }
+        }
+      }
+    }
+    if (config.endFromFilename) {
+      const datePattern = /\d{4}-\d{2}-\d{2}/g;
+      const matches = file.basename.match(datePattern);
+      if (matches && matches.length >= 2) {
+        const date = this.parseLocalDate(matches[1]);
+        if (date && !isNaN(date.getTime())) {
+          endSources.push({ type: "filename", date });
+        }
+      }
+    }
+    if (endSources.length > 0) {
+      if (endSources.length === 1) {
+        result.endDate = endSources[0].date;
+      } else {
+        const prioritySource = endSources.find((s) => s.type === config.endPriority);
+        result.endDate = (prioritySource == null ? void 0 : prioritySource.date) || endSources[0].date;
+      }
+    }
+    return result;
+  }
+  processMultiDayEntries(notesMap) {
+    const multiDayMap = /* @__PURE__ */ new Map();
+    notesMap.forEach((notes) => {
+      notes.forEach((noteInfo) => {
+        if (noteInfo.isMultiDay && noteInfo.endDate && !isNaN(noteInfo.endDate.getTime())) {
+          let currentDate = new Date(noteInfo.startDate);
+          const endDate = new Date(noteInfo.endDate);
+          let monthCount = 0;
+          const maxMonths = 24;
+          while (currentDate <= endDate && monthCount < maxMonths) {
+            const currentMonth = currentDate.getMonth();
+            const currentYear = currentDate.getFullYear();
+            const entryId = `${noteInfo.file.path}-${currentYear}-${currentMonth}`;
+            if (!multiDayMap.has(entryId)) {
+              const segmentStartDay = currentDate.getDate();
+              const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+              let segmentEndDay;
+              if (endDate.getFullYear() === currentYear && endDate.getMonth() === currentMonth) {
+                segmentEndDay = endDate.getDate();
+              } else {
+                segmentEndDay = lastDayOfMonth;
+              }
+              multiDayMap.set(entryId, {
+                file: noteInfo.file,
+                startDate: new Date(currentYear, currentMonth, segmentStartDay),
+                endDate: new Date(currentYear, currentMonth, segmentEndDay),
+                month: currentMonth,
+                year: currentYear
+              });
+            }
+            currentDate = new Date(currentYear, currentMonth + 1, 1);
+            monthCount++;
+          }
+        }
+      });
+    });
+    return multiDayMap;
+  }
+  dateToKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  }
+  isDailyNote(file) {
+    const format = this.plugin.settings.dailyNoteFormat;
+    const basename = file.basename;
+    const pattern = format.replace("YYYY", "\\d{4}").replace("MM", "\\d{2}").replace("DD", "\\d{2}");
+    const regex = new RegExp(`^${pattern}$`);
+    return regex.test(basename);
+  }
+  hasDateAndText(file) {
+    const datePattern = /^\d{4}-\d{2}-\d{2}/;
+    const match = file.basename.match(datePattern);
+    if (!match) return false;
+    return file.basename.length > match[0].length;
+  }
+  getDisplayName(file) {
+    if (!this.plugin.settings.hideDateInTitle) {
+      return file.basename;
+    }
+    const datePattern = /\d{4}-\d{2}-\d{2}/g;
+    const matches = file.basename.match(datePattern);
+    if (matches && matches.length > 1) {
+      return file.basename;
+    }
+    const startDatePattern = /^\d{4}-\d{2}-\d{2}\s*/;
+    return file.basename.replace(startDatePattern, "").trim() || file.basename;
+  }
+  shouldShowNote(file) {
+    if (this.isDailyNote(file)) {
+      return this.plugin.settings.showDailyNotesInCells;
+    }
+    if (this.hasDateAndText(file)) {
+      return this.plugin.settings.showNotesWithDateAndText;
+    }
+    return true;
+  }
+  getDailyNoteFolder() {
+    var _a, _b, _c, _d;
+    if (this.plugin.settings.dailyNoteFolderMode === "obsidian") {
+      const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
+      if (dailyNotesPlugin && dailyNotesPlugin.enabled) {
+        let folder = ((_d = (_c = dailyNotesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder) || "";
+        folder = folder.replace(/^\/+|\/+$/g, "");
+        return folder ? folder + "/" : "";
+      }
+      return "";
+    } else {
+      const folder = this.plugin.settings.dailyNoteCustomFolder;
+      return folder ? folder + "/" : "";
+    }
+  }
+  async findDailyNoteInFolder(filename, folderPath) {
+    const files = this.app.vault.getMarkdownFiles();
+    for (const file of files) {
+      if (file.path.startsWith(folderPath) && file.name === filename) {
+        return file;
+      }
+    }
+    return null;
+  }
+  formatDateForDailyNote(date) {
+    const format = this.plugin.settings.dailyNoteFormat;
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return format.replace("YYYY", String(year)).replace("MM", month).replace("DD", day);
+  }
+  async openOrCreateDailyNote(date) {
+    const filename = this.formatDateForDailyNote(date);
+    const folderPath = this.getDailyNoteFolder();
+    const existingFile = await this.findDailyNoteInFolder(`${filename}.md`, folderPath);
+    if (existingFile) {
+      await this.app.workspace.getLeaf(false).openFile(existingFile);
+    } else {
+      const fullPath = `${folderPath}${filename}.md`;
+      const newFile = await this.app.vault.create(fullPath, "");
+      await this.app.workspace.getLeaf(false).openFile(newFile);
+    }
+  }
+  /**
+   * Render the category index as a standalone section between header and calendar.
+   * Shows all enabled categories as clickable chips, or a welcome message if no categories exist.
+   */
+  renderCategoryIndexRow(container) {
+    const config = this.plugin.settings.colorCategories;
+    const categoryIndexDiv = container.createDiv({ cls: "category-index-section" });
+    if (config.categories.length === 0) {
+      const welcomeContainer = categoryIndexDiv.createDiv({ cls: "categories-container" });
+      welcomeContainer.style.cssText = "flex-direction: column; gap: 12px; align-items: center;";
+      const welcomeText = welcomeContainer.createEl("div", { text: "Add color to your year! \u2728\u{1F988}" });
+      welcomeText.style.cssText = "font-size: 1.1em; font-weight: 500;";
+      const hideHint = welcomeContainer.createEl("div", { text: "Hide this section by disabling Color Categories in the settings." });
+      hideHint.style.cssText = "font-size: 0.9em; color: var(--text-muted); margin-top: 4px;";
+      const addBtn2 = welcomeContainer.createEl("button", { text: "+ Add category" });
+      addBtn2.style.cssText = "padding: 6px 16px; cursor: pointer; margin-top: 8px;";
+      addBtn2.onclick = async () => {
+        const newCategory = {
+          id: Date.now().toString(),
+          name: "New Category",
+          color: "#6366f1",
+          iconType: null,
+          iconValue: "",
+          conditions: [],
+          matchMode: "all",
+          enabled: true
+        };
+        config.categories.push(newCategory);
+        await this.plugin.saveSettings();
+        new CategoryEditModal(
+          this.app,
+          this.plugin,
+          newCategory,
+          () => this.reload()
+        ).open();
+      };
+      return;
+    }
+    const chipsContainer = categoryIndexDiv.createDiv({ cls: "categories-container" });
+    config.categories.forEach((category) => {
+      if (!category.enabled) return;
+      const chip = chipsContainer.createDiv({ cls: "category-chip" });
+      chip.style.background = category.color;
+      chip.style.color = "#ffffff";
+      if (category.iconType && category.iconValue && config.showIconsInCalendar) {
+        const iconEl = chip.createEl("span", { cls: "category-chip-icon" });
+        if (category.iconType === "emoji") {
+          iconEl.textContent = category.iconValue;
+        } else {
+          (0, import_obsidian4.setIcon)(iconEl, category.iconValue);
+          iconEl.style.color = "#ffffff";
+        }
+      }
+      chip.createEl("span", {
+        text: category.name,
+        cls: "category-chip-name"
+      });
+      chip.style.cursor = "pointer";
+      chip.onclick = () => {
+        new CategoryEditModal(
+          this.app,
+          this.plugin,
+          category,
+          () => this.reload()
+          // Refresh calendar when category is edited
+        ).open();
+      };
+      chip.addEventListener("mouseenter", () => {
+        chip.style.opacity = "0.8";
+      });
+      chip.addEventListener("mouseleave", () => {
+        chip.style.opacity = "1";
+      });
+    });
+    const addBtn = chipsContainer.createDiv({ cls: "category-chip category-add-btn" });
+    addBtn.style.cssText = "background: var(--interactive-accent); color: #ffffff; cursor: pointer; font-weight: 600;";
+    addBtn.textContent = "+";
+    addBtn.onclick = async () => {
+      const newCategory = {
+        id: Date.now().toString(),
+        name: "New Category",
+        color: "#6366f1",
+        iconType: null,
+        iconValue: "",
+        conditions: [],
+        matchMode: "all",
+        enabled: true
+      };
+      config.categories.push(newCategory);
+      await this.plugin.saveSettings();
+      new CategoryEditModal(
+        this.app,
+        this.plugin,
+        newCategory,
+        () => this.reload()
+      ).open();
+    };
+    addBtn.addEventListener("mouseenter", () => {
+      addBtn.style.opacity = "0.8";
+    });
+    addBtn.addEventListener("mouseleave", () => {
+      addBtn.style.opacity = "1";
+    });
+  }
+  async renderMonthRow(tbody, year, month, monthName, notesMap, multiDayEntries, maxDayCells) {
+    const row = tbody.createEl("tr", { cls: "month-row" });
+    row.createEl("td", { text: monthName, cls: "month-label" });
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    const useWeekdayAlignment = this.plugin.settings.columnAlignment === "weekday";
+    let columnOffset = 0;
+    if (useWeekdayAlignment) {
+      const weekStartDay = this.plugin.settings.weekStartDay;
+      columnOffset = (startingDayOfWeek - weekStartDay + 7) % 7;
+    }
+    const dayCells = [];
+    const activeMultiDayEntries = [];
+    multiDayEntries.forEach((entry) => {
+      if (entry.month === month && entry.year === year && this.shouldShowNote(entry.file)) {
+        activeMultiDayEntries.push(entry);
+      }
+    });
+    const occupiedRows = [];
+    const barPositions = /* @__PURE__ */ new Map();
+    activeMultiDayEntries.forEach((entry) => {
+      const startDay = entry.startDate.getDate();
+      const endDay = entry.endDate.getDate();
+      const startCol = columnOffset + startDay - 1;
+      const endCol = columnOffset + endDay - 1;
+      const span = endCol - startCol + 1;
+      if (span <= 0) return;
+      let rowIndex = 0;
+      while (occupiedRows.some(
+        (occupied) => occupied.row === rowIndex && occupied.start < endCol + 1 && occupied.end > startCol
+      )) {
+        rowIndex++;
+      }
+      occupiedRows.push({ row: rowIndex, start: startCol, end: endCol + 1 });
+      barPositions.set(entry.file.path + "-" + entry.month, { rowIndex, startCol, endCol, span });
+    });
+    const maxBarRow = occupiedRows.length > 0 ? Math.max(...occupiedRows.map((o) => o.row)) : -1;
+    const topPadding = (maxBarRow + 1) * 16 + 18;
+    for (let i = 0; i < columnOffset; i++) {
+      const emptyCell = row.createEl("td", { cls: "day-cell empty" });
+      dayCells.push(emptyCell);
+    }
+    const today = /* @__PURE__ */ new Date();
+    today.setHours(0, 0, 0, 0);
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dateKey = this.dateToKey(date);
+      const dayCell = row.createEl("td", { cls: "day-cell" });
+      const dayIndex = columnOffset + day - 1;
+      const barsAbove = occupiedRows.filter((o) => o.start <= dayIndex && o.end > dayIndex).length;
+      if (barsAbove > 0) {
+        dayCell.style.paddingTop = `${topPadding}px`;
+      }
+      dayCells.push(dayCell);
+      const dayNumber = dayCell.createEl("a", {
+        text: String(day).padStart(2, "0"),
+        cls: "day-number day-number-link"
+      });
+      dayNumber.onclick = async (e) => {
+        e.preventDefault();
+        await this.openOrCreateDailyNote(date);
+      };
+      const notes = notesMap.get(dateKey);
+      if (notes && notes.length > 0) {
+        const notesContainer = dayCell.createDiv({ cls: "day-notes" });
+        const singleDayNotes = notes.filter((n) => !n.isMultiDay && this.shouldShowNote(n.file));
+        singleDayNotes.forEach((noteInfo) => {
+          const noteLink = notesContainer.createEl("a", {
+            cls: "note-link internal-link",
+            href: "#"
+          });
+          noteLink.style.background = this.getColorForFile(noteInfo.file);
+          const icon = this.getIconForFile(noteInfo.file);
+          if (icon) {
+            const iconSpan = noteLink.createEl("span", { cls: "note-icon" });
+            iconSpan.style.cssText = "margin-right: 3px;";
+            if (icon.type === "emoji") {
+              iconSpan.textContent = icon.value;
+            } else {
+              (0, import_obsidian4.setIcon)(iconSpan, icon.value);
+              iconSpan.style.color = "#ffffff";
+            }
+          }
+          noteLink.createEl("span", { text: this.getDisplayName(noteInfo.file) });
+          noteLink.setAttr("data-href", noteInfo.file.path);
+          noteLink.addEventListener("mouseenter", (event) => {
+            this.showTooltip(noteInfo.file.basename, event);
+          });
+          noteLink.addEventListener("mouseleave", () => {
+            this.hideTooltip();
+          });
+          noteLink.addEventListener("mouseover", (event) => {
+            this.app.workspace.trigger("hover-link", {
+              event,
+              source: VIEW_TYPE_CALENDAR,
+              hoverParent: this,
+              targetEl: noteLink,
+              linktext: noteInfo.file.path
+            });
+          });
+          noteLink.onclick = (e) => {
+            e.preventDefault();
+            this.app.workspace.getLeaf(false).openFile(noteInfo.file);
+          };
+        });
+      }
+      if (date.getTime() === today.getTime()) {
+        dayCell.addClass("today");
+      }
+    }
+    const cellsUsed = columnOffset + daysInMonth;
+    const remainingCells = maxDayCells - cellsUsed;
+    for (let i = 0; i < remainingCells; i++) {
+      const emptyCell = row.createEl("td", { cls: "day-cell empty" });
+      dayCells.push(emptyCell);
+    }
+    activeMultiDayEntries.forEach((entry) => {
+      const pos = barPositions.get(entry.file.path + "-" + entry.month);
+      if (!pos) return;
+      const firstDayCell = dayCells[pos.startCol];
+      if (firstDayCell && firstDayCell.classList.contains("day-cell")) {
+        const multiDayBar = firstDayCell.createEl("div", {
+          cls: "multi-day-bar"
+        });
+        multiDayBar.style.background = this.getColorForFile(entry.file);
+        multiDayBar.style.top = `${20 + pos.rowIndex * 16}px`;
+        multiDayBar.dataset.span = pos.span.toString();
+        const noteLink = multiDayBar.createEl("a", {
+          cls: "multi-day-link internal-link",
+          href: "#"
+        });
+        const icon = this.getIconForFile(entry.file);
+        if (icon) {
+          const iconSpan = noteLink.createEl("span", { cls: "note-icon" });
+          iconSpan.style.cssText = "margin-right: 3px;";
+          if (icon.type === "emoji") {
+            iconSpan.textContent = icon.value;
+          } else {
+            (0, import_obsidian4.setIcon)(iconSpan, icon.value);
+            iconSpan.style.color = "#ffffff";
+          }
+        }
+        noteLink.createEl("span", { text: this.getDisplayName(entry.file) });
+        noteLink.setAttr("data-href", entry.file.path);
+        noteLink.addEventListener("mouseenter", (event) => {
+          this.showTooltip(entry.file.basename, event);
+        });
+        noteLink.addEventListener("mouseleave", () => {
+          this.hideTooltip();
+        });
+        noteLink.addEventListener("mouseover", (event) => {
+          this.app.workspace.trigger("hover-link", {
+            event,
+            source: VIEW_TYPE_CALENDAR,
+            hoverParent: this,
+            targetEl: noteLink,
+            linktext: entry.file.path
+          });
+        });
+        noteLink.onclick = (e) => {
+          e.preventDefault();
+          this.app.workspace.getLeaf(false).openFile(entry.file);
+        };
+        setTimeout(() => {
+          if (firstDayCell && firstDayCell.parentElement) {
+            const row2 = firstDayCell.parentElement;
+            const cells = Array.from(row2.querySelectorAll(".day-cell"));
+            const startIndex = cells.indexOf(firstDayCell);
+            if (startIndex >= 0 && startIndex + pos.span - 1 < cells.length) {
+              const lastCell = cells[startIndex + pos.span - 1];
+              const firstCellRect = firstDayCell.getBoundingClientRect();
+              const lastCellRect = lastCell.getBoundingClientRect();
+              const totalWidth = lastCellRect.right - firstCellRect.left - 6;
+              multiDayBar.style.width = `${totalWidth}px`;
+            }
+          }
+        }, 0);
+      }
+    });
+    row.createEl("td", { text: monthName, cls: "month-label-right" });
+  }
+  async onClose() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
+    this.hideTooltip();
+  }
+  showTooltip(text, event) {
+    this.hideTooltip();
+    this.tooltip = document.body.createEl("div", {
+      cls: "lc-tooltip",
+      text
+    });
+    const x = event.clientX + 10;
+    const y = event.clientY + 10;
+    this.tooltip.style.left = `${x}px`;
+    this.tooltip.style.top = `${y}px`;
+  }
+  hideTooltip() {
+    if (this.tooltip) {
+      this.tooltip.remove();
+      this.tooltip = null;
+    }
+  }
 };
 
 // src/main.ts
-var LinearCalendarPlugin = class extends import_obsidian4.Plugin {
+var LinearCalendarPlugin = class extends import_obsidian5.Plugin {
   async onload() {
     await this.loadSettings();
     this.registerView(
@@ -1473,7 +5349,31 @@ var LinearCalendarPlugin = class extends import_obsidian4.Plugin {
     this.app.workspace.detachLeavesOfType(VIEW_TYPE_CALENDAR);
   }
   async loadSettings() {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const loadedData = await this.loadData();
+    this.settings = this.deepMerge(DEFAULT_SETTINGS, loadedData || {});
+  }
+  /**
+   * Deep merge two objects, preserving user values while adding new defaults.
+   * Handles nested objects but not arrays (arrays are replaced, not merged).
+   */
+  deepMerge(defaults, loaded) {
+    const result = Object.assign({}, defaults);
+    for (const key in loaded) {
+      const loadedValue = loaded[key];
+      const defaultValue = defaults[key];
+      if (this.isPlainObject(loadedValue) && this.isPlainObject(defaultValue)) {
+        result[key] = this.deepMerge(defaultValue, loadedValue);
+      } else {
+        result[key] = loadedValue;
+      }
+    }
+    return result;
+  }
+  /**
+   * Check if a value is a plain object (not an array, not null, not a Date, etc.)
+   */
+  isPlainObject(value) {
+    return value !== null && typeof value === "object" && !Array.isArray(value) && Object.prototype.toString.call(value) === "[object Object]";
   }
   async saveSettings() {
     await this.saveData(this.settings);

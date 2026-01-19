@@ -1,56 +1,277 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, Setting, setIcon, Modal } from 'obsidian';
 import LinearCalendarPlugin from './main';
-import { Condition } from './types';
+import { Condition, ColorCategory } from './types';
 import { FolderSuggest } from './FolderSuggest';
+import { IconSuggest } from './IconSuggest';
+
+// Helper function to get valid operators for a property type
+function getValidOperators(property: string): { value: string, label: string }[] {
+    if (property === 'file.tags') {
+        // For file.tags (array): contains, doesn't contain, exists, doesn't exist
+        return [
+            { value: 'contains', label: 'contains' },
+            { value: 'doesNotContain', label: 'does not contain' },
+            { value: 'exists', label: 'exists' },
+            { value: 'doesNotExist', label: 'does not exist' }
+        ];
+    } else if (property === 'file.name' || property === 'file.basename') {
+        // For filenames: all string operators + matchesDatePattern
+        return [
+            { value: 'is', label: 'is' },
+            { value: 'isNot', label: 'is not' },
+            { value: 'contains', label: 'contains' },
+            { value: 'doesNotContain', label: 'does not contain' },
+            { value: 'startsWith', label: 'starts with' },
+            { value: 'endsWith', label: 'ends with' },
+            { value: 'matches', label: 'matches regex' },
+            { value: 'matchesDatePattern', label: 'matches date pattern' }
+        ];
+    } else if (property === 'file.folder' || property === 'file.path' || property === 'file.ext') {
+        // For file properties: all string operators (no date pattern)
+        return [
+            { value: 'is', label: 'is' },
+            { value: 'isNot', label: 'is not' },
+            { value: 'contains', label: 'contains' },
+            { value: 'doesNotContain', label: 'does not contain' },
+            { value: 'startsWith', label: 'starts with' },
+            { value: 'endsWith', label: 'ends with' },
+            { value: 'matches', label: 'matches regex' }
+        ];
+    } else {
+        // For custom properties: all string operators + exists
+        return [
+            { value: 'is', label: 'is' },
+            { value: 'isNot', label: 'is not' },
+            { value: 'contains', label: 'contains' },
+            { value: 'doesNotContain', label: 'does not contain' },
+            { value: 'startsWith', label: 'starts with' },
+            { value: 'endsWith', label: 'ends with' },
+            { value: 'matches', label: 'matches regex' },
+            { value: 'exists', label: 'exists' },
+            { value: 'doesNotExist', label: 'does not exist' }
+        ];
+    }
+}
 
 export class CalendarSettingTab extends PluginSettingTab {
     plugin: LinearCalendarPlugin;
+    private expandedCategories: Set<string> = new Set();
+    private isPalettesExpanded: boolean = false;
+    private paletteEditModes: Map<number, 'visual' | 'source'> = new Map();
+    private activeTab: 'basic' | 'categories' | 'daily-notes' | 'experimental' = 'basic';
 
     constructor(app: App, plugin: LinearCalendarPlugin) {
         super(app, plugin);
         this.plugin = plugin;
     }
 
+    /**
+     * IMPORTANT: This helper method is used in multiple places (Categories settings AND CategoryEditModal).
+     * When making changes to this method, always evaluate if the change should apply to both locations.
+     * Current usage locations:
+     * 1. Categories section - within each category's collapsible content (line ~1618)
+     * 2. CategoryEditModal conditions section (line ~2461)
+     */
+    renderConditionsInfoIcon(container: HTMLElement): void {
+        const infoIcon = container.createEl('span');
+        setIcon(infoIcon, 'info');
+        infoIcon.style.cssText = 'cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;';
+        infoIcon.title = 'Click to see examples';
+
+        // Create popover (hidden by default)
+        let popover: HTMLElement | null = null;
+
+        const closePopover = () => {
+            if (popover) {
+                popover.remove();
+                popover = null;
+            }
+        };
+
+        infoIcon.onclick = (e) => {
+            e.preventDefault();
+
+            // Close existing popover if open
+            if (popover) {
+                closePopover();
+                return;
+            }
+
+            // Create popover
+            popover = document.body.createDiv();
+            popover.style.cssText = 'position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px;';
+
+            // Close button
+            const closeBtn = popover.createEl('button');
+            closeBtn.textContent = '×';
+            closeBtn.style.cssText = 'position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;';
+            closeBtn.title = 'Close';
+            closeBtn.onmouseenter = () => {
+                closeBtn.style.background = 'var(--background-modifier-hover)';
+            };
+            closeBtn.onmouseleave = () => {
+                closeBtn.style.background = 'transparent';
+            };
+            closeBtn.onclick = (e) => {
+                e.preventDefault();
+                closePopover();
+            };
+
+            // Examples heading
+            popover.createEl('div', {
+                text: 'Examples:',
+                attr: { style: 'font-weight: 600; margin-bottom: 8px; color: var(--text-normal); padding-right: 20px;' }
+            });
+
+            // Example items
+            popover.createEl('div', {
+                text: '• Property "category" is "school"',
+                attr: { style: 'margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;' }
+            });
+            popover.createEl('div', {
+                text: '• File tags has tag "holidays"',
+                attr: { style: 'margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;' }
+            });
+            popover.createEl('div', {
+                text: '• File name contains "meeting"',
+                attr: { style: 'margin-left: 8px; color: var(--text-muted); font-size: 0.9em;' }
+            });
+
+            // Position near icon
+            const iconRect = infoIcon.getBoundingClientRect();
+            popover.style.top = (iconRect.bottom + 6) + 'px';
+            popover.style.left = iconRect.left + 'px';
+
+            // Adjust if off-screen
+            setTimeout(() => {
+                if (popover) {
+                    const popoverRect = popover.getBoundingClientRect();
+                    if (popoverRect.right > window.innerWidth) {
+                        popover.style.left = (window.innerWidth - popoverRect.width - 10) + 'px';
+                    }
+                    if (popoverRect.bottom > window.innerHeight) {
+                        popover.style.top = (iconRect.top - popoverRect.height - 6) + 'px';
+                    }
+                }
+            }, 0);
+
+            // Close on click outside
+            const closeHandler = (e: MouseEvent) => {
+                if (popover && !popover.contains(e.target as Node) && !infoIcon.contains(e.target as Node)) {
+                    closePopover();
+                    document.removeEventListener('click', closeHandler);
+                }
+            };
+
+            setTimeout(() => {
+                document.addEventListener('click', closeHandler);
+            }, 0);
+
+            // Close on Escape key
+            const escHandler = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') {
+                    closePopover();
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+        };
+    }
+
     display(): void {
         const { containerEl } = this;
+
+        // Save scroll position before clearing
+        const scrollTop = containerEl.scrollTop;
+
         containerEl.empty();
 
         containerEl.createEl('h2', { text: 'Linear Calendar Settings' });
 
-        // Development notice
+        // Development notice (always visible)
         this.renderDevelopmentNotice(containerEl);
 
-        // Calendar appearance section
-        this.renderCalendarAppearanceSection(containerEl);
+        // Render tabs
+        this.renderTabs(containerEl);
 
-        // Divider
-        this.renderDivider(containerEl);
+        // Content container for the active tab
+        const contentEl = containerEl.createDiv();
+        contentEl.style.cssText = 'margin-top: 20px;';
 
-        // Date extraction section
-        this.renderDateExtractionSection(containerEl);
+        // Render content based on active tab
+        if (this.activeTab === 'basic') {
+            this.renderCalendarAppearanceSection(contentEl);
+            this.renderDivider(contentEl);
+            this.renderDateExtractionSection(contentEl);
+            this.renderDivider(contentEl);
+            this.renderFiltersSection(contentEl);
+        } else if (this.activeTab === 'categories') {
+            this.renderColorCategoriesSection(contentEl);
+        } else if (this.activeTab === 'daily-notes') {
+            this.renderDailyNotesSection(contentEl);
+        } else if (this.activeTab === 'experimental') {
+            this.renderExperimentalSection(contentEl);
+        }
 
-        // Divider
-        this.renderDivider(containerEl);
+        // Restore scroll position after render
+        setTimeout(() => {
+            containerEl.scrollTop = scrollTop;
+        }, 0);
+    }
 
-        // Filters section
-        this.renderFiltersSection(containerEl);
+    renderTabs(containerEl: HTMLElement): void {
+        const tabsContainer = containerEl.createDiv();
+        tabsContainer.style.cssText = 'display: flex; gap: 4px; border-bottom: 2px solid var(--background-modifier-border); margin-top: 20px;';
 
-        // Divider
-        this.renderDivider(containerEl);
+        const tabs = [
+            { id: 'basic' as const, label: 'Basic Settings' },
+            { id: 'categories' as const, label: 'Categories (Colors & Icons)' },
+            { id: 'daily-notes' as const, label: 'Daily Notes' },
+            { id: 'experimental' as const, label: 'Experimental' }
+        ];
 
-        // Daily notes section
-        this.renderDailyNotesSection(containerEl);
+        tabs.forEach(tab => {
+            const tabBtn = tabsContainer.createEl('button');
+            const isActive = this.activeTab === tab.id;
 
-        // Divider
-        this.renderDivider(containerEl);
+            tabBtn.textContent = tab.label;
+            tabBtn.style.cssText = `
+                padding: 10px 16px;
+                background: ${isActive ? 'var(--background-primary)' : 'var(--background-secondary)'};
+                border: none;
+                border-bottom: 2px solid ${isActive ? 'var(--interactive-accent)' : 'transparent'};
+                cursor: pointer;
+                font-size: 0.95em;
+                font-weight: ${isActive ? '600' : '400'};
+                color: ${isActive ? 'var(--text-normal)' : 'var(--text-muted)'};
+                transition: all 0.2s;
+                margin-bottom: -2px;
+            `;
 
-        // Experimental features section
-        this.renderExperimentalSection(containerEl);
+            tabBtn.addEventListener('click', () => {
+                this.activeTab = tab.id;
+                this.display();
+            });
+
+            tabBtn.addEventListener('mouseenter', () => {
+                if (!isActive) {
+                    tabBtn.style.background = 'var(--background-modifier-hover)';
+                    tabBtn.style.color = 'var(--text-normal)';
+                }
+            });
+
+            tabBtn.addEventListener('mouseleave', () => {
+                if (!isActive) {
+                    tabBtn.style.background = 'var(--background-secondary)';
+                    tabBtn.style.color = 'var(--text-muted)';
+                }
+            });
+        });
     }
 
     renderDevelopmentNotice(containerEl: HTMLElement): void {
         const noticeEl = containerEl.createDiv();
-        noticeEl.style.cssText = 'background: var(--background-secondary); border-left: 4px solid var(--interactive-accent); padding: 15px 20px; margin: 15px 0 20px 0; border-radius: 3px;';
+        noticeEl.style.cssText = 'background: var(--background-secondary); border-left: 4px solid var(--interactive-accent); padding: 15px 20px; margin: 15px 0 12px 0; border-radius: 3px;';
 
         const titleEl = noticeEl.createEl('div');
         titleEl.style.cssText = 'font-weight: 600; margin-bottom: 8px; color: var(--text-normal);';
@@ -61,6 +282,36 @@ export class CalendarSettingTab extends PluginSettingTab {
         textEl.innerHTML = `
             This plugin is in early development and may undergo significant changes. The core functionality—how notes are recognized and dates are extracted—will remain stable. If you use properties or dates in filenames, these will continue to work.<br><br>
             New features are actively being developed. If you encounter any issues or have feedback, please reach out via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or via <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
+        `;
+
+        // Feedback box
+        const feedbackBox = containerEl.createDiv();
+        feedbackBox.style.cssText = 'background: var(--background-primary); border: 2px solid var(--interactive-accent); padding: 15px 20px; margin: 0 0 20px 0; border-radius: 6px;';
+
+        const feedbackTitle = feedbackBox.createEl('div');
+        feedbackTitle.style.cssText = 'font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;';
+        feedbackTitle.textContent = '💬 Feedback wanted – Version 0.3.0';
+
+        const feedbackList = feedbackBox.createEl('ul');
+        feedbackList.style.cssText = 'margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;';
+        feedbackList.innerHTML = `
+            <li>Are the notes displaying on the right day?</li>
+            <li>Are the color categories working as you would like?</li>
+            <li>Did switching from an older version to the new one go smoothly?</li>
+            <li>Is there anything weird, annoying, unexpected happening?</li>
+        `;
+
+        const feedbackFooter = feedbackBox.createEl('div');
+        feedbackFooter.style.cssText = 'font-size: 0.95em; color: var(--text-muted); margin-top: 8px;';
+
+        const footerText = feedbackFooter.createEl('div');
+        footerText.style.cssText = 'font-style: italic; margin-bottom: 6px;';
+        footerText.textContent = 'Help me improve the plugin! It means a lot to me ✨🦈';
+
+        const footerLinks = feedbackFooter.createEl('div');
+        footerLinks.style.cssText = 'font-size: 0.9em;';
+        footerLinks.innerHTML = `
+            Share feedback via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
         `;
     }
 
@@ -101,6 +352,43 @@ export class CalendarSettingTab extends PluginSettingTab {
                             await this.plugin.saveSettings();
                         }
                     }));
+        }
+
+        new Setting(containerEl)
+            .setName('Column alignment')
+            .setDesc('Choose how to align the calendar columns: by weekday or by date (all 1st days align, all 2nd days align, etc.)')
+            .addDropdown(dropdown => {
+                dropdown
+                    .addOption('weekday', 'Align by weekday')
+                    .addOption('date', 'Align by date')
+                    .setValue(this.plugin.settings.columnAlignment)
+                    .onChange(async (value) => {
+                        this.plugin.settings.columnAlignment = value as 'weekday' | 'date';
+                        await this.plugin.saveSettings();
+                        this.display();  // Refresh to show/hide week start setting
+                    });
+            });
+
+        // Week start day setting (only shown in weekday mode)
+        if (this.plugin.settings.columnAlignment === 'weekday') {
+            new Setting(containerEl)
+                .setName('Week starts on')
+                .setDesc('Choose which day the week starts on')
+                .addDropdown(dropdown => {
+                    dropdown
+                        .addOption('0', 'Sunday')
+                        .addOption('1', 'Monday')
+                        .addOption('2', 'Tuesday')
+                        .addOption('3', 'Wednesday')
+                        .addOption('4', 'Thursday')
+                        .addOption('5', 'Friday')
+                        .addOption('6', 'Saturday')
+                        .setValue(String(this.plugin.settings.weekStartDay))
+                        .onChange(async (value) => {
+                            this.plugin.settings.weekStartDay = parseInt(value);
+                            await this.plugin.saveSettings();
+                        });
+                });
         }
     }
 
@@ -614,7 +902,8 @@ export class CalendarSettingTab extends PluginSettingTab {
             { value: 'file.folder', label: 'Folder' },
             { value: 'file.path', label: 'File path' },
             { value: 'file.ext', label: 'Extension' },
-            { value: 'custom', label: 'Custom property...' }
+            { value: 'file.tags', label: 'File tags' },
+            { value: 'custom', label: 'Property' }
         ];
         properties.forEach(prop => {
             const option = propertySelect.createEl('option', {
@@ -628,7 +917,7 @@ export class CalendarSettingTab extends PluginSettingTab {
         });
         propertySelect.onchange = async (e) => {
             if ((e.target as HTMLSelectElement).value === 'custom') {
-                condition.property = '';
+                condition.property = 'category';
             } else {
                 condition.property = (e.target as HTMLSelectElement).value;
             }
@@ -653,19 +942,7 @@ export class CalendarSettingTab extends PluginSettingTab {
         // Operator selector
         const operatorSelect = condEl.createEl('select');
         operatorSelect.style.cssText = 'padding: 4px 8px;';
-        const operators = [
-            { value: 'is', label: 'is' },
-            { value: 'isNot', label: 'is not' },
-            { value: 'contains', label: 'contains' },
-            { value: 'doesNotContain', label: 'does not contain' },
-            { value: 'startsWith', label: 'starts with' },
-            { value: 'endsWith', label: 'ends with' },
-            { value: 'matches', label: 'matches regex' },
-            { value: 'exists', label: 'exists' },
-            { value: 'doesNotExist', label: 'does not exist' },
-            { value: 'hasTag', label: 'has tag' },
-            { value: 'matchesDatePattern', label: 'matches date pattern' }
-        ];
+        const operators = getValidOperators(condition.property);
         operators.forEach(op => {
             const option = operatorSelect.createEl('option', {
                 text: op.label,
@@ -828,13 +1105,13 @@ export class CalendarSettingTab extends PluginSettingTab {
 
     renderExperimentalSection(containerEl: HTMLElement): void {
         const headerContainer = containerEl.createDiv();
-        headerContainer.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 10px;';
+        headerContainer.style.cssText = 'display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;';
 
         headerContainer.createEl('h3', { text: 'Note Title Display' });
 
         const badge = headerContainer.createEl('span');
         badge.textContent = 'Experimental';
-        badge.style.cssText = 'background: var(--interactive-accent); color: var(--text-on-accent); padding: 2px 8px; border-radius: 3px; font-size: 0.75em; font-weight: 600;';
+        badge.style.cssText = 'background: var(--interactive-accent); color: var(--text-on-accent); padding: 3px 8px; border-radius: 3px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;';
 
         const desc = containerEl.createEl('p', {
             cls: 'setting-item-description',
@@ -895,5 +1172,1599 @@ export class CalendarSettingTab extends PluginSettingTab {
                     exp.condensedLetters = value;
                     await this.plugin.saveSettings();
                 }));
+    }
+
+    renderColorCategoriesSection(containerEl: HTMLElement): void {
+        const config = this.plugin.settings.colorCategories;
+
+        containerEl.createEl('h3', { text: 'Color Categories' });
+
+        const descEl = containerEl.createDiv();
+        descEl.style.cssText = 'color: var(--text-muted); margin-bottom: 15px;';
+        descEl.innerHTML = 'Visually organize notes with colors and icons based on conditions. Categories are checked in order, first match wins.';
+
+        // Enable/disable color categories toggle
+        new Setting(containerEl)
+            .setName('Enable color categories')
+            .setDesc('Turn the color categories feature on or off.')
+            .addToggle(toggle => toggle
+                .setValue(config.enabled)
+                .onChange(async (value) => {
+                    config.enabled = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show/hide section
+                }));
+
+        // If disabled, show message and return early
+        if (!config.enabled) {
+            const disabledMsg = containerEl.createDiv();
+            disabledMsg.style.cssText = 'color: var(--text-muted); font-style: italic; padding: 20px; text-align: center;';
+            disabledMsg.textContent = 'Color categories are currently disabled.';
+            return;
+        }
+
+        // Settings section (grouped visually)
+        const settingsSection = containerEl.createDiv();
+        settingsSection.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 6px; margin-bottom: 20px;';
+
+        const settingsHeader = settingsSection.createEl('h4', { text: 'Category Settings' });
+        settingsHeader.style.cssText = 'margin-top: 0; margin-bottom: 12px; font-size: 1em; color: var(--text-normal);';
+
+        // Show category index toggle
+        new Setting(settingsSection)
+            .setName('Show category index')
+            .setDesc('Display a row at the top of the calendar showing all categories as clickable chips.')
+            .addToggle(toggle => toggle
+                .setValue(config.showCategoryIndex)
+                .onChange(async (value) => {
+                    config.showCategoryIndex = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        // Show icons in calendar toggle
+        new Setting(settingsSection)
+            .setName('Show icons in calendar')
+            .setDesc('Display category icons before note titles in the calendar. Turn off to show only colors.')
+            .addToggle(toggle => toggle
+                .setValue(config.showIconsInCalendar)
+                .onChange(async (value) => {
+                    config.showIconsInCalendar = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        // Default color section
+        const defaultColorSetting = new Setting(settingsSection)
+            .setName('Default color')
+            .setDesc('Color for notes that don\'t match any category.');
+
+        const defaultColorContainer = defaultColorSetting.controlEl.createDiv();
+        defaultColorContainer.style.cssText = 'display: flex; flex-direction: column; gap: 8px;';
+
+        // Only show color picker if not using theme accent
+        if (config.defaultCategoryColor !== null) {
+            this.renderColorPicker(
+                defaultColorContainer,
+                config.defaultCategoryColor || '#6366f1',
+                async (newColor) => {
+                    config.defaultCategoryColor = newColor;
+                    await this.plugin.saveSettings();
+                },
+                'defaultColor'
+            );
+        } else {
+            const themeAccentNote = defaultColorContainer.createDiv();
+            themeAccentNote.textContent = 'Using theme accent color';
+            themeAccentNote.style.cssText = 'color: var(--text-muted); font-size: 0.9em; font-style: italic;';
+        }
+
+        // Reset/Custom toggle button
+        const toggleRow = defaultColorContainer.createDiv();
+        toggleRow.style.cssText = 'margin-top: 4px;';
+
+        const toggleBtn = toggleRow.createEl('button');
+        toggleBtn.textContent = config.defaultCategoryColor === null ? 'Use custom color' : 'Use theme accent';
+        toggleBtn.style.cssText = 'padding: 4px 12px; cursor: pointer; font-size: 0.9em;';
+        toggleBtn.onclick = async () => {
+            if (config.defaultCategoryColor === null) {
+                config.defaultCategoryColor = '#6366f1';
+            } else {
+                config.defaultCategoryColor = null;
+            }
+            await this.plugin.saveSettings();
+            this.display();
+        };
+
+        // Color Palettes section
+        this.renderColorPalettes(containerEl);
+
+        // Visual separator before categories
+        const separator = containerEl.createDiv();
+        separator.style.cssText = 'height: 1px; background: var(--background-modifier-border); margin: 30px 0 25px 0;';
+
+        // Categories list header
+        const categoriesHeader = containerEl.createDiv();
+        categoriesHeader.style.cssText = 'margin-bottom: 15px;';
+
+        const categoryTitle = categoriesHeader.createEl('h4', { text: 'Your Categories' });
+        categoryTitle.style.cssText = 'margin: 0 0 6px 0; font-size: 1.1em; color: var(--text-normal);';
+
+        const categoryDesc = categoriesHeader.createDiv();
+        categoryDesc.style.cssText = 'color: var(--text-muted); font-size: 0.95em;';
+        categoryDesc.textContent = 'Create and organize your color categories. Each category can have conditions that determine which notes match.';
+
+        // Categories list container with visual emphasis
+        const categoriesContainer = containerEl.createDiv();
+        categoriesContainer.style.cssText = 'background: var(--background-primary); border: 2px solid var(--background-modifier-border); border-radius: 8px; padding: 12px; margin-top: 12px;';
+
+        if (config.categories.length > 0) {
+            const hintEl = categoriesContainer.createDiv();
+            hintEl.style.cssText = 'color: var(--text-muted); font-size: 0.9em; margin-bottom: 12px; padding: 6px 10px; background: var(--background-secondary); border-radius: 4px;';
+            hintEl.textContent = '⋮⋮ Drag to reorder priority — first match wins';
+        } else {
+            const emptyState = categoriesContainer.createDiv();
+            emptyState.style.cssText = 'color: var(--text-muted); font-style: italic; text-align: center; padding: 30px 20px;';
+            emptyState.textContent = 'No categories yet. Click "+ Add category" below to create your first one.';
+        }
+
+        this.renderCategoriesList(categoriesContainer);
+
+        // Add category button
+        const addBtn = containerEl.createEl('button', { text: '+ Add category' });
+        addBtn.style.cssText = 'margin-top: 12px; padding: 8px 16px; cursor: pointer; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 4px; font-weight: 500;';
+        addBtn.onmouseenter = () => {
+            addBtn.style.opacity = '0.9';
+        };
+        addBtn.onmouseleave = () => {
+            addBtn.style.opacity = '1';
+        };
+        addBtn.onclick = async () => {
+            const newCategory: ColorCategory = {
+                id: Date.now().toString(),
+                name: 'New Category',
+                color: '#6366f1',
+                iconType: null,
+                iconValue: '',
+                conditions: [],
+                matchMode: 'all',
+                enabled: true
+            };
+            config.categories.push(newCategory);
+            await this.plugin.saveSettings();
+            this.display();
+        };
+    }
+
+    renderCategoriesList(container: HTMLElement): void {
+        const config = this.plugin.settings.colorCategories;
+        let draggedIndex: number | null = null;
+
+        config.categories.forEach((category, index) => {
+            this.renderCategoryItem(container, category, index, {
+                onDragStart: () => { draggedIndex = index; },
+                onDragEnd: () => { draggedIndex = null; },
+                onDragOver: (targetIndex: number) => {
+                    if (draggedIndex !== null && draggedIndex !== targetIndex) {
+                        const [removed] = config.categories.splice(draggedIndex, 1);
+                        config.categories.splice(targetIndex, 0, removed);
+                        draggedIndex = targetIndex;
+                        this.plugin.saveSettings();
+                        this.display();
+                    }
+                }
+            });
+        });
+    }
+
+    renderCategoryItem(
+        container: HTMLElement,
+        category: ColorCategory,
+        index: number,
+        dragHandlers: {
+            onDragStart: () => void;
+            onDragEnd: () => void;
+            onDragOver: (index: number) => void;
+        }
+    ): void {
+        const config = this.plugin.settings.colorCategories;
+        const itemEl = container.createDiv();
+        itemEl.style.cssText = 'margin-bottom: 12px; border: 1px solid var(--background-modifier-border); border-radius: 5px; background: var(--background-secondary);';
+
+        // Drag events - only allow dragging via drag handle
+        itemEl.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            itemEl.style.border = '2px solid var(--interactive-accent)';
+        });
+
+        itemEl.addEventListener('dragleave', () => {
+            itemEl.style.border = '1px solid var(--background-modifier-border)';
+        });
+
+        itemEl.addEventListener('drop', (e) => {
+            e.preventDefault();
+            itemEl.style.border = '1px solid var(--background-modifier-border)';
+            dragHandlers.onDragOver(index);
+        });
+
+        // Track collapsed state using category ID
+        const isExpanded = this.expandedCategories.has(category.id);
+
+        // Header
+        const header = itemEl.createDiv();
+        header.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer;';
+
+        // Drag handle - make the entire item draggable only when dragging from the handle
+        const dragHandle = header.createEl('span', { text: '⋮⋮' });
+        dragHandle.style.cssText = 'cursor: grab; opacity: 0.5; user-select: none;';
+        dragHandle.draggable = true;
+
+        dragHandle.addEventListener('dragstart', (e) => {
+            dragHandle.style.cursor = 'grabbing';
+            itemEl.style.opacity = '0.5';
+            dragHandlers.onDragStart();
+            // Prevent text selection
+            e.dataTransfer?.setData('text/plain', '');
+        });
+
+        dragHandle.addEventListener('dragend', () => {
+            dragHandle.style.cursor = 'grab';
+            itemEl.style.opacity = '1';
+            itemEl.style.border = '1px solid var(--background-modifier-border)';
+            dragHandlers.onDragEnd();
+        });
+
+        // Chevron
+        const chevron = header.createEl('span', { text: '›' });
+        chevron.style.cssText = 'transition: transform 0.2s; font-size: 1.2em; user-select: none;';
+        if (isExpanded) {
+            chevron.style.transform = 'rotate(90deg)';
+        }
+
+        // Unified capsule with color, icon, and name
+        const capsule = header.createEl('div');
+        capsule.style.cssText = `display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; background: ${category.color}; color: #ffffff; flex: 1;`;
+        capsule.dataset.categoryId = category.id; // Add ID for finding capsule later
+
+        // Icon preview (if exists) - give it a class so we can find and update it
+        const iconPreview = capsule.createEl('span', { cls: 'category-header-icon' });
+        iconPreview.style.cssText = 'flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;';
+        if (category.iconType && category.iconValue) {
+            if (category.iconType === 'emoji') {
+                iconPreview.textContent = category.iconValue;
+            } else {
+                setIcon(iconPreview, category.iconValue);
+                iconPreview.style.color = '#ffffff';
+            }
+        }
+
+        // Category name
+        const nameSpan = capsule.createEl('span', { text: category.name });
+        nameSpan.style.cssText = 'font-weight: 500;';
+
+        // Conditions count
+        const countSpan = header.createEl('span', {
+            text: category.conditions.length === 1
+                ? '1 condition'
+                : `${category.conditions.length} conditions`
+        });
+        countSpan.style.cssText = 'font-size: 0.85em; color: var(--text-muted);';
+
+        // Enabled toggle
+        const enabledCheckbox = header.createEl('input', { type: 'checkbox' });
+        enabledCheckbox.checked = category.enabled;
+        enabledCheckbox.style.cssText = 'cursor: pointer;';
+        enabledCheckbox.onclick = async (e) => {
+            e.stopPropagation();
+            category.enabled = enabledCheckbox.checked;
+            await this.plugin.saveSettings();
+        };
+
+        // Delete button
+        const deleteBtn = header.createEl('button', { text: '×' });
+        deleteBtn.style.cssText = 'padding: 2px 8px; cursor: pointer; font-size: 1.3em; background: transparent; border: none;';
+        deleteBtn.onclick = async (e) => {
+            e.stopPropagation();
+            config.categories.splice(index, 1);
+            await this.plugin.saveSettings();
+            this.display();
+        };
+
+        // Toggle expand/collapse
+        header.onclick = (e) => {
+            if ((e.target as HTMLElement).tagName !== 'INPUT' && (e.target as HTMLElement).tagName !== 'BUTTON') {
+                if (isExpanded) {
+                    this.expandedCategories.delete(category.id);
+                } else {
+                    this.expandedCategories.add(category.id);
+                }
+                this.display();
+            }
+        };
+
+        // Collapsible content
+        if (isExpanded) {
+            const content = itemEl.createDiv();
+            content.style.cssText = 'padding: 15px; border-top: 1px solid var(--background-modifier-border);';
+
+            // Name input
+            const nameLabel = content.createEl('label');
+            nameLabel.style.cssText = 'display: block; margin-bottom: 10px;';
+            nameLabel.createEl('div', { text: 'Category name:', cls: 'setting-item-name' });
+            const nameInput = nameLabel.createEl('input', { type: 'text', value: category.name });
+            nameInput.style.cssText = 'width: 100%; padding: 6px; margin-top: 5px;';
+            nameInput.onchange = async () => {
+                category.name = nameInput.value;
+                await this.plugin.saveSettings();
+                this.display();
+            };
+
+            // Color picker with palette dropdown
+            const colorSection = content.createDiv();
+            colorSection.style.cssText = 'margin-bottom: 15px;';
+            colorSection.createEl('div', { text: 'Color:', cls: 'setting-item-name' });
+
+            const colorPickerWrapper = colorSection.createDiv();
+            colorPickerWrapper.style.cssText = 'margin-top: 8px;';
+
+            this.renderColorPicker(
+                colorPickerWrapper,
+                category.color,
+                async (newColor) => {
+                    category.color = newColor;
+                    await this.plugin.saveSettings();
+                    this.display();
+                },
+                `category_${category.id}`
+            );
+
+            // Use icon checkbox
+            const useIconContainer = content.createEl('div');
+            useIconContainer.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 10px;';
+            const useIconCheckbox = useIconContainer.createEl('input', { type: 'checkbox' });
+            useIconCheckbox.checked = category.iconType !== null;
+            useIconCheckbox.style.cssText = 'cursor: pointer;';
+            useIconCheckbox.onchange = async () => {
+                if (useIconCheckbox.checked) {
+                    category.iconType = 'emoji';
+                    category.iconValue = '⭐';
+                } else {
+                    category.iconType = null;
+                    category.iconValue = '';
+                }
+                await this.plugin.saveSettings();
+                this.display();
+            };
+            useIconContainer.createEl('span', { text: 'Use icon', cls: 'setting-item-name' });
+
+            // Icon settings (if enabled)
+            if (category.iconType !== null) {
+                const iconSettings = content.createDiv();
+                iconSettings.style.cssText = 'margin-left: 25px; margin-bottom: 15px;';
+
+                const iconLabel = iconSettings.createEl('div');
+                iconLabel.style.cssText = 'margin-bottom: 8px; color: var(--text-muted); font-size: 0.9em;';
+                iconLabel.textContent = 'Search for emoji or Lucide icon:';
+
+                // Icon value input with preview
+                const iconInputContainer = iconSettings.createDiv();
+                iconInputContainer.style.cssText = 'display: flex; gap: 10px; align-items: center;';
+
+                // Icon preview (moved to left)
+                const iconPreviewEl = iconInputContainer.createEl('div');
+                iconPreviewEl.style.cssText = 'width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--background-modifier-border); border-radius: 3px; font-size: 1.2em; flex-shrink: 0;';
+                if (category.iconValue) {
+                    if (category.iconType === 'emoji') {
+                        iconPreviewEl.textContent = category.iconValue;
+                    } else {
+                        setIcon(iconPreviewEl, category.iconValue);
+                    }
+                }
+
+                const iconInput = iconInputContainer.createEl('input', {
+                    type: 'text',
+                    value: category.iconValue,
+                    attr: { placeholder: 'Type to search icons...' }
+                });
+                iconInput.style.cssText = 'flex: 1; padding: 6px;';
+
+                // Initialize dataset with existing iconType
+                if (category.iconType) {
+                    iconInput.dataset.iconType = category.iconType;
+                }
+
+                // Save on input event
+                const saveIconValue = async () => {
+                    category.iconValue = iconInput.value;
+                    // Also update iconType from dataset if available
+                    if (iconInput.dataset.iconType) {
+                        category.iconType = iconInput.dataset.iconType as 'emoji' | 'lucide';
+                    }
+
+                    await this.plugin.saveSettings();
+
+                    // Update the header icon preview directly without rebuilding entire UI
+                    const capsule = document.querySelector(`[data-category-id="${category.id}"]`);
+                    if (capsule) {
+                        const headerIcon = capsule.querySelector('.category-header-icon') as HTMLElement;
+                        if (headerIcon) {
+                            headerIcon.empty();
+                            if (category.iconType && category.iconValue) {
+                                if (category.iconType === 'emoji') {
+                                    headerIcon.textContent = category.iconValue;
+                                } else {
+                                    setIcon(headerIcon, category.iconValue);
+                                    headerIcon.style.color = '#ffffff';
+                                }
+                            }
+                        }
+                    }
+                };
+
+                iconInput.addEventListener('input', saveIconValue);
+
+                // Attach IconSuggest
+                new IconSuggest(iconInput, iconPreviewEl);
+            }
+
+            // Conditions section with info icon
+            const conditionsHeader = content.createDiv();
+            conditionsHeader.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-top: 15px; margin-bottom: 10px;';
+
+            conditionsHeader.createEl('div', {
+                text: 'Conditions:',
+                attr: { style: 'font-weight: 500; margin: 0;' }
+            });
+
+            // Add info icon using shared helper method
+            this.renderConditionsInfoIcon(conditionsHeader);
+
+            // Match mode toggle (only show if multiple conditions exist)
+            if (category.conditions.length > 1) {
+                const matchModeToggle = content.createDiv();
+                matchModeToggle.style.cssText = 'display: flex; align-items: center; gap: 8px; font-size: 0.9em; margin-bottom: 10px;';
+
+                const matchModeLabel = matchModeToggle.createEl('span', { text: 'Match:' });
+                matchModeLabel.style.cssText = 'color: var(--text-muted);';
+
+                const matchModeSelect = matchModeToggle.createEl('select');
+                matchModeSelect.style.cssText = 'padding: 3px 6px;';
+
+                matchModeSelect.createEl('option', { text: 'All (AND)', value: 'all' });
+                matchModeSelect.createEl('option', { text: 'Any (OR)', value: 'any' });
+
+                matchModeSelect.value = category.matchMode || 'all';
+                matchModeSelect.onchange = async () => {
+                    category.matchMode = matchModeSelect.value as 'all' | 'any';
+                    await this.plugin.saveSettings();
+                };
+            }
+
+            const conditionsContainer = content.createDiv();
+            conditionsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 8px;';
+
+            if (category.conditions.length === 0) {
+                const emptyMsg = conditionsContainer.createDiv();
+                emptyMsg.style.cssText = 'color: var(--text-muted); font-style: italic; padding: 10px;';
+                emptyMsg.textContent = 'No conditions yet. Add at least one condition for this category to match notes.';
+            } else {
+                category.conditions.forEach((condition, condIndex) => {
+                    this.renderCategoryCondition(conditionsContainer, category, condition, condIndex);
+                });
+            }
+
+            // Add condition button
+            const addCondBtn = content.createEl('button', { text: '+ Add condition' });
+            addCondBtn.style.cssText = 'margin-top: 8px; padding: 4px 12px; cursor: pointer;';
+            addCondBtn.onclick = async () => {
+                category.conditions.push({
+                    property: 'file.name',
+                    operator: 'contains',
+                    value: ''
+                });
+                await this.plugin.saveSettings();
+                this.display();
+            };
+        }
+    }
+
+    renderCategoryCondition(
+        container: HTMLElement,
+        category: ColorCategory,
+        condition: Condition,
+        condIndex: number
+    ): void {
+        const condEl = container.createDiv();
+        condEl.style.cssText = 'display: flex; gap: 5px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; padding: 8px; background: var(--background-primary); border-radius: 3px;';
+
+        // Property selector
+        const propertySelect = condEl.createEl('select');
+        propertySelect.style.cssText = 'padding: 4px 8px;';
+        const properties = [
+            { value: 'file.name', label: 'File name' },
+            { value: 'file.basename', label: 'File basename' },
+            { value: 'file.folder', label: 'Folder' },
+            { value: 'file.path', label: 'File path' },
+            { value: 'file.ext', label: 'Extension' },
+            { value: 'file.tags', label: 'File tags' },
+            { value: 'custom', label: 'Property' }
+        ];
+        properties.forEach(prop => {
+            const option = propertySelect.createEl('option', {
+                text: prop.label,
+                value: prop.value
+            });
+            if (condition.property === prop.value ||
+                (prop.value === 'custom' && !properties.find(p => p.value === condition.property))) {
+                option.selected = true;
+            }
+        });
+        propertySelect.onchange = async (e) => {
+            if ((e.target as HTMLSelectElement).value === 'custom') {
+                condition.property = 'category';
+            } else {
+                condition.property = (e.target as HTMLSelectElement).value;
+            }
+            await this.plugin.saveSettings();
+            this.display();
+        };
+
+        // If custom property, show text input
+        if (propertySelect.value === 'custom' || !properties.find(p => p.value === condition.property)) {
+            const customInput = condEl.createEl('input', {
+                type: 'text',
+                attr: { placeholder: 'property name' },
+                value: condition.property
+            });
+            customInput.style.cssText = 'padding: 4px 8px; width: 120px;';
+            customInput.onchange = async (e) => {
+                condition.property = (e.target as HTMLInputElement).value;
+                await this.plugin.saveSettings();
+            };
+        }
+
+        // Operator selector
+        const operatorSelect = condEl.createEl('select');
+        operatorSelect.style.cssText = 'padding: 4px 8px;';
+        const operators = getValidOperators(condition.property);
+        operators.forEach(op => {
+            const option = operatorSelect.createEl('option', {
+                text: op.label,
+                value: op.value
+            });
+            if (condition.operator === op.value) {
+                option.selected = true;
+            }
+        });
+        operatorSelect.onchange = async (e) => {
+            condition.operator = (e.target as HTMLSelectElement).value as any;
+            await this.plugin.saveSettings();
+            this.display();
+        };
+
+        // Value input (not needed for exists/doesNotExist)
+        if (!['exists', 'doesNotExist'].includes(condition.operator)) {
+            const valueInput = condEl.createEl('input', {
+                type: 'text',
+                attr: { placeholder: 'value' },
+                value: condition.value || ''
+            });
+            valueInput.style.cssText = 'padding: 4px 8px; flex: 1; min-width: 120px;';
+            valueInput.onchange = async (e) => {
+                condition.value = (e.target as HTMLInputElement).value;
+                await this.plugin.saveSettings();
+            };
+        }
+
+        // Include subfolders option for folder property
+        if (condition.property === 'file.folder' && condition.operator === 'is') {
+            const subfolderLabel = condEl.createEl('label');
+            subfolderLabel.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+            const subfolderCheckbox = subfolderLabel.createEl('input', { type: 'checkbox' });
+            subfolderCheckbox.checked = condition.includeSubfolders || false;
+            subfolderCheckbox.onchange = async (e) => {
+                condition.includeSubfolders = (e.target as HTMLInputElement).checked;
+                await this.plugin.saveSettings();
+            };
+            subfolderLabel.createEl('span', { text: 'Include subfolders' });
+        }
+
+        // Require additional text option for date pattern
+        if (condition.operator === 'matchesDatePattern') {
+            const requireTextLabel = condEl.createEl('label');
+            requireTextLabel.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+            const requireTextCheckbox = requireTextLabel.createEl('input', { type: 'checkbox' });
+            requireTextCheckbox.checked = condition.requireAdditionalText || false;
+            requireTextCheckbox.onchange = async (e) => {
+                condition.requireAdditionalText = (e.target as HTMLInputElement).checked;
+                await this.plugin.saveSettings();
+            };
+            requireTextLabel.createEl('span', { text: 'and has text after date' });
+        }
+
+        // Delete condition button
+        const deleteBtn = condEl.createEl('button', { text: '×' });
+        deleteBtn.style.cssText = 'padding: 2px 10px; cursor: pointer; font-size: 1.2em;';
+        deleteBtn.onclick = async () => {
+            category.conditions.splice(condIndex, 1);
+            await this.plugin.saveSettings();
+            this.display();
+        };
+    }
+
+    renderColorPalettes(containerEl: HTMLElement): void {
+        const config = this.plugin.settings.colorCategories;
+
+        // Collapsible Color Palettes section
+        const palettesSectionContainer = containerEl.createDiv();
+        palettesSectionContainer.style.cssText = 'margin-top: 20px; border: 1px solid var(--background-modifier-border); border-radius: 4px; overflow: hidden;';
+
+        // Header (clickable to expand/collapse)
+        const palettesHeader = palettesSectionContainer.createDiv();
+        palettesHeader.style.cssText = 'padding: 12px; background: var(--background-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;';
+
+        const chevron = palettesHeader.createEl('span', { text: '›' });
+        chevron.style.cssText = 'font-size: 1.2em; transition: transform 0.2s; display: inline-block;';
+
+        const icon = palettesHeader.createEl('span');
+        icon.style.cssText = 'display: flex; align-items: center; margin-right: 4px;';
+        setIcon(icon, 'palette');
+
+        palettesHeader.createEl('strong', { text: 'Color Palettes' });
+        const headerDesc = palettesHeader.createEl('span', { text: '(optional - create reusable color sets)' });
+        headerDesc.style.cssText = 'color: var(--text-muted); font-size: 0.9em; margin-left: 8px;';
+
+        // Content (collapsed by default)
+        const palettesContent = palettesSectionContainer.createDiv();
+        palettesContent.style.cssText = 'padding: 15px; display: none;';
+
+        // Toggle expand/collapse
+        palettesHeader.onclick = () => {
+            this.isPalettesExpanded = !this.isPalettesExpanded;
+            palettesContent.style.display = this.isPalettesExpanded ? 'block' : 'none';
+            chevron.style.transform = this.isPalettesExpanded ? 'rotate(90deg)' : 'rotate(0deg)';
+        };
+
+        // Restore expanded state
+        if (this.isPalettesExpanded) {
+            palettesContent.style.display = 'block';
+            chevron.style.transform = 'rotate(90deg)';
+        }
+
+        // Description
+        const desc = palettesContent.createDiv();
+        desc.style.cssText = 'color: var(--text-muted); font-size: 0.9em; margin-bottom: 15px;';
+        desc.textContent = 'Create custom color palettes to quickly assign colors to categories. Palettes can be shared by copying/pasting the palette text when viewed in source mode.';
+
+        // Palettes list
+        config.colorPalettes.forEach((palette, index) => {
+            this.renderPalette(palettesContent, palette, index);
+        });
+
+        // Add palette button
+        const addPaletteBtn = palettesContent.createEl('button', { text: '+ Add Palette' });
+        addPaletteBtn.style.cssText = 'padding: 6px 16px; cursor: pointer; margin-top: 10px;';
+        addPaletteBtn.onclick = async () => {
+            const newPalette: import('./types').ColorPalette = {
+                name: 'New Palette',
+                colors: [
+                    { name: 'Red', hex: '#ef4444' },
+                    { name: 'Blue', hex: '#3b82f6' },
+                    { name: 'Green', hex: '#10b981' }
+                ]
+            };
+            config.colorPalettes.push(newPalette);
+            await this.plugin.saveSettings();
+            this.display();
+        };
+    }
+
+    renderPalette(container: HTMLElement, palette: import('./types').ColorPalette, paletteIndex: number): void {
+        const config = this.plugin.settings.colorCategories;
+
+        const paletteEl = container.createDiv();
+        paletteEl.style.cssText = 'border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 12px; margin-bottom: 12px; background: var(--background-primary);';
+
+        // Palette header with name, mode toggle, and delete button
+        const paletteHeader = paletteEl.createDiv();
+        paletteHeader.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 12px;';
+
+        const nameInput = paletteHeader.createEl('input', {
+            type: 'text',
+            value: palette.name,
+            attr: { placeholder: 'Palette name' }
+        });
+        nameInput.style.cssText = 'flex: 1; padding: 4px 8px; font-weight: 500;';
+        nameInput.oninput = async () => {
+            palette.name = nameInput.value;
+            await this.plugin.saveSettings();
+        };
+
+        // Mode toggle button
+        const currentMode = this.paletteEditModes.get(paletteIndex) || 'visual';
+        const modeToggleBtn = paletteHeader.createEl('button');
+        modeToggleBtn.textContent = currentMode === 'visual' ? 'Source' : 'Visual';
+        modeToggleBtn.style.cssText = 'padding: 4px 10px; cursor: pointer; font-size: 0.85em;';
+        modeToggleBtn.title = currentMode === 'visual' ? 'Switch to source mode' : 'Switch to visual mode';
+
+        const deleteBtn = paletteHeader.createEl('button', { text: '×' });
+        deleteBtn.style.cssText = 'padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: var(--background-modifier-error); color: var(--text-on-accent);';
+        deleteBtn.onclick = async () => {
+            config.colorPalettes.splice(paletteIndex, 1);
+            this.paletteEditModes.delete(paletteIndex);
+            await this.plugin.saveSettings();
+            this.display();
+        };
+
+        // Editor container
+        const editorContainer = paletteEl.createDiv();
+
+        // Render based on mode
+        const renderEditor = () => {
+            editorContainer.empty();
+            const mode = this.paletteEditModes.get(paletteIndex) || 'visual';
+
+            if (mode === 'visual') {
+                // Visual editor mode
+                const colorsContainer = editorContainer.createDiv();
+                colorsContainer.style.cssText = 'display: flex; flex-direction: column; gap: 8px;';
+
+                palette.colors.forEach((color, colorIndex) => {
+                    const colorRow = colorsContainer.createDiv();
+                    colorRow.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--background-secondary); border-radius: 4px;';
+
+                    // Color picker
+                    const colorPicker = colorRow.createEl('input', { type: 'color', value: color.hex });
+                    colorPicker.style.cssText = 'width: 50px; height: 32px; cursor: pointer; border-radius: 4px;';
+                    colorPicker.onchange = async (e) => {
+                        color.hex = (e.target as HTMLInputElement).value.toLowerCase();
+                        await this.plugin.saveSettings();
+                    };
+
+                    // Hex display
+                    const hexDisplay = colorRow.createEl('code');
+                    hexDisplay.textContent = color.hex.toUpperCase();
+                    hexDisplay.style.cssText = 'color: var(--text-muted); font-size: 0.85em; min-width: 70px;';
+
+                    colorPicker.oninput = () => {
+                        hexDisplay.textContent = colorPicker.value.toUpperCase();
+                    };
+
+                    // Color name input
+                    const nameInput = colorRow.createEl('input', {
+                        type: 'text',
+                        value: color.name,
+                        attr: { placeholder: 'Color name' }
+                    });
+                    nameInput.style.cssText = 'flex: 1; padding: 4px 8px;';
+                    nameInput.oninput = async () => {
+                        color.name = nameInput.value;
+                        await this.plugin.saveSettings();
+                    };
+
+                    // Delete color button
+                    const deleteColorBtn = colorRow.createEl('button', { text: '×' });
+                    deleteColorBtn.style.cssText = 'padding: 2px 8px; cursor: pointer; font-size: 1.1em;';
+                    deleteColorBtn.onclick = async () => {
+                        palette.colors.splice(colorIndex, 1);
+                        await this.plugin.saveSettings();
+                        renderEditor();
+                    };
+                });
+
+                // Add color button
+                const addColorBtn = editorContainer.createEl('button', { text: '+ Add Color' });
+                addColorBtn.style.cssText = 'padding: 6px 12px; cursor: pointer; margin-top: 8px; font-size: 0.9em;';
+                addColorBtn.onclick = async () => {
+                    palette.colors.push({ name: 'New Color', hex: '#3b82f6' });
+                    await this.plugin.saveSettings();
+                    renderEditor();
+                };
+
+            } else {
+                // Source mode
+                const sourceLabel = editorContainer.createDiv();
+                sourceLabel.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-bottom: 6px;';
+                sourceLabel.textContent = 'Text format (ColorName: #hexcode, one per line):';
+
+                const paletteText = editorContainer.createEl('textarea');
+                paletteText.style.cssText = 'width: 100%; min-height: 120px; font-family: monospace; font-size: 0.85em; padding: 8px; resize: vertical;';
+                paletteText.value = this.paletteTOText(palette);
+
+                let typingTimer: NodeJS.Timeout;
+                paletteText.oninput = () => {
+                    clearTimeout(typingTimer);
+                    typingTimer = setTimeout(async () => {
+                        const parsed = this.textToPalette(paletteText.value, palette.name);
+                        if (parsed) {
+                            palette.colors = parsed.colors;
+                            await this.plugin.saveSettings();
+                        }
+                    }, 500);
+                };
+            }
+        };
+
+        // Toggle mode handler
+        modeToggleBtn.onclick = () => {
+            const currentMode = this.paletteEditModes.get(paletteIndex) || 'visual';
+            const newMode = currentMode === 'visual' ? 'source' : 'visual';
+            this.paletteEditModes.set(paletteIndex, newMode);
+            modeToggleBtn.textContent = newMode === 'visual' ? 'Source' : 'Visual';
+            modeToggleBtn.title = newMode === 'visual' ? 'Switch to source mode' : 'Switch to visual mode';
+            renderEditor();
+        };
+
+        // Initial render
+        renderEditor();
+    }
+
+    paletteTOText(palette: import('./types').ColorPalette): string {
+        return palette.colors.map(c => `${c.name}: ${c.hex}`).join('\n');
+    }
+
+    textToPalette(text: string, fallbackName: string): import('./types').ColorPalette | null {
+        const lines = text.split('\n').filter(l => l.trim());
+        const colors: import('./types').ColorPaletteEntry[] = [];
+
+        for (const line of lines) {
+            const match = line.match(/^(.+?):\s*(#[0-9a-fA-F]{6})$/);
+            if (match) {
+                colors.push({ name: match[1].trim(), hex: match[2].toLowerCase() });
+            } else {
+                // Invalid format
+                return null;
+            }
+        }
+
+        if (colors.length === 0) return null;
+
+        return { name: fallbackName, colors };
+    }
+
+    /**
+     * Render a color picker with optional palette selection popover
+     */
+    renderColorPicker(
+        container: HTMLElement,
+        currentColor: string,
+        onColorChange: (color: string) => Promise<void>,
+        dropdownId: string
+    ): void {
+        const config = this.plugin.settings.colorCategories;
+
+        // Main container
+        const colorPickerContainer = container.createDiv();
+        colorPickerContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+
+        // Color input
+        const colorInput = colorPickerContainer.createEl('input', { type: 'color', value: currentColor });
+        colorInput.style.cssText = 'width: 60px; height: 32px; cursor: pointer; border-radius: 4px;';
+        colorInput.onchange = async (e) => {
+            await onColorChange((e.target as HTMLInputElement).value);
+        };
+
+        // Hex display
+        const hexDisplay = colorPickerContainer.createEl('code');
+        hexDisplay.textContent = currentColor.toUpperCase();
+        hexDisplay.style.cssText = 'color: var(--text-muted); font-size: 0.9em;';
+
+        // Update hex display on color change
+        colorInput.oninput = () => {
+            hexDisplay.textContent = colorInput.value.toUpperCase();
+        };
+
+        // Palette button (only if palettes exist)
+        if (config.colorPalettes && config.colorPalettes.length > 0) {
+            const paletteBtn = colorPickerContainer.createEl('button');
+            paletteBtn.style.cssText = 'padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;';
+            setIcon(paletteBtn, 'palette');
+            paletteBtn.title = 'Open Color Palettes';
+
+            // Create popover (hidden by default)
+            let popover: HTMLElement | null = null;
+
+            const closePopover = () => {
+                if (popover) {
+                    popover.remove();
+                    popover = null;
+                }
+            };
+
+            paletteBtn.onclick = (e) => {
+                e.preventDefault();
+
+                // Close existing popover if open
+                if (popover) {
+                    closePopover();
+                    return;
+                }
+
+                // Create popover
+                popover = document.body.createDiv();
+                popover.style.cssText = 'position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;';
+
+                // Close button
+                const closeBtn = popover.createEl('button');
+                closeBtn.textContent = '×';
+                closeBtn.style.cssText = 'position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;';
+                closeBtn.title = 'Close';
+                closeBtn.onmouseenter = () => {
+                    closeBtn.style.background = 'var(--background-modifier-hover)';
+                };
+                closeBtn.onmouseleave = () => {
+                    closeBtn.style.background = 'transparent';
+                };
+                closeBtn.onclick = (e) => {
+                    e.preventDefault();
+                    closePopover();
+                };
+
+                // Position near button
+                const btnRect = paletteBtn.getBoundingClientRect();
+                popover.style.top = (btnRect.bottom + 6) + 'px';
+                popover.style.left = btnRect.left + 'px';
+
+                // Adjust if off-screen
+                setTimeout(() => {
+                    if (popover) {
+                        const popoverRect = popover.getBoundingClientRect();
+                        if (popoverRect.right > window.innerWidth) {
+                            popover.style.left = (window.innerWidth - popoverRect.width - 10) + 'px';
+                        }
+                        if (popoverRect.bottom > window.innerHeight) {
+                            popover.style.top = (btnRect.top - popoverRect.height - 6) + 'px';
+                        }
+                    }
+                }, 0);
+
+                // Render palettes
+                config.colorPalettes.forEach((palette, idx) => {
+                    const paletteSection = popover!.createDiv();
+                    paletteSection.style.cssText = idx > 0 ? 'margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);' : 'margin-top: 4px;';
+
+                    const paletteName = paletteSection.createEl('div', { text: palette.name });
+                    paletteName.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;';
+
+                    const swatchesGrid = paletteSection.createDiv();
+                    swatchesGrid.style.cssText = 'display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;';
+
+                    palette.colors.forEach(colorEntry => {
+                        const swatch = swatchesGrid.createEl('button');
+                        const isSelected = currentColor.toLowerCase() === colorEntry.hex.toLowerCase();
+                        swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? 'var(--interactive-accent)' : 'var(--background-modifier-border)'}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
+                        swatch.title = `${colorEntry.name}\n${colorEntry.hex}`;
+                        swatch.onclick = async (e) => {
+                            e.preventDefault();
+                            colorInput.value = colorEntry.hex;
+                            hexDisplay.textContent = colorEntry.hex.toUpperCase();
+                            await onColorChange(colorEntry.hex);
+                            closePopover();
+                        };
+                        swatch.onmouseenter = () => {
+                            swatch.style.transform = 'scale(1.08)';
+                            swatch.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+                        };
+                        swatch.onmouseleave = () => {
+                            swatch.style.transform = 'scale(1)';
+                            swatch.style.boxShadow = 'none';
+                        };
+                    });
+                });
+
+                // Close on click outside
+                const closeHandler = (e: MouseEvent) => {
+                    if (popover && !popover.contains(e.target as Node) && !paletteBtn.contains(e.target as Node)) {
+                        closePopover();
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+
+                setTimeout(() => {
+                    document.addEventListener('click', closeHandler);
+                }, 0);
+
+                // Close on Escape key
+                const keyHandler = (e: KeyboardEvent) => {
+                    if (e.key === 'Escape' && popover) {
+                        closePopover();
+                        document.removeEventListener('keydown', keyHandler);
+                    }
+                };
+                document.addEventListener('keydown', keyHandler);
+            };
+        }
+    }
+}
+
+/**
+ * Modal for editing a color category
+ */
+export class CategoryEditModal extends Modal {
+    plugin: LinearCalendarPlugin;
+    category: ColorCategory;
+    onSave: () => void;
+
+    constructor(app: App, plugin: LinearCalendarPlugin, category: ColorCategory, onSave: () => void) {
+        super(app);
+        this.plugin = plugin;
+        this.category = category;
+        this.onSave = onSave;
+    }
+
+    /**
+     * IMPORTANT: This method is duplicated from CalendarSettingTab.renderConditionsInfoIcon().
+     * When making changes here, apply the same changes to CalendarSettingTab.renderConditionsInfoIcon().
+     * This ensures both main settings and modal have consistent info icon behavior.
+     */
+    renderConditionsInfoIcon(container: HTMLElement): void {
+        const infoIcon = container.createEl('span');
+        setIcon(infoIcon, 'info');
+        infoIcon.style.cssText = 'cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;';
+        infoIcon.title = 'Click to see examples';
+
+        // Create popover (hidden by default)
+        let popover: HTMLElement | null = null;
+
+        const closePopover = () => {
+            if (popover) {
+                popover.remove();
+                popover = null;
+            }
+        };
+
+        infoIcon.onclick = (e) => {
+            e.preventDefault();
+
+            // Close existing popover if open
+            if (popover) {
+                closePopover();
+                return;
+            }
+
+            // Create popover
+            popover = document.body.createDiv();
+            popover.style.cssText = 'position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px;';
+
+            // Close button
+            const closeBtn = popover.createEl('button');
+            closeBtn.textContent = '×';
+            closeBtn.style.cssText = 'position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;';
+            closeBtn.title = 'Close';
+            closeBtn.onmouseenter = () => {
+                closeBtn.style.background = 'var(--background-modifier-hover)';
+            };
+            closeBtn.onmouseleave = () => {
+                closeBtn.style.background = 'transparent';
+            };
+            closeBtn.onclick = (e) => {
+                e.preventDefault();
+                closePopover();
+            };
+
+            // Examples heading
+            popover.createEl('div', {
+                text: 'Examples:',
+                attr: { style: 'font-weight: 600; margin-bottom: 8px; color: var(--text-normal); padding-right: 20px;' }
+            });
+
+            // Example items
+            popover.createEl('div', {
+                text: '• Property "category" is "school"',
+                attr: { style: 'margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;' }
+            });
+            popover.createEl('div', {
+                text: '• File tags has tag "holidays"',
+                attr: { style: 'margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;' }
+            });
+            popover.createEl('div', {
+                text: '• File name contains "meeting"',
+                attr: { style: 'margin-left: 8px; color: var(--text-muted); font-size: 0.9em;' }
+            });
+
+            // Position near icon
+            const iconRect = infoIcon.getBoundingClientRect();
+            popover.style.top = (iconRect.bottom + 6) + 'px';
+            popover.style.left = iconRect.left + 'px';
+
+            // Adjust if off-screen
+            setTimeout(() => {
+                if (popover) {
+                    const popoverRect = popover.getBoundingClientRect();
+                    if (popoverRect.right > window.innerWidth) {
+                        popover.style.left = (window.innerWidth - popoverRect.width - 10) + 'px';
+                    }
+                    if (popoverRect.bottom > window.innerHeight) {
+                        popover.style.top = (iconRect.top - popoverRect.height - 6) + 'px';
+                    }
+                }
+            }, 0);
+
+            // Close on click outside
+            const closeHandler = (e: MouseEvent) => {
+                if (popover && !popover.contains(e.target as Node) && !infoIcon.contains(e.target as Node)) {
+                    closePopover();
+                    document.removeEventListener('click', closeHandler);
+                }
+            };
+
+            setTimeout(() => {
+                document.addEventListener('click', closeHandler);
+            }, 0);
+
+            // Close on Escape key
+            const escHandler = (e: KeyboardEvent) => {
+                if (e.key === 'Escape') {
+                    closePopover();
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+        };
+    }
+
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.empty();
+
+        contentEl.createEl('h2', { text: 'Edit Category' });
+
+        // Name input
+        new Setting(contentEl)
+            .setName('Category name')
+            .addText(text => text
+                .setValue(this.category.name)
+                .onChange(async (value) => {
+                    this.category.name = value;
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                }));
+
+        // Divider
+        contentEl.createEl('div', {
+            attr: { style: 'border-top: 1px solid var(--background-modifier-border); margin: 16px 0;' }
+        });
+
+        // Color picker with palette support
+        const colorSetting = new Setting(contentEl)
+            .setName('Color')
+            .setDesc('Choose a color for this category');
+
+        this.renderColorPickerInModal(colorSetting.controlEl);
+
+        // Divider
+        contentEl.createEl('div', {
+            attr: { style: 'border-top: 1px solid var(--background-modifier-border); margin: 16px 0;' }
+        });
+
+        // Use icon toggle (manual to prevent clicking label from toggling)
+        const useIconSetting = contentEl.createDiv();
+        useIconSetting.style.cssText = 'display: flex; flex-direction: column; gap: 4px; padding: 12px 0;';
+
+        const useIconHeader = useIconSetting.createDiv();
+        useIconHeader.style.cssText = 'display: flex; align-items: center; gap: 10px;';
+
+        const useIconCheckbox = useIconHeader.createEl('input', { type: 'checkbox' });
+        useIconCheckbox.checked = this.category.iconType !== null;
+        useIconCheckbox.style.cssText = 'cursor: pointer;';
+        useIconCheckbox.onchange = async () => {
+            if (useIconCheckbox.checked) {
+                this.category.iconType = 'emoji';
+                this.category.iconValue = '⭐';
+            } else {
+                this.category.iconType = null;
+                this.category.iconValue = '';
+            }
+            await this.plugin.saveSettings();
+            this.onSave();
+            this.onOpen(); // Refresh to show/hide icon input
+        };
+
+        const useIconLabel = useIconHeader.createEl('div');
+        useIconLabel.style.cssText = 'font-weight: 500;';
+        useIconLabel.textContent = 'Use icon';
+
+        const useIconDesc = useIconSetting.createEl('div');
+        useIconDesc.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-left: 24px;';
+        useIconDesc.textContent = 'Add an emoji or Lucide icon to this category';
+
+        // Icon input (if enabled)
+        if (this.category.iconType !== null) {
+            const iconSetting = new Setting(contentEl)
+                .setName('Icon')
+                .setDesc('Search for emoji or Lucide icon');
+
+            const inputContainer = iconSetting.controlEl.createDiv();
+            inputContainer.style.cssText = 'display: flex; gap: 10px; align-items: center; width: 100%;';
+
+            const iconInput = inputContainer.createEl('input', {
+                type: 'text',
+                value: this.category.iconValue,
+                attr: { placeholder: 'Type to search icons...' }
+            });
+            iconInput.style.cssText = 'flex: 1; padding: 6px;';
+
+            // Initialize dataset with existing iconType
+            if (this.category.iconType) {
+                iconInput.dataset.iconType = this.category.iconType;
+            }
+
+            // Save on input
+            const saveIconValue = async () => {
+                this.category.iconValue = iconInput.value;
+                if (iconInput.dataset.iconType) {
+                    this.category.iconType = iconInput.dataset.iconType as 'emoji' | 'lucide';
+                }
+                await this.plugin.saveSettings();
+                this.onSave();
+            };
+
+            iconInput.addEventListener('input', saveIconValue);
+
+            // Icon preview
+            const iconPreviewEl = inputContainer.createEl('div');
+            iconPreviewEl.style.cssText = 'width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--background-modifier-border); border-radius: 3px; font-size: 1.2em;';
+            if (this.category.iconValue) {
+                if (this.category.iconType === 'emoji') {
+                    iconPreviewEl.textContent = this.category.iconValue;
+                } else {
+                    setIcon(iconPreviewEl, this.category.iconValue);
+                }
+            }
+
+            // Attach IconSuggest
+            new IconSuggest(iconInput, iconPreviewEl);
+        }
+
+        // Enabled toggle
+        new Setting(contentEl)
+            .setName('Enabled')
+            .setDesc('Toggle this category on/off without deleting it')
+            .addToggle(toggle => toggle
+                .setValue(this.category.enabled)
+                .onChange(async (value) => {
+                    this.category.enabled = value;
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                }));
+
+        // Divider
+        contentEl.createEl('div', {
+            attr: { style: 'border-top: 1px solid var(--background-modifier-border); margin: 20px 0;' }
+        });
+
+        // Conditions section with info icon
+        const conditionsHeader = contentEl.createDiv();
+        conditionsHeader.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-top: 0; margin-bottom: 10px;';
+
+        conditionsHeader.createEl('h3', { text: 'Conditions', attr: { style: 'margin: 0;' } });
+
+        // Add info icon using local method (duplicated from CalendarSettingTab for consistency)
+        this.renderConditionsInfoIcon(conditionsHeader);
+
+        // Match mode selector
+        new Setting(contentEl)
+            .setName('Match mode')
+            .setDesc('Choose how conditions should be evaluated')
+            .addDropdown(dropdown => dropdown
+                .addOption('all', 'AND - All conditions must match')
+                .addOption('any', 'OR - Any condition can match')
+                .setValue(this.category.matchMode)
+                .onChange(async (value) => {
+                    this.category.matchMode = value as 'all' | 'any';
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                }));
+
+        const conditionsContainer = contentEl.createDiv();
+        conditionsContainer.style.cssText = 'max-height: 300px; overflow-y: auto;';
+
+        if (this.category.conditions.length === 0) {
+            conditionsContainer.createEl('div', {
+                text: 'No conditions yet. Add at least one condition for this category to match notes.',
+                attr: { style: 'color: var(--text-muted); font-style: italic; padding: 10px;' }
+            });
+        } else {
+            this.category.conditions.forEach((condition, index) => {
+                this.renderCondition(conditionsContainer, condition, index);
+            });
+        }
+
+        // Add condition button
+        new Setting(contentEl)
+            .addButton(btn => btn
+                .setButtonText('+ Add condition')
+                .onClick(async () => {
+                    this.category.conditions.push({
+                        property: 'file.name',
+                        operator: 'contains',
+                        value: ''
+                    });
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                    this.onOpen(); // Refresh modal
+                }));
+
+        // Footer with delete (left) and close (right) buttons
+        const footerSetting = new Setting(contentEl)
+            .setName('')
+            .setDesc('')
+            .addButton(btn => btn
+                .setIcon('trash')
+                .setTooltip('Delete category')
+                .onClick(async () => {
+                    // Confirmation dialog
+                    const confirmed = confirm(`Are you sure you want to delete the category "${this.category.name}"?`);
+                    if (confirmed) {
+                        const config = this.plugin.settings.colorCategories;
+                        const index = config.categories.indexOf(this.category);
+                        if (index > -1) {
+                            config.categories.splice(index, 1);
+                            await this.plugin.saveSettings();
+                            this.onSave();
+                            this.close();
+                        }
+                    }
+                }))
+            .addButton(btn => btn
+                .setButtonText('Close')
+                .setCta()
+                .onClick(() => this.close()));
+        footerSetting.settingEl.style.cssText = 'border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;';
+    }
+
+    renderCondition(container: HTMLElement, condition: Condition, condIndex: number): void {
+        const condEl = container.createDiv();
+        condEl.style.cssText = 'display: flex; gap: 5px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; padding: 10px; background: var(--background-primary); border-radius: 3px; border: 1px solid var(--background-modifier-border);';
+
+        const fieldsContainer = condEl.createDiv();
+        fieldsContainer.style.cssText = 'display: flex; gap: 5px; flex-wrap: wrap; flex: 1; align-items: center;';
+
+        // Property selector
+        const propertySelect = fieldsContainer.createEl('select');
+        propertySelect.style.cssText = 'padding: 4px 8px;';
+        const properties = [
+            { value: 'file.name', label: 'File name' },
+            { value: 'file.basename', label: 'File basename' },
+            { value: 'file.folder', label: 'Folder' },
+            { value: 'file.path', label: 'File path' },
+            { value: 'file.ext', label: 'Extension' },
+            { value: 'file.tags', label: 'File tags' },
+            { value: 'custom', label: 'Property' }
+        ];
+        properties.forEach(prop => {
+            const option = propertySelect.createEl('option', {
+                text: prop.label,
+                value: prop.value
+            });
+            if (condition.property === prop.value ||
+                (prop.value === 'custom' && !properties.find(p => p.value === condition.property))) {
+                option.selected = true;
+            }
+        });
+        propertySelect.onchange = async () => {
+            if (propertySelect.value === 'custom') {
+                condition.property = 'category';
+            } else {
+                condition.property = propertySelect.value;
+            }
+            await this.plugin.saveSettings();
+            this.onSave();
+            this.onOpen();
+        };
+
+        // Custom property input
+        if (propertySelect.value === 'custom' || !properties.find(p => p.value === condition.property)) {
+            const customInput = fieldsContainer.createEl('input', {
+                type: 'text',
+                attr: { placeholder: 'property name' },
+                value: condition.property
+            });
+            customInput.style.cssText = 'padding: 4px 8px; width: 120px;';
+            customInput.onchange = async () => {
+                condition.property = customInput.value;
+                await this.plugin.saveSettings();
+                this.onSave();
+            };
+        }
+
+        // Operator selector
+        const operatorSelect = fieldsContainer.createEl('select');
+        operatorSelect.style.cssText = 'padding: 4px 8px;';
+        const operators = getValidOperators(condition.property);
+
+        operators.forEach(op => {
+            const option = operatorSelect.createEl('option', {
+                text: op.label,
+                value: op.value
+            });
+            if (condition.operator === op.value) {
+                option.selected = true;
+            }
+        });
+        operatorSelect.onchange = async () => {
+            condition.operator = operatorSelect.value as any;
+            await this.plugin.saveSettings();
+            this.onSave();
+            this.onOpen();
+        };
+
+        // Value input (not needed for exists/doesNotExist)
+        if (!['exists', 'doesNotExist'].includes(condition.operator)) {
+            const valueInput = fieldsContainer.createEl('input', {
+                type: 'text',
+                attr: { placeholder: 'value' },
+                value: condition.value || ''
+            });
+            valueInput.style.cssText = 'padding: 4px 8px; flex: 1; min-width: 120px;';
+            valueInput.onchange = async () => {
+                condition.value = valueInput.value;
+                await this.plugin.saveSettings();
+                this.onSave();
+            };
+        }
+
+        // Delete button
+        const deleteBtn = condEl.createEl('button', { text: '×' });
+        deleteBtn.style.cssText = 'padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: none;';
+        deleteBtn.onclick = async () => {
+            this.category.conditions.splice(condIndex, 1);
+            await this.plugin.saveSettings();
+            this.onSave();
+            this.onOpen();
+        };
+    }
+
+    renderColorPickerInModal(container: HTMLElement): void {
+        const config = this.plugin.settings.colorCategories;
+
+        // Main container
+        const colorPickerContainer = container.createDiv();
+        colorPickerContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+
+        // Color input
+        const colorInput = colorPickerContainer.createEl('input', { type: 'color', value: this.category.color });
+        colorInput.style.cssText = 'width: 60px; height: 32px; cursor: pointer; border-radius: 4px;';
+        colorInput.onchange = async (e) => {
+            this.category.color = (e.target as HTMLInputElement).value;
+            await this.plugin.saveSettings();
+            this.onSave();
+        };
+
+        // Hex display
+        const hexDisplay = colorPickerContainer.createEl('code');
+        hexDisplay.textContent = this.category.color.toUpperCase();
+        hexDisplay.style.cssText = 'color: var(--text-muted); font-size: 0.9em;';
+
+        // Update hex display on color change
+        colorInput.oninput = () => {
+            hexDisplay.textContent = colorInput.value.toUpperCase();
+        };
+
+        // Palette button (only if palettes exist)
+        if (config.colorPalettes && config.colorPalettes.length > 0) {
+            const paletteBtn = colorPickerContainer.createEl('button');
+            paletteBtn.style.cssText = 'padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;';
+            setIcon(paletteBtn, 'palette');
+            paletteBtn.title = 'Open Color Palettes';
+
+            // Create popover (hidden by default)
+            let popover: HTMLElement | null = null;
+
+            const closePopover = () => {
+                if (popover) {
+                    popover.remove();
+                    popover = null;
+                }
+            };
+
+            paletteBtn.onclick = (e) => {
+                e.preventDefault();
+
+                // Close existing popover if open
+                if (popover) {
+                    closePopover();
+                    return;
+                }
+
+                // Create popover
+                popover = document.body.createDiv();
+                popover.style.cssText = 'position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;';
+
+                // Close button
+                const closeBtn = popover.createEl('button');
+                closeBtn.textContent = '×';
+                closeBtn.style.cssText = 'position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;';
+                closeBtn.title = 'Close';
+                closeBtn.onmouseenter = () => {
+                    closeBtn.style.background = 'var(--background-modifier-hover)';
+                };
+                closeBtn.onmouseleave = () => {
+                    closeBtn.style.background = 'transparent';
+                };
+                closeBtn.onclick = (e) => {
+                    e.preventDefault();
+                    closePopover();
+                };
+
+                // Position near button
+                const btnRect = paletteBtn.getBoundingClientRect();
+                popover.style.top = (btnRect.bottom + 6) + 'px';
+                popover.style.left = btnRect.left + 'px';
+
+                // Adjust if off-screen
+                setTimeout(() => {
+                    if (popover) {
+                        const popoverRect = popover.getBoundingClientRect();
+                        if (popoverRect.right > window.innerWidth) {
+                            popover.style.left = (window.innerWidth - popoverRect.width - 10) + 'px';
+                        }
+                        if (popoverRect.bottom > window.innerHeight) {
+                            popover.style.top = (btnRect.top - popoverRect.height - 6) + 'px';
+                        }
+                    }
+                }, 0);
+
+                // Render palettes
+                config.colorPalettes.forEach((palette, idx) => {
+                    const paletteSection = popover!.createDiv();
+                    paletteSection.style.cssText = idx > 0 ? 'margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);' : 'margin-top: 4px;';
+
+                    const paletteName = paletteSection.createEl('div', { text: palette.name });
+                    paletteName.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;';
+
+                    const swatchesGrid = paletteSection.createDiv();
+                    swatchesGrid.style.cssText = 'display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;';
+
+                    palette.colors.forEach(colorEntry => {
+                        const swatch = swatchesGrid.createEl('button');
+                        const isSelected = this.category.color.toLowerCase() === colorEntry.hex.toLowerCase();
+                        swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? 'var(--interactive-accent)' : 'var(--background-modifier-border)'}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
+                        swatch.title = `${colorEntry.name}\n${colorEntry.hex}`;
+                        swatch.onclick = async (e) => {
+                            e.preventDefault();
+                            colorInput.value = colorEntry.hex;
+                            hexDisplay.textContent = colorEntry.hex.toUpperCase();
+                            this.category.color = colorEntry.hex;
+                            await this.plugin.saveSettings();
+                            this.onSave();
+                            closePopover();
+                        };
+                        swatch.onmouseenter = () => {
+                            swatch.style.transform = 'scale(1.08)';
+                            swatch.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+                        };
+                        swatch.onmouseleave = () => {
+                            swatch.style.transform = 'scale(1)';
+                            swatch.style.boxShadow = 'none';
+                        };
+                    });
+                });
+
+                // Close on click outside
+                const closeHandler = (e: MouseEvent) => {
+                    if (popover && !popover.contains(e.target as Node) && !paletteBtn.contains(e.target as Node)) {
+                        closePopover();
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+
+                setTimeout(() => {
+                    document.addEventListener('click', closeHandler);
+                }, 0);
+
+                // Close on Escape key
+                const escHandler = (e: KeyboardEvent) => {
+                    if (e.key === 'Escape') {
+                        closePopover();
+                        document.removeEventListener('keydown', escHandler);
+                    }
+                };
+                document.addEventListener('keydown', escHandler);
+            };
+        }
+    }
+
+    onClose() {
+        const { contentEl } = this;
+        contentEl.empty();
     }
 }

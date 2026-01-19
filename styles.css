@@ -182,7 +182,7 @@
 
 .note-link {
     padding: 1px 3px;
-    background: var(--interactive-accent) !important;
+    background: var(--interactive-accent);
     color: var(--text-on-accent) !important;
     border-radius: 2px;
     cursor: pointer;
@@ -190,14 +190,15 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: block;
+    display: flex;
+    align-items: center;
     transition: background 0.2s;
     max-width: 100%;
     box-sizing: border-box;
 }
 
 .note-link:hover {
-    background: var(--interactive-accent-hover) !important;
+    background: var(--interactive-accent-hover);
 }
 
 /* Multi-day bar styling */
@@ -205,7 +206,7 @@
     position: absolute;
     left: 3px;
     height: 14px;
-    background: var(--interactive-accent) !important;
+    background: var(--interactive-accent);
     border-radius: 3px;
     z-index: 10;
     display: flex;
@@ -220,6 +221,8 @@
     font-size: 0.65em;
     font-weight: 500;
     cursor: pointer;
+    display: flex;
+    align-items: center;
     text-decoration: none !important;
     white-space: nowrap;
     overflow: hidden;
@@ -649,6 +652,14 @@ select.dropdown {
     word-wrap: break-word;
     overflow-wrap: break-word;
     line-height: 1.2;
+    align-items: flex-start;
+    display: block;
+}
+
+.exp-multiline .note-icon {
+    line-height: 1.2;
+    float: left;
+    margin-right: 3px;
 }
 
 /* Vertical text */
@@ -684,4 +695,67 @@ select.dropdown {
 
 .exp-condensed .multi-day-link {
     letter-spacing: -0.5px;
+}
+
+/* Category Index Section */
+.category-index-section {
+    margin: 12px 0;
+    padding: 12px;
+    background: var(--background-secondary);
+    border-radius: 6px;
+    border: 1px solid var(--background-modifier-border);
+}
+
+.categories-container {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.category-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.category-chip:hover {
+    opacity: 0.8;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.category-chip-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+}
+
+.category-chip-icon svg {
+    width: 0.9em;
+    height: 0.9em;
+}
+
+.category-chip-name {
+    flex-shrink: 0;
+}
+
+/* Note Icons */
+.note-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.3em;
+}
+
+.note-icon svg {
+    width: 1em;
+    height: 1em;
 }

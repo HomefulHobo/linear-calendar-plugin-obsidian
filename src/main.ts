@@ -50,7 +50,43 @@ export default class LinearCalendarPlugin extends Plugin {
     }
 
     async loadSettings(): Promise<void> {
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+        const loadedData = await this.loadData();
+
+        // Deep merge to preserve user settings while adding new defaults
+        this.settings = this.deepMerge(DEFAULT_SETTINGS, loadedData || {});
+    }
+
+    /**
+     * Deep merge two objects, preserving user values while adding new defaults.
+     * Handles nested objects but not arrays (arrays are replaced, not merged).
+     */
+    private deepMerge<T>(defaults: T, loaded: Partial<T>): T {
+        const result: any = Object.assign({}, defaults);
+
+        for (const key in loaded) {
+            const loadedValue = loaded[key];
+            const defaultValue = (defaults as any)[key];
+
+            // If both are plain objects (not arrays, not null), deep merge them
+            if (this.isPlainObject(loadedValue) && this.isPlainObject(defaultValue)) {
+                result[key] = this.deepMerge(defaultValue, loadedValue as any);
+            } else {
+                // For primitives, arrays, or when only one side is an object, use loaded value
+                result[key] = loadedValue;
+            }
+        }
+
+        return result as T;
+    }
+
+    /**
+     * Check if a value is a plain object (not an array, not null, not a Date, etc.)
+     */
+    private isPlainObject(value: any): boolean {
+        return value !== null &&
+               typeof value === 'object' &&
+               !Array.isArray(value) &&
+               Object.prototype.toString.call(value) === '[object Object]';
     }
 
     async saveSettings(): Promise<void> {

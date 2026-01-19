@@ -10,6 +10,8 @@ export interface LinearCalendarSettings {
     hideDateInTitle: boolean;  // Hide the date portion in note titles
     calendarWidth: 'fit-screen' | 'scrollable';  // Calendar width mode
     cellMinWidth: number;  // Minimum width per day cell in pixels (when scrollable)
+    columnAlignment: 'weekday' | 'date';  // Align columns by weekday or by date
+    weekStartDay: number;  // 0 = Sunday, 1 = Monday, etc.
 
     // Simplified date extraction settings
     dateExtraction: DateExtractionConfig;
@@ -17,6 +19,9 @@ export interface LinearCalendarSettings {
     // Optional filtering
     filterMode: 'none' | 'include' | 'exclude';
     filterConditions: Condition[];
+
+    // Color categories
+    colorCategories: ColorCategoriesConfig;
 
     // Experimental features
     experimental: ExperimentalFeatures;
@@ -47,6 +52,36 @@ export interface Condition {
     value: string;
     includeSubfolders?: boolean;
     requireAdditionalText?: boolean;
+}
+
+export interface ColorCategory {
+    id: string;
+    name: string;
+    color: string;  // Hex color
+    iconType: 'emoji' | 'lucide' | null;  // null = no icon
+    iconValue: string;  // Empty string if iconType is null
+    conditions: Condition[];  // Reuse existing Condition type
+    matchMode: 'all' | 'any';  // 'all' = AND (all must match), 'any' = OR (any can match)
+    enabled: boolean;
+}
+
+export interface ColorPalette {
+    name: string;
+    colors: ColorPaletteEntry[];
+}
+
+export interface ColorPaletteEntry {
+    name: string;
+    hex: string;
+}
+
+export interface ColorCategoriesConfig {
+    enabled: boolean;  // Master toggle to enable/disable entire color categories feature
+    categories: ColorCategory[];
+    defaultCategoryColor: string | null;  // null = use theme accent
+    showCategoryIndex: boolean;
+    showIconsInCalendar: boolean;  // Global setting to show/hide icons in note titles
+    colorPalettes: ColorPalette[];  // User-defined color palettes
 }
 
 export type ConditionOperator =
@@ -87,6 +122,8 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
     hideDateInTitle: false,  // Show full title by default
     calendarWidth: 'fit-screen',  // Fit to screen width by default
     cellMinWidth: 30,  // Minimum 30px per cell when scrollable
+    columnAlignment: 'weekday',  // Align by weekday by default
+    weekStartDay: 0,  // Sunday by default
 
     dateExtraction: {
         startFromProperties: ['date'],
@@ -100,6 +137,26 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
 
     filterMode: 'none',
     filterConditions: [],
+
+    colorCategories: {
+        enabled: true,  // Enable colors by default
+        categories: [],
+        defaultCategoryColor: null,
+        showCategoryIndex: true,
+        showIconsInCalendar: true,
+        colorPalettes: [
+            {
+                name: 'Default',
+                colors: [
+                    { name: 'Purple', hex: '#876c9d' },
+                    { name: 'Blue', hex: '#6c849d' },
+                    { name: 'Red', hex: '#9d6c6c' },
+                    { name: 'Yellow', hex: '#9d906c' },
+                    { name: 'Green', hex: '#779d6c' }
+                ]
+            }
+        ]
+    },
 
     experimental: {
         multilineNotes: false,

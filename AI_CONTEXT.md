@@ -30,7 +30,8 @@ linear-calendar/
 │   ├── main.ts                   # Plugin entry point
 │   ├── types.ts                  # Type definitions and defaults
 │   ├── CalendarView.ts           # Calendar rendering and logic
-│   ├── SettingsTab.ts            # Settings UI
+│   ├── SettingsTab.ts            # Settings UI (includes CategoryEditModal)
+│   ├── IconSuggest.ts            # Icon autocomplete (500+ emojis/Lucide icons)
 │   └── FolderSuggest.ts          # Folder autocomplete helper
 ├── styles.css                    # Plugin styles
 ├── main.js                       # Compiled output (generated)
@@ -125,6 +126,31 @@ Property lists support drag-and-drop reordering:
 - Automatic save on reorder
 
 **Implementation**: See `SettingsTab.ts:renderStartPropsList()` and `renderEndPropsList()` (lines 66-157, 195-343)
+
+### 6. Color Categories (v0.3.0)
+
+Visual organization system for notes using colors and icons:
+- **Categories**: Custom color (hex), optional icon (emoji/Lucide), filter conditions
+- **Matching Logic**: First match wins (drag-to-reorder priority), categories can be enabled/disabled
+- **Category Index**: Standalone section in calendar showing chips, click to edit via CategoryEditModal
+- **Icon System**: IconSuggest.ts provides autocomplete for 500+ emojis and Lucide icons
+- **Settings**: Master toggle to enable/disable, default color picker (custom or theme accent), global icon show/hide
+- **Welcome Message**: Shows "Add color to your year!" when no categories exist
+
+**Implementation**:
+- Types: `ColorCategory`, `ColorCategoriesConfig` in `types.ts`
+- Matching: `CalendarView.ts:getCategoryForFile()`, `getColorForFile()`, `getIconForFile()`
+- UI: `CalendarView.ts:renderCategoryIndexRow()`, `SettingsTab.ts:CategoryEditModal`
+- Icons update instantly in header via DOM query (no full refresh)
+
+### 7. Column Alignment (v0.3.0)
+
+Two alignment modes for calendar columns:
+- **Weekday Mode**: Align by day of week (configurable week start day: Sunday-Saturday)
+- **Date Mode**: Align by date number (all 1st days in same column, etc.)
+- Formula: `columnOffset = (startingDayOfWeek - weekStartDay + 7) % 7`
+
+**Implementation**: See `CalendarView.ts` column offset calculation and header rendering
 
 ## Type Definitions
 
@@ -311,6 +337,22 @@ interface NoteInfo {
 
 ## Version History
 
+- **v0.3.0** (2025-01-19): Color categories and calendar enhancements
+  - **Color Categories System**: Visual organization with colors and icons
+    - Categories with custom colors (hex) and optional icons (emoji/Lucide)
+    - Drag-to-reorder priority, first match wins
+    - Category index row with clickable chips opening modal editor
+    - Master toggle to enable/disable feature
+    - Default color picker (custom or theme accent)
+    - Color palettes (visual and text mode) for easy color management
+    - AND/OR logic for category condition matching
+  - **Column Alignment**: Weekday mode (configurable start day) or date mode
+  - **Tabbed Settings Interface**: Basic Settings, Categories, Daily Notes, Experimental
+  - **User Feedback System**: Feedback box in settings with links to GitHub and email
+  - **Icon System**: IconSuggest autocomplete for 500+ emojis/Lucide icons, global show/hide toggle
+  - **UI Improvements**: Complete settings reorganization with improved visual hierarchy, palette button uses Lucide 'palette' icon
+  - **Fixes**: Tab icon (calendar-range), notes display at correct date independent from timezone, icon preview positioning, palette section stays open when adding/removing palettes, category index opens settings when clicking chips, experimental badge alignment
+
 - **v0.2.4** (2025-01-17): GitHub Actions integration
   - Fixed workflow tag pattern to support v-prefixed tags
   - Fixed workflow permissions for automated releases
@@ -382,6 +424,6 @@ When working on this project:
 
 ---
 
-**Last Updated**: 2025-01-18
-**Plugin Version**: 0.2.4
+**Last Updated**: 2025-01-19
+**Plugin Version**: 0.3.0
 **Maintained for**: Claude Code and other AI assistants

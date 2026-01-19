@@ -4,6 +4,32 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.0] - 2025-01-19
+
+### Added
+- **Color Categories System**: Visual organization with custom colors and optional icons
+  - Categories with custom colors (hex) and optional icons (emoji/Lucide)
+  - Drag-to-reorder priority system (first match wins)
+  - AND/OR logic for category condition matching
+  - Category index row with clickable chips at top of calendar
+  - Master toggle to enable/disable entire feature
+  - Global setting to show/hide icons in calendar
+  - Default color picker (custom color or theme accent)
+- **Color Palettes**: Visual and text mode for easy color management
+  - Default palette with 5 curated colors
+  - Editing and source mode for easy sharing of palettes
+- **Column Alignment Options**: Weekday mode (configurable start day) or date mode
+- **Tabbed Settings Interface**: Basic Settings, Categories, Daily Notes, Experimental
+- **Info Icon**: Clickable info icons with popup examples for category conditions
+- **Default Property**: When selecting "Property" in conditions, defaults to "category"
+
+### Changed
+- Complete settings UI reorganization with improved visual hierarchy
+
+### Fixed
+- Tab icon is now correct one (calendar-range)
+- Notes should now display at the correct date, independent from time zone
+
 ## [0.2.4] - 2025-01-17
 
 ### Fixed

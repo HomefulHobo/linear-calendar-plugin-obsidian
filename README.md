@@ -59,9 +59,10 @@ Or use filenames:
 ### 🎨 Customization Options
 
 **Calendar Appearance:**
-- **Fit to screen**: Calendar adjusts to available width (default)
-- **Scrollable**: Fixed cell widths with horizontal scrolling
+- **Width modes**: Fit to screen (default) or scrollable with fixed cell widths
 - **Configurable cell width**: Set minimum cell width (20-200px) for scrollable mode
+- **Column alignment**: Weekday mode (align by day of week) or date mode (align by date number)
+- **Week start day**: Configure first day of week (Sunday-Saturday)
 
 **Display Options:**
 - Show/hide daily notes in calendar cells
@@ -89,6 +90,30 @@ Filter which notes appear in the calendar:
 - Show only notes with a specific property
 
 ![Settings Filters Screenshot](screenshots/settings-filters.png)
+
+### 🎨 Color Categories
+
+Organize and visualize your notes with custom colors and icons:
+
+**Visual Organization:**
+- **Custom colors**: Assign hex colors to categorize notes
+- **Optional icons**: Add emoji or Lucide icons to categories
+- **Condition-based matching**: Use the same powerful conditions as filters
+- **AND/OR logic**: Match all conditions (AND) or any condition (OR)
+- **Priority system**: Drag to reorder categories—first match wins
+
+**Category Index:**
+- Displays all categories as clickable chips at the top of the calendar
+- Click any category to open the category editor
+- Shows color and icon for quick visual reference
+
+**Display Options:**
+- Master toggle to enable/disable color categories
+- Global setting to show/hide icons in calendar
+- Set default color for uncategorized notes (custom or theme accent)
+
+![Settings Color Categories Screenshot](screenshots/settings-color-categories.png)
+![Settings Chip Color Categories Screenshot](screenshots/chip-settings-color-categories.png)
 
 ## 📥 Installation
 

@@ -1,6 +1,7 @@
-import { ItemView, TFile, WorkspaceLeaf } from 'obsidian';
+import { ItemView, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 import LinearCalendarPlugin from './main';
-import { VIEW_TYPE_CALENDAR, NoteInfo, MultiDayEntry, Condition } from './types';
+import { VIEW_TYPE_CALENDAR, NoteInfo, MultiDayEntry, Condition, ColorCategory } from './types';
+import { CategoryEditModal } from './SettingsTab';
 
 export class LinearCalendarView extends ItemView {
     plugin: LinearCalendarPlugin;
@@ -21,7 +22,7 @@ export class LinearCalendarView extends ItemView {
     }
 
     getIcon(): string {
-        return "calendar";
+        return "calendar-range";
     }
 
     async onOpen(): Promise<void> {
@@ -103,6 +104,13 @@ export class LinearCalendarView extends ItemView {
         const notesWithDates = await this.getNotesWithDates();
         const multiDayEntries = this.processMultiDayEntries(notesWithDates);
 
+        // Render category index row (if enabled) - between header and calendar
+        // Show welcome message if no categories, or chips if categories exist
+        if (this.plugin.settings.colorCategories.enabled &&
+            this.plugin.settings.colorCategories.showCategoryIndex) {
+            this.renderCategoryIndexRow(container);
+        }
+
         const calendarWrapper = container.createDiv({ cls: 'calendar-wrapper' });
 
         // Apply experimental feature classes
@@ -142,15 +150,30 @@ export class LinearCalendarView extends ItemView {
 
         const maxDayCells = 37;
 
-        const headerRow = calendarTable.createEl('thead').createEl('tr');
+        const thead = calendarTable.createEl('thead');
+        const headerRow = thead.createEl('tr');
         headerRow.createEl('th', { cls: 'month-label-cell' });
 
-        const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-        for (let i = 0; i < maxDayCells; i++) {
-            headerRow.createEl('th', {
-                text: weekdays[i % 7],
-                cls: 'weekday-header'
-            });
+        // Choose header based on alignment mode
+        if (this.plugin.settings.columnAlignment === 'date') {
+            // Show date numbers (1-31)
+            for (let i = 0; i < 31; i++) {
+                headerRow.createEl('th', {
+                    text: String(i + 1).padStart(2, '0'),
+                    cls: 'weekday-header'
+                });
+            }
+        } else {
+            // Show weekdays with adjustable start day
+            const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            const startDay = this.plugin.settings.weekStartDay;
+            for (let i = 0; i < maxDayCells; i++) {
+                const dayIndex = (i + startDay) % 7;
+                headerRow.createEl('th', {
+                    text: weekdays[dayIndex],
+                    cls: 'weekday-header'
+                });
+            }
         }
         headerRow.createEl('th', { cls: 'month-label-cell-right' });
 
@@ -158,17 +181,35 @@ export class LinearCalendarView extends ItemView {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+        const cellsPerRow = this.plugin.settings.columnAlignment === 'date' ? 31 : maxDayCells;
+
         for (let month = 0; month < 12; month++) {
-            await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, maxDayCells);
+            await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, cellsPerRow);
         }
 
         const footerRow = calendarTable.createEl('tfoot').createEl('tr');
         footerRow.createEl('td', { cls: 'month-label-cell' });
-        for (let i = 0; i < maxDayCells; i++) {
-            footerRow.createEl('td', {
-                text: weekdays[i % 7],
-                cls: 'weekday-header'
-            });
+
+        // Footer matches header
+        if (this.plugin.settings.columnAlignment === 'date') {
+            // Show date numbers (1-31)
+            for (let i = 0; i < 31; i++) {
+                footerRow.createEl('td', {
+                    text: String(i + 1).padStart(2, '0'),
+                    cls: 'weekday-header'
+                });
+            }
+        } else {
+            // Show weekdays with adjustable start day
+            const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            const startDay = this.plugin.settings.weekStartDay;
+            for (let i = 0; i < maxDayCells; i++) {
+                const dayIndex = (i + startDay) % 7;
+                footerRow.createEl('td', {
+                    text: weekdays[dayIndex],
+                    cls: 'weekday-header'
+                });
+            }
         }
         footerRow.createEl('td', { cls: 'month-label-cell-right' });
     }
@@ -238,6 +279,12 @@ export class LinearCalendarView extends ItemView {
             actualValue = file.path;
         } else if (property === 'file.ext') {
             actualValue = file.extension;
+        } else if (property === 'file.tags') {
+            // Get all tags from the file
+            const cache = this.app.metadataCache.getFileCache(file);
+            const tags = cache?.tags?.map(t => t.tag.substring(1)) || [];
+            const frontmatterTags = cache?.frontmatter?.tags || [];
+            actualValue = [...tags, ...frontmatterTags];
         } else if (property.startsWith('property:')) {
             // Custom property
             const propertyName = property.substring(9);
@@ -266,11 +313,21 @@ export class LinearCalendarView extends ItemView {
                 if (typeof actualValue === 'string') {
                     return actualValue.toLowerCase().includes(value.toLowerCase());
                 }
+                if (Array.isArray(actualValue)) {
+                    return actualValue.some(item =>
+                        String(item).toLowerCase().includes(value.toLowerCase())
+                    );
+                }
                 return false;
 
             case 'doesNotContain':
                 if (typeof actualValue === 'string') {
                     return !actualValue.toLowerCase().includes(value.toLowerCase());
+                }
+                if (Array.isArray(actualValue)) {
+                    return !actualValue.some(item =>
+                        String(item).toLowerCase().includes(value.toLowerCase())
+                    );
                 }
                 return true;
 
@@ -325,6 +382,66 @@ export class LinearCalendarView extends ItemView {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Get the color category that matches a file.
+     * Returns the first enabled category where all conditions match.
+     * Returns null if no category matches.
+     */
+    getCategoryForFile(file: TFile): ColorCategory | null {
+        const config = this.plugin.settings.colorCategories;
+
+        for (const category of config.categories) {
+            if (!category.enabled) continue;
+            if (category.conditions.length === 0) continue;
+
+            const matchMode = category.matchMode || 'all'; // Default to 'all' for backwards compatibility
+            const matches = matchMode === 'all'
+                ? category.conditions.every(c => this.evaluateCondition(file, c))  // AND logic
+                : category.conditions.some(c => this.evaluateCondition(file, c));  // OR logic
+
+            if (matches) return category; // First match wins
+        }
+        return null;
+    }
+
+    /**
+     * Get the color to use for a file.
+     * Uses category color if file matches a category, otherwise uses default color.
+     */
+    getColorForFile(file: TFile): string {
+        // If color categories are disabled, use theme accent
+        if (!this.plugin.settings.colorCategories.enabled) {
+            return 'var(--interactive-accent)';
+        }
+
+        const category = this.getCategoryForFile(file);
+        if (category) return category.color;
+
+        const defaultColor = this.plugin.settings.colorCategories.defaultCategoryColor;
+        return defaultColor || 'var(--interactive-accent)';
+    }
+
+    /**
+     * Get the icon to display for a file.
+     * Returns null if global setting is off, or if file doesn't match a category with an icon.
+     */
+    getIconForFile(file: TFile): { type: 'emoji' | 'lucide', value: string } | null {
+        // Check if color categories feature is enabled
+        if (!this.plugin.settings.colorCategories.enabled) {
+            return null;
+        }
+
+        // Check global setting for showing icons
+        if (!this.plugin.settings.colorCategories.showIconsInCalendar) {
+            return null;
+        }
+
+        const category = this.getCategoryForFile(file);
+        if (!category || !category.iconType) return null;
+
+        return { type: category.iconType, value: category.iconValue };
     }
 
     /**
@@ -601,6 +718,132 @@ export class LinearCalendarView extends ItemView {
         }
     }
 
+    /**
+     * Render the category index as a standalone section between header and calendar.
+     * Shows all enabled categories as clickable chips, or a welcome message if no categories exist.
+     */
+    renderCategoryIndexRow(container: HTMLElement): void {
+        const config = this.plugin.settings.colorCategories;
+
+        // Create a standalone div for the category index
+        const categoryIndexDiv = container.createDiv({ cls: 'category-index-section' });
+
+        // If no categories exist, show welcome message
+        if (config.categories.length === 0) {
+            const welcomeContainer = categoryIndexDiv.createDiv({ cls: 'categories-container' });
+            welcomeContainer.style.cssText = 'flex-direction: column; gap: 12px; align-items: center;';
+
+            const welcomeText = welcomeContainer.createEl('div', { text: 'Add color to your year! ✨🦈' });
+            welcomeText.style.cssText = 'font-size: 1.1em; font-weight: 500;';
+
+            const hideHint = welcomeContainer.createEl('div', { text: 'Hide this section by disabling Color Categories in the settings.' });
+            hideHint.style.cssText = 'font-size: 0.9em; color: var(--text-muted); margin-top: 4px;';
+
+            const addBtn = welcomeContainer.createEl('button', { text: '+ Add category' });
+            addBtn.style.cssText = 'padding: 6px 16px; cursor: pointer; margin-top: 8px;';
+            addBtn.onclick = async () => {
+                const newCategory: ColorCategory = {
+                    id: Date.now().toString(),
+                    name: 'New Category',
+                    color: '#6366f1',
+                    iconType: null,
+                    iconValue: '',
+                    conditions: [],
+                    matchMode: 'all',
+                    enabled: true
+                };
+                config.categories.push(newCategory);
+                await this.plugin.saveSettings();
+                new CategoryEditModal(
+                    this.app,
+                    this.plugin,
+                    newCategory,
+                    () => this.reload()
+                ).open();
+            };
+            return;
+        }
+
+        // Container for category chips
+        const chipsContainer = categoryIndexDiv.createDiv({ cls: 'categories-container' });
+
+        // Render each enabled category as a chip
+        config.categories.forEach(category => {
+            if (!category.enabled) return;
+
+            const chip = chipsContainer.createDiv({ cls: 'category-chip' });
+            chip.style.background = category.color;
+            chip.style.color = '#ffffff'; // White text for contrast
+
+            // Add icon if exists and global setting is on
+            if (category.iconType && category.iconValue && config.showIconsInCalendar) {
+                const iconEl = chip.createEl('span', { cls: 'category-chip-icon' });
+                if (category.iconType === 'emoji') {
+                    iconEl.textContent = category.iconValue;
+                } else {
+                    setIcon(iconEl, category.iconValue);
+                    iconEl.style.color = '#ffffff';
+                }
+            }
+
+            // Category name
+            chip.createEl('span', {
+                text: category.name,
+                cls: 'category-chip-name'
+            });
+
+            // Click to open category edit modal
+            chip.style.cursor = 'pointer';
+            chip.onclick = () => {
+                new CategoryEditModal(
+                    this.app,
+                    this.plugin,
+                    category,
+                    () => this.reload()  // Refresh calendar when category is edited
+                ).open();
+            };
+
+            // Hover effect
+            chip.addEventListener('mouseenter', () => {
+                chip.style.opacity = '0.8';
+            });
+            chip.addEventListener('mouseleave', () => {
+                chip.style.opacity = '1';
+            });
+        });
+
+        // Add + button to create new category
+        const addBtn = chipsContainer.createDiv({ cls: 'category-chip category-add-btn' });
+        addBtn.style.cssText = 'background: var(--interactive-accent); color: #ffffff; cursor: pointer; font-weight: 600;';
+        addBtn.textContent = '+';
+        addBtn.onclick = async () => {
+            const newCategory: ColorCategory = {
+                id: Date.now().toString(),
+                name: 'New Category',
+                color: '#6366f1',
+                iconType: null,
+                iconValue: '',
+                conditions: [],
+                matchMode: 'all',
+                enabled: true
+            };
+            config.categories.push(newCategory);
+            await this.plugin.saveSettings();
+            new CategoryEditModal(
+                this.app,
+                this.plugin,
+                newCategory,
+                () => this.reload()
+            ).open();
+        };
+        addBtn.addEventListener('mouseenter', () => {
+            addBtn.style.opacity = '0.8';
+        });
+        addBtn.addEventListener('mouseleave', () => {
+            addBtn.style.opacity = '1';
+        });
+    }
+
     async renderMonthRow(
         tbody: HTMLTableSectionElement,
         year: number,
@@ -619,6 +862,17 @@ export class LinearCalendarView extends ItemView {
         const daysInMonth = lastDay.getDate();
         const startingDayOfWeek = firstDay.getDay();
 
+        // Determine offset based on alignment mode
+        // For 'weekday' mode: adjust offset based on week start day
+        // For 'date' mode: no offset, day 1 always in column 0
+        const useWeekdayAlignment = this.plugin.settings.columnAlignment === 'weekday';
+        let columnOffset = 0;
+        if (useWeekdayAlignment) {
+            const weekStartDay = this.plugin.settings.weekStartDay;
+            // Calculate offset: how many columns from the configured week start
+            columnOffset = (startingDayOfWeek - weekStartDay + 7) % 7;
+        }
+
         const dayCells: HTMLElement[] = [];
 
         const activeMultiDayEntries: MultiDayEntry[] = [];
@@ -636,8 +890,8 @@ export class LinearCalendarView extends ItemView {
             const startDay = entry.startDate.getDate();
             const endDay = entry.endDate.getDate();
 
-            const startCol = startingDayOfWeek + startDay - 1;
-            const endCol = startingDayOfWeek + endDay - 1;
+            const startCol = columnOffset + startDay - 1;
+            const endCol = columnOffset + endDay - 1;
             const span = endCol - startCol + 1;
 
             if (span <= 0) return;
@@ -658,7 +912,8 @@ export class LinearCalendarView extends ItemView {
         const maxBarRow = occupiedRows.length > 0 ? Math.max(...occupiedRows.map(o => o.row)) : -1;
         const topPadding = (maxBarRow + 1) * 16 + 18;
 
-        for (let i = 0; i < startingDayOfWeek; i++) {
+        // Add empty cells for alignment (only in weekday mode)
+        for (let i = 0; i < columnOffset; i++) {
             const emptyCell = row.createEl('td', { cls: 'day-cell empty' });
             dayCells.push(emptyCell);
         }
@@ -671,7 +926,7 @@ export class LinearCalendarView extends ItemView {
             const dateKey = this.dateToKey(date);
             const dayCell = row.createEl('td', { cls: 'day-cell' });
 
-            const dayIndex = startingDayOfWeek + day - 1;
+            const dayIndex = columnOffset + day - 1;
             const barsAbove = occupiedRows.filter(o => o.start <= dayIndex && o.end > dayIndex).length;
             if (barsAbove > 0) {
                 dayCell.style.paddingTop = `${topPadding}px`;
@@ -697,10 +952,28 @@ export class LinearCalendarView extends ItemView {
 
                 singleDayNotes.forEach(noteInfo => {
                     const noteLink = notesContainer.createEl('a', {
-                        text: this.getDisplayName(noteInfo.file),
                         cls: 'note-link internal-link',
                         href: '#'
                     });
+
+                    // Apply color
+                    noteLink.style.background = this.getColorForFile(noteInfo.file);
+
+                    // Add icon if exists
+                    const icon = this.getIconForFile(noteInfo.file);
+                    if (icon) {
+                        const iconSpan = noteLink.createEl('span', { cls: 'note-icon' });
+                        iconSpan.style.cssText = 'margin-right: 3px;';
+                        if (icon.type === 'emoji') {
+                            iconSpan.textContent = icon.value;
+                        } else {
+                            setIcon(iconSpan, icon.value);
+                            iconSpan.style.color = '#ffffff';
+                        }
+                    }
+
+                    // Add title
+                    noteLink.createEl('span', { text: this.getDisplayName(noteInfo.file) });
 
                     noteLink.setAttr('data-href', noteInfo.file.path);
 
@@ -735,7 +1008,7 @@ export class LinearCalendarView extends ItemView {
             }
         }
 
-        const cellsUsed = startingDayOfWeek + daysInMonth;
+        const cellsUsed = columnOffset + daysInMonth;
         const remainingCells = maxDayCells - cellsUsed;
         for (let i = 0; i < remainingCells; i++) {
             const emptyCell = row.createEl('td', { cls: 'day-cell empty' });
@@ -753,14 +1026,31 @@ export class LinearCalendarView extends ItemView {
                     cls: 'multi-day-bar'
                 });
 
+                // Apply color to bar
+                multiDayBar.style.background = this.getColorForFile(entry.file);
                 multiDayBar.style.top = `${20 + (pos.rowIndex * 16)}px`;
                 multiDayBar.dataset.span = pos.span.toString();
 
                 const noteLink = multiDayBar.createEl('a', {
-                    text: this.getDisplayName(entry.file),
                     cls: 'multi-day-link internal-link',
                     href: '#'
                 });
+
+                // Add icon if exists
+                const icon = this.getIconForFile(entry.file);
+                if (icon) {
+                    const iconSpan = noteLink.createEl('span', { cls: 'note-icon' });
+                    iconSpan.style.cssText = 'margin-right: 3px;';
+                    if (icon.type === 'emoji') {
+                        iconSpan.textContent = icon.value;
+                    } else {
+                        setIcon(iconSpan, icon.value);
+                        iconSpan.style.color = '#ffffff';
+                    }
+                }
+
+                // Add title
+                noteLink.createEl('span', { text: this.getDisplayName(entry.file) });
 
                 noteLink.setAttr('data-href', entry.file.path);
 

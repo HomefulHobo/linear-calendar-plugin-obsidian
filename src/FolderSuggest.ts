@@ -1,4 +1,4 @@
-import { App, TFolder } from 'obsidian';
+import { TFolder } from 'obsidian';
 import { BaseSuggest, SuggestItem } from './helpers/BaseSuggest';
 
 /**

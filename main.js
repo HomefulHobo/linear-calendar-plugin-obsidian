@@ -5219,7 +5219,7 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
   async renderCalendar(container) {
     const year = this.plugin.settings.currentYear;
     const header = container.createDiv({ cls: "calendar-header" });
-    const leftSpacer = header.createDiv({ cls: "header-spacer" });
+    header.createDiv({ cls: "header-spacer" });
     const centerSection = header.createDiv({ cls: "header-center" });
     const prevBtn = centerSection.createEl("button", { text: "\u2190", cls: "year-nav-btn" });
     centerSection.createEl("span", { text: `${year}`, cls: "year-title" });

@@ -1,4 +1,3 @@
-import { App } from 'obsidian';
 import { BaseSuggest, SuggestItem } from './helpers/BaseSuggest';
 
 /**

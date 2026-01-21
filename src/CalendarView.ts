@@ -89,7 +89,7 @@ export class LinearCalendarView extends ItemView {
         const header = container.createDiv({ cls: 'calendar-header' });
 
         // Left spacer for centering
-        const leftSpacer = header.createDiv({ cls: 'header-spacer' });
+        header.createDiv({ cls: 'header-spacer' });
 
         // Center section with year navigation
         const centerSection = header.createDiv({ cls: 'header-center' });

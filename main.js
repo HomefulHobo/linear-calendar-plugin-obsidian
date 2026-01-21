@@ -25,12 +25,12 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/PropertySuggest.ts
-var PropertySuggest;
-var init_PropertySuggest = __esm({
-  "src/PropertySuggest.ts"() {
+// src/helpers/BaseSuggest.ts
+var BaseSuggest;
+var init_BaseSuggest = __esm({
+  "src/helpers/BaseSuggest.ts"() {
     "use strict";
-    PropertySuggest = class {
+    BaseSuggest = class {
       constructor(app, inputEl) {
         this.suggestions = null;
         this.app = app;
@@ -40,6 +40,67 @@ var init_PropertySuggest = __esm({
         this.inputEl.addEventListener("blur", () => {
           setTimeout(() => this.closeSuggestions(), 200);
         });
+      }
+      updateSuggestions() {
+        const query = this.inputEl.value.toLowerCase();
+        const items = this.getSuggestions(query);
+        this.showSuggestions(items);
+      }
+      showSuggestions(items) {
+        this.closeSuggestions();
+        if (items.length === 0) return;
+        this.suggestions = document.createElement("div");
+        this.suggestions.className = "suggestion-container";
+        this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 300px; overflow-y: auto;";
+        items.forEach((item) => {
+          var _a;
+          const div = document.createElement("div");
+          div.className = "suggestion-item";
+          div.textContent = item.label || item.value;
+          div.style.cssText = "padding: 6px 12px; cursor: pointer; border-radius: 3px;";
+          div.addEventListener("mouseenter", () => {
+            div.style.background = "var(--background-modifier-hover)";
+          });
+          div.addEventListener("mouseleave", () => {
+            div.style.background = "";
+          });
+          div.addEventListener("click", () => {
+            this.selectItem(item);
+          });
+          (_a = this.suggestions) == null ? void 0 : _a.appendChild(div);
+        });
+        const rect = this.inputEl.getBoundingClientRect();
+        this.suggestions.style.top = rect.bottom + 2 + "px";
+        this.suggestions.style.left = rect.left + "px";
+        this.suggestions.style.width = rect.width + "px";
+        document.body.appendChild(this.suggestions);
+      }
+      selectItem(item) {
+        this.inputEl.value = item.value;
+        this.inputEl.dispatchEvent(new Event("input"));
+        this.closeSuggestions();
+        this.inputEl.focus();
+      }
+      closeSuggestions() {
+        if (this.suggestions) {
+          this.suggestions.remove();
+          this.suggestions = null;
+        }
+      }
+    };
+  }
+});
+
+// src/PropertySuggest.ts
+var PropertySuggest;
+var init_PropertySuggest = __esm({
+  "src/PropertySuggest.ts"() {
+    "use strict";
+    init_BaseSuggest();
+    PropertySuggest = class extends BaseSuggest {
+      getSuggestions(query) {
+        const properties = this.getAllProperties();
+        return properties.filter((prop) => prop.toLowerCase().includes(query)).slice(0, 20).map((prop) => ({ value: prop }));
       }
       getAllProperties() {
         const properties = /* @__PURE__ */ new Set();
@@ -56,137 +117,6 @@ var init_PropertySuggest = __esm({
         });
         return Array.from(properties).sort();
       }
-      updateSuggestions() {
-        const query = this.inputEl.value.toLowerCase();
-        const allProperties = this.getAllProperties();
-        const matches = allProperties.filter((prop) => prop.toLowerCase().includes(query)).slice(0, 20);
-        this.showSuggestions(matches);
-      }
-      showSuggestions(properties) {
-        this.closeSuggestions();
-        if (properties.length === 0) return;
-        this.suggestions = document.createElement("div");
-        this.suggestions.className = "suggestion-container";
-        this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 300px; overflow-y: auto;";
-        properties.forEach((property) => {
-          var _a;
-          const item = document.createElement("div");
-          item.className = "suggestion-item";
-          item.textContent = property;
-          item.style.cssText = "padding: 6px 12px; cursor: pointer; border-radius: 3px;";
-          item.addEventListener("mouseenter", () => {
-            item.style.background = "var(--background-modifier-hover)";
-          });
-          item.addEventListener("mouseleave", () => {
-            item.style.background = "";
-          });
-          item.addEventListener("click", () => {
-            this.inputEl.value = property;
-            this.inputEl.dispatchEvent(new Event("input"));
-            this.closeSuggestions();
-            this.inputEl.focus();
-          });
-          (_a = this.suggestions) == null ? void 0 : _a.appendChild(item);
-        });
-        const rect = this.inputEl.getBoundingClientRect();
-        this.suggestions.style.top = rect.bottom + 2 + "px";
-        this.suggestions.style.left = rect.left + "px";
-        this.suggestions.style.width = rect.width + "px";
-        document.body.appendChild(this.suggestions);
-      }
-      closeSuggestions() {
-        if (this.suggestions) {
-          this.suggestions.remove();
-          this.suggestions = null;
-        }
-      }
-    };
-  }
-});
-
-// src/ValueSuggest.ts
-var ValueSuggest;
-var init_ValueSuggest = __esm({
-  "src/ValueSuggest.ts"() {
-    "use strict";
-    ValueSuggest = class {
-      constructor(app, inputEl, getPropertyKey) {
-        this.suggestions = null;
-        this.app = app;
-        this.inputEl = inputEl;
-        this.getPropertyKey = getPropertyKey;
-        this.inputEl.addEventListener("input", () => this.updateSuggestions());
-        this.inputEl.addEventListener("focus", () => this.updateSuggestions());
-        this.inputEl.addEventListener("blur", () => {
-          setTimeout(() => this.closeSuggestions(), 200);
-        });
-      }
-      getAllValuesForProperty(propertyKey) {
-        if (!propertyKey) return [];
-        const values = /* @__PURE__ */ new Set();
-        const files = this.app.vault.getMarkdownFiles();
-        files.forEach((file) => {
-          const cache = this.app.metadataCache.getFileCache(file);
-          if ((cache == null ? void 0 : cache.frontmatter) && cache.frontmatter[propertyKey]) {
-            const value = cache.frontmatter[propertyKey];
-            if (Array.isArray(value)) {
-              value.forEach((v) => values.add(String(v)));
-            } else {
-              values.add(String(value));
-            }
-          }
-        });
-        return Array.from(values).sort();
-      }
-      updateSuggestions() {
-        const propertyKey = this.getPropertyKey();
-        if (!propertyKey) {
-          this.closeSuggestions();
-          return;
-        }
-        const query = this.inputEl.value.toLowerCase();
-        const allValues = this.getAllValuesForProperty(propertyKey);
-        const matches = allValues.filter((val) => val.toLowerCase().includes(query)).slice(0, 20);
-        this.showSuggestions(matches);
-      }
-      showSuggestions(values) {
-        this.closeSuggestions();
-        if (values.length === 0) return;
-        this.suggestions = document.createElement("div");
-        this.suggestions.className = "suggestion-container";
-        this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 300px; overflow-y: auto;";
-        values.forEach((value) => {
-          var _a;
-          const item = document.createElement("div");
-          item.className = "suggestion-item";
-          item.textContent = value;
-          item.style.cssText = "padding: 6px 12px; cursor: pointer; border-radius: 3px;";
-          item.addEventListener("mouseenter", () => {
-            item.style.background = "var(--background-modifier-hover)";
-          });
-          item.addEventListener("mouseleave", () => {
-            item.style.background = "";
-          });
-          item.addEventListener("click", () => {
-            this.inputEl.value = value;
-            this.inputEl.dispatchEvent(new Event("input"));
-            this.closeSuggestions();
-            this.inputEl.focus();
-          });
-          (_a = this.suggestions) == null ? void 0 : _a.appendChild(item);
-        });
-        const rect = this.inputEl.getBoundingClientRect();
-        this.suggestions.style.top = rect.bottom + 2 + "px";
-        this.suggestions.style.left = rect.left + "px";
-        this.suggestions.style.width = rect.width + "px";
-        document.body.appendChild(this.suggestions);
-      }
-      closeSuggestions() {
-        if (this.suggestions) {
-          this.suggestions.remove();
-          this.suggestions = null;
-        }
-      }
     };
   }
 });
@@ -196,17 +126,23 @@ var TagSuggest;
 var init_TagSuggest = __esm({
   "src/TagSuggest.ts"() {
     "use strict";
-    TagSuggest = class {
-      constructor(app, inputEl) {
-        this.suggestions = null;
+    init_BaseSuggest();
+    TagSuggest = class extends BaseSuggest {
+      constructor() {
+        super(...arguments);
         this.onSelect = null;
-        this.app = app;
-        this.inputEl = inputEl;
-        this.inputEl.addEventListener("input", () => this.updateSuggestions());
-        this.inputEl.addEventListener("focus", () => this.updateSuggestions());
-        this.inputEl.addEventListener("blur", () => {
-          setTimeout(() => this.closeSuggestions(), 200);
-        });
+      }
+      getSuggestions(query) {
+        const tags = this.getAllTags();
+        return tags.filter((tag) => tag.toLowerCase().includes(query)).slice(0, 20).map((tag) => ({ value: tag }));
+      }
+      selectItem(item) {
+        if (this.onSelect) {
+          this.onSelect(item.value);
+          this.inputEl.value = "";
+        } else {
+          super.selectItem(item);
+        }
       }
       getAllTags() {
         const tags = /* @__PURE__ */ new Set();
@@ -235,54 +171,159 @@ var init_TagSuggest = __esm({
         });
         return Array.from(tags).sort();
       }
-      updateSuggestions() {
-        const query = this.inputEl.value.toLowerCase();
-        const allTags = this.getAllTags();
-        const matches = allTags.filter((tag) => tag.toLowerCase().includes(query)).slice(0, 20);
-        this.showSuggestions(matches);
-      }
-      showSuggestions(tags) {
-        this.closeSuggestions();
-        if (tags.length === 0) return;
-        this.suggestions = document.createElement("div");
-        this.suggestions.className = "suggestion-container";
-        this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 300px; overflow-y: auto;";
-        tags.forEach((tag) => {
-          var _a;
-          const item = document.createElement("div");
-          item.className = "suggestion-item";
-          item.textContent = tag;
-          item.style.cssText = "padding: 6px 12px; cursor: pointer; border-radius: 3px;";
-          item.addEventListener("mouseenter", () => {
-            item.style.background = "var(--background-modifier-hover)";
-          });
-          item.addEventListener("mouseleave", () => {
-            item.style.background = "";
-          });
-          item.addEventListener("click", () => {
-            if (this.onSelect) {
-              this.onSelect(tag);
-              this.inputEl.value = "";
-            } else {
-              this.inputEl.value = tag;
-              this.inputEl.dispatchEvent(new Event("input"));
-            }
-            this.closeSuggestions();
-            this.inputEl.focus();
-          });
-          (_a = this.suggestions) == null ? void 0 : _a.appendChild(item);
+    };
+  }
+});
+
+// src/helpers/TagPillRenderer.ts
+var TagPillRenderer;
+var init_TagPillRenderer = __esm({
+  "src/helpers/TagPillRenderer.ts"() {
+    "use strict";
+    init_TagSuggest();
+    TagPillRenderer = class _TagPillRenderer {
+      static render(config) {
+        const { tags, onTagsChange, container, app } = config;
+        container.empty();
+        container.style.cssText = "display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);";
+        tags.forEach((tag, index) => {
+          const chip = container.createEl("span");
+          chip.style.cssText = "display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;";
+          chip.createEl("span", { text: tag });
+          const removeBtn = chip.createEl("span", { text: "\xD7" });
+          removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
+          removeBtn.onclick = async () => {
+            tags.splice(index, 1);
+            await onTagsChange(tags);
+            _TagPillRenderer.render(config);
+          };
         });
-        const rect = this.inputEl.getBoundingClientRect();
-        this.suggestions.style.top = rect.bottom + 2 + "px";
-        this.suggestions.style.left = rect.left + "px";
-        this.suggestions.style.width = rect.width + "px";
-        document.body.appendChild(this.suggestions);
+        const tagInput = container.createEl("input", {
+          type: "text",
+          attr: { placeholder: "Add tag..." }
+        });
+        tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
+        const tagSuggest = new TagSuggest(app, tagInput);
+        tagSuggest.onSelect = async (tag) => {
+          const newTag = tag.replace(/^#/, "").trim();
+          if (newTag && !tags.includes(newTag)) {
+            tags.push(newTag);
+            await onTagsChange(tags);
+            _TagPillRenderer.render(config);
+          }
+        };
+        tagInput.onkeydown = async (e) => {
+          if (e.key === "Enter" || e.key === ",") {
+            e.preventDefault();
+            const newTag = tagInput.value.replace(/^#/, "").trim();
+            if (newTag && !tags.includes(newTag)) {
+              tags.push(newTag);
+              await onTagsChange(tags);
+              tagInput.value = "";
+              _TagPillRenderer.render(config);
+            }
+          } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
+            tags.pop();
+            await onTagsChange(tags);
+            _TagPillRenderer.render(config);
+          }
+        };
+        setTimeout(() => tagInput.focus(), 0);
       }
-      closeSuggestions() {
-        if (this.suggestions) {
-          this.suggestions.remove();
-          this.suggestions = null;
+    };
+  }
+});
+
+// src/ValueSuggest.ts
+var ValueSuggest;
+var init_ValueSuggest = __esm({
+  "src/ValueSuggest.ts"() {
+    "use strict";
+    init_BaseSuggest();
+    ValueSuggest = class extends BaseSuggest {
+      constructor(app, inputEl, getPropertyKey) {
+        super(app, inputEl);
+        this.getPropertyKey = getPropertyKey;
+      }
+      getSuggestions(query) {
+        const propertyKey = this.getPropertyKey();
+        if (!propertyKey) return [];
+        const values = this.getAllValuesForProperty(propertyKey);
+        return values.filter((val) => val.toLowerCase().includes(query)).slice(0, 20).map((val) => ({ value: val }));
+      }
+      getAllValuesForProperty(propertyKey) {
+        const values = /* @__PURE__ */ new Set();
+        const files = this.app.vault.getMarkdownFiles();
+        files.forEach((file) => {
+          const cache = this.app.metadataCache.getFileCache(file);
+          if ((cache == null ? void 0 : cache.frontmatter) && cache.frontmatter[propertyKey]) {
+            const value = cache.frontmatter[propertyKey];
+            if (Array.isArray(value)) {
+              value.forEach((v) => values.add(String(v)));
+            } else {
+              values.add(String(value));
+            }
+          }
+        });
+        return Array.from(values).sort();
+      }
+    };
+  }
+});
+
+// src/helpers/MetadataRowRenderer.ts
+var MetadataRowRenderer;
+var init_MetadataRowRenderer = __esm({
+  "src/helpers/MetadataRowRenderer.ts"() {
+    "use strict";
+    init_PropertySuggest();
+    init_ValueSuggest();
+    init_TagPillRenderer();
+    MetadataRowRenderer = class {
+      static render(container, config) {
+        const { entry, onKeyChange, onValueChange, onDelete, onRefresh, app } = config;
+        const rowContainer = container.createDiv();
+        rowContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
+        const keyInput = rowContainer.createEl("input", {
+          type: "text",
+          value: entry.key,
+          attr: { placeholder: "Property name" }
+        });
+        keyInput.style.cssText = "flex: 0 0 150px; padding: 6px 8px;";
+        keyInput.oninput = async () => {
+          await onKeyChange(keyInput.value);
+          onRefresh == null ? void 0 : onRefresh();
+        };
+        new PropertySuggest(app, keyInput);
+        rowContainer.createEl("span", { text: ":", attr: { style: "font-weight: 500;" } });
+        if (entry.key === "tags") {
+          const tags = entry.value ? entry.value.split(/[,\s]+/).map((t) => t.replace(/^#/, "").trim()).filter((t) => t) : [];
+          const tagContainer = rowContainer.createDiv();
+          TagPillRenderer.render({
+            tags,
+            onTagsChange: async (updatedTags) => {
+              await onValueChange(updatedTags.join(", "));
+            },
+            container: tagContainer,
+            app
+          });
+        } else {
+          const valueInput = rowContainer.createEl("input", {
+            type: "text",
+            value: entry.value,
+            attr: { placeholder: "Value" }
+          });
+          valueInput.style.cssText = "flex: 1; padding: 6px 8px;";
+          valueInput.oninput = async () => {
+            await onValueChange(valueInput.value);
+          };
+          new ValueSuggest(app, valueInput, () => entry.key);
         }
+        const deleteBtn = rowContainer.createEl("button", { text: "\xD7" });
+        deleteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.2em; flex-shrink: 0;";
+        deleteBtn.onclick = async () => {
+          await onDelete();
+        };
       }
     };
   }
@@ -300,7 +341,7 @@ var init_QuickNoteModal = __esm({
     import_obsidian4 = require("obsidian");
     init_PropertySuggest();
     init_ValueSuggest();
-    init_TagSuggest();
+    init_MetadataRowRenderer();
     QuickNoteModal = class extends import_obsidian4.Modal {
       constructor(app, plugin, startDate, endDate) {
         super(app);
@@ -441,100 +482,23 @@ var init_QuickNoteModal = __esm({
         };
       }
       renderMetadataRow(container, entry, index) {
-        const rowContainer = container.createDiv();
-        rowContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
-        const keyInput = rowContainer.createEl("input", {
-          type: "text",
-          value: entry.key,
-          attr: { placeholder: "Property name" }
-        });
-        keyInput.style.cssText = "flex: 0 0 150px; padding: 6px 8px;";
-        keyInput.oninput = () => {
-          const oldKey = this.metadata[index].key;
-          const newKey = keyInput.value;
-          const wasTag = oldKey === "tags" || oldKey === "tag";
-          const isTag = newKey === "tags" || newKey === "tag";
-          this.metadata[index].key = newKey;
-          if (isTag !== wasTag) {
+        MetadataRowRenderer.render(container, {
+          entry,
+          onKeyChange: async (key) => {
+            this.metadata[index].key = key;
+          },
+          onValueChange: async (value) => {
+            this.metadata[index].value = value;
+          },
+          onDelete: async () => {
+            this.metadata.splice(index, 1);
             this.onOpen();
-          }
-        };
-        this.addPropertySuggest(keyInput);
-        rowContainer.createEl("span", { text: ":", attr: { style: "font-weight: 500;" } });
-        const isTagProperty = entry.key === "tags" || entry.key === "tag";
-        if (isTagProperty) {
-          this.renderTagInput(rowContainer, entry, index);
-        } else {
-          const valueInput = rowContainer.createEl("input", {
-            type: "text",
-            value: entry.value,
-            attr: { placeholder: "Value" }
-          });
-          valueInput.style.cssText = "flex: 1; padding: 6px 8px;";
-          valueInput.oninput = () => {
-            this.metadata[index].value = valueInput.value;
-          };
-          this.addValueSuggest(valueInput, () => this.metadata[index].key);
-        }
-        const deleteBtn = rowContainer.createEl("button", { text: "\xD7" });
-        deleteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.2em; flex-shrink: 0;";
-        deleteBtn.onclick = () => {
-          this.metadata.splice(index, 1);
-          this.onOpen();
-        };
-      }
-      renderTagInput(container, entry, index) {
-        const tagContainer = container.createDiv();
-        tagContainer.style.cssText = "flex: 1; display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--background-modifier-border); border-radius: 4px; min-height: 32px; align-items: center;";
-        const refreshTags = () => {
-          tagContainer.empty();
-          const tags = this.metadata[index].value.split(/[,\s]+/).map((t) => t.replace(/^#/, "").trim()).filter((t) => t.length > 0);
-          tags.forEach((tag, tagIndex) => {
-            const chip = tagContainer.createEl("span");
-            chip.textContent = tag;
-            chip.style.cssText = "background: var(--interactive-accent); color: var(--text-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 0.9em; display: flex; align-items: center; gap: 4px;";
-            const removeBtn = chip.createEl("span");
-            removeBtn.textContent = "\xD7";
-            removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
-            removeBtn.onclick = () => {
-              tags.splice(tagIndex, 1);
-              this.metadata[index].value = tags.join(", ");
-              refreshTags();
-            };
-          });
-          const tagInput = tagContainer.createEl("input", {
-            type: "text",
-            attr: { placeholder: "Add tag..." }
-          });
-          tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
-          const tagSuggest = new TagSuggest(this.app, tagInput);
-          tagSuggest.onSelect = (tag) => {
-            const newTag = tag.replace(/^#/, "").trim();
-            if (newTag && !tags.includes(newTag)) {
-              tags.push(newTag);
-              this.metadata[index].value = tags.join(", ");
-              refreshTags();
-            }
-          };
-          tagInput.onkeydown = (e) => {
-            if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault();
-              const newTag = tagInput.value.replace(/^#/, "").trim();
-              if (newTag && !tags.includes(newTag)) {
-                tags.push(newTag);
-                this.metadata[index].value = tags.join(", ");
-                tagInput.value = "";
-                refreshTags();
-              }
-            } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
-              tags.pop();
-              this.metadata[index].value = tags.join(", ");
-              refreshTags();
-            }
-          };
-          setTimeout(() => tagInput.focus(), 0);
-        };
-        refreshTags();
+          },
+          onRefresh: () => {
+            this.onOpen();
+          },
+          app: this.app
+        });
       }
       addPropertySuggest(input) {
         new PropertySuggest(this.app, input);
@@ -868,16 +832,11 @@ var import_obsidian3 = require("obsidian");
 
 // src/FolderSuggest.ts
 var import_obsidian = require("obsidian");
-var FolderSuggest = class {
-  constructor(app, inputEl) {
-    this.suggestions = null;
-    this.app = app;
-    this.inputEl = inputEl;
-    this.inputEl.addEventListener("input", () => this.updateSuggestions());
-    this.inputEl.addEventListener("focus", () => this.updateSuggestions());
-    this.inputEl.addEventListener("blur", () => {
-      setTimeout(() => this.closeSuggestions(), 200);
-    });
+init_BaseSuggest();
+var FolderSuggest = class extends BaseSuggest {
+  getSuggestions(query) {
+    const folders = this.getAllFolders();
+    return folders.filter((folder) => folder.toLowerCase().includes(query)).slice(0, 10).map((folder) => ({ value: folder }));
   }
   getAllFolders() {
     const folders = [];
@@ -893,49 +852,6 @@ var FolderSuggest = class {
     };
     recurse(this.app.vault.getRoot());
     return folders;
-  }
-  updateSuggestions() {
-    const query = this.inputEl.value.toLowerCase();
-    const allFolders = this.getAllFolders();
-    const matches = allFolders.filter((folder) => folder.toLowerCase().includes(query)).slice(0, 10);
-    this.showSuggestions(matches);
-  }
-  showSuggestions(folders) {
-    this.closeSuggestions();
-    if (folders.length === 0) return;
-    this.suggestions = document.createElement("div");
-    this.suggestions.className = "suggestion-container";
-    this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 200px; overflow-y: auto;";
-    folders.forEach((folder) => {
-      var _a;
-      const item = document.createElement("div");
-      item.className = "suggestion-item";
-      item.textContent = folder;
-      item.style.cssText = "padding: 4px 8px; cursor: pointer; border-radius: 3px;";
-      item.addEventListener("mouseenter", () => {
-        item.style.background = "var(--background-modifier-hover)";
-      });
-      item.addEventListener("mouseleave", () => {
-        item.style.background = "";
-      });
-      item.addEventListener("click", () => {
-        this.inputEl.value = folder;
-        this.inputEl.dispatchEvent(new Event("input"));
-        this.closeSuggestions();
-      });
-      (_a = this.suggestions) == null ? void 0 : _a.appendChild(item);
-    });
-    const rect = this.inputEl.getBoundingClientRect();
-    this.suggestions.style.top = rect.bottom + 2 + "px";
-    this.suggestions.style.left = rect.left + "px";
-    this.suggestions.style.width = rect.width + "px";
-    document.body.appendChild(this.suggestions);
-  }
-  closeSuggestions() {
-    if (this.suggestions) {
-      this.suggestions.remove();
-      this.suggestions = null;
-    }
   }
 };
 
@@ -3178,8 +3094,11 @@ var IconSuggest = class {
 
 // src/SettingsTab.ts
 init_PropertySuggest();
+
+// src/helpers/ConditionRenderer.ts
+init_TagPillRenderer();
+init_PropertySuggest();
 init_ValueSuggest();
-init_TagSuggest();
 function getValidOperators(property) {
   if (property === "file.tags") {
     return [
@@ -3188,26 +3107,12 @@ function getValidOperators(property) {
       { value: "exists", label: "exists" },
       { value: "doesNotExist", label: "does not exist" }
     ];
-  } else if (property === "file.name" || property === "file.basename") {
+  } else if (property === "file.folder") {
     return [
       { value: "is", label: "is" },
       { value: "isNot", label: "is not" },
       { value: "contains", label: "contains" },
-      { value: "doesNotContain", label: "does not contain" },
-      { value: "startsWith", label: "starts with" },
-      { value: "endsWith", label: "ends with" },
-      { value: "matches", label: "matches regex" },
-      { value: "matchesDatePattern", label: "matches date pattern" }
-    ];
-  } else if (property === "file.folder" || property === "file.path" || property === "file.ext") {
-    return [
-      { value: "is", label: "is" },
-      { value: "isNot", label: "is not" },
-      { value: "contains", label: "contains" },
-      { value: "doesNotContain", label: "does not contain" },
-      { value: "startsWith", label: "starts with" },
-      { value: "endsWith", label: "ends with" },
-      { value: "matches", label: "matches regex" }
+      { value: "doesNotContain", label: "does not contain" }
     ];
   } else {
     return [
@@ -3215,14 +3120,162 @@ function getValidOperators(property) {
       { value: "isNot", label: "is not" },
       { value: "contains", label: "contains" },
       { value: "doesNotContain", label: "does not contain" },
-      { value: "startsWith", label: "starts with" },
-      { value: "endsWith", label: "ends with" },
-      { value: "matches", label: "matches regex" },
       { value: "exists", label: "exists" },
       { value: "doesNotExist", label: "does not exist" }
     ];
   }
 }
+var ConditionRenderer = class {
+  static render(container, condition, condIndex, conditions, app, callbacks) {
+    const condEl = container.createDiv();
+    condEl.style.cssText = "display: flex; gap: 5px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; padding: 10px; background: var(--background-primary); border-radius: 3px; border: 1px solid var(--background-modifier-border);";
+    const fieldsContainer = condEl.createDiv();
+    fieldsContainer.style.cssText = "display: flex; gap: 5px; flex-wrap: wrap; flex: 1; align-items: center;";
+    this.renderPropertySelector(fieldsContainer, condition, callbacks);
+    this.renderCustomPropertyInput(fieldsContainer, condition, app, callbacks);
+    this.renderOperatorSelector(fieldsContainer, condition, callbacks);
+    this.renderValueInput(fieldsContainer, condition, app, callbacks);
+    this.renderSubfoldersCheckbox(fieldsContainer, condition, callbacks);
+    this.renderDeleteButton(condEl, conditions, condIndex, callbacks);
+  }
+  static renderPropertySelector(container, condition, callbacks) {
+    const properties = [
+      { value: "file.folder", label: "Folder" },
+      { value: "file.tags", label: "Tags" },
+      { value: "file.name", label: "File Name" },
+      { value: "file.basename", label: "File Basename" },
+      { value: "file.ext", label: "Extension" },
+      { value: "file.path", label: "Path" },
+      { value: "custom", label: "Custom property" }
+    ];
+    const propertySelect = container.createEl("select");
+    propertySelect.style.cssText = "padding: 4px 8px;";
+    properties.forEach((prop) => {
+      const option = propertySelect.createEl("option", {
+        text: prop.label,
+        value: prop.value
+      });
+      if (condition.property === prop.value || prop.value === "custom" && !properties.find((p) => p.value === condition.property)) {
+        option.selected = true;
+      }
+    });
+    propertySelect.onchange = async (e) => {
+      var _a;
+      if (e.target.value === "custom") {
+        condition.property = "category";
+      } else {
+        condition.property = e.target.value;
+      }
+      await callbacks.onSave();
+      (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
+    };
+  }
+  static renderCustomPropertyInput(container, condition, app, callbacks) {
+    const properties = [
+      { value: "file.folder", label: "Folder" },
+      { value: "file.tags", label: "Tags" },
+      { value: "file.name", label: "File Name" },
+      { value: "file.basename", label: "File Basename" },
+      { value: "file.ext", label: "Extension" },
+      { value: "file.path", label: "Path" },
+      { value: "custom", label: "Custom property" }
+    ];
+    const needsCustomInput = !properties.find((p) => p.value === condition.property);
+    if (needsCustomInput) {
+      const customInput = container.createEl("input", {
+        type: "text",
+        attr: { placeholder: "property name" },
+        value: condition.property
+      });
+      customInput.style.cssText = "padding: 4px 8px; width: 120px;";
+      customInput.onchange = async (e) => {
+        condition.property = e.target.value;
+        await callbacks.onSave();
+      };
+      new PropertySuggest(app, customInput);
+    }
+  }
+  static renderOperatorSelector(container, condition, callbacks) {
+    const operatorSelect = container.createEl("select");
+    operatorSelect.style.cssText = "padding: 4px 8px;";
+    const operators = getValidOperators(condition.property);
+    operators.forEach((op) => {
+      const option = operatorSelect.createEl("option", {
+        text: op.label,
+        value: op.value
+      });
+      if (condition.operator === op.value) {
+        option.selected = true;
+      }
+    });
+    operatorSelect.onchange = async (e) => {
+      var _a;
+      condition.operator = e.target.value;
+      await callbacks.onSave();
+      (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
+    };
+  }
+  static renderValueInput(container, condition, app, callbacks) {
+    if (["exists", "doesNotExist"].includes(condition.operator)) {
+      return;
+    }
+    if (condition.property === "file.tags") {
+      const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
+      const tagContainer = container.createDiv();
+      TagPillRenderer.render({
+        tags,
+        onTagsChange: async (updatedTags) => {
+          condition.value = updatedTags.join(", ");
+          await callbacks.onSave();
+        },
+        container: tagContainer,
+        app
+      });
+    } else {
+      const valueInput = container.createEl("input", {
+        type: "text",
+        attr: { placeholder: "value" },
+        value: condition.value || ""
+      });
+      valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
+      valueInput.onchange = async (e) => {
+        condition.value = e.target.value;
+        await callbacks.onSave();
+      };
+      if (condition.property === "file.folder") {
+        new FolderSuggest(app, valueInput);
+      } else {
+        new ValueSuggest(app, valueInput, () => condition.property);
+      }
+    }
+  }
+  static renderSubfoldersCheckbox(container, condition, callbacks) {
+    if (condition.property === "file.folder" && condition.operator === "is") {
+      const subfolderLabel = container.createEl("label");
+      subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+      const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
+      subfolderCheckbox.checked = condition.includeSubfolders || false;
+      subfolderCheckbox.onchange = async (e) => {
+        condition.includeSubfolders = e.target.checked;
+        await callbacks.onSave();
+      };
+      subfolderLabel.createEl("span", { text: "Include subfolders" });
+    }
+  }
+  static renderDeleteButton(container, conditions, condIndex, callbacks) {
+    const deleteBtn = container.createEl("button", { text: "\xD7" });
+    deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: none;";
+    deleteBtn.onclick = async () => {
+      var _a;
+      conditions.splice(condIndex, 1);
+      await callbacks.onSave();
+      (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
+    };
+  }
+};
+
+// src/SettingsTab.ts
+init_MetadataRowRenderer();
 var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
@@ -3856,171 +3909,14 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     }
   }
   renderCondition(container, condition, condIndex) {
-    const condEl = container.createDiv();
-    condEl.style.cssText = "display: flex; gap: 5px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; padding: 8px; background: var(--background-primary); border-radius: 3px;";
-    const propertySelect = condEl.createEl("select");
-    propertySelect.style.cssText = "padding: 4px 8px;";
-    const properties = [
-      { value: "file.name", label: "File name" },
-      { value: "file.basename", label: "File basename" },
-      { value: "file.folder", label: "Folder" },
-      { value: "file.path", label: "File path" },
-      { value: "file.ext", label: "Extension" },
-      { value: "file.tags", label: "File tags" },
-      { value: "custom", label: "Property" }
-    ];
-    properties.forEach((prop) => {
-      const option = propertySelect.createEl("option", {
-        text: prop.label,
-        value: prop.value
-      });
-      if (condition.property === prop.value || prop.value === "custom" && !properties.find((p) => p.value === condition.property)) {
-        option.selected = true;
+    ConditionRenderer.render(container, condition, condIndex, this.plugin.settings.filterConditions, this.app, {
+      onSave: async () => {
+        await this.plugin.saveSettings();
+      },
+      onRefresh: () => {
+        this.display();
       }
     });
-    propertySelect.onchange = async (e) => {
-      if (e.target.value === "custom") {
-        condition.property = "category";
-      } else {
-        condition.property = e.target.value;
-      }
-      await this.plugin.saveSettings();
-      this.display();
-    };
-    if (propertySelect.value === "custom" || !properties.find((p) => p.value === condition.property)) {
-      const customInput = condEl.createEl("input", {
-        type: "text",
-        attr: { placeholder: "property name" },
-        value: condition.property
-      });
-      customInput.style.cssText = "padding: 4px 8px; width: 120px;";
-      customInput.onchange = async (e) => {
-        condition.property = e.target.value;
-        await this.plugin.saveSettings();
-      };
-      new PropertySuggest(this.app, customInput);
-    }
-    const operatorSelect = condEl.createEl("select");
-    operatorSelect.style.cssText = "padding: 4px 8px;";
-    const operators = getValidOperators(condition.property);
-    operators.forEach((op) => {
-      const option = operatorSelect.createEl("option", {
-        text: op.label,
-        value: op.value
-      });
-      if (condition.operator === op.value) {
-        option.selected = true;
-      }
-    });
-    operatorSelect.onchange = async (e) => {
-      condition.operator = e.target.value;
-      await this.plugin.saveSettings();
-      this.display();
-    };
-    if (!["exists", "doesNotExist"].includes(condition.operator)) {
-      if (condition.property === "file.tags") {
-        const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
-        const tagContainer = condEl.createDiv();
-        tagContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);";
-        const refreshTags = () => {
-          tagContainer.empty();
-          tags.forEach((tag, tagIndex) => {
-            const chip = tagContainer.createEl("span");
-            chip.style.cssText = "display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;";
-            chip.createEl("span", { text: tag });
-            const removeBtn = chip.createEl("span");
-            removeBtn.textContent = "\xD7";
-            removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
-            removeBtn.onclick = async () => {
-              tags.splice(tagIndex, 1);
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              refreshTags();
-            };
-          });
-          const tagInput = tagContainer.createEl("input", {
-            type: "text",
-            attr: { placeholder: "Add tag..." }
-          });
-          tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
-          const tagSuggest = new TagSuggest(this.app, tagInput);
-          tagSuggest.onSelect = async (tag) => {
-            const newTag = tag.replace(/^#/, "").trim();
-            if (newTag && !tags.includes(newTag)) {
-              tags.push(newTag);
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              refreshTags();
-            }
-          };
-          tagInput.onkeydown = async (e) => {
-            if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault();
-              const newTag = tagInput.value.replace(/^#/, "").trim();
-              if (newTag && !tags.includes(newTag)) {
-                tags.push(newTag);
-                condition.value = tags.join(", ");
-                tagInput.value = "";
-                await this.plugin.saveSettings();
-                refreshTags();
-              }
-            } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
-              tags.pop();
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              refreshTags();
-            }
-          };
-          setTimeout(() => tagInput.focus(), 0);
-        };
-        refreshTags();
-      } else {
-        const valueInput = condEl.createEl("input", {
-          type: "text",
-          attr: { placeholder: "value" },
-          value: condition.value || ""
-        });
-        valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
-        valueInput.onchange = async (e) => {
-          condition.value = e.target.value;
-          await this.plugin.saveSettings();
-        };
-        if (condition.property === "file.folder") {
-          new FolderSuggest(this.app, valueInput);
-        } else {
-          new ValueSuggest(this.app, valueInput, () => condition.property);
-        }
-      }
-    }
-    if (condition.property === "file.folder" && condition.operator === "is") {
-      const subfolderLabel = condEl.createEl("label");
-      subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-      const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
-      subfolderCheckbox.checked = condition.includeSubfolders || false;
-      subfolderCheckbox.onchange = async (e) => {
-        condition.includeSubfolders = e.target.checked;
-        await this.plugin.saveSettings();
-      };
-      subfolderLabel.createEl("span", { text: "Include subfolders" });
-    }
-    if (condition.operator === "matchesDatePattern") {
-      const requireTextLabel = condEl.createEl("label");
-      requireTextLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-      const requireTextCheckbox = requireTextLabel.createEl("input", { type: "checkbox" });
-      requireTextCheckbox.checked = condition.requireAdditionalText || false;
-      requireTextCheckbox.onchange = async (e) => {
-        condition.requireAdditionalText = e.target.checked;
-        await this.plugin.saveSettings();
-      };
-      requireTextLabel.createEl("span", { text: "and has text after date" });
-    }
-    const deleteBtn = condEl.createEl("button", { text: "\xD7" });
-    deleteBtn.style.cssText = "padding: 2px 10px; cursor: pointer; font-size: 1.2em;";
-    deleteBtn.onclick = async () => {
-      this.plugin.settings.filterConditions.splice(condIndex, 1);
-      await this.plugin.saveSettings();
-      this.display();
-    };
   }
   renderDailyNotesSection(containerEl) {
     containerEl.createEl("h3", { text: "Daily Notes" });
@@ -4154,38 +4050,26 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
   }
   renderDefaultMetadataRow(container, entry, index) {
     const config = this.plugin.settings.quickNoteCreation;
-    const rowContainer = container.createDiv();
-    rowContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
-    const keyInput = rowContainer.createEl("input", {
-      type: "text",
-      value: entry.key,
-      attr: { placeholder: "Property name" }
+    MetadataRowRenderer.render(container, {
+      entry,
+      onKeyChange: async (key) => {
+        config.defaultMetadata[index].key = key;
+        await this.plugin.saveSettings();
+      },
+      onValueChange: async (value) => {
+        config.defaultMetadata[index].value = value;
+        await this.plugin.saveSettings();
+      },
+      onDelete: async () => {
+        config.defaultMetadata.splice(index, 1);
+        await this.plugin.saveSettings();
+        this.display();
+      },
+      onRefresh: () => {
+        this.display();
+      },
+      app: this.app
     });
-    keyInput.style.cssText = "flex: 0 0 150px; padding: 6px 8px;";
-    keyInput.oninput = async () => {
-      config.defaultMetadata[index].key = keyInput.value;
-      await this.plugin.saveSettings();
-    };
-    new PropertySuggest(this.app, keyInput);
-    rowContainer.createEl("span", { text: ":", attr: { style: "font-weight: 500;" } });
-    const valueInput = rowContainer.createEl("input", {
-      type: "text",
-      value: entry.value,
-      attr: { placeholder: "Value" }
-    });
-    valueInput.style.cssText = "flex: 1; padding: 6px 8px;";
-    valueInput.oninput = async () => {
-      config.defaultMetadata[index].value = valueInput.value;
-      await this.plugin.saveSettings();
-    };
-    new ValueSuggest(this.app, valueInput, () => keyInput.value);
-    const deleteBtn = rowContainer.createEl("button", { text: "\xD7" });
-    deleteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.2em; flex-shrink: 0;";
-    deleteBtn.onclick = async () => {
-      config.defaultMetadata.splice(index, 1);
-      await this.plugin.saveSettings();
-      this.display();
-    };
   }
   renderExperimentalSection(containerEl) {
     const headerContainer = containerEl.createDiv();
@@ -4584,171 +4468,14 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     }
   }
   renderCategoryCondition(container, category, condition, condIndex) {
-    const condEl = container.createDiv();
-    condEl.style.cssText = "display: flex; gap: 5px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; padding: 8px; background: var(--background-primary); border-radius: 3px;";
-    const propertySelect = condEl.createEl("select");
-    propertySelect.style.cssText = "padding: 4px 8px;";
-    const properties = [
-      { value: "file.name", label: "File name" },
-      { value: "file.basename", label: "File basename" },
-      { value: "file.folder", label: "Folder" },
-      { value: "file.path", label: "File path" },
-      { value: "file.ext", label: "Extension" },
-      { value: "file.tags", label: "File tags" },
-      { value: "custom", label: "Property" }
-    ];
-    properties.forEach((prop) => {
-      const option = propertySelect.createEl("option", {
-        text: prop.label,
-        value: prop.value
-      });
-      if (condition.property === prop.value || prop.value === "custom" && !properties.find((p) => p.value === condition.property)) {
-        option.selected = true;
+    ConditionRenderer.render(container, condition, condIndex, category.conditions, this.app, {
+      onSave: async () => {
+        await this.plugin.saveSettings();
+      },
+      onRefresh: () => {
+        this.display();
       }
     });
-    propertySelect.onchange = async (e) => {
-      if (e.target.value === "custom") {
-        condition.property = "category";
-      } else {
-        condition.property = e.target.value;
-      }
-      await this.plugin.saveSettings();
-      this.display();
-    };
-    if (propertySelect.value === "custom" || !properties.find((p) => p.value === condition.property)) {
-      const customInput = condEl.createEl("input", {
-        type: "text",
-        attr: { placeholder: "property name" },
-        value: condition.property
-      });
-      customInput.style.cssText = "padding: 4px 8px; width: 120px;";
-      customInput.onchange = async (e) => {
-        condition.property = e.target.value;
-        await this.plugin.saveSettings();
-      };
-      new PropertySuggest(this.app, customInput);
-    }
-    const operatorSelect = condEl.createEl("select");
-    operatorSelect.style.cssText = "padding: 4px 8px;";
-    const operators = getValidOperators(condition.property);
-    operators.forEach((op) => {
-      const option = operatorSelect.createEl("option", {
-        text: op.label,
-        value: op.value
-      });
-      if (condition.operator === op.value) {
-        option.selected = true;
-      }
-    });
-    operatorSelect.onchange = async (e) => {
-      condition.operator = e.target.value;
-      await this.plugin.saveSettings();
-      this.display();
-    };
-    if (!["exists", "doesNotExist"].includes(condition.operator)) {
-      if (condition.property === "file.tags") {
-        const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
-        const tagContainer = condEl.createDiv();
-        tagContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);";
-        const refreshTags = () => {
-          tagContainer.empty();
-          tags.forEach((tag, tagIndex) => {
-            const chip = tagContainer.createEl("span");
-            chip.style.cssText = "display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;";
-            chip.createEl("span", { text: tag });
-            const removeBtn = chip.createEl("span");
-            removeBtn.textContent = "\xD7";
-            removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
-            removeBtn.onclick = async () => {
-              tags.splice(tagIndex, 1);
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              refreshTags();
-            };
-          });
-          const tagInput = tagContainer.createEl("input", {
-            type: "text",
-            attr: { placeholder: "Add tag..." }
-          });
-          tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
-          const tagSuggest = new TagSuggest(this.app, tagInput);
-          tagSuggest.onSelect = async (tag) => {
-            const newTag = tag.replace(/^#/, "").trim();
-            if (newTag && !tags.includes(newTag)) {
-              tags.push(newTag);
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              refreshTags();
-            }
-          };
-          tagInput.onkeydown = async (e) => {
-            if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault();
-              const newTag = tagInput.value.replace(/^#/, "").trim();
-              if (newTag && !tags.includes(newTag)) {
-                tags.push(newTag);
-                condition.value = tags.join(", ");
-                tagInput.value = "";
-                await this.plugin.saveSettings();
-                refreshTags();
-              }
-            } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
-              tags.pop();
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              refreshTags();
-            }
-          };
-          setTimeout(() => tagInput.focus(), 0);
-        };
-        refreshTags();
-      } else {
-        const valueInput = condEl.createEl("input", {
-          type: "text",
-          attr: { placeholder: "value" },
-          value: condition.value || ""
-        });
-        valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
-        valueInput.onchange = async (e) => {
-          condition.value = e.target.value;
-          await this.plugin.saveSettings();
-        };
-        if (condition.property === "file.folder") {
-          new FolderSuggest(this.app, valueInput);
-        } else {
-          new ValueSuggest(this.app, valueInput, () => condition.property);
-        }
-      }
-    }
-    if (condition.property === "file.folder" && condition.operator === "is") {
-      const subfolderLabel = condEl.createEl("label");
-      subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-      const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
-      subfolderCheckbox.checked = condition.includeSubfolders || false;
-      subfolderCheckbox.onchange = async (e) => {
-        condition.includeSubfolders = e.target.checked;
-        await this.plugin.saveSettings();
-      };
-      subfolderLabel.createEl("span", { text: "Include subfolders" });
-    }
-    if (condition.operator === "matchesDatePattern") {
-      const requireTextLabel = condEl.createEl("label");
-      requireTextLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-      const requireTextCheckbox = requireTextLabel.createEl("input", { type: "checkbox" });
-      requireTextCheckbox.checked = condition.requireAdditionalText || false;
-      requireTextCheckbox.onchange = async (e) => {
-        condition.requireAdditionalText = e.target.checked;
-        await this.plugin.saveSettings();
-      };
-      requireTextLabel.createEl("span", { text: "and has text after date" });
-    }
-    const deleteBtn = condEl.createEl("button", { text: "\xD7" });
-    deleteBtn.style.cssText = "padding: 2px 10px; cursor: pointer; font-size: 1.2em;";
-    deleteBtn.onclick = async () => {
-      category.conditions.splice(condIndex, 1);
-      await this.plugin.saveSettings();
-      this.display();
-    };
   }
   renderColorPalettes(containerEl) {
     const config = this.plugin.settings.colorCategories;
@@ -5260,159 +4987,15 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
     footerSetting.settingEl.style.cssText = "border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;";
   }
   renderCondition(container, condition, condIndex) {
-    const condEl = container.createDiv();
-    condEl.style.cssText = "display: flex; gap: 5px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; padding: 10px; background: var(--background-primary); border-radius: 3px; border: 1px solid var(--background-modifier-border);";
-    const fieldsContainer = condEl.createDiv();
-    fieldsContainer.style.cssText = "display: flex; gap: 5px; flex-wrap: wrap; flex: 1; align-items: center;";
-    const propertySelect = fieldsContainer.createEl("select");
-    propertySelect.style.cssText = "padding: 4px 8px;";
-    const properties = [
-      { value: "file.name", label: "File name" },
-      { value: "file.basename", label: "File basename" },
-      { value: "file.folder", label: "Folder" },
-      { value: "file.path", label: "File path" },
-      { value: "file.ext", label: "Extension" },
-      { value: "file.tags", label: "File tags" },
-      { value: "custom", label: "Property" }
-    ];
-    properties.forEach((prop) => {
-      const option = propertySelect.createEl("option", {
-        text: prop.label,
-        value: prop.value
-      });
-      if (condition.property === prop.value || prop.value === "custom" && !properties.find((p) => p.value === condition.property)) {
-        option.selected = true;
-      }
-    });
-    propertySelect.onchange = async () => {
-      if (propertySelect.value === "custom") {
-        condition.property = "category";
-      } else {
-        condition.property = propertySelect.value;
-      }
-      await this.plugin.saveSettings();
-      this.onSave();
-      this.onOpen();
-    };
-    if (propertySelect.value === "custom" || !properties.find((p) => p.value === condition.property)) {
-      const customInput = fieldsContainer.createEl("input", {
-        type: "text",
-        attr: { placeholder: "property name" },
-        value: condition.property
-      });
-      customInput.style.cssText = "padding: 4px 8px; width: 120px;";
-      customInput.onchange = async () => {
-        condition.property = customInput.value;
+    ConditionRenderer.render(container, condition, condIndex, this.category.conditions, this.app, {
+      onSave: async () => {
         await this.plugin.saveSettings();
         this.onSave();
-      };
-      new PropertySuggest(this.app, customInput);
-    }
-    const operatorSelect = fieldsContainer.createEl("select");
-    operatorSelect.style.cssText = "padding: 4px 8px;";
-    const operators = getValidOperators(condition.property);
-    operators.forEach((op) => {
-      const option = operatorSelect.createEl("option", {
-        text: op.label,
-        value: op.value
-      });
-      if (condition.operator === op.value) {
-        option.selected = true;
+      },
+      onRefresh: () => {
+        this.onOpen();
       }
     });
-    operatorSelect.onchange = async () => {
-      condition.operator = operatorSelect.value;
-      await this.plugin.saveSettings();
-      this.onSave();
-      this.onOpen();
-    };
-    if (!["exists", "doesNotExist"].includes(condition.operator)) {
-      const valueInput = fieldsContainer.createEl("input", {
-        type: "text",
-        attr: { placeholder: "value" },
-        value: condition.value || ""
-      });
-      valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
-      valueInput.onchange = async () => {
-        condition.value = valueInput.value;
-        await this.plugin.saveSettings();
-        this.onSave();
-      };
-      if (condition.property === "file.tags") {
-        valueInput.remove();
-        const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
-        const tagContainer = fieldsContainer.createDiv();
-        tagContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);";
-        const refreshTags = () => {
-          tagContainer.empty();
-          tags.forEach((tag, tagIndex) => {
-            const chip = tagContainer.createEl("span");
-            chip.style.cssText = "display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;";
-            chip.createEl("span", { text: tag });
-            const removeBtn = chip.createEl("span");
-            removeBtn.textContent = "\xD7";
-            removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
-            removeBtn.onclick = async () => {
-              tags.splice(tagIndex, 1);
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              this.onSave();
-              refreshTags();
-            };
-          });
-          const tagInput = tagContainer.createEl("input", {
-            type: "text",
-            attr: { placeholder: "Add tag..." }
-          });
-          tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
-          const tagSuggest = new TagSuggest(this.app, tagInput);
-          tagSuggest.onSelect = async (tag) => {
-            const newTag = tag.replace(/^#/, "").trim();
-            if (newTag && !tags.includes(newTag)) {
-              tags.push(newTag);
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              this.onSave();
-              refreshTags();
-            }
-          };
-          tagInput.onkeydown = async (e) => {
-            if (e.key === "Enter" || e.key === ",") {
-              e.preventDefault();
-              const newTag = tagInput.value.replace(/^#/, "").trim();
-              if (newTag && !tags.includes(newTag)) {
-                tags.push(newTag);
-                condition.value = tags.join(", ");
-                tagInput.value = "";
-                await this.plugin.saveSettings();
-                this.onSave();
-                refreshTags();
-              }
-            } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
-              tags.pop();
-              condition.value = tags.join(", ");
-              await this.plugin.saveSettings();
-              this.onSave();
-              refreshTags();
-            }
-          };
-          setTimeout(() => tagInput.focus(), 0);
-        };
-        refreshTags();
-      } else if (condition.property === "file.folder") {
-        new FolderSuggest(this.app, valueInput);
-      } else {
-        new ValueSuggest(this.app, valueInput, () => condition.property);
-      }
-    }
-    const deleteBtn = condEl.createEl("button", { text: "\xD7" });
-    deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: none;";
-    deleteBtn.onclick = async () => {
-      this.category.conditions.splice(condIndex, 1);
-      await this.plugin.saveSettings();
-      this.onSave();
-      this.onOpen();
-    };
   }
   renderColorPickerInModal(container) {
     const config = this.plugin.settings.colorCategories;

@@ -3,7 +3,7 @@ import type LinearCalendarPlugin from './main';
 import type { MetadataEntry } from './types';
 import { PropertySuggest } from './PropertySuggest';
 import { ValueSuggest } from './ValueSuggest';
-import { TagSuggest } from './TagSuggest';
+import { MetadataRowRenderer } from './helpers/MetadataRowRenderer';
 
 export class QuickNoteModal extends Modal {
     plugin: LinearCalendarPlugin;
@@ -237,141 +237,23 @@ export class QuickNoteModal extends Modal {
     }
 
     renderMetadataRow(container: HTMLElement, entry: MetadataEntry, index: number): void {
-        const rowContainer = container.createDiv();
-        rowContainer.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
-
-        // Property name input
-        const keyInput = rowContainer.createEl('input', {
-            type: 'text',
-            value: entry.key,
-            attr: { placeholder: 'Property name' }
-        });
-        keyInput.style.cssText = 'flex: 0 0 150px; padding: 6px 8px;';
-        keyInput.oninput = () => {
-            const oldKey = this.metadata[index].key;
-            const newKey = keyInput.value;
-
-            // Re-render if switching to/from tags
-            const wasTag = oldKey === 'tags' || oldKey === 'tag';
-            const isTag = newKey === 'tags' || newKey === 'tag';
-
-            this.metadata[index].key = newKey;
-
-            if (isTag !== wasTag) {
+        MetadataRowRenderer.render(container, {
+            entry,
+            onKeyChange: async (key) => {
+                this.metadata[index].key = key;
+            },
+            onValueChange: async (value) => {
+                this.metadata[index].value = value;
+            },
+            onDelete: async () => {
+                this.metadata.splice(index, 1);
                 this.onOpen();
-            }
-        };
-
-        // Add property dropdown helper
-        this.addPropertySuggest(keyInput);
-
-        // Colon separator
-        rowContainer.createEl('span', { text: ':', attr: { style: 'font-weight: 500;' } });
-
-        // Check if this is a tag property
-        const isTagProperty = entry.key === 'tags' || entry.key === 'tag';
-
-        if (isTagProperty) {
-            // Tag chip interface
-            this.renderTagInput(rowContainer, entry, index);
-        } else {
-            // Regular property value input
-            const valueInput = rowContainer.createEl('input', {
-                type: 'text',
-                value: entry.value,
-                attr: { placeholder: 'Value' }
-            });
-            valueInput.style.cssText = 'flex: 1; padding: 6px 8px;';
-            valueInput.oninput = () => {
-                this.metadata[index].value = valueInput.value;
-            };
-
-            // Add value dropdown helper based on the key
-            this.addValueSuggest(valueInput, () => this.metadata[index].key);
-        }
-
-        // Delete button
-        const deleteBtn = rowContainer.createEl('button', { text: '×' });
-        deleteBtn.style.cssText = 'padding: 4px 10px; cursor: pointer; font-size: 1.2em; flex-shrink: 0;';
-        deleteBtn.onclick = () => {
-            this.metadata.splice(index, 1);
-            this.onOpen();
-        };
-    }
-
-    renderTagInput(container: HTMLElement, entry: MetadataEntry, index: number): void {
-        const tagContainer = container.createDiv();
-        tagContainer.style.cssText = 'flex: 1; display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--background-modifier-border); border-radius: 4px; min-height: 32px; align-items: center;';
-
-        const refreshTags = () => {
-            // Clear container but keep it
-            tagContainer.empty();
-
-            // Parse current tags
-            const tags = this.metadata[index].value
-                .split(/[,\s]+/)
-                .map(t => t.replace(/^#/, '').trim())
-                .filter(t => t.length > 0);
-
-            // Render existing tags as chips
-            tags.forEach((tag, tagIndex) => {
-                const chip = tagContainer.createEl('span');
-                chip.textContent = tag;
-                chip.style.cssText = 'background: var(--interactive-accent); color: var(--text-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 0.9em; display: flex; align-items: center; gap: 4px;';
-
-                const removeBtn = chip.createEl('span');
-                removeBtn.textContent = '×';
-                removeBtn.style.cssText = 'cursor: pointer; font-weight: bold;';
-                removeBtn.onclick = () => {
-                    tags.splice(tagIndex, 1);
-                    this.metadata[index].value = tags.join(', ');
-                    refreshTags(); // Just refresh this container
-                };
-            });
-
-            // Input for adding new tags
-            const tagInput = tagContainer.createEl('input', {
-                type: 'text',
-                attr: { placeholder: 'Add tag...' }
-            });
-            tagInput.style.cssText = 'flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;';
-
-            // Add tag autocomplete with custom callback
-            const tagSuggest = new TagSuggest(this.app, tagInput);
-            // Override the default behavior to add tag immediately on selection
-            tagSuggest.onSelect = (tag: string) => {
-                const newTag = tag.replace(/^#/, '').trim();
-                if (newTag && !tags.includes(newTag)) {
-                    tags.push(newTag);
-                    this.metadata[index].value = tags.join(', ');
-                    refreshTags(); // Refresh to show new chip
-                }
-            };
-
-            tagInput.onkeydown = (e) => {
-                if (e.key === 'Enter' || e.key === ',') {
-                    e.preventDefault();
-                    const newTag = tagInput.value.replace(/^#/, '').trim();
-                    if (newTag && !tags.includes(newTag)) {
-                        tags.push(newTag);
-                        this.metadata[index].value = tags.join(', ');
-                        tagInput.value = '';
-                        refreshTags(); // Just refresh this container
-                    }
-                } else if (e.key === 'Backspace' && tagInput.value === '' && tags.length > 0) {
-                    // Remove last tag on backspace
-                    tags.pop();
-                    this.metadata[index].value = tags.join(', ');
-                    refreshTags(); // Just refresh this container
-                }
-            };
-
-            // Focus the input after refresh
-            setTimeout(() => tagInput.focus(), 0);
-        };
-
-        // Initial render
-        refreshTags();
+            },
+            onRefresh: () => {
+                this.onOpen();
+            },
+            app: this.app
+        });
     }
 
     addPropertySuggest(input: HTMLInputElement): void {

@@ -21,6 +21,31 @@ export class CalendarSettingTab extends PluginSettingTab {
     }
 
     /**
+     * Create a checkbox with label that only toggles when the checkbox itself is clicked.
+     * This prevents accidental toggling when clicking the label text.
+     */
+    private createCheckboxWithLabel(
+        container: HTMLElement,
+        text: string,
+        checked: boolean,
+        onChange: (checked: boolean) => void | Promise<void>
+    ): HTMLInputElement {
+        const wrapper = container.createDiv();
+        wrapper.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
+
+        const checkbox = wrapper.createEl('input', { type: 'checkbox' });
+        checkbox.checked = checked;
+        checkbox.onchange = async (e) => {
+            await onChange((e.target as HTMLInputElement).checked);
+        };
+
+        const label = wrapper.createEl('span', { text });
+        label.style.cssText = 'font-weight: 500; cursor: default;';
+
+        return checkbox;
+    }
+
+    /**
      * IMPORTANT: This helper method is used in multiple places (Categories settings AND CategoryEditModal).
      * When making changes to this method, always evaluate if the change should apply to both locations.
      * Current usage locations:
@@ -397,19 +422,34 @@ export class CalendarSettingTab extends PluginSettingTab {
         const startPropsContainer = startSection.createDiv();
         startPropsContainer.style.cssText = 'margin-bottom: 15px;';
 
-        const startPropsLabel = startPropsContainer.createEl('label');
-        startPropsLabel.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
-
-        const startPropsCheckbox = startPropsLabel.createEl('input', { type: 'checkbox' });
-        startPropsCheckbox.checked = config.startFromProperties.length > 0;
-        startPropsLabel.createEl('span', { text: 'From properties', attr: { style: 'font-weight: 500;' } });
-
-        // Properties list
-        const startPropsListContainer = startPropsContainer.createDiv();
+        // Checkbox first
+        const startPropsListContainer = document.createElement('div');
         startPropsListContainer.style.cssText = 'margin-left: 28px;';
         if (config.startFromProperties.length === 0) {
             startPropsListContainer.style.display = 'none';
         }
+
+        this.createCheckboxWithLabel(
+            startPropsContainer,
+            'From properties',
+            config.startFromProperties.length > 0,
+            async (checked) => {
+                if (checked) {
+                    if (config.startFromProperties.length === 0) {
+                        config.startFromProperties.push('date');
+                    }
+                    startPropsListContainer.style.display = 'block';
+                } else {
+                    config.startFromProperties = [];
+                    startPropsListContainer.style.display = 'none';
+                }
+                await this.plugin.saveSettings();
+                renderStartPropsList();
+            }
+        );
+
+        // Properties list container appended after checkbox
+        startPropsContainer.appendChild(startPropsListContainer);
 
         const renderStartPropsList = () => {
             startPropsListContainer.empty();
@@ -509,33 +549,17 @@ export class CalendarSettingTab extends PluginSettingTab {
 
         renderStartPropsList();
 
-        startPropsCheckbox.onchange = async (e) => {
-            if ((e.target as HTMLInputElement).checked) {
-                if (config.startFromProperties.length === 0) {
-                    config.startFromProperties.push('date');
-                }
-                startPropsListContainer.style.display = 'block';
-            } else {
-                config.startFromProperties = [];
-                startPropsListContainer.style.display = 'none';
-            }
-            await this.plugin.saveSettings();
-            renderStartPropsList();
-        };
-
         // Start from filename
-        const startFilenameLabel = startSection.createEl('label');
-        startFilenameLabel.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 15px;';
-
-        const startFilenameCheckbox = startFilenameLabel.createEl('input', { type: 'checkbox' });
-        startFilenameCheckbox.checked = config.startFromFilename;
-        startFilenameLabel.createEl('span', { text: 'From filename (first YYYY-MM-DD pattern)', attr: { style: 'font-weight: 500;' } });
-
-        startFilenameCheckbox.onchange = async (e) => {
-            config.startFromFilename = (e.target as HTMLInputElement).checked;
-            await this.plugin.saveSettings();
-            updatePriorityVisibility();
-        };
+        this.createCheckboxWithLabel(
+            startSection,
+            'From filename (first YYYY-MM-DD pattern)',
+            config.startFromFilename,
+            async (checked) => {
+                config.startFromFilename = checked;
+                await this.plugin.saveSettings();
+                updatePriorityVisibility();
+            }
+        );
 
         // Priority selection (only show if both are enabled)
         const startPriorityContainer = startSection.createDiv();
@@ -586,15 +610,8 @@ export class CalendarSettingTab extends PluginSettingTab {
         const endPropsContainer = endSection.createDiv();
         endPropsContainer.style.cssText = 'margin-bottom: 15px;';
 
-        const endPropsLabel = endPropsContainer.createEl('label');
-        endPropsLabel.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
-
-        const endPropsCheckbox = endPropsLabel.createEl('input', { type: 'checkbox' });
-        endPropsCheckbox.checked = config.endFromProperties.length > 0;
-        endPropsLabel.createEl('span', { text: 'From properties', attr: { style: 'font-weight: 500;' } });
-
-        // Properties list
-        const endPropsListContainer = endPropsContainer.createDiv();
+        // Properties list container (will be appended after checkbox)
+        const endPropsListContainer = document.createElement('div');
         endPropsListContainer.style.cssText = 'margin-left: 28px;';
         if (config.endFromProperties.length === 0) {
             endPropsListContainer.style.display = 'none';
@@ -696,36 +713,43 @@ export class CalendarSettingTab extends PluginSettingTab {
             };
         };
 
+        // Checkbox first
+        this.createCheckboxWithLabel(
+            endPropsContainer,
+            'From properties',
+            config.endFromProperties.length > 0,
+            async (checked) => {
+                if (checked) {
+                    if (config.endFromProperties.length === 0) {
+                        config.endFromProperties.push('date_end');
+                    }
+                    endPropsListContainer.style.display = 'block';
+                } else {
+                    config.endFromProperties = [];
+                    endPropsListContainer.style.display = 'none';
+                }
+                await this.plugin.saveSettings();
+                renderEndPropsList();
+                updateEndPriorityVisibility();
+            }
+        );
+
+        // Properties list container appended after checkbox
+        endPropsContainer.appendChild(endPropsListContainer);
+
         renderEndPropsList();
 
-        endPropsCheckbox.onchange = async (e) => {
-            if ((e.target as HTMLInputElement).checked) {
-                if (config.endFromProperties.length === 0) {
-                    config.endFromProperties.push('date_end');
-                }
-                endPropsListContainer.style.display = 'block';
-            } else {
-                config.endFromProperties = [];
-                endPropsListContainer.style.display = 'none';
-            }
-            await this.plugin.saveSettings();
-            renderEndPropsList();
-            updateEndPriorityVisibility();
-        };
-
         // End from filename
-        const endFilenameLabel = endSection.createEl('label');
-        endFilenameLabel.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 15px;';
-
-        const endFilenameCheckbox = endFilenameLabel.createEl('input', { type: 'checkbox' });
-        endFilenameCheckbox.checked = config.endFromFilename;
-        endFilenameLabel.createEl('span', { text: 'From filename (second YYYY-MM-DD pattern)', attr: { style: 'font-weight: 500;' } });
-
-        endFilenameCheckbox.onchange = async (e) => {
-            config.endFromFilename = (e.target as HTMLInputElement).checked;
-            await this.plugin.saveSettings();
-            updateEndPriorityVisibility();
-        };
+        this.createCheckboxWithLabel(
+            endSection,
+            'From filename (second YYYY-MM-DD pattern)',
+            config.endFromFilename,
+            async (checked) => {
+                config.endFromFilename = checked;
+                await this.plugin.saveSettings();
+                updateEndPriorityVisibility();
+            }
+        );
 
         // End priority selection (only show if both are enabled)
         const endPriorityContainer = endSection.createDiv();
@@ -1549,23 +1573,22 @@ export class CalendarSettingTab extends PluginSettingTab {
             );
 
             // Use icon checkbox
-            const useIconContainer = content.createEl('div');
-            useIconContainer.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 10px;';
-            const useIconCheckbox = useIconContainer.createEl('input', { type: 'checkbox' });
-            useIconCheckbox.checked = category.iconType !== null;
-            useIconCheckbox.style.cssText = 'cursor: pointer;';
-            useIconCheckbox.onchange = async () => {
-                if (useIconCheckbox.checked) {
-                    category.iconType = 'emoji';
-                    category.iconValue = '⭐';
-                } else {
-                    category.iconType = null;
-                    category.iconValue = '';
+            this.createCheckboxWithLabel(
+                content,
+                'Use icon',
+                category.iconType !== null,
+                async (checked) => {
+                    if (checked) {
+                        category.iconType = 'emoji';
+                        category.iconValue = '⭐';
+                    } else {
+                        category.iconType = null;
+                        category.iconValue = '';
+                    }
+                    await this.plugin.saveSettings();
+                    this.display();
                 }
-                await this.plugin.saveSettings();
-                this.display();
-            };
-            useIconContainer.createEl('span', { text: 'Use icon', cls: 'setting-item-name' });
+            );
 
             // Icon settings (if enabled)
             if (category.iconType !== null) {
@@ -2110,6 +2133,31 @@ export class CategoryEditModal extends Modal {
     }
 
     /**
+     * Helper to create a checkbox with label in a consistent format.
+     * The checkbox is placed inside a wrapper div, NOT inside a <label> element.
+     * This prevents accidental toggling when clicking the label text.
+     */
+    private createCheckboxWithLabel(
+        container: HTMLElement,
+        text: string,
+        checked: boolean,
+        onChange: (checked: boolean) => void | Promise<void>
+    ): HTMLInputElement {
+        const wrapper = container.createDiv();
+        wrapper.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
+
+        const checkbox = wrapper.createEl('input', { type: 'checkbox' });
+        checkbox.checked = checked;
+        checkbox.onchange = async (e) => {
+            await onChange((e.target as HTMLInputElement).checked);
+        };
+
+        wrapper.createEl('span', { text });
+
+        return checkbox;
+    }
+
+    /**
      * IMPORTANT: This method is duplicated from CalendarSettingTab.renderConditionsInfoIcon().
      * When making changes here, apply the same changes to CalendarSettingTab.renderConditionsInfoIcon().
      * This ensures both main settings and modal have consistent info icon behavior.
@@ -2259,27 +2307,25 @@ export class CategoryEditModal extends Modal {
         useIconSetting.style.cssText = 'display: flex; flex-direction: column; gap: 4px; padding: 12px 0;';
 
         const useIconHeader = useIconSetting.createDiv();
-        useIconHeader.style.cssText = 'display: flex; align-items: center; gap: 10px;';
+        useIconHeader.style.cssText = 'display: flex; flex-direction: column; gap: 4px;';
 
-        const useIconCheckbox = useIconHeader.createEl('input', { type: 'checkbox' });
-        useIconCheckbox.checked = this.category.iconType !== null;
-        useIconCheckbox.style.cssText = 'cursor: pointer;';
-        useIconCheckbox.onchange = async () => {
-            if (useIconCheckbox.checked) {
-                this.category.iconType = 'emoji';
-                this.category.iconValue = '⭐';
-            } else {
-                this.category.iconType = null;
-                this.category.iconValue = '';
+        this.createCheckboxWithLabel(
+            useIconHeader,
+            'Use icon',
+            this.category.iconType !== null,
+            async (checked) => {
+                if (checked) {
+                    this.category.iconType = 'emoji';
+                    this.category.iconValue = '⭐';
+                } else {
+                    this.category.iconType = null;
+                    this.category.iconValue = '';
+                }
+                await this.plugin.saveSettings();
+                this.onSave();
+                this.onOpen(); // Refresh to show/hide icon input
             }
-            await this.plugin.saveSettings();
-            this.onSave();
-            this.onOpen(); // Refresh to show/hide icon input
-        };
-
-        const useIconLabel = useIconHeader.createEl('div');
-        useIconLabel.style.cssText = 'font-weight: 500;';
-        useIconLabel.textContent = 'Use icon';
+        );
 
         const useIconDesc = useIconSetting.createEl('div');
         useIconDesc.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-left: 24px;';

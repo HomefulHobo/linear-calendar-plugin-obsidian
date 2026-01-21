@@ -3287,6 +3287,22 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     this.plugin = plugin;
   }
   /**
+   * Create a checkbox with label that only toggles when the checkbox itself is clicked.
+   * This prevents accidental toggling when clicking the label text.
+   */
+  createCheckboxWithLabel(container, text, checked, onChange) {
+    const wrapper = container.createDiv();
+    wrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
+    const checkbox = wrapper.createEl("input", { type: "checkbox" });
+    checkbox.checked = checked;
+    checkbox.onchange = async (e) => {
+      await onChange(e.target.checked);
+    };
+    const label = wrapper.createEl("span", { text });
+    label.style.cssText = "font-weight: 500; cursor: default;";
+    return checkbox;
+  }
+  /**
    * IMPORTANT: This helper method is used in multiple places (Categories settings AND CategoryEditModal).
    * When making changes to this method, always evaluate if the change should apply to both locations.
    * Current usage locations:
@@ -3554,16 +3570,30 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     startSection.createEl("h4", { text: "Start Date", attr: { style: "margin-top: 0;" } });
     const startPropsContainer = startSection.createDiv();
     startPropsContainer.style.cssText = "margin-bottom: 15px;";
-    const startPropsLabel = startPropsContainer.createEl("label");
-    startPropsLabel.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
-    const startPropsCheckbox = startPropsLabel.createEl("input", { type: "checkbox" });
-    startPropsCheckbox.checked = config.startFromProperties.length > 0;
-    startPropsLabel.createEl("span", { text: "From properties", attr: { style: "font-weight: 500;" } });
-    const startPropsListContainer = startPropsContainer.createDiv();
+    const startPropsListContainer = document.createElement("div");
     startPropsListContainer.style.cssText = "margin-left: 28px;";
     if (config.startFromProperties.length === 0) {
       startPropsListContainer.style.display = "none";
     }
+    this.createCheckboxWithLabel(
+      startPropsContainer,
+      "From properties",
+      config.startFromProperties.length > 0,
+      async (checked) => {
+        if (checked) {
+          if (config.startFromProperties.length === 0) {
+            config.startFromProperties.push("date");
+          }
+          startPropsListContainer.style.display = "block";
+        } else {
+          config.startFromProperties = [];
+          startPropsListContainer.style.display = "none";
+        }
+        await this.plugin.saveSettings();
+        renderStartPropsList();
+      }
+    );
+    startPropsContainer.appendChild(startPropsListContainer);
     const renderStartPropsList = () => {
       startPropsListContainer.empty();
       if (config.startFromProperties.length > 0) {
@@ -3639,29 +3669,16 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       };
     };
     renderStartPropsList();
-    startPropsCheckbox.onchange = async (e) => {
-      if (e.target.checked) {
-        if (config.startFromProperties.length === 0) {
-          config.startFromProperties.push("date");
-        }
-        startPropsListContainer.style.display = "block";
-      } else {
-        config.startFromProperties = [];
-        startPropsListContainer.style.display = "none";
+    this.createCheckboxWithLabel(
+      startSection,
+      "From filename (first YYYY-MM-DD pattern)",
+      config.startFromFilename,
+      async (checked) => {
+        config.startFromFilename = checked;
+        await this.plugin.saveSettings();
+        updatePriorityVisibility();
       }
-      await this.plugin.saveSettings();
-      renderStartPropsList();
-    };
-    const startFilenameLabel = startSection.createEl("label");
-    startFilenameLabel.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 15px;";
-    const startFilenameCheckbox = startFilenameLabel.createEl("input", { type: "checkbox" });
-    startFilenameCheckbox.checked = config.startFromFilename;
-    startFilenameLabel.createEl("span", { text: "From filename (first YYYY-MM-DD pattern)", attr: { style: "font-weight: 500;" } });
-    startFilenameCheckbox.onchange = async (e) => {
-      config.startFromFilename = e.target.checked;
-      await this.plugin.saveSettings();
-      updatePriorityVisibility();
-    };
+    );
     const startPriorityContainer = startSection.createDiv();
     startPriorityContainer.style.cssText = "margin-top: 10px; padding: 10px; background: var(--background-primary); border-radius: 3px;";
     const updatePriorityVisibility = () => {
@@ -3698,12 +3715,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     endSection.createEl("h4", { text: "End Date (for multi-day events)", attr: { style: "margin-top: 0;" } });
     const endPropsContainer = endSection.createDiv();
     endPropsContainer.style.cssText = "margin-bottom: 15px;";
-    const endPropsLabel = endPropsContainer.createEl("label");
-    endPropsLabel.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
-    const endPropsCheckbox = endPropsLabel.createEl("input", { type: "checkbox" });
-    endPropsCheckbox.checked = config.endFromProperties.length > 0;
-    endPropsLabel.createEl("span", { text: "From properties", attr: { style: "font-weight: 500;" } });
-    const endPropsListContainer = endPropsContainer.createDiv();
+    const endPropsListContainer = document.createElement("div");
     endPropsListContainer.style.cssText = "margin-left: 28px;";
     if (config.endFromProperties.length === 0) {
       endPropsListContainer.style.display = "none";
@@ -3782,31 +3794,37 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
         renderEndPropsList();
       };
     };
-    renderEndPropsList();
-    endPropsCheckbox.onchange = async (e) => {
-      if (e.target.checked) {
-        if (config.endFromProperties.length === 0) {
-          config.endFromProperties.push("date_end");
+    this.createCheckboxWithLabel(
+      endPropsContainer,
+      "From properties",
+      config.endFromProperties.length > 0,
+      async (checked) => {
+        if (checked) {
+          if (config.endFromProperties.length === 0) {
+            config.endFromProperties.push("date_end");
+          }
+          endPropsListContainer.style.display = "block";
+        } else {
+          config.endFromProperties = [];
+          endPropsListContainer.style.display = "none";
         }
-        endPropsListContainer.style.display = "block";
-      } else {
-        config.endFromProperties = [];
-        endPropsListContainer.style.display = "none";
+        await this.plugin.saveSettings();
+        renderEndPropsList();
+        updateEndPriorityVisibility();
       }
-      await this.plugin.saveSettings();
-      renderEndPropsList();
-      updateEndPriorityVisibility();
-    };
-    const endFilenameLabel = endSection.createEl("label");
-    endFilenameLabel.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 15px;";
-    const endFilenameCheckbox = endFilenameLabel.createEl("input", { type: "checkbox" });
-    endFilenameCheckbox.checked = config.endFromFilename;
-    endFilenameLabel.createEl("span", { text: "From filename (second YYYY-MM-DD pattern)", attr: { style: "font-weight: 500;" } });
-    endFilenameCheckbox.onchange = async (e) => {
-      config.endFromFilename = e.target.checked;
-      await this.plugin.saveSettings();
-      updateEndPriorityVisibility();
-    };
+    );
+    endPropsContainer.appendChild(endPropsListContainer);
+    renderEndPropsList();
+    this.createCheckboxWithLabel(
+      endSection,
+      "From filename (second YYYY-MM-DD pattern)",
+      config.endFromFilename,
+      async (checked) => {
+        config.endFromFilename = checked;
+        await this.plugin.saveSettings();
+        updateEndPriorityVisibility();
+      }
+    );
     const endPriorityContainer = endSection.createDiv();
     endPriorityContainer.style.cssText = "margin-top: 10px; padding: 10px; background: var(--background-primary); border-radius: 3px;";
     const updateEndPriorityVisibility = () => {
@@ -4354,23 +4372,22 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
           this.display();
         }
       );
-      const useIconContainer = content.createEl("div");
-      useIconContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 10px;";
-      const useIconCheckbox = useIconContainer.createEl("input", { type: "checkbox" });
-      useIconCheckbox.checked = category.iconType !== null;
-      useIconCheckbox.style.cssText = "cursor: pointer;";
-      useIconCheckbox.onchange = async () => {
-        if (useIconCheckbox.checked) {
-          category.iconType = "emoji";
-          category.iconValue = "\u2B50";
-        } else {
-          category.iconType = null;
-          category.iconValue = "";
+      this.createCheckboxWithLabel(
+        content,
+        "Use icon",
+        category.iconType !== null,
+        async (checked) => {
+          if (checked) {
+            category.iconType = "emoji";
+            category.iconValue = "\u2B50";
+          } else {
+            category.iconType = null;
+            category.iconValue = "";
+          }
+          await this.plugin.saveSettings();
+          this.display();
         }
-        await this.plugin.saveSettings();
-        this.display();
-      };
-      useIconContainer.createEl("span", { text: "Use icon", cls: "setting-item-name" });
+      );
       if (category.iconType !== null) {
         const iconSettings = content.createDiv();
         iconSettings.style.cssText = "margin-left: 25px; margin-bottom: 15px;";
@@ -4772,6 +4789,22 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
     this.onSave = onSave;
   }
   /**
+   * Helper to create a checkbox with label in a consistent format.
+   * The checkbox is placed inside a wrapper div, NOT inside a <label> element.
+   * This prevents accidental toggling when clicking the label text.
+   */
+  createCheckboxWithLabel(container, text, checked, onChange) {
+    const wrapper = container.createDiv();
+    wrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
+    const checkbox = wrapper.createEl("input", { type: "checkbox" });
+    checkbox.checked = checked;
+    checkbox.onchange = async (e) => {
+      await onChange(e.target.checked);
+    };
+    wrapper.createEl("span", { text });
+    return checkbox;
+  }
+  /**
    * IMPORTANT: This method is duplicated from CalendarSettingTab.renderConditionsInfoIcon().
    * When making changes here, apply the same changes to CalendarSettingTab.renderConditionsInfoIcon().
    * This ensures both main settings and modal have consistent info icon behavior.
@@ -4878,25 +4911,24 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
     const useIconSetting = contentEl.createDiv();
     useIconSetting.style.cssText = "display: flex; flex-direction: column; gap: 4px; padding: 12px 0;";
     const useIconHeader = useIconSetting.createDiv();
-    useIconHeader.style.cssText = "display: flex; align-items: center; gap: 10px;";
-    const useIconCheckbox = useIconHeader.createEl("input", { type: "checkbox" });
-    useIconCheckbox.checked = this.category.iconType !== null;
-    useIconCheckbox.style.cssText = "cursor: pointer;";
-    useIconCheckbox.onchange = async () => {
-      if (useIconCheckbox.checked) {
-        this.category.iconType = "emoji";
-        this.category.iconValue = "\u2B50";
-      } else {
-        this.category.iconType = null;
-        this.category.iconValue = "";
+    useIconHeader.style.cssText = "display: flex; flex-direction: column; gap: 4px;";
+    this.createCheckboxWithLabel(
+      useIconHeader,
+      "Use icon",
+      this.category.iconType !== null,
+      async (checked) => {
+        if (checked) {
+          this.category.iconType = "emoji";
+          this.category.iconValue = "\u2B50";
+        } else {
+          this.category.iconType = null;
+          this.category.iconValue = "";
+        }
+        await this.plugin.saveSettings();
+        this.onSave();
+        this.onOpen();
       }
-      await this.plugin.saveSettings();
-      this.onSave();
-      this.onOpen();
-    };
-    const useIconLabel = useIconHeader.createEl("div");
-    useIconLabel.style.cssText = "font-weight: 500;";
-    useIconLabel.textContent = "Use icon";
+    );
     const useIconDesc = useIconSetting.createEl("div");
     useIconDesc.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-left: 24px;";
     useIconDesc.textContent = "Add an emoji or Lucide icon to this category";
@@ -6135,6 +6167,11 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
 
 // src/main.ts
 var LinearCalendarPlugin = class extends import_obsidian6.Plugin {
+  constructor() {
+    super(...arguments);
+    // Plugin icon shown in settings sidebar, ribbon, and tabs
+    this.icon = "calendar-range";
+  }
   async onload() {
     await this.loadSettings();
     this.registerView(

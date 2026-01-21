@@ -6,6 +6,9 @@ import { LinearCalendarSettings, DEFAULT_SETTINGS, VIEW_TYPE_CALENDAR } from './
 export default class LinearCalendarPlugin extends Plugin {
     settings!: LinearCalendarSettings;
 
+    // Plugin icon shown in settings sidebar, ribbon, and tabs
+    icon = 'calendar-range';
+
     async onload(): Promise<void> {
         await this.loadSettings();
 

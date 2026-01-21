@@ -26,6 +26,15 @@ export default class LinearCalendarPlugin extends Plugin {
             }
         });
 
+        this.addCommand({
+            id: 'quick-note-create',
+            name: 'Create Quick Note',
+            callback: async () => {
+                const { QuickNoteModal } = await import('./QuickNoteModal');
+                new QuickNoteModal(this.app, this, null, null).open();
+            }
+        });
+
         this.addSettingTab(new CalendarSettingTab(this.app, this));
     }
 
@@ -46,6 +55,17 @@ export default class LinearCalendarPlugin extends Plugin {
     }
 
     onunload(): void {
+        // Clean up mouse handlers
+        const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR);
+        for (const leaf of leaves) {
+            if (leaf.view instanceof LinearCalendarView) {
+                const view = leaf.view as LinearCalendarView;
+                if (view.mouseUpHandler) {
+                    document.removeEventListener('mouseup', view.mouseUpHandler);
+                }
+            }
+        }
+
         this.app.workspace.detachLeavesOfType(VIEW_TYPE_CALENDAR);
     }
 

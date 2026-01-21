@@ -8,6 +8,9 @@ var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
@@ -22,16 +25,771 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// src/PropertySuggest.ts
+var PropertySuggest;
+var init_PropertySuggest = __esm({
+  "src/PropertySuggest.ts"() {
+    "use strict";
+    PropertySuggest = class {
+      constructor(app, inputEl) {
+        this.suggestions = null;
+        this.app = app;
+        this.inputEl = inputEl;
+        this.inputEl.addEventListener("input", () => this.updateSuggestions());
+        this.inputEl.addEventListener("focus", () => this.updateSuggestions());
+        this.inputEl.addEventListener("blur", () => {
+          setTimeout(() => this.closeSuggestions(), 200);
+        });
+      }
+      getAllProperties() {
+        const properties = /* @__PURE__ */ new Set();
+        const files = this.app.vault.getMarkdownFiles();
+        files.forEach((file) => {
+          const cache = this.app.metadataCache.getFileCache(file);
+          if (cache == null ? void 0 : cache.frontmatter) {
+            Object.keys(cache.frontmatter).forEach((key) => {
+              if (key !== "position") {
+                properties.add(key);
+              }
+            });
+          }
+        });
+        return Array.from(properties).sort();
+      }
+      updateSuggestions() {
+        const query = this.inputEl.value.toLowerCase();
+        const allProperties = this.getAllProperties();
+        const matches = allProperties.filter((prop) => prop.toLowerCase().includes(query)).slice(0, 20);
+        this.showSuggestions(matches);
+      }
+      showSuggestions(properties) {
+        this.closeSuggestions();
+        if (properties.length === 0) return;
+        this.suggestions = document.createElement("div");
+        this.suggestions.className = "suggestion-container";
+        this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 300px; overflow-y: auto;";
+        properties.forEach((property) => {
+          var _a;
+          const item = document.createElement("div");
+          item.className = "suggestion-item";
+          item.textContent = property;
+          item.style.cssText = "padding: 6px 12px; cursor: pointer; border-radius: 3px;";
+          item.addEventListener("mouseenter", () => {
+            item.style.background = "var(--background-modifier-hover)";
+          });
+          item.addEventListener("mouseleave", () => {
+            item.style.background = "";
+          });
+          item.addEventListener("click", () => {
+            this.inputEl.value = property;
+            this.inputEl.dispatchEvent(new Event("input"));
+            this.closeSuggestions();
+            this.inputEl.focus();
+          });
+          (_a = this.suggestions) == null ? void 0 : _a.appendChild(item);
+        });
+        const rect = this.inputEl.getBoundingClientRect();
+        this.suggestions.style.top = rect.bottom + 2 + "px";
+        this.suggestions.style.left = rect.left + "px";
+        this.suggestions.style.width = rect.width + "px";
+        document.body.appendChild(this.suggestions);
+      }
+      closeSuggestions() {
+        if (this.suggestions) {
+          this.suggestions.remove();
+          this.suggestions = null;
+        }
+      }
+    };
+  }
+});
+
+// src/ValueSuggest.ts
+var ValueSuggest;
+var init_ValueSuggest = __esm({
+  "src/ValueSuggest.ts"() {
+    "use strict";
+    ValueSuggest = class {
+      constructor(app, inputEl, getPropertyKey) {
+        this.suggestions = null;
+        this.app = app;
+        this.inputEl = inputEl;
+        this.getPropertyKey = getPropertyKey;
+        this.inputEl.addEventListener("input", () => this.updateSuggestions());
+        this.inputEl.addEventListener("focus", () => this.updateSuggestions());
+        this.inputEl.addEventListener("blur", () => {
+          setTimeout(() => this.closeSuggestions(), 200);
+        });
+      }
+      getAllValuesForProperty(propertyKey) {
+        if (!propertyKey) return [];
+        const values = /* @__PURE__ */ new Set();
+        const files = this.app.vault.getMarkdownFiles();
+        files.forEach((file) => {
+          const cache = this.app.metadataCache.getFileCache(file);
+          if ((cache == null ? void 0 : cache.frontmatter) && cache.frontmatter[propertyKey]) {
+            const value = cache.frontmatter[propertyKey];
+            if (Array.isArray(value)) {
+              value.forEach((v) => values.add(String(v)));
+            } else {
+              values.add(String(value));
+            }
+          }
+        });
+        return Array.from(values).sort();
+      }
+      updateSuggestions() {
+        const propertyKey = this.getPropertyKey();
+        if (!propertyKey) {
+          this.closeSuggestions();
+          return;
+        }
+        const query = this.inputEl.value.toLowerCase();
+        const allValues = this.getAllValuesForProperty(propertyKey);
+        const matches = allValues.filter((val) => val.toLowerCase().includes(query)).slice(0, 20);
+        this.showSuggestions(matches);
+      }
+      showSuggestions(values) {
+        this.closeSuggestions();
+        if (values.length === 0) return;
+        this.suggestions = document.createElement("div");
+        this.suggestions.className = "suggestion-container";
+        this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 300px; overflow-y: auto;";
+        values.forEach((value) => {
+          var _a;
+          const item = document.createElement("div");
+          item.className = "suggestion-item";
+          item.textContent = value;
+          item.style.cssText = "padding: 6px 12px; cursor: pointer; border-radius: 3px;";
+          item.addEventListener("mouseenter", () => {
+            item.style.background = "var(--background-modifier-hover)";
+          });
+          item.addEventListener("mouseleave", () => {
+            item.style.background = "";
+          });
+          item.addEventListener("click", () => {
+            this.inputEl.value = value;
+            this.inputEl.dispatchEvent(new Event("input"));
+            this.closeSuggestions();
+            this.inputEl.focus();
+          });
+          (_a = this.suggestions) == null ? void 0 : _a.appendChild(item);
+        });
+        const rect = this.inputEl.getBoundingClientRect();
+        this.suggestions.style.top = rect.bottom + 2 + "px";
+        this.suggestions.style.left = rect.left + "px";
+        this.suggestions.style.width = rect.width + "px";
+        document.body.appendChild(this.suggestions);
+      }
+      closeSuggestions() {
+        if (this.suggestions) {
+          this.suggestions.remove();
+          this.suggestions = null;
+        }
+      }
+    };
+  }
+});
+
+// src/TagSuggest.ts
+var TagSuggest;
+var init_TagSuggest = __esm({
+  "src/TagSuggest.ts"() {
+    "use strict";
+    TagSuggest = class {
+      constructor(app, inputEl) {
+        this.suggestions = null;
+        this.onSelect = null;
+        this.app = app;
+        this.inputEl = inputEl;
+        this.inputEl.addEventListener("input", () => this.updateSuggestions());
+        this.inputEl.addEventListener("focus", () => this.updateSuggestions());
+        this.inputEl.addEventListener("blur", () => {
+          setTimeout(() => this.closeSuggestions(), 200);
+        });
+      }
+      getAllTags() {
+        const tags = /* @__PURE__ */ new Set();
+        const files = this.app.vault.getMarkdownFiles();
+        files.forEach((file) => {
+          var _a;
+          const cache = this.app.metadataCache.getFileCache(file);
+          if ((_a = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _a.tags) {
+            const frontmatterTags = cache.frontmatter.tags;
+            if (Array.isArray(frontmatterTags)) {
+              frontmatterTags.forEach((t) => {
+                const tag = String(t).replace(/^#/, "").trim();
+                if (tag) tags.add(tag);
+              });
+            } else {
+              const tag = String(frontmatterTags).replace(/^#/, "").trim();
+              if (tag) tags.add(tag);
+            }
+          }
+          if (cache == null ? void 0 : cache.tags) {
+            cache.tags.forEach((tagCache) => {
+              const tag = tagCache.tag.replace(/^#/, "").trim();
+              if (tag) tags.add(tag);
+            });
+          }
+        });
+        return Array.from(tags).sort();
+      }
+      updateSuggestions() {
+        const query = this.inputEl.value.toLowerCase();
+        const allTags = this.getAllTags();
+        const matches = allTags.filter((tag) => tag.toLowerCase().includes(query)).slice(0, 20);
+        this.showSuggestions(matches);
+      }
+      showSuggestions(tags) {
+        this.closeSuggestions();
+        if (tags.length === 0) return;
+        this.suggestions = document.createElement("div");
+        this.suggestions.className = "suggestion-container";
+        this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 300px; overflow-y: auto;";
+        tags.forEach((tag) => {
+          var _a;
+          const item = document.createElement("div");
+          item.className = "suggestion-item";
+          item.textContent = tag;
+          item.style.cssText = "padding: 6px 12px; cursor: pointer; border-radius: 3px;";
+          item.addEventListener("mouseenter", () => {
+            item.style.background = "var(--background-modifier-hover)";
+          });
+          item.addEventListener("mouseleave", () => {
+            item.style.background = "";
+          });
+          item.addEventListener("click", () => {
+            if (this.onSelect) {
+              this.onSelect(tag);
+              this.inputEl.value = "";
+            } else {
+              this.inputEl.value = tag;
+              this.inputEl.dispatchEvent(new Event("input"));
+            }
+            this.closeSuggestions();
+            this.inputEl.focus();
+          });
+          (_a = this.suggestions) == null ? void 0 : _a.appendChild(item);
+        });
+        const rect = this.inputEl.getBoundingClientRect();
+        this.suggestions.style.top = rect.bottom + 2 + "px";
+        this.suggestions.style.left = rect.left + "px";
+        this.suggestions.style.width = rect.width + "px";
+        document.body.appendChild(this.suggestions);
+      }
+      closeSuggestions() {
+        if (this.suggestions) {
+          this.suggestions.remove();
+          this.suggestions = null;
+        }
+      }
+    };
+  }
+});
+
+// src/QuickNoteModal.ts
+var QuickNoteModal_exports = {};
+__export(QuickNoteModal_exports, {
+  QuickNoteModal: () => QuickNoteModal
+});
+var import_obsidian4, QuickNoteModal;
+var init_QuickNoteModal = __esm({
+  "src/QuickNoteModal.ts"() {
+    "use strict";
+    import_obsidian4 = require("obsidian");
+    init_PropertySuggest();
+    init_ValueSuggest();
+    init_TagSuggest();
+    QuickNoteModal = class extends import_obsidian4.Modal {
+      constructor(app, plugin, startDate, endDate) {
+        super(app);
+        this.noteTitle = "";
+        this.startDateMethod = "property";
+        this.endDateMethod = "property";
+        this.includeEndDate = false;
+        this.metadata = [];
+        this.plugin = plugin;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        const config = plugin.settings.quickNoteCreation;
+        this.startDateProperty = config.defaultStartDateProperty;
+        this.endDateProperty = config.defaultEndDateProperty;
+        this.startDateValue = startDate ? this.formatDate(startDate) : "";
+        this.endDateValue = endDate ? this.formatDate(endDate) : "";
+        this.selectedFolder = this.getFolderPath();
+        this.includeEndDate = endDate !== null;
+        this.metadata = config.defaultMetadata.map((entry) => ({
+          key: entry.key,
+          value: entry.value
+        }));
+      }
+      onOpen() {
+        const { contentEl } = this;
+        contentEl.empty();
+        contentEl.createEl("h2", { text: "Create New Note" });
+        if (!this.startDate) {
+          const hint = contentEl.createEl("div", {
+            cls: "quick-note-hint"
+          });
+          hint.style.cssText = "background: var(--background-secondary); padding: 12px; border-radius: 6px; margin-bottom: 20px; border-left: 3px solid var(--interactive-accent);";
+          const hintTitle = hint.createEl("strong", { text: "\u{1F988}\u2728 Get Faster" });
+          hintTitle.style.cssText = "display: block; margin-bottom: 6px;";
+          const hintText = hint.createEl("div");
+          hintText.innerHTML = `
+                You can also create notes directly from the calendar:<br>
+                \u2022 <strong>Cmd/Ctrl+Click</strong> on a day (date number) to create a note for that date<br>
+                \u2022 <strong>Cmd/Ctrl+Click and drag</strong> to create a multi-day note<br>
+                \u2699\uFE0F <strong>Configure</strong> your preferred default behavior in this plugin's settings
+            `;
+        }
+        new import_obsidian4.Setting(contentEl).setName("Note Title").setDesc("Enter the title for your new note").addText((text) => text.setValue(this.noteTitle).onChange((value) => this.noteTitle = value));
+        contentEl.createEl("div", {
+          attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+        });
+        this.renderDateSection(contentEl, "Start Date", true);
+        contentEl.createEl("div", {
+          attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+        });
+        this.renderDateSection(contentEl, "End Date", false);
+        contentEl.createEl("div", {
+          attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+        });
+        this.renderMetadataSection(contentEl);
+        contentEl.createEl("div", {
+          attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+        });
+        this.renderFolderSection(contentEl);
+        contentEl.createEl("div", {
+          attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+        });
+        new import_obsidian4.Setting(contentEl).addButton((btn) => btn.setButtonText("Create Note").setCta().onClick(() => this.createNote())).addButton((btn) => btn.setButtonText("Cancel").onClick(() => this.close()));
+      }
+      renderDateSection(container, label, isStartDate) {
+        const isEndDate = !isStartDate;
+        if (isEndDate) {
+          new import_obsidian4.Setting(container).setName("Include end date").setDesc("Add an end date for multi-day notes").addToggle((toggle) => toggle.setValue(this.includeEndDate).onChange((value) => {
+            this.includeEndDate = value;
+            this.onOpen();
+          }));
+          if (!this.includeEndDate) return;
+        }
+        container.createEl("h4", { text: label, attr: { style: "margin-bottom: 10px;" } });
+        new import_obsidian4.Setting(container).setName("Date method").setDesc(isStartDate ? "How to store the start date" : "How to store the end date").addDropdown((dropdown) => dropdown.addOption("property", "By property").addOption("filename", "By filename").setValue(isStartDate ? this.startDateMethod : this.endDateMethod).onChange((value) => {
+          if (isStartDate) {
+            this.startDateMethod = value;
+          } else {
+            this.endDateMethod = value;
+          }
+          this.onOpen();
+        }));
+        const method = isStartDate ? this.startDateMethod : this.endDateMethod;
+        if (method === "property") {
+          const propertyContainer = container.createDiv();
+          propertyContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin: 10px 0;";
+          const propertyInput = propertyContainer.createEl("input", {
+            type: "text",
+            value: isStartDate ? this.startDateProperty : this.endDateProperty,
+            attr: { placeholder: "Property name" }
+          });
+          propertyInput.style.cssText = "flex: 0 0 150px; padding: 6px 8px;";
+          propertyInput.oninput = () => {
+            if (isStartDate) {
+              this.startDateProperty = propertyInput.value;
+            } else {
+              this.endDateProperty = propertyInput.value;
+            }
+          };
+          propertyContainer.createEl("span", { text: ":", attr: { style: "font-weight: 500;" } });
+          const dateInput = propertyContainer.createEl("input", {
+            type: "text",
+            value: isStartDate ? this.startDateValue : this.endDateValue,
+            attr: { placeholder: "YYYY-MM-DD" }
+          });
+          dateInput.style.cssText = "flex: 1; padding: 6px 8px;";
+          dateInput.oninput = () => {
+            if (isStartDate) {
+              this.startDateValue = dateInput.value;
+            } else {
+              this.endDateValue = dateInput.value;
+            }
+          };
+          this.addPropertySuggest(propertyInput);
+        } else {
+          const filenameNote = container.createEl("p", {
+            text: isStartDate ? `Date will be added to filename: ${this.startDate ? this.formatDate(this.startDate) : "YYYY-MM-DD"} Title` : `Date will be added to filename: Title \u2013 ${this.endDate ? this.formatDate(this.endDate) : "YYYY-MM-DD"}`,
+            cls: "setting-item-description"
+          });
+          filenameNote.style.marginTop = "10px";
+        }
+      }
+      renderMetadataSection(container) {
+        container.createEl("h4", { text: "Metadata", attr: { style: "margin-bottom: 10px;" } });
+        const desc = container.createEl("p", {
+          cls: "setting-item-description",
+          text: "Add custom properties and tags to your note"
+        });
+        desc.style.marginBottom = "15px";
+        this.metadata.forEach((entry, index) => {
+          this.renderMetadataRow(container, entry, index);
+        });
+        const addBtn = container.createEl("button", { text: "+ Add Property" });
+        addBtn.style.cssText = "margin-top: 10px; padding: 6px 12px; cursor: pointer;";
+        addBtn.onclick = () => {
+          this.metadata.push({ key: "", value: "" });
+          this.onOpen();
+        };
+      }
+      renderMetadataRow(container, entry, index) {
+        const rowContainer = container.createDiv();
+        rowContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
+        const keyInput = rowContainer.createEl("input", {
+          type: "text",
+          value: entry.key,
+          attr: { placeholder: "Property name" }
+        });
+        keyInput.style.cssText = "flex: 0 0 150px; padding: 6px 8px;";
+        keyInput.oninput = () => {
+          const oldKey = this.metadata[index].key;
+          const newKey = keyInput.value;
+          const wasTag = oldKey === "tags" || oldKey === "tag";
+          const isTag = newKey === "tags" || newKey === "tag";
+          this.metadata[index].key = newKey;
+          if (isTag !== wasTag) {
+            this.onOpen();
+          }
+        };
+        this.addPropertySuggest(keyInput);
+        rowContainer.createEl("span", { text: ":", attr: { style: "font-weight: 500;" } });
+        const isTagProperty = entry.key === "tags" || entry.key === "tag";
+        if (isTagProperty) {
+          this.renderTagInput(rowContainer, entry, index);
+        } else {
+          const valueInput = rowContainer.createEl("input", {
+            type: "text",
+            value: entry.value,
+            attr: { placeholder: "Value" }
+          });
+          valueInput.style.cssText = "flex: 1; padding: 6px 8px;";
+          valueInput.oninput = () => {
+            this.metadata[index].value = valueInput.value;
+          };
+          this.addValueSuggest(valueInput, () => this.metadata[index].key);
+        }
+        const deleteBtn = rowContainer.createEl("button", { text: "\xD7" });
+        deleteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.2em; flex-shrink: 0;";
+        deleteBtn.onclick = () => {
+          this.metadata.splice(index, 1);
+          this.onOpen();
+        };
+      }
+      renderTagInput(container, entry, index) {
+        const tagContainer = container.createDiv();
+        tagContainer.style.cssText = "flex: 1; display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid var(--background-modifier-border); border-radius: 4px; min-height: 32px; align-items: center;";
+        const refreshTags = () => {
+          tagContainer.empty();
+          const tags = this.metadata[index].value.split(/[,\s]+/).map((t) => t.replace(/^#/, "").trim()).filter((t) => t.length > 0);
+          tags.forEach((tag, tagIndex) => {
+            const chip = tagContainer.createEl("span");
+            chip.textContent = tag;
+            chip.style.cssText = "background: var(--interactive-accent); color: var(--text-on-accent); padding: 2px 8px; border-radius: 12px; font-size: 0.9em; display: flex; align-items: center; gap: 4px;";
+            const removeBtn = chip.createEl("span");
+            removeBtn.textContent = "\xD7";
+            removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
+            removeBtn.onclick = () => {
+              tags.splice(tagIndex, 1);
+              this.metadata[index].value = tags.join(", ");
+              refreshTags();
+            };
+          });
+          const tagInput = tagContainer.createEl("input", {
+            type: "text",
+            attr: { placeholder: "Add tag..." }
+          });
+          tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
+          const tagSuggest = new TagSuggest(this.app, tagInput);
+          tagSuggest.onSelect = (tag) => {
+            const newTag = tag.replace(/^#/, "").trim();
+            if (newTag && !tags.includes(newTag)) {
+              tags.push(newTag);
+              this.metadata[index].value = tags.join(", ");
+              refreshTags();
+            }
+          };
+          tagInput.onkeydown = (e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              const newTag = tagInput.value.replace(/^#/, "").trim();
+              if (newTag && !tags.includes(newTag)) {
+                tags.push(newTag);
+                this.metadata[index].value = tags.join(", ");
+                tagInput.value = "";
+                refreshTags();
+              }
+            } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
+              tags.pop();
+              this.metadata[index].value = tags.join(", ");
+              refreshTags();
+            }
+          };
+          setTimeout(() => tagInput.focus(), 0);
+        };
+        refreshTags();
+      }
+      addPropertySuggest(input) {
+        new PropertySuggest(this.app, input);
+      }
+      addValueSuggest(input, getKey) {
+        new ValueSuggest(this.app, input, getKey);
+      }
+      renderFolderSection(container) {
+        new import_obsidian4.Setting(container).setName("Save location").setDesc(`Current: ${this.selectedFolder || "(vault root)"}`).addText((text) => text.setValue(this.selectedFolder).onChange((value) => this.selectedFolder = value));
+      }
+      getFolderPath() {
+        var _a, _b, _c, _d;
+        const config = this.plugin.settings.quickNoteCreation;
+        switch (config.defaultFolder) {
+          case "default":
+            return this.app.vault.getConfig("newFileLocation") === "folder" ? this.app.vault.getConfig("newFileFolderPath") || "" : "";
+          case "dailynotes":
+            if (this.plugin.settings.dailyNoteFolderMode === "obsidian") {
+              const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
+              if (dailyNotesPlugin && dailyNotesPlugin.enabled) {
+                let folder = ((_d = (_c = dailyNotesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder) || "";
+                folder = folder.replace(/^\/+|\/+$/g, "");
+                return folder;
+              }
+              return "";
+            } else {
+              return this.plugin.settings.dailyNoteCustomFolder;
+            }
+          case "custom":
+            return config.customFolder;
+          default:
+            return "";
+        }
+      }
+      formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+      async createNote() {
+        if (!this.noteTitle.trim()) {
+          new import_obsidian4.Notice("Please enter a note title");
+          return;
+        }
+        let filename = "";
+        if (this.startDateMethod === "filename") {
+          filename = this.startDateValue;
+        }
+        if (this.includeEndDate && this.endDateMethod === "filename") {
+          if (filename) {
+            filename = `${filename} \u2013 ${this.endDateValue}`;
+          } else {
+            filename = this.endDateValue;
+          }
+        }
+        if (filename) {
+          filename = `${filename} ${this.noteTitle.trim()}`;
+        } else {
+          filename = this.noteTitle.trim();
+        }
+        const frontmatter = {};
+        if (this.startDateMethod === "property" && this.startDateProperty && this.startDateValue) {
+          frontmatter[this.startDateProperty] = this.startDateValue;
+        }
+        if (this.includeEndDate && this.endDateMethod === "property" && this.endDateProperty && this.endDateValue) {
+          frontmatter[this.endDateProperty] = this.endDateValue;
+        }
+        this.metadata.forEach((entry) => {
+          if (entry.key && entry.value) {
+            if (entry.key === "tags" || entry.key === "tag") {
+              const tags = entry.value.split(/[,\s]+/).map((t) => t.replace(/^#/, "").trim()).filter((t) => t.length > 0);
+              frontmatter[entry.key] = tags.length === 1 ? tags[0] : tags;
+            } else {
+              frontmatter[entry.key] = entry.value;
+            }
+          }
+        });
+        let content = "";
+        if (Object.keys(frontmatter).length > 0) {
+          content += "---\n";
+          for (const [key, value] of Object.entries(frontmatter)) {
+            if (Array.isArray(value)) {
+              content += `${key}:
+`;
+              value.forEach((v) => content += `  - ${v}
+`);
+            } else {
+              content += `${key}: ${value}
+`;
+            }
+          }
+          content += "---\n\n";
+        }
+        const folder = this.selectedFolder ? `${this.selectedFolder}/` : "";
+        const fullPath = `${folder}${filename}.md`;
+        try {
+          const shouldUseTemplater = this.shouldTemplaterProcess(fullPath);
+          if (shouldUseTemplater) {
+            const newFile = await this.app.vault.create(fullPath, "");
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            await this.waitForTemplater(newFile);
+            const templaterContent = await this.app.vault.read(newFile);
+            if (templaterContent.length > 0) {
+              await this.mergeFrontmatterWithTemplaterOutput(newFile, frontmatter);
+            } else {
+              await this.app.vault.modify(newFile, content);
+            }
+            await this.app.workspace.getLeaf(false).openFile(newFile);
+          } else {
+            const newFile = await this.app.vault.create(fullPath, content);
+            await this.app.workspace.getLeaf(false).openFile(newFile);
+          }
+          this.close();
+          new import_obsidian4.Notice(`Created note: ${filename}`);
+        } catch (error) {
+          new import_obsidian4.Notice(`Error creating note: ${error.message}`);
+        }
+      }
+      async mergeFrontmatterWithTemplaterOutput(file, frontmatter) {
+        const currentContent = await this.app.vault.read(file);
+        const frontmatterRegex = /^---\n([\s\S]*?)\n---\n/;
+        const match = currentContent.match(frontmatterRegex);
+        if (match) {
+          const existingFrontmatter = match[1];
+          const bodyContent = currentContent.substring(match[0].length);
+          const existingProps = {};
+          existingFrontmatter.split("\n").forEach((line) => {
+            const colonIndex = line.indexOf(":");
+            if (colonIndex > 0) {
+              const key = line.substring(0, colonIndex).trim();
+              const value = line.substring(colonIndex + 1).trim();
+              existingProps[key] = value;
+            }
+          });
+          const mergedProps = { ...existingProps, ...frontmatter };
+          let newFrontmatter = "---\n";
+          for (const [key, value] of Object.entries(mergedProps)) {
+            if (Array.isArray(value)) {
+              newFrontmatter += `${key}:
+`;
+              value.forEach((v) => newFrontmatter += `  - ${v}
+`);
+            } else {
+              newFrontmatter += `${key}: ${value}
+`;
+            }
+          }
+          newFrontmatter += "---\n";
+          await this.app.vault.modify(file, newFrontmatter + bodyContent);
+        } else {
+          let newFrontmatter = "---\n";
+          for (const [key, value] of Object.entries(frontmatter)) {
+            if (Array.isArray(value)) {
+              newFrontmatter += `${key}:
+`;
+              value.forEach((v) => newFrontmatter += `  - ${v}
+`);
+            } else {
+              newFrontmatter += `${key}: ${value}
+`;
+            }
+          }
+          newFrontmatter += "---\n\n";
+          await this.app.vault.modify(file, newFrontmatter + currentContent);
+        }
+      }
+      shouldTemplaterProcess(filePath) {
+        const templater = this.app.plugins.plugins["templater-obsidian"];
+        if (!templater || !templater._loaded) {
+          return false;
+        }
+        const settings = templater.settings;
+        if (!(settings == null ? void 0 : settings.trigger_on_file_creation) || !settings.enable_folder_templates) {
+          return false;
+        }
+        if (!settings.folder_templates || settings.folder_templates.length === 0) {
+          return false;
+        }
+        const normalizedPath = filePath.replace(/\.md$/, "");
+        for (const folderTemplate of settings.folder_templates) {
+          const folderPath = folderTemplate.folder;
+          if (!folderPath) continue;
+          if (folderPath === "/") {
+            const isInRoot = !normalizedPath.includes("/") && !filePath.includes("/");
+            if (isInRoot) {
+              return true;
+            }
+            continue;
+          }
+          const matches = normalizedPath.startsWith(folderPath + "/") || normalizedPath === folderPath || filePath.startsWith(folderPath + "/");
+          if (matches) {
+            return true;
+          }
+        }
+        return false;
+      }
+      async waitForTemplater(file) {
+        const templater = this.app.plugins.plugins["templater-obsidian"];
+        if (!templater || !templater._loaded) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          return;
+        }
+        const settings = templater.settings;
+        if (!(settings == null ? void 0 : settings.trigger_on_file_creation)) {
+          await new Promise((resolve) => setTimeout(resolve, 50));
+          return;
+        }
+        const maxWaitTime = 5e3;
+        const stabilizationTime = 300;
+        return new Promise((resolve) => {
+          let resolved = false;
+          let timeoutId;
+          let stabilizationTimeoutId = null;
+          const cleanup = () => {
+            if (resolved) return;
+            resolved = true;
+            this.app.vault.off("modify", modifyHandler);
+            if (stabilizationTimeoutId) {
+              clearTimeout(stabilizationTimeoutId);
+            }
+            clearTimeout(timeoutId);
+          };
+          const modifyHandler = (modifiedFile) => {
+            if (modifiedFile.path === file.path) {
+              if (stabilizationTimeoutId) {
+                clearTimeout(stabilizationTimeoutId);
+              }
+              stabilizationTimeoutId = setTimeout(() => {
+                cleanup();
+                resolve();
+              }, stabilizationTime);
+            }
+          };
+          this.app.vault.on("modify", modifyHandler);
+          timeoutId = setTimeout(() => {
+            cleanup();
+            resolve();
+          }, maxWaitTime);
+        });
+      }
+    };
+  }
+});
+
 // src/main.ts
 var main_exports = {};
 __export(main_exports, {
   default: () => LinearCalendarPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian5 = require("obsidian");
+var import_obsidian6 = require("obsidian");
 
 // src/CalendarView.ts
-var import_obsidian4 = require("obsidian");
+var import_obsidian5 = require("obsidian");
 
 // src/types.ts
 var DEFAULT_SETTINGS = {
@@ -81,6 +839,19 @@ var DEFAULT_SETTINGS = {
           { name: "Green", hex: "#779d6c" }
         ]
       }
+    ]
+  },
+  quickNoteCreation: {
+    enabled: true,
+    showAddNoteButton: true,
+    hasSeenWelcomeBanner: false,
+    defaultFolder: "dailynotes",
+    customFolder: "",
+    defaultStartDateProperty: "date",
+    defaultEndDateProperty: "endDate",
+    defaultCategoryProperty: "category",
+    defaultMetadata: [
+      { key: "category", value: "" }
     ]
   },
   experimental: {
@@ -2406,6 +3177,9 @@ var IconSuggest = class {
 };
 
 // src/SettingsTab.ts
+init_PropertySuggest();
+init_ValueSuggest();
+init_TagSuggest();
 function getValidOperators(property) {
   if (property === "file.tags") {
     return [
@@ -2566,6 +3340,8 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       this.renderColorCategoriesSection(contentEl);
     } else if (this.activeTab === "daily-notes") {
       this.renderDailyNotesSection(contentEl);
+    } else if (this.activeTab === "quicknotes") {
+      this.renderQuickNoteCreationSettings(contentEl);
     } else if (this.activeTab === "experimental") {
       this.renderExperimentalSection(contentEl);
     }
@@ -2580,6 +3356,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       { id: "basic", label: "Basic Settings" },
       { id: "categories", label: "Categories (Colors & Icons)" },
       { id: "daily-notes", label: "Daily Notes" },
+      { id: "quicknotes", label: "Quick Notes" },
       { id: "experimental", label: "Experimental" }
     ];
     tabs.forEach((tab) => {
@@ -2759,6 +3536,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
           config.startFromProperties[index] = e.target.value;
           await this.plugin.saveSettings();
         };
+        new PropertySuggest(this.app, propInput);
         const removeBtn = propRow.createEl("button", { text: "\xD7" });
         removeBtn.style.cssText = "padding: 2px 8px; cursor: pointer;";
         removeBtn.onclick = async () => {
@@ -2902,6 +3680,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
           config.endFromProperties[index] = e.target.value;
           await this.plugin.saveSettings();
         };
+        new PropertySuggest(this.app, propInput);
         const removeBtn = propRow.createEl("button", { text: "\xD7" });
         removeBtn.style.cssText = "padding: 2px 8px; cursor: pointer;";
         removeBtn.onclick = async () => {
@@ -3119,6 +3898,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
         condition.property = e.target.value;
         await this.plugin.saveSettings();
       };
+      new PropertySuggest(this.app, customInput);
     }
     const operatorSelect = condEl.createEl("select");
     operatorSelect.style.cssText = "padding: 4px 8px;";
@@ -3138,16 +3918,79 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       this.display();
     };
     if (!["exists", "doesNotExist"].includes(condition.operator)) {
-      const valueInput = condEl.createEl("input", {
-        type: "text",
-        attr: { placeholder: "value" },
-        value: condition.value || ""
-      });
-      valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
-      valueInput.onchange = async (e) => {
-        condition.value = e.target.value;
-        await this.plugin.saveSettings();
-      };
+      if (condition.property === "file.tags") {
+        const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
+        const tagContainer = condEl.createDiv();
+        tagContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);";
+        const refreshTags = () => {
+          tagContainer.empty();
+          tags.forEach((tag, tagIndex) => {
+            const chip = tagContainer.createEl("span");
+            chip.style.cssText = "display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;";
+            chip.createEl("span", { text: tag });
+            const removeBtn = chip.createEl("span");
+            removeBtn.textContent = "\xD7";
+            removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
+            removeBtn.onclick = async () => {
+              tags.splice(tagIndex, 1);
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              refreshTags();
+            };
+          });
+          const tagInput = tagContainer.createEl("input", {
+            type: "text",
+            attr: { placeholder: "Add tag..." }
+          });
+          tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
+          const tagSuggest = new TagSuggest(this.app, tagInput);
+          tagSuggest.onSelect = async (tag) => {
+            const newTag = tag.replace(/^#/, "").trim();
+            if (newTag && !tags.includes(newTag)) {
+              tags.push(newTag);
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              refreshTags();
+            }
+          };
+          tagInput.onkeydown = async (e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              const newTag = tagInput.value.replace(/^#/, "").trim();
+              if (newTag && !tags.includes(newTag)) {
+                tags.push(newTag);
+                condition.value = tags.join(", ");
+                tagInput.value = "";
+                await this.plugin.saveSettings();
+                refreshTags();
+              }
+            } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
+              tags.pop();
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              refreshTags();
+            }
+          };
+          setTimeout(() => tagInput.focus(), 0);
+        };
+        refreshTags();
+      } else {
+        const valueInput = condEl.createEl("input", {
+          type: "text",
+          attr: { placeholder: "value" },
+          value: condition.value || ""
+        });
+        valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
+        valueInput.onchange = async (e) => {
+          condition.value = e.target.value;
+          await this.plugin.saveSettings();
+        };
+        if (condition.property === "file.folder") {
+          new FolderSuggest(this.app, valueInput);
+        } else {
+          new ValueSuggest(this.app, valueInput, () => condition.property);
+        }
+      }
     }
     if (condition.property === "file.folder" && condition.operator === "is") {
       const subfolderLabel = condEl.createEl("label");
@@ -3226,6 +4069,123 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       this.plugin.settings.hideDateInTitle = value;
       await this.plugin.saveSettings();
     }));
+  }
+  renderQuickNoteCreationSettings(containerEl) {
+    const config = this.plugin.settings.quickNoteCreation;
+    containerEl.createEl("h3", { text: "Quick Note Creation" });
+    const desc = containerEl.createEl("p", {
+      cls: "setting-item-description",
+      text: "Create notes directly from the calendar by Cmd/Ctrl+clicking on day numbers. Click and drag to select a date range for multi-day notes."
+    });
+    desc.style.marginTop = "-10px";
+    desc.style.marginBottom = "15px";
+    new import_obsidian3.Setting(containerEl).setName("Enable quick note creation").setDesc("Create notes directly from the calendar with Cmd/Ctrl+Click").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+      config.enabled = value;
+      await this.plugin.saveSettings();
+      this.display();
+    }));
+    if (!config.enabled) return;
+    new import_obsidian3.Setting(containerEl).setName('Show "Add Note" button').setDesc('Display an "Add Note" button in the calendar header for easy access').addToggle((toggle) => toggle.setValue(config.showAddNoteButton).onChange(async (value) => {
+      config.showAddNoteButton = value;
+      await this.plugin.saveSettings();
+      const leaves = this.plugin.app.workspace.getLeavesOfType("linear-calendar");
+      for (const leaf of leaves) {
+        if (leaf.view instanceof LinearCalendarView) {
+          await leaf.view.reload();
+        }
+      }
+    }));
+    this.renderDivider(containerEl);
+    new import_obsidian3.Setting(containerEl).setName("Default save location").setDesc("Where new notes should be saved by default").addDropdown((dropdown) => dropdown.addOption("default", "Same as new notes").addOption("dailynotes", "Same as daily notes").addOption("custom", "Custom folder").setValue(config.defaultFolder).onChange(async (value) => {
+      config.defaultFolder = value;
+      await this.plugin.saveSettings();
+      this.display();
+    }));
+    if (config.defaultFolder === "custom") {
+      new import_obsidian3.Setting(containerEl).setName("Custom folder path").setDesc("Path where quick notes should be saved").addText((text) => {
+        text.setPlaceholder("folder/subfolder").setValue(config.customFolder).onChange(async (value) => {
+          const cleaned = value.replace(/^\/+|\/+$/g, "");
+          config.customFolder = cleaned;
+          await this.plugin.saveSettings();
+        });
+        new FolderSuggest(this.app, text.inputEl);
+      });
+    }
+    this.renderDivider(containerEl);
+    containerEl.createEl("h4", { text: "Default Properties" });
+    new import_obsidian3.Setting(containerEl).setName("Start date property").setDesc("Default property name for start date").addText((text) => {
+      text.setValue(config.defaultStartDateProperty).onChange(async (value) => {
+        config.defaultStartDateProperty = value;
+        await this.plugin.saveSettings();
+      });
+      new PropertySuggest(this.app, text.inputEl);
+    });
+    new import_obsidian3.Setting(containerEl).setName("End date property").setDesc("Default property name for end date").addText((text) => {
+      text.setValue(config.defaultEndDateProperty).onChange(async (value) => {
+        config.defaultEndDateProperty = value;
+        await this.plugin.saveSettings();
+      });
+      new PropertySuggest(this.app, text.inputEl);
+    });
+    new import_obsidian3.Setting(containerEl).setName("Category property").setDesc("Default property name for category").addText((text) => {
+      text.setValue(config.defaultCategoryProperty).onChange(async (value) => {
+        config.defaultCategoryProperty = value;
+        await this.plugin.saveSettings();
+      });
+      new PropertySuggest(this.app, text.inputEl);
+    });
+    this.renderDivider(containerEl);
+    containerEl.createEl("h4", { text: "Default Metadata" });
+    const metadataDesc = containerEl.createEl("p", {
+      cls: "setting-item-description",
+      text: "Default metadata that will be pre-filled when creating a new note"
+    });
+    metadataDesc.style.marginBottom = "15px";
+    config.defaultMetadata.forEach((entry, index) => {
+      this.renderDefaultMetadataRow(containerEl, entry, index);
+    });
+    const addBtn = containerEl.createEl("button", { text: "+ Add Default Metadata" });
+    addBtn.style.cssText = "margin-top: 10px; padding: 6px 12px; cursor: pointer;";
+    addBtn.onclick = async () => {
+      config.defaultMetadata.push({ key: "", value: "" });
+      await this.plugin.saveSettings();
+      this.display();
+    };
+  }
+  renderDefaultMetadataRow(container, entry, index) {
+    const config = this.plugin.settings.quickNoteCreation;
+    const rowContainer = container.createDiv();
+    rowContainer.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
+    const keyInput = rowContainer.createEl("input", {
+      type: "text",
+      value: entry.key,
+      attr: { placeholder: "Property name" }
+    });
+    keyInput.style.cssText = "flex: 0 0 150px; padding: 6px 8px;";
+    keyInput.oninput = async () => {
+      config.defaultMetadata[index].key = keyInput.value;
+      await this.plugin.saveSettings();
+    };
+    new PropertySuggest(this.app, keyInput);
+    rowContainer.createEl("span", { text: ":", attr: { style: "font-weight: 500;" } });
+    const valueInput = rowContainer.createEl("input", {
+      type: "text",
+      value: entry.value,
+      attr: { placeholder: "Value" }
+    });
+    valueInput.style.cssText = "flex: 1; padding: 6px 8px;";
+    valueInput.oninput = async () => {
+      config.defaultMetadata[index].value = valueInput.value;
+      await this.plugin.saveSettings();
+    };
+    new ValueSuggest(this.app, valueInput, () => keyInput.value);
+    const deleteBtn = rowContainer.createEl("button", { text: "\xD7" });
+    deleteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.2em; flex-shrink: 0;";
+    deleteBtn.onclick = async () => {
+      config.defaultMetadata.splice(index, 1);
+      await this.plugin.saveSettings();
+      this.display();
+    };
   }
   renderExperimentalSection(containerEl) {
     const headerContainer = containerEl.createDiv();
@@ -3666,6 +4626,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
         condition.property = e.target.value;
         await this.plugin.saveSettings();
       };
+      new PropertySuggest(this.app, customInput);
     }
     const operatorSelect = condEl.createEl("select");
     operatorSelect.style.cssText = "padding: 4px 8px;";
@@ -3685,16 +4646,79 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       this.display();
     };
     if (!["exists", "doesNotExist"].includes(condition.operator)) {
-      const valueInput = condEl.createEl("input", {
-        type: "text",
-        attr: { placeholder: "value" },
-        value: condition.value || ""
-      });
-      valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
-      valueInput.onchange = async (e) => {
-        condition.value = e.target.value;
-        await this.plugin.saveSettings();
-      };
+      if (condition.property === "file.tags") {
+        const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
+        const tagContainer = condEl.createDiv();
+        tagContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);";
+        const refreshTags = () => {
+          tagContainer.empty();
+          tags.forEach((tag, tagIndex) => {
+            const chip = tagContainer.createEl("span");
+            chip.style.cssText = "display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;";
+            chip.createEl("span", { text: tag });
+            const removeBtn = chip.createEl("span");
+            removeBtn.textContent = "\xD7";
+            removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
+            removeBtn.onclick = async () => {
+              tags.splice(tagIndex, 1);
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              refreshTags();
+            };
+          });
+          const tagInput = tagContainer.createEl("input", {
+            type: "text",
+            attr: { placeholder: "Add tag..." }
+          });
+          tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
+          const tagSuggest = new TagSuggest(this.app, tagInput);
+          tagSuggest.onSelect = async (tag) => {
+            const newTag = tag.replace(/^#/, "").trim();
+            if (newTag && !tags.includes(newTag)) {
+              tags.push(newTag);
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              refreshTags();
+            }
+          };
+          tagInput.onkeydown = async (e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              const newTag = tagInput.value.replace(/^#/, "").trim();
+              if (newTag && !tags.includes(newTag)) {
+                tags.push(newTag);
+                condition.value = tags.join(", ");
+                tagInput.value = "";
+                await this.plugin.saveSettings();
+                refreshTags();
+              }
+            } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
+              tags.pop();
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              refreshTags();
+            }
+          };
+          setTimeout(() => tagInput.focus(), 0);
+        };
+        refreshTags();
+      } else {
+        const valueInput = condEl.createEl("input", {
+          type: "text",
+          attr: { placeholder: "value" },
+          value: condition.value || ""
+        });
+        valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
+        valueInput.onchange = async (e) => {
+          condition.value = e.target.value;
+          await this.plugin.saveSettings();
+        };
+        if (condition.property === "file.folder") {
+          new FolderSuggest(this.app, valueInput);
+        } else {
+          new ValueSuggest(this.app, valueInput, () => condition.property);
+        }
+      }
     }
     if (condition.property === "file.folder" && condition.operator === "is") {
       const subfolderLabel = condEl.createEl("label");
@@ -4282,6 +5306,7 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
         await this.plugin.saveSettings();
         this.onSave();
       };
+      new PropertySuggest(this.app, customInput);
     }
     const operatorSelect = fieldsContainer.createEl("select");
     operatorSelect.style.cssText = "padding: 4px 8px;";
@@ -4313,6 +5338,72 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
         await this.plugin.saveSettings();
         this.onSave();
       };
+      if (condition.property === "file.tags") {
+        valueInput.remove();
+        const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
+        const tagContainer = fieldsContainer.createDiv();
+        tagContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);";
+        const refreshTags = () => {
+          tagContainer.empty();
+          tags.forEach((tag, tagIndex) => {
+            const chip = tagContainer.createEl("span");
+            chip.style.cssText = "display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;";
+            chip.createEl("span", { text: tag });
+            const removeBtn = chip.createEl("span");
+            removeBtn.textContent = "\xD7";
+            removeBtn.style.cssText = "cursor: pointer; font-weight: bold;";
+            removeBtn.onclick = async () => {
+              tags.splice(tagIndex, 1);
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              this.onSave();
+              refreshTags();
+            };
+          });
+          const tagInput = tagContainer.createEl("input", {
+            type: "text",
+            attr: { placeholder: "Add tag..." }
+          });
+          tagInput.style.cssText = "flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;";
+          const tagSuggest = new TagSuggest(this.app, tagInput);
+          tagSuggest.onSelect = async (tag) => {
+            const newTag = tag.replace(/^#/, "").trim();
+            if (newTag && !tags.includes(newTag)) {
+              tags.push(newTag);
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              this.onSave();
+              refreshTags();
+            }
+          };
+          tagInput.onkeydown = async (e) => {
+            if (e.key === "Enter" || e.key === ",") {
+              e.preventDefault();
+              const newTag = tagInput.value.replace(/^#/, "").trim();
+              if (newTag && !tags.includes(newTag)) {
+                tags.push(newTag);
+                condition.value = tags.join(", ");
+                tagInput.value = "";
+                await this.plugin.saveSettings();
+                this.onSave();
+                refreshTags();
+              }
+            } else if (e.key === "Backspace" && tagInput.value === "" && tags.length > 0) {
+              tags.pop();
+              condition.value = tags.join(", ");
+              await this.plugin.saveSettings();
+              this.onSave();
+              refreshTags();
+            }
+          };
+          setTimeout(() => tagInput.focus(), 0);
+        };
+        refreshTags();
+      } else if (condition.property === "file.folder") {
+        new FolderSuggest(this.app, valueInput);
+      } else {
+        new ValueSuggest(this.app, valueInput, () => condition.property);
+      }
     }
     const deleteBtn = condEl.createEl("button", { text: "\xD7" });
     deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: none;";
@@ -4446,11 +5537,15 @@ ${colorEntry.hex}`;
 };
 
 // src/CalendarView.ts
-var LinearCalendarView = class extends import_obsidian4.ItemView {
+var LinearCalendarView = class extends import_obsidian5.ItemView {
   constructor(leaf, plugin) {
     super(leaf);
     this.resizeObserver = null;
     this.tooltip = null;
+    this.dragStartDate = null;
+    this.dragEndDate = null;
+    this.isDragging = false;
+    this.mouseUpHandler = null;
     this.plugin = plugin;
   }
   getViewType() {
@@ -4508,9 +5603,22 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
   async renderCalendar(container) {
     const year = this.plugin.settings.currentYear;
     const header = container.createDiv({ cls: "calendar-header" });
-    const prevBtn = header.createEl("button", { text: "\u2190", cls: "year-nav-btn" });
-    header.createEl("span", { text: `${year}`, cls: "year-title" });
-    const nextBtn = header.createEl("button", { text: "\u2192", cls: "year-nav-btn" });
+    const leftSpacer = header.createDiv({ cls: "header-spacer" });
+    const centerSection = header.createDiv({ cls: "header-center" });
+    const prevBtn = centerSection.createEl("button", { text: "\u2190", cls: "year-nav-btn" });
+    centerSection.createEl("span", { text: `${year}`, cls: "year-title" });
+    const nextBtn = centerSection.createEl("button", { text: "\u2192", cls: "year-nav-btn" });
+    const rightSection = header.createDiv({ cls: "header-right" });
+    if (this.plugin.settings.quickNoteCreation.enabled && this.plugin.settings.quickNoteCreation.showAddNoteButton) {
+      const addNoteBtn = rightSection.createEl("button", { cls: "add-note-btn" });
+      addNoteBtn.setAttribute("aria-label", "Add note");
+      const icon = addNoteBtn.createSpan({ cls: "add-note-icon" });
+      (0, import_obsidian5.setIcon)(icon, "calendar-plus");
+      addNoteBtn.createSpan({ text: "Add Note", cls: "add-note-text" });
+      addNoteBtn.onclick = async () => {
+        await this.openQuickNoteModal(null, null);
+      };
+    }
     prevBtn.onclick = async () => {
       this.plugin.settings.currentYear--;
       await this.plugin.saveSettings();
@@ -4525,6 +5633,9 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
     };
     const notesWithDates = await this.getNotesWithDates();
     const multiDayEntries = this.processMultiDayEntries(notesWithDates);
+    if (this.plugin.settings.quickNoteCreation.enabled && !this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner) {
+      this.renderWelcomeBanner(container);
+    }
     if (this.plugin.settings.colorCategories.enabled && this.plugin.settings.colorCategories.showCategoryIndex) {
       this.renderCategoryIndexRow(container);
     }
@@ -4557,6 +5668,22 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
       calendarTable.style.minWidth = "";
       calendarTable.style.removeProperty("--cell-min-width");
     }
+    const handleMouseUp = async (e) => {
+      if (this.isDragging && this.dragStartDate) {
+        e.preventDefault();
+        const endDate = this.dragEndDate || this.dragStartDate;
+        const [start, end] = this.dragStartDate <= endDate ? [this.dragStartDate, endDate] : [endDate, this.dragStartDate];
+        this.clearDragSelection();
+        if (this.plugin.settings.quickNoteCreation.enabled) {
+          await this.openQuickNoteModal(start, start.getTime() === end.getTime() ? null : end);
+        }
+      }
+    };
+    if (this.mouseUpHandler) {
+      document.removeEventListener("mouseup", this.mouseUpHandler);
+    }
+    this.mouseUpHandler = handleMouseUp;
+    document.addEventListener("mouseup", handleMouseUp);
     const maxDayCells = 37;
     const thead = calendarTable.createEl("thead");
     const headerRow = thead.createEl("tr");
@@ -4999,10 +6126,96 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
       await this.app.workspace.getLeaf(false).openFile(newFile);
     }
   }
+  async openQuickNoteModal(startDate, endDate = null) {
+    const { QuickNoteModal: QuickNoteModal2 } = await Promise.resolve().then(() => (init_QuickNoteModal(), QuickNoteModal_exports));
+    new QuickNoteModal2(
+      this.app,
+      this.plugin,
+      startDate,
+      endDate
+    ).open();
+  }
+  highlightDateRange(startDate, endDate) {
+    const [start, end] = startDate <= endDate ? [startDate, endDate] : [endDate, startDate];
+    const dayNumbers = this.containerEl.querySelectorAll(".day-number");
+    dayNumbers.forEach((el) => {
+      const htmlEl = el;
+      const dateStr = htmlEl.dataset.date;
+      if (!dateStr) return;
+      const cellDate = new Date(dateStr);
+      if (cellDate >= start && cellDate <= end) {
+        htmlEl.addClass("drag-selecting");
+      }
+    });
+  }
+  clearDragSelection() {
+    this.containerEl.querySelectorAll(".drag-selecting").forEach((el) => {
+      el.removeClass("drag-selecting");
+    });
+    this.dragStartDate = null;
+    this.dragEndDate = null;
+    this.isDragging = false;
+  }
   /**
    * Render the category index as a standalone section between header and calendar.
    * Shows all enabled categories as clickable chips, or a welcome message if no categories exist.
    */
+  renderWelcomeBanner(container) {
+    const banner = container.createDiv({ cls: "quick-note-welcome-banner" });
+    banner.style.cssText = `
+            background: var(--background-secondary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            border: 2px solid var(--interactive-accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        `;
+    const contentWrapper = banner.createDiv();
+    contentWrapper.style.cssText = "flex: 1;";
+    const title = contentWrapper.createEl("div", { text: "\u{1F988}\u2728 Get Faster" });
+    title.style.cssText = "font-weight: 600; font-size: 1.05em; margin-bottom: 8px;";
+    const message = contentWrapper.createEl("div");
+    message.style.cssText = "color: var(--text-muted); font-size: 0.95em; line-height: 1.5;";
+    message.innerHTML = `
+            <strong>Click "Add Note"</strong> above to create a new note, or<br>
+            <strong>Cmd/Ctrl+Click on any day</strong> number to create a dated note instantly<br>
+            <strong>Cmd/Ctrl+Click and drag</strong> across days to create a multi-day note<br>
+            \u2699\uFE0F <strong>Configure</strong> your preferred default behavior in this plugin's settings
+        `;
+    const closeBtn = banner.createEl("button", { text: "\xD7" });
+    closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        `;
+    closeBtn.setAttribute("aria-label", "Dismiss banner");
+    closeBtn.onmouseenter = () => {
+      closeBtn.style.background = "var(--background-modifier-hover)";
+    };
+    closeBtn.onmouseleave = () => {
+      closeBtn.style.background = "none";
+    };
+    closeBtn.onclick = async () => {
+      this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = true;
+      await this.plugin.saveSettings();
+      banner.remove();
+    };
+  }
   renderCategoryIndexRow(container) {
     const config = this.plugin.settings.colorCategories;
     const categoryIndexDiv = container.createDiv({ cls: "category-index-section" });
@@ -5048,7 +6261,7 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
         if (category.iconType === "emoji") {
           iconEl.textContent = category.iconValue;
         } else {
-          (0, import_obsidian4.setIcon)(iconEl, category.iconValue);
+          (0, import_obsidian5.setIcon)(iconEl, category.iconValue);
           iconEl.style.color = "#ffffff";
         }
       }
@@ -5163,9 +6376,34 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
         text: String(day).padStart(2, "0"),
         cls: "day-number day-number-link"
       });
+      dayNumber.dataset.date = date.toISOString();
       dayNumber.onclick = async (e) => {
         e.preventDefault();
-        await this.openOrCreateDailyNote(date);
+        if (e.metaKey || e.ctrlKey) {
+          if (this.plugin.settings.quickNoteCreation.enabled) {
+            await this.openQuickNoteModal(date);
+          }
+        } else {
+          await this.openOrCreateDailyNote(date);
+        }
+      };
+      dayNumber.onmousedown = (e) => {
+        if (e.metaKey || e.ctrlKey) {
+          e.preventDefault();
+          this.dragStartDate = date;
+          this.dragEndDate = null;
+          this.isDragging = true;
+          dayNumber.addClass("drag-selecting");
+        }
+      };
+      dayNumber.onmouseenter = () => {
+        if (this.isDragging && this.dragStartDate) {
+          this.containerEl.querySelectorAll(".drag-selecting").forEach((el) => {
+            el.removeClass("drag-selecting");
+          });
+          this.dragEndDate = date;
+          this.highlightDateRange(this.dragStartDate, this.dragEndDate);
+        }
       };
       const notes = notesMap.get(dateKey);
       if (notes && notes.length > 0) {
@@ -5184,7 +6422,7 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
             if (icon.type === "emoji") {
               iconSpan.textContent = icon.value;
             } else {
-              (0, import_obsidian4.setIcon)(iconSpan, icon.value);
+              (0, import_obsidian5.setIcon)(iconSpan, icon.value);
               iconSpan.style.color = "#ffffff";
             }
           }
@@ -5243,7 +6481,7 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
           if (icon.type === "emoji") {
             iconSpan.textContent = icon.value;
           } else {
-            (0, import_obsidian4.setIcon)(iconSpan, icon.value);
+            (0, import_obsidian5.setIcon)(iconSpan, icon.value);
             iconSpan.style.color = "#ffffff";
           }
         }
@@ -5312,7 +6550,7 @@ var LinearCalendarView = class extends import_obsidian4.ItemView {
 };
 
 // src/main.ts
-var LinearCalendarPlugin = class extends import_obsidian5.Plugin {
+var LinearCalendarPlugin = class extends import_obsidian6.Plugin {
   async onload() {
     await this.loadSettings();
     this.registerView(
@@ -5327,6 +6565,14 @@ var LinearCalendarPlugin = class extends import_obsidian5.Plugin {
       name: "Open Linear Calendar",
       callback: () => {
         this.activateView();
+      }
+    });
+    this.addCommand({
+      id: "quick-note-create",
+      name: "Create Quick Note",
+      callback: async () => {
+        const { QuickNoteModal: QuickNoteModal2 } = await Promise.resolve().then(() => (init_QuickNoteModal(), QuickNoteModal_exports));
+        new QuickNoteModal2(this.app, this, null, null).open();
       }
     });
     this.addSettingTab(new CalendarSettingTab(this.app, this));
@@ -5344,6 +6590,15 @@ var LinearCalendarPlugin = class extends import_obsidian5.Plugin {
     workspace.revealLeaf(leaf);
   }
   onunload() {
+    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR);
+    for (const leaf of leaves) {
+      if (leaf.view instanceof LinearCalendarView) {
+        const view = leaf.view;
+        if (view.mouseUpHandler) {
+          document.removeEventListener("mouseup", view.mouseUpHandler);
+        }
+      }
+    }
     this.app.workspace.detachLeavesOfType(VIEW_TYPE_CALENDAR);
   }
   async loadSettings() {

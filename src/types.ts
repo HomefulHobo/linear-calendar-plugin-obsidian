@@ -23,6 +23,9 @@ export interface LinearCalendarSettings {
     // Color categories
     colorCategories: ColorCategoriesConfig;
 
+    // Quick note creation
+    quickNoteCreation: QuickNoteCreationConfig;
+
     // Experimental features
     experimental: ExperimentalFeatures;
 }
@@ -82,6 +85,23 @@ export interface ColorCategoriesConfig {
     showCategoryIndex: boolean;
     showIconsInCalendar: boolean;  // Global setting to show/hide icons in note titles
     colorPalettes: ColorPalette[];  // User-defined color palettes
+}
+
+export interface MetadataEntry {
+    key: string;
+    value: string;
+}
+
+export interface QuickNoteCreationConfig {
+    enabled: boolean;                           // Master toggle
+    showAddNoteButton: boolean;                 // Show "Add Note" button in top bar
+    hasSeenWelcomeBanner: boolean;              // Track if user has dismissed welcome banner
+    defaultFolder: 'default' | 'dailynotes' | 'custom';  // Folder mode
+    customFolder: string;                       // Custom folder path
+    defaultStartDateProperty: string;           // Default: "date"
+    defaultEndDateProperty: string;             // Default: "endDate"
+    defaultCategoryProperty: string;            // Default: "category"
+    defaultMetadata: MetadataEntry[];           // Default metadata entries
 }
 
 export type ConditionOperator =
@@ -155,6 +175,20 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
                     { name: 'Green', hex: '#779d6c' }
                 ]
             }
+        ]
+    },
+
+    quickNoteCreation: {
+        enabled: true,
+        showAddNoteButton: true,
+        hasSeenWelcomeBanner: false,
+        defaultFolder: 'dailynotes',
+        customFolder: '',
+        defaultStartDateProperty: 'date',
+        defaultEndDateProperty: 'endDate',
+        defaultCategoryProperty: 'category',
+        defaultMetadata: [
+            { key: 'category', value: '' }
         ]
     },
 

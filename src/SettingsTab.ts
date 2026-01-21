@@ -3,6 +3,10 @@ import LinearCalendarPlugin from './main';
 import { Condition, ColorCategory } from './types';
 import { FolderSuggest } from './FolderSuggest';
 import { IconSuggest } from './IconSuggest';
+import { PropertySuggest } from './PropertySuggest';
+import { ValueSuggest } from './ValueSuggest';
+import { TagSuggest } from './TagSuggest';
+import { LinearCalendarView } from './CalendarView';
 
 // Helper function to get valid operators for a property type
 function getValidOperators(property: string): { value: string, label: string }[] {
@@ -58,7 +62,7 @@ export class CalendarSettingTab extends PluginSettingTab {
     private expandedCategories: Set<string> = new Set();
     private isPalettesExpanded: boolean = false;
     private paletteEditModes: Map<number, 'visual' | 'source'> = new Map();
-    private activeTab: 'basic' | 'categories' | 'daily-notes' | 'experimental' = 'basic';
+    private activeTab: 'basic' | 'categories' | 'daily-notes' | 'quicknotes' | 'experimental' = 'basic';
 
     constructor(app: App, plugin: LinearCalendarPlugin) {
         super(app, plugin);
@@ -209,6 +213,8 @@ export class CalendarSettingTab extends PluginSettingTab {
             this.renderColorCategoriesSection(contentEl);
         } else if (this.activeTab === 'daily-notes') {
             this.renderDailyNotesSection(contentEl);
+        } else if (this.activeTab === 'quicknotes') {
+            this.renderQuickNoteCreationSettings(contentEl);
         } else if (this.activeTab === 'experimental') {
             this.renderExperimentalSection(contentEl);
         }
@@ -227,6 +233,7 @@ export class CalendarSettingTab extends PluginSettingTab {
             { id: 'basic' as const, label: 'Basic Settings' },
             { id: 'categories' as const, label: 'Categories (Colors & Icons)' },
             { id: 'daily-notes' as const, label: 'Daily Notes' },
+            { id: 'quicknotes' as const, label: 'Quick Notes' },
             { id: 'experimental' as const, label: 'Experimental' }
         ];
 
@@ -487,6 +494,9 @@ export class CalendarSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 };
 
+                // Add property suggestions
+                new PropertySuggest(this.app, propInput);
+
                 const removeBtn = propRow.createEl('button', { text: '×' });
                 removeBtn.style.cssText = 'padding: 2px 8px; cursor: pointer;';
                 removeBtn.onclick = async () => {
@@ -672,6 +682,9 @@ export class CalendarSettingTab extends PluginSettingTab {
                     config.endFromProperties[index] = (e.target as HTMLInputElement).value;
                     await this.plugin.saveSettings();
                 };
+
+                // Add property suggestions
+                new PropertySuggest(this.app, propInput);
 
                 const removeBtn = propRow.createEl('button', { text: '×' });
                 removeBtn.style.cssText = 'padding: 2px 8px; cursor: pointer;';
@@ -937,6 +950,9 @@ export class CalendarSettingTab extends PluginSettingTab {
                 condition.property = (e.target as HTMLInputElement).value;
                 await this.plugin.saveSettings();
             };
+
+            // Add property suggestions
+            new PropertySuggest(this.app, customInput);
         }
 
         // Operator selector
@@ -960,16 +976,95 @@ export class CalendarSettingTab extends PluginSettingTab {
 
         // Value input (not needed for exists/doesNotExist)
         if (!['exists', 'doesNotExist'].includes(condition.operator)) {
-            const valueInput = condEl.createEl('input', {
-                type: 'text',
-                attr: { placeholder: 'value' },
-                value: condition.value || ''
-            });
-            valueInput.style.cssText = 'padding: 4px 8px; flex: 1; min-width: 120px;';
-            valueInput.onchange = async (e) => {
-                condition.value = (e.target as HTMLInputElement).value;
-                await this.plugin.saveSettings();
-            };
+            // Special handling for file.tags - use tag pill UI
+            if (condition.property === 'file.tags') {
+                const tags = condition.value ? condition.value.split(',').map(t => t.trim()).filter(t => t) : [];
+
+                const tagContainer = condEl.createDiv();
+                tagContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);';
+
+                const refreshTags = () => {
+                    tagContainer.empty();
+
+                    // Display existing tags as chips
+                    tags.forEach((tag, tagIndex) => {
+                        const chip = tagContainer.createEl('span');
+                        chip.style.cssText = 'display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;';
+                        chip.createEl('span', { text: tag });
+
+                        const removeBtn = chip.createEl('span');
+                        removeBtn.textContent = '×';
+                        removeBtn.style.cssText = 'cursor: pointer; font-weight: bold;';
+                        removeBtn.onclick = async () => {
+                            tags.splice(tagIndex, 1);
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            refreshTags();
+                        };
+                    });
+
+                    // Input for adding new tags
+                    const tagInput = tagContainer.createEl('input', {
+                        type: 'text',
+                        attr: { placeholder: 'Add tag...' }
+                    });
+                    tagInput.style.cssText = 'flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;';
+
+                    // Add tag autocomplete with custom callback
+                    const tagSuggest = new TagSuggest(this.app, tagInput);
+                    tagSuggest.onSelect = async (tag: string) => {
+                        const newTag = tag.replace(/^#/, '').trim();
+                        if (newTag && !tags.includes(newTag)) {
+                            tags.push(newTag);
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            refreshTags();
+                        }
+                    };
+
+                    tagInput.onkeydown = async (e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const newTag = tagInput.value.replace(/^#/, '').trim();
+                            if (newTag && !tags.includes(newTag)) {
+                                tags.push(newTag);
+                                condition.value = tags.join(', ');
+                                tagInput.value = '';
+                                await this.plugin.saveSettings();
+                                refreshTags();
+                            }
+                        } else if (e.key === 'Backspace' && tagInput.value === '' && tags.length > 0) {
+                            tags.pop();
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            refreshTags();
+                        }
+                    };
+
+                    setTimeout(() => tagInput.focus(), 0);
+                };
+
+                refreshTags();
+            } else {
+                // Regular text input for other properties
+                const valueInput = condEl.createEl('input', {
+                    type: 'text',
+                    attr: { placeholder: 'value' },
+                    value: condition.value || ''
+                });
+                valueInput.style.cssText = 'padding: 4px 8px; flex: 1; min-width: 120px;';
+                valueInput.onchange = async (e) => {
+                    condition.value = (e.target as HTMLInputElement).value;
+                    await this.plugin.saveSettings();
+                };
+
+                // Add appropriate suggestions based on property type
+                if (condition.property === 'file.folder') {
+                    new FolderSuggest(this.app, valueInput);
+                } else {
+                    new ValueSuggest(this.app, valueInput, () => condition.property);
+                }
+            }
         }
 
         // Include subfolders option for folder property
@@ -1101,6 +1196,214 @@ export class CalendarSettingTab extends PluginSettingTab {
                     this.plugin.settings.hideDateInTitle = value;
                     await this.plugin.saveSettings();
                 }));
+    }
+
+    renderQuickNoteCreationSettings(containerEl: HTMLElement): void {
+        const config = this.plugin.settings.quickNoteCreation;
+
+        containerEl.createEl('h3', { text: 'Quick Note Creation' });
+
+        const desc = containerEl.createEl('p', {
+            cls: 'setting-item-description',
+            text: 'Create notes directly from the calendar by Cmd/Ctrl+clicking on day numbers. Click and drag to select a date range for multi-day notes.'
+        });
+        desc.style.marginTop = '-10px';
+        desc.style.marginBottom = '15px';
+
+        // Master toggle
+        new Setting(containerEl)
+            .setName('Enable quick note creation')
+            .setDesc('Create notes directly from the calendar with Cmd/Ctrl+Click')
+            .addToggle(toggle => toggle
+                .setValue(config.enabled)
+                .onChange(async (value) => {
+                    config.enabled = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (!config.enabled) return;
+
+        // Show Add Note button
+        new Setting(containerEl)
+            .setName('Show "Add Note" button')
+            .setDesc('Display an "Add Note" button in the calendar header for easy access')
+            .addToggle(toggle => toggle
+                .setValue(config.showAddNoteButton)
+                .onChange(async (value) => {
+                    config.showAddNoteButton = value;
+                    await this.plugin.saveSettings();
+                    // Refresh the calendar view to show/hide the button
+                    const leaves = this.plugin.app.workspace.getLeavesOfType('linear-calendar');
+                    for (const leaf of leaves) {
+                        if (leaf.view instanceof LinearCalendarView) {
+                            await leaf.view.reload();
+                        }
+                    }
+                }));
+
+        // Divider
+        this.renderDivider(containerEl);
+
+        // Default folder setting
+        new Setting(containerEl)
+            .setName('Default save location')
+            .setDesc('Where new notes should be saved by default')
+            .addDropdown(dropdown => dropdown
+                .addOption('default', 'Same as new notes')
+                .addOption('dailynotes', 'Same as daily notes')
+                .addOption('custom', 'Custom folder')
+                .setValue(config.defaultFolder)
+                .onChange(async (value) => {
+                    config.defaultFolder = value as 'default' | 'dailynotes' | 'custom';
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        // Custom folder input (only show if custom is selected)
+        if (config.defaultFolder === 'custom') {
+            new Setting(containerEl)
+                .setName('Custom folder path')
+                .setDesc('Path where quick notes should be saved')
+                .addText(text => {
+                    text
+                        .setPlaceholder('folder/subfolder')
+                        .setValue(config.customFolder)
+                        .onChange(async (value) => {
+                            const cleaned = value.replace(/^\/+|\/+$/g, '');
+                            config.customFolder = cleaned;
+                            await this.plugin.saveSettings();
+                        });
+
+                    new FolderSuggest(this.app, text.inputEl);
+                });
+        }
+
+        // Divider
+        this.renderDivider(containerEl);
+
+        // Default property settings
+        containerEl.createEl('h4', { text: 'Default Properties' });
+
+        new Setting(containerEl)
+            .setName('Start date property')
+            .setDesc('Default property name for start date')
+            .addText(text => {
+                text
+                    .setValue(config.defaultStartDateProperty)
+                    .onChange(async (value) => {
+                        config.defaultStartDateProperty = value;
+                        await this.plugin.saveSettings();
+                    });
+
+                // Add property suggestions
+                new PropertySuggest(this.app, text.inputEl);
+            });
+
+        new Setting(containerEl)
+            .setName('End date property')
+            .setDesc('Default property name for end date')
+            .addText(text => {
+                text
+                    .setValue(config.defaultEndDateProperty)
+                    .onChange(async (value) => {
+                        config.defaultEndDateProperty = value;
+                        await this.plugin.saveSettings();
+                    });
+
+                // Add property suggestions
+                new PropertySuggest(this.app, text.inputEl);
+            });
+
+        new Setting(containerEl)
+            .setName('Category property')
+            .setDesc('Default property name for category')
+            .addText(text => {
+                text
+                    .setValue(config.defaultCategoryProperty)
+                    .onChange(async (value) => {
+                        config.defaultCategoryProperty = value;
+                        await this.plugin.saveSettings();
+                    });
+
+                // Add property suggestions
+                new PropertySuggest(this.app, text.inputEl);
+            });
+
+        // Divider
+        this.renderDivider(containerEl);
+
+        // Default metadata section
+        containerEl.createEl('h4', { text: 'Default Metadata' });
+
+        const metadataDesc = containerEl.createEl('p', {
+            cls: 'setting-item-description',
+            text: 'Default metadata that will be pre-filled when creating a new note'
+        });
+        metadataDesc.style.marginBottom = '15px';
+
+        // Render existing default metadata
+        config.defaultMetadata.forEach((entry, index) => {
+            this.renderDefaultMetadataRow(containerEl, entry, index);
+        });
+
+        // Add metadata button
+        const addBtn = containerEl.createEl('button', { text: '+ Add Default Metadata' });
+        addBtn.style.cssText = 'margin-top: 10px; padding: 6px 12px; cursor: pointer;';
+        addBtn.onclick = async () => {
+            config.defaultMetadata.push({ key: '', value: '' });
+            await this.plugin.saveSettings();
+            this.display();
+        };
+    }
+
+    renderDefaultMetadataRow(container: HTMLElement, entry: { key: string; value: string }, index: number): void {
+        const config = this.plugin.settings.quickNoteCreation;
+
+        const rowContainer = container.createDiv();
+        rowContainer.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px;';
+
+        // Property name input
+        const keyInput = rowContainer.createEl('input', {
+            type: 'text',
+            value: entry.key,
+            attr: { placeholder: 'Property name' }
+        });
+        keyInput.style.cssText = 'flex: 0 0 150px; padding: 6px 8px;';
+        keyInput.oninput = async () => {
+            config.defaultMetadata[index].key = keyInput.value;
+            await this.plugin.saveSettings();
+        };
+
+        // Add property suggestions
+        new PropertySuggest(this.app, keyInput);
+
+        // Colon separator
+        rowContainer.createEl('span', { text: ':', attr: { style: 'font-weight: 500;' } });
+
+        // Property value input
+        const valueInput = rowContainer.createEl('input', {
+            type: 'text',
+            value: entry.value,
+            attr: { placeholder: 'Value' }
+        });
+        valueInput.style.cssText = 'flex: 1; padding: 6px 8px;';
+        valueInput.oninput = async () => {
+            config.defaultMetadata[index].value = valueInput.value;
+            await this.plugin.saveSettings();
+        };
+
+        // Add value suggestions (based on the current property key)
+        new ValueSuggest(this.app, valueInput, () => keyInput.value);
+
+        // Delete button
+        const deleteBtn = rowContainer.createEl('button', { text: '×' });
+        deleteBtn.style.cssText = 'padding: 4px 10px; cursor: pointer; font-size: 1.2em; flex-shrink: 0;';
+        deleteBtn.onclick = async () => {
+            config.defaultMetadata.splice(index, 1);
+            await this.plugin.saveSettings();
+            this.display();
+        };
     }
 
     renderExperimentalSection(containerEl: HTMLElement): void {
@@ -1717,6 +2020,9 @@ export class CalendarSettingTab extends PluginSettingTab {
                 condition.property = (e.target as HTMLInputElement).value;
                 await this.plugin.saveSettings();
             };
+
+            // Add property suggestions
+            new PropertySuggest(this.app, customInput);
         }
 
         // Operator selector
@@ -1740,16 +2046,95 @@ export class CalendarSettingTab extends PluginSettingTab {
 
         // Value input (not needed for exists/doesNotExist)
         if (!['exists', 'doesNotExist'].includes(condition.operator)) {
-            const valueInput = condEl.createEl('input', {
-                type: 'text',
-                attr: { placeholder: 'value' },
-                value: condition.value || ''
-            });
-            valueInput.style.cssText = 'padding: 4px 8px; flex: 1; min-width: 120px;';
-            valueInput.onchange = async (e) => {
-                condition.value = (e.target as HTMLInputElement).value;
-                await this.plugin.saveSettings();
-            };
+            // Special handling for file.tags - use tag pill UI
+            if (condition.property === 'file.tags') {
+                const tags = condition.value ? condition.value.split(',').map(t => t.trim()).filter(t => t) : [];
+
+                const tagContainer = condEl.createDiv();
+                tagContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);';
+
+                const refreshTags = () => {
+                    tagContainer.empty();
+
+                    // Display existing tags as chips
+                    tags.forEach((tag, tagIndex) => {
+                        const chip = tagContainer.createEl('span');
+                        chip.style.cssText = 'display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;';
+                        chip.createEl('span', { text: tag });
+
+                        const removeBtn = chip.createEl('span');
+                        removeBtn.textContent = '×';
+                        removeBtn.style.cssText = 'cursor: pointer; font-weight: bold;';
+                        removeBtn.onclick = async () => {
+                            tags.splice(tagIndex, 1);
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            refreshTags();
+                        };
+                    });
+
+                    // Input for adding new tags
+                    const tagInput = tagContainer.createEl('input', {
+                        type: 'text',
+                        attr: { placeholder: 'Add tag...' }
+                    });
+                    tagInput.style.cssText = 'flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;';
+
+                    // Add tag autocomplete with custom callback
+                    const tagSuggest = new TagSuggest(this.app, tagInput);
+                    tagSuggest.onSelect = async (tag: string) => {
+                        const newTag = tag.replace(/^#/, '').trim();
+                        if (newTag && !tags.includes(newTag)) {
+                            tags.push(newTag);
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            refreshTags();
+                        }
+                    };
+
+                    tagInput.onkeydown = async (e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const newTag = tagInput.value.replace(/^#/, '').trim();
+                            if (newTag && !tags.includes(newTag)) {
+                                tags.push(newTag);
+                                condition.value = tags.join(', ');
+                                tagInput.value = '';
+                                await this.plugin.saveSettings();
+                                refreshTags();
+                            }
+                        } else if (e.key === 'Backspace' && tagInput.value === '' && tags.length > 0) {
+                            tags.pop();
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            refreshTags();
+                        }
+                    };
+
+                    setTimeout(() => tagInput.focus(), 0);
+                };
+
+                refreshTags();
+            } else {
+                // Regular text input for other properties
+                const valueInput = condEl.createEl('input', {
+                    type: 'text',
+                    attr: { placeholder: 'value' },
+                    value: condition.value || ''
+                });
+                valueInput.style.cssText = 'padding: 4px 8px; flex: 1; min-width: 120px;';
+                valueInput.onchange = async (e) => {
+                    condition.value = (e.target as HTMLInputElement).value;
+                    await this.plugin.saveSettings();
+                };
+
+                // Add appropriate suggestions based on property type
+                if (condition.property === 'file.folder') {
+                    new FolderSuggest(this.app, valueInput);
+                } else {
+                    new ValueSuggest(this.app, valueInput, () => condition.property);
+                }
+            }
         }
 
         // Include subfolders option for folder property
@@ -2561,6 +2946,9 @@ export class CategoryEditModal extends Modal {
                 await this.plugin.saveSettings();
                 this.onSave();
             };
+
+            // Add property suggestions
+            new PropertySuggest(this.app, customInput);
         }
 
         // Operator selector
@@ -2597,6 +2985,91 @@ export class CategoryEditModal extends Modal {
                 await this.plugin.saveSettings();
                 this.onSave();
             };
+
+            // Add value suggestions (based on the current property)
+            // Special handling for file.tags - use tag pill UI
+            if (condition.property === 'file.tags') {
+                // Remove the simple input and create tag pill UI
+                valueInput.remove();
+
+                const tags = condition.value ? condition.value.split(',').map(t => t.trim()).filter(t => t) : [];
+
+                const tagContainer = fieldsContainer.createDiv();
+                tagContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1; min-width: 120px; padding: 4px 8px; border: 1px solid var(--background-modifier-border); border-radius: 3px; background: var(--background-primary);';
+
+                const refreshTags = () => {
+                    tagContainer.empty();
+
+                    // Display existing tags as chips
+                    tags.forEach((tag, tagIndex) => {
+                        const chip = tagContainer.createEl('span');
+                        chip.style.cssText = 'display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 12px; font-size: 0.9em;';
+                        chip.createEl('span', { text: tag });
+
+                        const removeBtn = chip.createEl('span');
+                        removeBtn.textContent = '×';
+                        removeBtn.style.cssText = 'cursor: pointer; font-weight: bold;';
+                        removeBtn.onclick = async () => {
+                            tags.splice(tagIndex, 1);
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            this.onSave();
+                            refreshTags();
+                        };
+                    });
+
+                    // Input for adding new tags
+                    const tagInput = tagContainer.createEl('input', {
+                        type: 'text',
+                        attr: { placeholder: 'Add tag...' }
+                    });
+                    tagInput.style.cssText = 'flex: 1; min-width: 80px; border: none; outline: none; background: transparent; padding: 2px 4px;';
+
+                    // Add tag autocomplete with custom callback
+                    const tagSuggest = new TagSuggest(this.app, tagInput);
+                    tagSuggest.onSelect = async (tag: string) => {
+                        const newTag = tag.replace(/^#/, '').trim();
+                        if (newTag && !tags.includes(newTag)) {
+                            tags.push(newTag);
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            this.onSave();
+                            refreshTags();
+                        }
+                    };
+
+                    tagInput.onkeydown = async (e) => {
+                        if (e.key === 'Enter' || e.key === ',') {
+                            e.preventDefault();
+                            const newTag = tagInput.value.replace(/^#/, '').trim();
+                            if (newTag && !tags.includes(newTag)) {
+                                tags.push(newTag);
+                                condition.value = tags.join(', ');
+                                tagInput.value = '';
+                                await this.plugin.saveSettings();
+                                this.onSave();
+                                refreshTags();
+                            }
+                        } else if (e.key === 'Backspace' && tagInput.value === '' && tags.length > 0) {
+                            tags.pop();
+                            condition.value = tags.join(', ');
+                            await this.plugin.saveSettings();
+                            this.onSave();
+                            refreshTags();
+                        }
+                    };
+
+                    setTimeout(() => tagInput.focus(), 0);
+                };
+
+                refreshTags();
+            } else if (condition.property === 'file.folder') {
+                // Use FolderSuggest for folder properties
+                new FolderSuggest(this.app, valueInput);
+            } else {
+                // Use ValueSuggest for other properties
+                new ValueSuggest(this.app, valueInput, () => condition.property);
+            }
         }
 
         // Delete button

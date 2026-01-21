@@ -7,6 +7,10 @@ export class LinearCalendarView extends ItemView {
     plugin: LinearCalendarPlugin;
     private resizeObserver: ResizeObserver | null = null;
     private tooltip: HTMLElement | null = null;
+    private dragStartDate: Date | null = null;
+    private dragEndDate: Date | null = null;
+    private isDragging: boolean = false;
+    mouseUpHandler: ((e: MouseEvent) => Promise<void>) | null = null;
 
     constructor(leaf: WorkspaceLeaf, plugin: LinearCalendarPlugin) {
         super(leaf);
@@ -83,9 +87,33 @@ export class LinearCalendarView extends ItemView {
         const year = this.plugin.settings.currentYear;
 
         const header = container.createDiv({ cls: 'calendar-header' });
-        const prevBtn = header.createEl('button', { text: '←', cls: 'year-nav-btn' });
-        header.createEl('span', { text: `${year}`, cls: 'year-title' });
-        const nextBtn = header.createEl('button', { text: '→', cls: 'year-nav-btn' });
+
+        // Left spacer for centering
+        const leftSpacer = header.createDiv({ cls: 'header-spacer' });
+
+        // Center section with year navigation
+        const centerSection = header.createDiv({ cls: 'header-center' });
+        const prevBtn = centerSection.createEl('button', { text: '←', cls: 'year-nav-btn' });
+        centerSection.createEl('span', { text: `${year}`, cls: 'year-title' });
+        const nextBtn = centerSection.createEl('button', { text: '→', cls: 'year-nav-btn' });
+
+        // Right section with Add Note button
+        const rightSection = header.createDiv({ cls: 'header-right' });
+        if (this.plugin.settings.quickNoteCreation.enabled && this.plugin.settings.quickNoteCreation.showAddNoteButton) {
+            const addNoteBtn = rightSection.createEl('button', { cls: 'add-note-btn' });
+            addNoteBtn.setAttribute('aria-label', 'Add note');
+
+            // Add calendar-plus icon
+            const icon = addNoteBtn.createSpan({ cls: 'add-note-icon' });
+            setIcon(icon, 'calendar-plus');
+
+            // Add text label
+            addNoteBtn.createSpan({ text: 'Add Note', cls: 'add-note-text' });
+
+            addNoteBtn.onclick = async () => {
+                await this.openQuickNoteModal(null, null);
+            };
+        }
 
         prevBtn.onclick = async () => {
             this.plugin.settings.currentYear--;
@@ -103,6 +131,12 @@ export class LinearCalendarView extends ItemView {
 
         const notesWithDates = await this.getNotesWithDates();
         const multiDayEntries = this.processMultiDayEntries(notesWithDates);
+
+        // Show welcome banner if user hasn't seen it yet
+        if (this.plugin.settings.quickNoteCreation.enabled &&
+            !this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner) {
+            this.renderWelcomeBanner(container);
+        }
 
         // Render category index row (if enabled) - between header and calendar
         // Show welcome message if no categories, or chips if categories exist
@@ -147,6 +181,36 @@ export class LinearCalendarView extends ItemView {
             calendarTable.style.minWidth = '';
             calendarTable.style.removeProperty('--cell-min-width');
         }
+
+        // Add mouse up handler for drag selection
+        const handleMouseUp = async (e: MouseEvent) => {
+            if (this.isDragging && this.dragStartDate) {
+                e.preventDefault();
+
+                // Determine final range
+                const endDate = this.dragEndDate || this.dragStartDate;
+                const [start, end] = this.dragStartDate <= endDate
+                    ? [this.dragStartDate, endDate]
+                    : [endDate, this.dragStartDate];
+
+                // Clear visual feedback
+                this.clearDragSelection();
+
+                // Open modal with date range
+                if (this.plugin.settings.quickNoteCreation.enabled) {
+                    await this.openQuickNoteModal(start, start.getTime() === end.getTime() ? null : end);
+                }
+            }
+        };
+
+        // Remove old handler if exists
+        if (this.mouseUpHandler) {
+            document.removeEventListener('mouseup', this.mouseUpHandler);
+        }
+
+        // Store and add new handler
+        this.mouseUpHandler = handleMouseUp;
+        document.addEventListener('mouseup', handleMouseUp);
 
         const maxDayCells = 37;
 
@@ -718,10 +782,110 @@ export class LinearCalendarView extends ItemView {
         }
     }
 
+    async openQuickNoteModal(startDate: Date | null, endDate: Date | null = null): Promise<void> {
+        const { QuickNoteModal } = await import('./QuickNoteModal');
+        new QuickNoteModal(
+            this.app,
+            this.plugin,
+            startDate,
+            endDate
+        ).open();
+    }
+
+    highlightDateRange(startDate: Date, endDate: Date): void {
+        // Ensure startDate is before endDate
+        const [start, end] = startDate <= endDate
+            ? [startDate, endDate]
+            : [endDate, startDate];
+
+        // Find all day numbers and highlight those in range
+        const dayNumbers = this.containerEl.querySelectorAll('.day-number');
+        dayNumbers.forEach((el: Element) => {
+            const htmlEl = el as HTMLElement;
+            const dateStr = htmlEl.dataset.date;
+            if (!dateStr) return;
+
+            const cellDate = new Date(dateStr);
+            if (cellDate >= start && cellDate <= end) {
+                htmlEl.addClass('drag-selecting');
+            }
+        });
+    }
+
+    clearDragSelection(): void {
+        this.containerEl.querySelectorAll('.drag-selecting').forEach((el: Element) => {
+            (el as HTMLElement).removeClass('drag-selecting');
+        });
+        this.dragStartDate = null;
+        this.dragEndDate = null;
+        this.isDragging = false;
+    }
+
     /**
      * Render the category index as a standalone section between header and calendar.
      * Shows all enabled categories as clickable chips, or a welcome message if no categories exist.
      */
+    renderWelcomeBanner(container: HTMLElement): void {
+        const banner = container.createDiv({ cls: 'quick-note-welcome-banner' });
+        banner.style.cssText = `
+            background: var(--background-secondary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            border: 2px solid var(--interactive-accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        `;
+
+        const contentWrapper = banner.createDiv();
+        contentWrapper.style.cssText = 'flex: 1;';
+
+        const title = contentWrapper.createEl('div', { text: '🦈✨ Get Faster' });
+        title.style.cssText = 'font-weight: 600; font-size: 1.05em; margin-bottom: 8px;';
+
+        const message = contentWrapper.createEl('div');
+        message.style.cssText = 'color: var(--text-muted); font-size: 0.95em; line-height: 1.5;';
+        message.innerHTML = `
+            <strong>Click "Add Note"</strong> above to create a new note, or<br>
+            <strong>Cmd/Ctrl+Click on any day</strong> number to create a dated note instantly<br>
+            <strong>Cmd/Ctrl+Click and drag</strong> across days to create a multi-day note<br>
+            ⚙️ <strong>Configure</strong> your preferred default behavior in this plugin's settings
+        `;
+
+        const closeBtn = banner.createEl('button', { text: '×' });
+        closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        `;
+        closeBtn.setAttribute('aria-label', 'Dismiss banner');
+        closeBtn.onmouseenter = () => {
+            closeBtn.style.background = 'var(--background-modifier-hover)';
+        };
+        closeBtn.onmouseleave = () => {
+            closeBtn.style.background = 'none';
+        };
+        closeBtn.onclick = async () => {
+            this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = true;
+            await this.plugin.saveSettings();
+            banner.remove();
+        };
+    }
+
     renderCategoryIndexRow(container: HTMLElement): void {
         const config = this.plugin.settings.colorCategories;
 
@@ -939,9 +1103,50 @@ export class LinearCalendarView extends ItemView {
                 cls: 'day-number day-number-link'
             });
 
+            // Store date in dataset for easy access
+            dayNumber.dataset.date = date.toISOString();
+
+            // Click handler - check for modifier key
             dayNumber.onclick = async (e) => {
                 e.preventDefault();
-                await this.openOrCreateDailyNote(date);
+
+                // Check if Cmd (Mac) or Ctrl (Windows/Linux) is pressed
+                if (e.metaKey || e.ctrlKey) {
+                    // Quick note creation
+                    if (this.plugin.settings.quickNoteCreation.enabled) {
+                        await this.openQuickNoteModal(date);
+                    }
+                } else {
+                    // Regular daily note open/create
+                    await this.openOrCreateDailyNote(date);
+                }
+            };
+
+            // Mouse down handler - start drag selection
+            dayNumber.onmousedown = (e) => {
+                if (e.metaKey || e.ctrlKey) {
+                    e.preventDefault();
+                    this.dragStartDate = date;
+                    this.dragEndDate = null;
+                    this.isDragging = true;
+
+                    // Add visual feedback
+                    dayNumber.addClass('drag-selecting');
+                }
+            };
+
+            // Mouse enter handler - update drag selection
+            dayNumber.onmouseenter = () => {
+                if (this.isDragging && this.dragStartDate) {
+                    // Clear previous selection highlights
+                    this.containerEl.querySelectorAll('.drag-selecting').forEach((el: Element) => {
+                        (el as HTMLElement).removeClass('drag-selecting');
+                    });
+
+                    // Highlight all days in range
+                    this.dragEndDate = date;
+                    this.highlightDateRange(this.dragStartDate, this.dragEndDate);
+                }
             };
 
             const notes = notesMap.get(dateKey);

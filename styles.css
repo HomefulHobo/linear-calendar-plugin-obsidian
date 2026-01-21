@@ -10,13 +10,29 @@
 .calendar-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 15px;
+    justify-content: space-between;
     padding: 8px 15px;
     background: var(--background-secondary);
     border-bottom: 1px solid var(--background-modifier-border);
     flex-shrink: 0;
     z-index: 100;
+}
+
+.header-spacer {
+    flex: 1;
+}
+
+.header-center {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    justify-content: center;
+}
+
+.header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
 }
 
 .year-title {
@@ -40,6 +56,41 @@
 
 .year-nav-btn:hover {
     background: var(--interactive-accent-hover);
+}
+
+.add-note-btn {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.add-note-btn:hover {
+    background: var(--interactive-accent-hover);
+}
+
+.add-note-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-note-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.add-note-text {
+    line-height: 1;
 }
 
 .calendar-wrapper {
@@ -758,4 +809,22 @@ select.dropdown {
 .note-icon svg {
     width: 1em;
     height: 1em;
+}
+
+/* Quick Note Creation - Drag Selection */
+.day-number.drag-selecting {
+    background: var(--interactive-accent) !important;
+    color: var(--text-on-accent) !important;
+    opacity: 0.7;
+    transition: background 0.1s, opacity 0.1s;
+}
+
+.day-cell {
+    user-select: none;  /* Prevent text selection during drag */
+}
+
+/* Quick Note Modal Styling */
+.modal {
+    max-height: 80vh;
+    overflow-y: auto;
 }

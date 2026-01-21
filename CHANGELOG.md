@@ -8,11 +8,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 - **QuickNote Feature**: Create notes directly from the calendar
-  - Customizable default template
-  - Click on any calendar cell to create a new note
-  - Configurable note folder, filename template, and metadata
+  - Cmd+Click on any calendar date to create a new note, drag to make multi day entry
+  - Configurable note title, date method, metadata and save location
+  - Customizable default data
   - Tag pill UI for easy tag management
-  - Templater compatibility: Trigger Templater on newly created notes via command
+  - Templater compatibility: Works with triggering Templater on newly created notes
 - **Settings Tab Icon**: Icon now displays in settings sidebar (Obsidian 1.11+)
 
 ### Changed

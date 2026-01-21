@@ -19,10 +19,12 @@ This plugin is being developed with the help of AI.
 ## ✨ Features
 
 ### 📝 Note Display
+
 - **Single-day notes**: Notes appear in their respective day cells
 - **Multi-day events**: Events spanning multiple days shown as horizontal bars
 - **Clickable notes**: Click any note to open it instantly
 - **Instant tooltips**: Hover over any note to see the full title immediately
+- **Note preview**: Cmd/Ctrl + hover to see a preview of any note
 
 ### 📆 Daily Notes Integration
 
@@ -35,12 +37,10 @@ Extract dates from multiple sources with customizable priority:
 **Start Date Sources:**
 - Properties (configurable, checked in order)
 - Filename (first YYYY-MM-DD pattern)
-- Choose which source takes priority when both are available
 
 **End Date Sources (for multi-day events):**
 - Properties (configurable, checked in order)
 - Filename (second YYYY-MM-DD pattern)
-- Choose which source takes priority when both are available
 
 **Examples:**
 ```yaml
@@ -68,6 +68,15 @@ Or use filenames:
 - Show/hide daily notes in calendar cells
 - Show/hide notes with date + text in title
 - Optional date hiding: Display "Meeting Notes" instead of "2024-01-15 Meeting Notes"
+
+### 📝 Quick Note Creation
+
+- Create notes directly from the calendar
+- Click on any calendar date to create a new note, drag to make multi day entry
+- Configure note title, date method, metadata and save location
+- Customize default data
+
+![Quick Note Multiple Screenshot](screenshots/quick-note-multiple.png)
 
 ### 🔎 Advanced Filtering
 

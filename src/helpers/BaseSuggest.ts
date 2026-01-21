@@ -68,6 +68,7 @@ export abstract class BaseSuggest {
     selectItem(item: SuggestItem): void {
         this.inputEl.value = item.value;
         this.inputEl.dispatchEvent(new Event('input'));
+        this.inputEl.dispatchEvent(new Event('change'));
         this.closeSuggestions();
         this.inputEl.focus();
     }

@@ -78,6 +78,7 @@ var init_BaseSuggest = __esm({
       selectItem(item) {
         this.inputEl.value = item.value;
         this.inputEl.dispatchEvent(new Event("input"));
+        this.inputEl.dispatchEvent(new Event("change"));
         this.closeSuggestions();
         this.inputEl.focus();
       }

@@ -4,6 +4,24 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.3.1] - 2025-01-21
+
+### Added
+- **QuickNote Feature**: Create notes directly from the calendar
+  - Customizable default template
+  - Click on any calendar cell to create a new note
+  - Configurable note folder, filename template, and metadata
+  - Tag pill UI for easy tag management
+  - Templater compatibility: Trigger Templater on newly created notes via command
+- **Settings Tab Icon**: Icon now displays in settings sidebar (Obsidian 1.11+)
+
+### Changed
+- **Code Refactoring**: Major internal code cleanup to improve maintainability (DRY/SSOT principles)
+
+### Fixed
+- **Checkbox UX**: Checkboxes now only toggle when clicking the checkbox itself, not the label text
+- **Tag Pill UI**: Fixed tag pill UI consistency across all settings sections
+
 ## [0.3.0] - 2025-01-19
 
 ### Added
@@ -77,6 +95,8 @@ This is the first version of the Linear Calendar Obsidian plugin
 
 ---
 
+[0.3.1]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.3.1
+[0.3.0]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.3.0
 [0.2.2]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.2.2
 [0.2.1]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.2.1
 [0.2.0]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.2.0

@@ -15,6 +15,9 @@ export class CalendarSettingTab extends PluginSettingTab {
     private paletteEditModes: Map<number, 'visual' | 'source'> = new Map();
     private activeTab: 'basic' | 'categories' | 'daily-notes' | 'quicknotes' | 'experimental' = 'basic';
 
+    // Icon displayed in the settings sidebar
+    icon = 'calendar-range';
+
     constructor(app: App, plugin: LinearCalendarPlugin) {
         super(app, plugin);
         this.plugin = plugin;
@@ -273,15 +276,16 @@ export class CalendarSettingTab extends PluginSettingTab {
 
         const feedbackTitle = feedbackBox.createEl('div');
         feedbackTitle.style.cssText = 'font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;';
-        feedbackTitle.textContent = '💬 Feedback wanted – Version 0.3.0';
+        feedbackTitle.textContent = '💬 Feedback wanted – Version 0.3.1';
 
         const feedbackList = feedbackBox.createEl('ul');
         feedbackList.style.cssText = 'margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;';
         feedbackList.innerHTML = `
-            <li>Are the notes displaying on the right day?</li>
+            <li>Does the QuickAdd feature work as you would like?</li>
             <li>Are the color categories working as you would like?</li>
             <li>Did switching from an older version to the new one go smoothly?</li>
             <li>Is there anything weird, annoying, unexpected happening?</li>
+            <li>Is anything hard to understand or unclear how to configure?</li>
         `;
 
         const feedbackFooter = feedbackBox.createEl('div');

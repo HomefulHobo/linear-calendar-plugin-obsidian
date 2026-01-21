@@ -3284,6 +3284,8 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     this.isPalettesExpanded = false;
     this.paletteEditModes = /* @__PURE__ */ new Map();
     this.activeTab = "basic";
+    // Icon displayed in the settings sidebar
+    this.icon = "calendar-range";
     this.plugin = plugin;
   }
   /**
@@ -3479,14 +3481,15 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     feedbackBox.style.cssText = "background: var(--background-primary); border: 2px solid var(--interactive-accent); padding: 15px 20px; margin: 0 0 20px 0; border-radius: 6px;";
     const feedbackTitle = feedbackBox.createEl("div");
     feedbackTitle.style.cssText = "font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;";
-    feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.3.0";
+    feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.3.1";
     const feedbackList = feedbackBox.createEl("ul");
     feedbackList.style.cssText = "margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
     feedbackList.innerHTML = `
-            <li>Are the notes displaying on the right day?</li>
+            <li>Does the QuickAdd feature work as you would like?</li>
             <li>Are the color categories working as you would like?</li>
             <li>Did switching from an older version to the new one go smoothly?</li>
             <li>Is there anything weird, annoying, unexpected happening?</li>
+            <li>Is anything hard to understand or unclear how to configure?</li>
         `;
     const feedbackFooter = feedbackBox.createEl("div");
     feedbackFooter.style.cssText = "font-size: 0.95em; color: var(--text-muted); margin-top: 8px;";

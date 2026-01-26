@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(awk:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

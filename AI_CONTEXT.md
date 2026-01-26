@@ -31,8 +31,17 @@ linear-calendar/
 │   ├── types.ts                  # Type definitions and defaults
 │   ├── CalendarView.ts           # Calendar rendering and logic
 │   ├── SettingsTab.ts            # Settings UI (includes CategoryEditModal)
+│   ├── QuickNoteModal.ts         # QuickNote creation modal
 │   ├── IconSuggest.ts            # Icon autocomplete (500+ emojis/Lucide icons)
-│   └── FolderSuggest.ts          # Folder autocomplete helper
+│   ├── FolderSuggest.ts          # Folder autocomplete (extends BaseSuggest)
+│   ├── PropertySuggest.ts        # Property autocomplete (extends BaseSuggest)
+│   ├── ValueSuggest.ts           # Value autocomplete (extends BaseSuggest)
+│   ├── TagSuggest.ts             # Tag autocomplete (extends BaseSuggest)
+│   └── helpers/                  # Reusable UI components (DRY/SSOT)
+│       ├── BaseSuggest.ts        # Abstract base class for all suggest components
+│       ├── TagPillRenderer.ts    # Tag pill UI with chips and autocomplete
+│       ├── ConditionRenderer.ts  # Unified condition rendering for filters/categories
+│       └── MetadataRowRenderer.ts # Reusable metadata key-value rows
 ├── styles.css                    # Plugin styles
 ├── main.js                       # Compiled output (generated)
 ├── manifest.json                 # Plugin manifest
@@ -151,6 +160,48 @@ Two alignment modes for calendar columns:
 - Formula: `columnOffset = (startingDayOfWeek - weekStartDay + 7) % 7`
 
 **Implementation**: See `CalendarView.ts` column offset calculation and header rendering
+
+### 8. QuickNote Feature (v0.3.1)
+
+Create notes directly from the calendar with customizable metadata:
+- **Trigger**: Cmd+Click on any calendar date, drag to create multi-day entries
+- **Configuration**:
+  - Save location (folder selection with autocomplete)
+  - Filename template with date variables
+  - Default metadata key-value pairs
+  - Tag pill UI for easy tag management
+- **Templater Compatibility**: Option to trigger Templater on newly created notes via command
+- **Modal UI**: `QuickNoteModal.ts` handles note creation with metadata preview
+
+**Implementation**:
+- Modal: `QuickNoteModal.ts`
+- Settings: `SettingsTab.ts` QuickNotes tab
+- Types: `QuickNoteConfig` in `types.ts`
+
+### 9. Helper Components (DRY/SSOT Architecture) (v0.3.1)
+
+Reusable UI components to eliminate code duplication:
+
+**BaseSuggest** (`helpers/BaseSuggest.ts`):
+- Abstract base class for all autocomplete/suggestion components
+- Handles positioning, keyboard navigation, item selection
+- Dispatches both 'input' and 'change' events on selection (fixes property clearing bug)
+- Extended by: PropertySuggest, ValueSuggest, TagSuggest, FolderSuggest
+
+**TagPillRenderer** (`helpers/TagPillRenderer.ts`):
+- Reusable tag pill UI with chips and autocomplete
+- Used in QuickNoteModal and SettingsTab (Default Metadata)
+- Callback-based design for decoupled updates
+
+**ConditionRenderer** (`helpers/ConditionRenderer.ts`):
+- Unified condition rendering for Filters, Categories, and CategoryEditModal
+- Property options: Folder, Tags, File Name, File Basename, Extension, Path, Custom property
+- Handles operator selection, value input, and tag-specific UI
+
+**MetadataRowRenderer** (`helpers/MetadataRowRenderer.ts`):
+- Reusable metadata key-value pair rows
+- Auto-detects "tags" property and shows TagPillRenderer
+- Ensures identical behavior in QuickNoteModal and SettingsTab
 
 ## Type Definitions
 
@@ -337,6 +388,20 @@ interface NoteInfo {
 
 ## Version History
 
+- **v0.3.1** (2025-01-21): QuickNote feature and DRY refactoring
+  - **QuickNote Feature**: Create notes directly from calendar
+    - Cmd+Click on any date to create a new note, drag to make multi-day entries
+    - Configurable note title, date method, metadata and save location
+    - Tag pill UI for easy tag management
+    - Templater compatibility: Works with triggering Templater on newly created notes
+  - **Settings Tab Icon**: Icon now displays in settings sidebar (Obsidian 1.11+)
+  - **DRY/SSOT Refactoring**: Major code cleanup (~800 lines reduced)
+    - Created `BaseSuggest` abstract class for all autocomplete components
+    - Created `TagPillRenderer`, `ConditionRenderer`, `MetadataRowRenderer` helpers
+    - Refactored all suggest classes to extend BaseSuggest
+  - **Improved Terminology**: "File Name" and "File Basename" (was "Name with/without extension")
+  - **Fixes**: Property clearing bug, checkbox UX, tag pill UI consistency
+
 - **v0.3.0** (2025-01-19): Color categories and calendar enhancements
   - **Color Categories System**: Visual organization with colors and icons
     - Categories with custom colors (hex) and optional icons (emoji/Lucide)
@@ -391,7 +456,6 @@ interface NoteInfo {
 ## Future Considerations
 
 Potential features to add:
-- Custom colors per filter rule or tag
 - Week numbers display
 - Search/filter within calendar view
 - Keyboard navigation
@@ -424,6 +488,6 @@ When working on this project:
 
 ---
 
-**Last Updated**: 2025-01-19
-**Plugin Version**: 0.3.0
+**Last Updated**: 2025-01-21
+**Plugin Version**: 0.3.1
 **Maintained for**: Claude Code and other AI assistants

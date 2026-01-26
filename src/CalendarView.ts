@@ -771,15 +771,79 @@ export class LinearCalendarView extends ItemView {
         const filename = this.formatDateForDailyNote(date);
         const folderPath = this.getDailyNoteFolder();
 
+        // Try to find existing daily note first
         const existingFile = await this.findDailyNoteInFolder(`${filename}.md`, folderPath);
 
         if (existingFile) {
             await this.app.workspace.getLeaf(false).openFile(existingFile);
         } else {
             const fullPath = `${folderPath}${filename}.md`;
-            const newFile = await this.app.vault.create(fullPath, '');
+
+            // Get template content and process variables for the target date
+            const templateContent = await this.getDailyNoteTemplateContent(date, filename);
+
+            // Create file with processed template content
+            const newFile = await this.app.vault.create(fullPath, templateContent);
+
+            // Open the file - this will trigger Templater if it's configured to run on file creation
             await this.app.workspace.getLeaf(false).openFile(newFile);
         }
+    }
+
+    async getDailyNoteTemplateContent(date: Date, filename: string): Promise<string> {
+        const dailyNotesPlugin = (this.app as any).internalPlugins?.plugins?.['daily-notes'];
+
+        if (!dailyNotesPlugin || !dailyNotesPlugin.enabled) {
+            return '';
+        }
+
+        const templatePath = dailyNotesPlugin.instance?.options?.template;
+        if (!templatePath) {
+            return '';
+        }
+
+        // Find the template file
+        const templateFile = this.app.vault.getAbstractFileByPath(templatePath + '.md')
+            || this.app.vault.getAbstractFileByPath(templatePath);
+
+        if (templateFile instanceof TFile) {
+            const rawContent = await this.app.vault.read(templateFile);
+            // Process template variables for the target date
+            return this.processTemplateVariables(rawContent, date, filename);
+        }
+
+        return '';
+    }
+
+    processTemplateVariables(content: string, date: Date, filename: string): string {
+        const moment = (window as any).moment;
+        const targetMoment = moment(date);
+        const format = this.plugin.settings.dailyNoteFormat;
+
+        // Process {{date}} and {{date:FORMAT}} patterns
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.format(customFormat || format);
+        });
+
+        // Process {{time}} and {{time:FORMAT}} patterns
+        content = content.replace(/\{\{time(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.format(customFormat || 'HH:mm');
+        });
+
+        // Process {{title}} - the filename without extension
+        content = content.replace(/\{\{title\}\}/g, filename);
+
+        // Process {{yesterday}} and {{yesterday:FORMAT}}
+        content = content.replace(/\{\{yesterday(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.clone().subtract(1, 'day').format(customFormat || format);
+        });
+
+        // Process {{tomorrow}} and {{tomorrow:FORMAT}}
+        content = content.replace(/\{\{tomorrow(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.clone().add(1, 'day').format(customFormat || format);
+        });
+
+        return content;
     }
 
     async openQuickNoteModal(startDate: Date | null, endDate: Date | null = null): Promise<void> {

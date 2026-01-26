@@ -5741,9 +5741,46 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
       await this.app.workspace.getLeaf(false).openFile(existingFile);
     } else {
       const fullPath = `${folderPath}${filename}.md`;
-      const newFile = await this.app.vault.create(fullPath, "");
+      const templateContent = await this.getDailyNoteTemplateContent(date, filename);
+      const newFile = await this.app.vault.create(fullPath, templateContent);
       await this.app.workspace.getLeaf(false).openFile(newFile);
     }
+  }
+  async getDailyNoteTemplateContent(date, filename) {
+    var _a, _b, _c, _d;
+    const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
+    if (!dailyNotesPlugin || !dailyNotesPlugin.enabled) {
+      return "";
+    }
+    const templatePath = (_d = (_c = dailyNotesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.template;
+    if (!templatePath) {
+      return "";
+    }
+    const templateFile = this.app.vault.getAbstractFileByPath(templatePath + ".md") || this.app.vault.getAbstractFileByPath(templatePath);
+    if (templateFile instanceof import_obsidian5.TFile) {
+      const rawContent = await this.app.vault.read(templateFile);
+      return this.processTemplateVariables(rawContent, date, filename);
+    }
+    return "";
+  }
+  processTemplateVariables(content, date, filename) {
+    const moment = window.moment;
+    const targetMoment = moment(date);
+    const format = this.plugin.settings.dailyNoteFormat;
+    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.format(customFormat || format);
+    });
+    content = content.replace(/\{\{time(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.format(customFormat || "HH:mm");
+    });
+    content = content.replace(/\{\{title\}\}/g, filename);
+    content = content.replace(/\{\{yesterday(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.clone().subtract(1, "day").format(customFormat || format);
+    });
+    content = content.replace(/\{\{tomorrow(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.clone().add(1, "day").format(customFormat || format);
+    });
+    return content;
   }
   async openQuickNoteModal(startDate, endDate = null) {
     const { QuickNoteModal: QuickNoteModal2 } = await Promise.resolve().then(() => (init_QuickNoteModal(), QuickNoteModal_exports));

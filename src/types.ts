@@ -185,7 +185,7 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
         defaultFolder: 'dailynotes',
         customFolder: '',
         defaultStartDateProperty: 'date',
-        defaultEndDateProperty: 'endDate',
+        defaultEndDateProperty: 'date_end',
         defaultCategoryProperty: 'category',
         defaultMetadata: [
             { key: 'category', value: '' }

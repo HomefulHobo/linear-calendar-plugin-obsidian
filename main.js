@@ -335,15 +335,15 @@ var QuickNoteModal_exports = {};
 __export(QuickNoteModal_exports, {
   QuickNoteModal: () => QuickNoteModal
 });
-var import_obsidian4, QuickNoteModal;
+var import_obsidian6, QuickNoteModal;
 var init_QuickNoteModal = __esm({
   "src/QuickNoteModal.ts"() {
     "use strict";
-    import_obsidian4 = require("obsidian");
+    import_obsidian6 = require("obsidian");
     init_PropertySuggest();
     init_ValueSuggest();
     init_MetadataRowRenderer();
-    QuickNoteModal = class extends import_obsidian4.Modal {
+    QuickNoteModal = class extends import_obsidian6.Modal {
       constructor(app, plugin, startDate, endDate) {
         super(app);
         this.noteTitle = "";
@@ -385,7 +385,7 @@ var init_QuickNoteModal = __esm({
                 \u2699\uFE0F <strong>Configure</strong> your preferred default behavior in this plugin's settings
             `;
         }
-        new import_obsidian4.Setting(contentEl).setName("Note Title").setDesc("Enter the title for your new note").addText((text) => text.setValue(this.noteTitle).onChange((value) => this.noteTitle = value));
+        new import_obsidian6.Setting(contentEl).setName("Note Title").setDesc("Enter the title for your new note").addText((text) => text.setValue(this.noteTitle).onChange((value) => this.noteTitle = value));
         contentEl.createEl("div", {
           attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
         });
@@ -405,19 +405,19 @@ var init_QuickNoteModal = __esm({
         contentEl.createEl("div", {
           attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
         });
-        new import_obsidian4.Setting(contentEl).addButton((btn) => btn.setButtonText("Create Note").setCta().onClick(() => this.createNote())).addButton((btn) => btn.setButtonText("Cancel").onClick(() => this.close()));
+        new import_obsidian6.Setting(contentEl).addButton((btn) => btn.setButtonText("Create Note").setCta().onClick(() => this.createNote())).addButton((btn) => btn.setButtonText("Cancel").onClick(() => this.close()));
       }
       renderDateSection(container, label, isStartDate) {
         const isEndDate = !isStartDate;
         if (isEndDate) {
-          new import_obsidian4.Setting(container).setName("Include end date").setDesc("Add an end date for multi-day notes").addToggle((toggle) => toggle.setValue(this.includeEndDate).onChange((value) => {
+          new import_obsidian6.Setting(container).setName("Include end date").setDesc("Add an end date for multi-day notes").addToggle((toggle) => toggle.setValue(this.includeEndDate).onChange((value) => {
             this.includeEndDate = value;
             this.onOpen();
           }));
           if (!this.includeEndDate) return;
         }
         container.createEl("h4", { text: label, attr: { style: "margin-bottom: 10px;" } });
-        new import_obsidian4.Setting(container).setName("Date method").setDesc(isStartDate ? "How to store the start date" : "How to store the end date").addDropdown((dropdown) => dropdown.addOption("property", "By property").addOption("filename", "By filename").setValue(isStartDate ? this.startDateMethod : this.endDateMethod).onChange((value) => {
+        new import_obsidian6.Setting(container).setName("Date method").setDesc(isStartDate ? "How to store the start date" : "How to store the end date").addDropdown((dropdown) => dropdown.addOption("property", "By property").addOption("filename", "By filename").setValue(isStartDate ? this.startDateMethod : this.endDateMethod).onChange((value) => {
           if (isStartDate) {
             this.startDateMethod = value;
           } else {
@@ -508,7 +508,7 @@ var init_QuickNoteModal = __esm({
         new ValueSuggest(this.app, input, getKey);
       }
       renderFolderSection(container) {
-        new import_obsidian4.Setting(container).setName("Save location").setDesc(`Current: ${this.selectedFolder || "(vault root)"}`).addText((text) => text.setValue(this.selectedFolder).onChange((value) => this.selectedFolder = value));
+        new import_obsidian6.Setting(container).setName("Save location").setDesc(`Current: ${this.selectedFolder || "(vault root)"}`).addText((text) => text.setValue(this.selectedFolder).onChange((value) => this.selectedFolder = value));
       }
       getFolderPath() {
         var _a, _b, _c, _d;
@@ -542,7 +542,7 @@ var init_QuickNoteModal = __esm({
       }
       async createNote() {
         if (!this.noteTitle.trim()) {
-          new import_obsidian4.Notice("Please enter a note title");
+          new import_obsidian6.Notice("Please enter a note title");
           return;
         }
         let filename = "";
@@ -614,9 +614,9 @@ var init_QuickNoteModal = __esm({
             await this.app.workspace.getLeaf(false).openFile(newFile);
           }
           this.close();
-          new import_obsidian4.Notice(`Created note: ${filename}`);
+          new import_obsidian6.Notice(`Created note: ${filename}`);
         } catch (error) {
-          new import_obsidian4.Notice(`Error creating note: ${error.message}`);
+          new import_obsidian6.Notice(`Error creating note: ${error.message}`);
         }
       }
       async mergeFrontmatterWithTemplaterOutput(file, frontmatter) {
@@ -751,12 +751,53 @@ __export(main_exports, {
   default: () => LinearCalendarPlugin
 });
 module.exports = __toCommonJS(main_exports);
-var import_obsidian6 = require("obsidian");
+var import_obsidian8 = require("obsidian");
 
 // src/CalendarView.ts
-var import_obsidian5 = require("obsidian");
+var import_obsidian7 = require("obsidian");
 
 // src/types.ts
+var DEFAULT_PERIODIC_NOTES = {
+  usePeriodicNotesPlugin: true,
+  templateFolderSource: "obsidian",
+  // Use Obsidian's template folder by default
+  templateCustomFolder: "",
+  weekStart: 1,
+  // Monday
+  weekNumberDisplay: "header-row",
+  // Default to row above month with week spans
+  weekBorderColor: {
+    mode: "neutral"
+    // Neutral border color by default
+  },
+  showWeekNumbers: true,
+  showQuarters: false,
+  weekly: {
+    enabled: false,
+    folder: "",
+    format: "gggg-[W]ww",
+    template: ""
+  },
+  monthly: {
+    enabled: false,
+    folder: "",
+    format: "YYYY-MM",
+    template: ""
+  },
+  quarterly: {
+    enabled: false,
+    folder: "",
+    format: "YYYY-[Q]Q",
+    template: ""
+  },
+  yearly: {
+    enabled: false,
+    folder: "",
+    format: "YYYY",
+    template: ""
+  },
+  customPeriodGroups: []
+};
 var DEFAULT_SETTINGS = {
   currentYear: (/* @__PURE__ */ new Date()).getFullYear(),
   dailyNoteFormat: "YYYY-MM-DD",
@@ -776,6 +817,8 @@ var DEFAULT_SETTINGS = {
   // Align by weekday by default
   weekStartDay: 0,
   // Sunday by default
+  highlightedWeekdays: [0, 6],
+  // Saturday and Sunday by default
   dateExtraction: {
     startFromProperties: ["date"],
     startFromFilename: false,
@@ -819,6 +862,7 @@ var DEFAULT_SETTINGS = {
       { key: "category", value: "" }
     ]
   },
+  periodicNotes: { ...DEFAULT_PERIODIC_NOTES },
   experimental: {
     multilineNotes: false,
     verticalText: false,
@@ -829,7 +873,7 @@ var DEFAULT_SETTINGS = {
 var VIEW_TYPE_CALENDAR = "linear-calendar-view";
 
 // src/SettingsTab.ts
-var import_obsidian3 = require("obsidian");
+var import_obsidian5 = require("obsidian");
 
 // src/FolderSuggest.ts
 var import_obsidian = require("obsidian");
@@ -856,8 +900,55 @@ var FolderSuggest = class extends BaseSuggest {
   }
 };
 
-// src/IconSuggest.ts
+// src/FileSuggest.ts
 var import_obsidian2 = require("obsidian");
+init_BaseSuggest();
+var FileSuggest = class extends BaseSuggest {
+  constructor(app, inputEl, baseFolderPath, extension = "md") {
+    super(app, inputEl);
+    this.baseFolderPath = baseFolderPath || null;
+    this.extension = extension;
+  }
+  getSuggestions(query) {
+    const files = this.getFiles();
+    return files.filter((file) => file.toLowerCase().includes(query)).slice(0, 15).map((file) => ({ value: file }));
+  }
+  getFiles() {
+    const files = [];
+    let startFolder = null;
+    if (this.baseFolderPath) {
+      const folder = this.app.vault.getAbstractFileByPath(this.baseFolderPath);
+      if (folder instanceof import_obsidian2.TFolder) {
+        startFolder = folder;
+      }
+    }
+    if (!startFolder) {
+      startFolder = this.app.vault.getRoot();
+    }
+    const recurse = (folder) => {
+      if (folder.children) {
+        for (const child of folder.children) {
+          if (child instanceof import_obsidian2.TFile && child.extension === this.extension) {
+            files.push(child.path.replace(new RegExp(`\\.${this.extension}$`), ""));
+          } else if (child instanceof import_obsidian2.TFolder) {
+            recurse(child);
+          }
+        }
+      }
+    };
+    recurse(startFolder);
+    return files.sort();
+  }
+  /**
+   * Update the base folder path (useful if the folder setting changes)
+   */
+  setBaseFolderPath(path) {
+    this.baseFolderPath = path;
+  }
+};
+
+// src/IconSuggest.ts
+var import_obsidian3 = require("obsidian");
 var IconSuggest = class {
   constructor(inputEl, previewEl) {
     this.previewEl = null;
@@ -1366,7 +1457,7 @@ var IconSuggest = class {
     });
     const lucideIcons = this.getLucideIcons();
     lucideIcons.forEach((iconName) => {
-      if (!(0, import_obsidian2.getIcon)(iconName)) return;
+      if (!(0, import_obsidian3.getIcon)(iconName)) return;
       const keywords = iconName.split("-");
       items.push({
         value: iconName,
@@ -3010,7 +3101,7 @@ var IconSuggest = class {
       if (iconItem.type === "emoji") {
         preview.textContent = iconItem.value;
       } else {
-        (0, import_obsidian2.setIcon)(preview, iconItem.value);
+        (0, import_obsidian3.setIcon)(preview, iconItem.value);
       }
       item.appendChild(preview);
       const textSpan = document.createElement("span");
@@ -3077,7 +3168,7 @@ var IconSuggest = class {
       this.previewEl.style.fontSize = "20px";
     } else {
       try {
-        (0, import_obsidian2.setIcon)(this.previewEl, value);
+        (0, import_obsidian3.setIcon)(this.previewEl, value);
         this.previewEl.style.fontSize = "";
       } catch (e) {
         this.previewEl.textContent = "?";
@@ -3277,7 +3368,129 @@ var ConditionRenderer = class {
 
 // src/SettingsTab.ts
 init_MetadataRowRenderer();
-var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
+
+// src/helpers/ColorPickerRenderer.ts
+var import_obsidian4 = require("obsidian");
+var ColorPickerRenderer = class {
+  static render(config) {
+    const { container, currentColor, palettes, onColorChange } = config;
+    container.empty();
+    const colorPickerContainer = container.createDiv();
+    colorPickerContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
+    const colorInput = colorPickerContainer.createEl("input", { type: "color", value: currentColor });
+    colorInput.style.cssText = "width: 60px; height: 32px; cursor: pointer; border-radius: 4px;";
+    const hexDisplay = colorPickerContainer.createEl("code");
+    hexDisplay.textContent = currentColor.toUpperCase();
+    hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.9em;";
+    colorInput.oninput = () => {
+      hexDisplay.textContent = colorInput.value.toUpperCase();
+    };
+    colorInput.onchange = async (e) => {
+      const newColor = e.target.value;
+      hexDisplay.textContent = newColor.toUpperCase();
+      await onColorChange(newColor);
+    };
+    if (palettes && palettes.length > 0) {
+      const paletteBtn = colorPickerContainer.createEl("button");
+      paletteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;";
+      (0, import_obsidian4.setIcon)(paletteBtn, "palette");
+      paletteBtn.title = "Open Color Palettes";
+      let popover = null;
+      const closePopover = () => {
+        if (popover) {
+          popover.remove();
+          popover = null;
+        }
+      };
+      paletteBtn.onclick = (e) => {
+        e.preventDefault();
+        if (popover) {
+          closePopover();
+          return;
+        }
+        popover = document.body.createDiv();
+        popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;";
+        const closeBtn = popover.createEl("button");
+        closeBtn.textContent = "\xD7";
+        closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
+        closeBtn.title = "Close";
+        closeBtn.onmouseenter = () => {
+          closeBtn.style.background = "var(--background-modifier-hover)";
+        };
+        closeBtn.onmouseleave = () => {
+          closeBtn.style.background = "transparent";
+        };
+        closeBtn.onclick = (e2) => {
+          e2.preventDefault();
+          closePopover();
+        };
+        const btnRect = paletteBtn.getBoundingClientRect();
+        popover.style.top = btnRect.bottom + 6 + "px";
+        popover.style.left = btnRect.left + "px";
+        setTimeout(() => {
+          if (popover) {
+            const popoverRect = popover.getBoundingClientRect();
+            if (popoverRect.right > window.innerWidth) {
+              popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+            }
+            if (popoverRect.bottom > window.innerHeight) {
+              popover.style.top = btnRect.top - popoverRect.height - 6 + "px";
+            }
+          }
+        }, 0);
+        palettes.forEach((palette, idx) => {
+          const paletteSection = popover.createDiv();
+          paletteSection.style.cssText = idx > 0 ? "margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);" : "margin-top: 4px;";
+          const paletteName = paletteSection.createEl("div", { text: palette.name });
+          paletteName.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;";
+          const swatchesGrid = paletteSection.createDiv();
+          swatchesGrid.style.cssText = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;";
+          palette.colors.forEach((colorEntry) => {
+            const swatch = swatchesGrid.createEl("button");
+            const isSelected = colorInput.value.toLowerCase() === colorEntry.hex.toLowerCase();
+            swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
+            swatch.title = `${colorEntry.name}
+${colorEntry.hex}`;
+            swatch.onclick = async (e2) => {
+              e2.preventDefault();
+              colorInput.value = colorEntry.hex;
+              hexDisplay.textContent = colorEntry.hex.toUpperCase();
+              await onColorChange(colorEntry.hex);
+              closePopover();
+            };
+            swatch.onmouseenter = () => {
+              swatch.style.transform = "scale(1.08)";
+              swatch.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+            };
+            swatch.onmouseleave = () => {
+              swatch.style.transform = "scale(1)";
+              swatch.style.boxShadow = "none";
+            };
+          });
+        });
+        const clickHandler = (e2) => {
+          if (popover && !popover.contains(e2.target) && !paletteBtn.contains(e2.target)) {
+            closePopover();
+            document.removeEventListener("click", clickHandler);
+          }
+        };
+        setTimeout(() => {
+          document.addEventListener("click", clickHandler);
+        }, 0);
+        const keyHandler = (e2) => {
+          if (e2.key === "Escape" && popover) {
+            closePopover();
+            document.removeEventListener("keydown", keyHandler);
+          }
+        };
+        document.addEventListener("keydown", keyHandler);
+      };
+    }
+  }
+};
+
+// src/SettingsTab.ts
+var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
   constructor(app, plugin) {
     super(app, plugin);
     this.expandedCategories = /* @__PURE__ */ new Set();
@@ -3305,6 +3518,26 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     return checkbox;
   }
   /**
+   * Get the template folder path based on settings.
+   * Returns the Obsidian templates folder or the custom folder.
+   */
+  getTemplateFolderPath() {
+    var _a, _b, _c, _d, _e, _f, _g;
+    const settings = this.plugin.settings.periodicNotes;
+    if (settings.templateFolderSource === "custom") {
+      return settings.templateCustomFolder || void 0;
+    }
+    const templatesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["templates"];
+    if ((templatesPlugin == null ? void 0 : templatesPlugin.enabled) && ((_d = (_c = templatesPlugin == null ? void 0 : templatesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder)) {
+      return templatesPlugin.instance.options.folder;
+    }
+    const templaterPlugin = (_f = (_e = this.app.plugins) == null ? void 0 : _e.plugins) == null ? void 0 : _f["templater-obsidian"];
+    if ((_g = templaterPlugin == null ? void 0 : templaterPlugin.settings) == null ? void 0 : _g.templates_folder) {
+      return templaterPlugin.settings.templates_folder;
+    }
+    return void 0;
+  }
+  /**
    * IMPORTANT: This helper method is used in multiple places (Categories settings AND CategoryEditModal).
    * When making changes to this method, always evaluate if the change should apply to both locations.
    * Current usage locations:
@@ -3313,7 +3546,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
    */
   renderConditionsInfoIcon(container) {
     const infoIcon = container.createEl("span");
-    (0, import_obsidian3.setIcon)(infoIcon, "info");
+    (0, import_obsidian5.setIcon)(infoIcon, "info");
     infoIcon.style.cssText = "cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;";
     infoIcon.title = "Click to see examples";
     let popover = null;
@@ -3412,6 +3645,8 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       this.renderColorCategoriesSection(contentEl);
     } else if (this.activeTab === "daily-notes") {
       this.renderDailyNotesSection(contentEl);
+    } else if (this.activeTab === "periodic-notes") {
+      this.renderPeriodicNotesSection(contentEl);
     } else if (this.activeTab === "quicknotes") {
       this.renderQuickNoteCreationSettings(contentEl);
     } else if (this.activeTab === "experimental") {
@@ -3428,6 +3663,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       { id: "basic", label: "Basic Settings" },
       { id: "categories", label: "Categories (Colors & Icons)" },
       { id: "daily-notes", label: "Daily Notes" },
+      { id: "periodic-notes", label: "Periodic Notes" },
       { id: "quicknotes", label: "Quick Notes" },
       { id: "experimental", label: "Experimental" }
     ];
@@ -3508,7 +3744,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
   }
   renderCalendarAppearanceSection(containerEl) {
     containerEl.createEl("h3", { text: "Calendar Appearance" });
-    new import_obsidian3.Setting(containerEl).setName("Calendar width").setDesc("Choose whether the calendar fits the screen width or becomes scrollable with wider cells").addDropdown((dropdown) => {
+    new import_obsidian5.Setting(containerEl).setName("Calendar width").setDesc("Choose whether the calendar fits the screen width or becomes scrollable with wider cells").addDropdown((dropdown) => {
       dropdown.addOption("fit-screen", "Fit to screen width").addOption("scrollable", "Scrollable (wider cells)").setValue(this.plugin.settings.calendarWidth).onChange(async (value) => {
         this.plugin.settings.calendarWidth = value;
         await this.plugin.saveSettings();
@@ -3516,7 +3752,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       });
     });
     if (this.plugin.settings.calendarWidth === "scrollable") {
-      new import_obsidian3.Setting(containerEl).setName("Minimum cell width").setDesc("Minimum width for each day cell in pixels (default: 30)").addText((text) => text.setPlaceholder("30").setValue(String(this.plugin.settings.cellMinWidth)).onChange(async (value) => {
+      new import_obsidian5.Setting(containerEl).setName("Minimum cell width").setDesc("Minimum width for each day cell in pixels (default: 30)").addText((text) => text.setPlaceholder("30").setValue(String(this.plugin.settings.cellMinWidth)).onChange(async (value) => {
         const numValue = parseInt(value);
         if (!isNaN(numValue) && numValue >= 20 && numValue <= 200) {
           this.plugin.settings.cellMinWidth = numValue;
@@ -3524,7 +3760,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
         }
       }));
     }
-    new import_obsidian3.Setting(containerEl).setName("Column alignment").setDesc("Choose how to align the calendar columns: by weekday or by date (all 1st days align, all 2nd days align, etc.)").addDropdown((dropdown) => {
+    new import_obsidian5.Setting(containerEl).setName("Column alignment").setDesc("Choose how to align the calendar columns: by weekday or by date (all 1st days align, all 2nd days align, etc.)").addDropdown((dropdown) => {
       dropdown.addOption("weekday", "Align by weekday").addOption("date", "Align by date").setValue(this.plugin.settings.columnAlignment).onChange(async (value) => {
         this.plugin.settings.columnAlignment = value;
         await this.plugin.saveSettings();
@@ -3532,13 +3768,37 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       });
     });
     if (this.plugin.settings.columnAlignment === "weekday") {
-      new import_obsidian3.Setting(containerEl).setName("Week starts on").setDesc("Choose which day the week starts on").addDropdown((dropdown) => {
+      new import_obsidian5.Setting(containerEl).setName("Week starts on").setDesc("Choose which day the week starts on").addDropdown((dropdown) => {
         dropdown.addOption("0", "Sunday").addOption("1", "Monday").addOption("2", "Tuesday").addOption("3", "Wednesday").addOption("4", "Thursday").addOption("5", "Friday").addOption("6", "Saturday").setValue(String(this.plugin.settings.weekStartDay)).onChange(async (value) => {
           this.plugin.settings.weekStartDay = parseInt(value);
           await this.plugin.saveSettings();
         });
       });
     }
+    const weekdayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const highlightedSetting = new import_obsidian5.Setting(containerEl).setName("Highlighted weekdays").setDesc("Choose which weekdays to visually highlight (typically weekends)");
+    const checkboxContainer = highlightedSetting.controlEl.createDiv();
+    checkboxContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 8px;";
+    weekdayNames.forEach((name, index) => {
+      const label = checkboxContainer.createEl("label");
+      label.style.cssText = "display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.9em;";
+      const checkbox = label.createEl("input", { type: "checkbox" });
+      checkbox.checked = this.plugin.settings.highlightedWeekdays.includes(index);
+      checkbox.onchange = async () => {
+        const current = this.plugin.settings.highlightedWeekdays;
+        if (checkbox.checked) {
+          if (!current.includes(index)) {
+            current.push(index);
+            current.sort((a, b) => a - b);
+          }
+        } else {
+          const idx = current.indexOf(index);
+          if (idx > -1) current.splice(idx, 1);
+        }
+        await this.plugin.saveSettings();
+      };
+      label.createEl("span", { text: name.slice(0, 3) });
+    });
   }
   renderDateExtractionSection(containerEl) {
     containerEl.createEl("h3", { text: "Date Extraction" });
@@ -3948,11 +4208,11 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     });
     desc.style.marginTop = "-10px";
     desc.style.marginBottom = "15px";
-    new import_obsidian3.Setting(containerEl).setName("Daily note format").setDesc("Format for daily note filenames (use YYYY for year, MM for month, DD for day)").addText((text) => text.setPlaceholder("YYYY-MM-DD").setValue(this.plugin.settings.dailyNoteFormat).onChange(async (value) => {
+    new import_obsidian5.Setting(containerEl).setName("Daily note format").setDesc("Format for daily note filenames (use YYYY for year, MM for month, DD for day)").addText((text) => text.setPlaceholder("YYYY-MM-DD").setValue(this.plugin.settings.dailyNoteFormat).onChange(async (value) => {
       this.plugin.settings.dailyNoteFormat = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian3.Setting(containerEl).setName("Daily notes folder mode").setDesc("Choose where to look for and create daily notes").addDropdown((dropdown) => {
+    new import_obsidian5.Setting(containerEl).setName("Daily notes folder mode").setDesc("Choose where to look for and create daily notes").addDropdown((dropdown) => {
       dropdown.addOption("obsidian", `Use native Daily Notes plugin's "New file location"`).addOption("custom", "Use custom folder").setValue(this.plugin.settings.dailyNoteFolderMode).onChange(async (value) => {
         this.plugin.settings.dailyNoteFolderMode = value;
         await this.plugin.saveSettings();
@@ -3960,7 +4220,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       });
     });
     if (this.plugin.settings.dailyNoteFolderMode === "custom") {
-      new import_obsidian3.Setting(containerEl).setName("Custom daily notes folder").setDesc("Folder path for daily notes. Searches subfolders too.").addText((text) => {
+      new import_obsidian5.Setting(containerEl).setName("Custom daily notes folder").setDesc("Folder path for daily notes. Searches subfolders too.").addText((text) => {
         text.setPlaceholder("Daily Notes").setValue(this.plugin.settings.dailyNoteCustomFolder).onChange(async (value) => {
           const cleaned = value.replace(/^\/+|\/+$/g, "");
           this.plugin.settings.dailyNoteCustomFolder = cleaned;
@@ -3972,21 +4232,436 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     const displaySection = containerEl.createDiv();
     displaySection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-top: 15px;";
     displaySection.createEl("h4", { text: "Display Options", attr: { style: "margin-top: 0;" } });
-    new import_obsidian3.Setting(displaySection).setName("Show daily notes in calendar cells").setDesc("Display daily notes as separate note cells in addition to the day number links").addToggle((toggle) => toggle.setValue(this.plugin.settings.showDailyNotesInCells).onChange(async (value) => {
+    new import_obsidian5.Setting(displaySection).setName("Show daily notes in calendar cells").setDesc("Display daily notes as separate note cells in addition to the day number links").addToggle((toggle) => toggle.setValue(this.plugin.settings.showDailyNotesInCells).onChange(async (value) => {
       this.plugin.settings.showDailyNotesInCells = value;
       await this.plugin.saveSettings();
     }));
     const dateTextSection = containerEl.createDiv();
     dateTextSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-top: 15px;";
     dateTextSection.createEl("h4", { text: "Notes with Date and Text in Title", attr: { style: "margin-top: 0;" } });
-    new import_obsidian3.Setting(dateTextSection).setName("Show notes with date and text").setDesc('Display notes that have both a date and additional text in their filename (e.g., "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.showNotesWithDateAndText).onChange(async (value) => {
+    new import_obsidian5.Setting(dateTextSection).setName("Show notes with date and text").setDesc('Display notes that have both a date and additional text in their filename (e.g., "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.showNotesWithDateAndText).onChange(async (value) => {
       this.plugin.settings.showNotesWithDateAndText = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian3.Setting(dateTextSection).setName("Hide date portion in titles").setDesc('When displaying notes in the calendar, hide the date portion of the title and only show the text (e.g., show "Meeting Notes" instead of "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideDateInTitle).onChange(async (value) => {
+    new import_obsidian5.Setting(dateTextSection).setName("Hide date portion in titles").setDesc('When displaying notes in the calendar, hide the date portion of the title and only show the text (e.g., show "Meeting Notes" instead of "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideDateInTitle).onChange(async (value) => {
       this.plugin.settings.hideDateInTitle = value;
       await this.plugin.saveSettings();
     }));
+  }
+  renderPeriodicNotesSection(containerEl) {
+    const settings = this.plugin.settings.periodicNotes;
+    containerEl.createEl("h3", { text: "Periodic Notes" });
+    const desc = containerEl.createEl("p", {
+      cls: "setting-item-description",
+      text: "Configure weekly, monthly, quarterly, yearly, and custom period notes. Compatible with the Periodic Notes plugin."
+    });
+    desc.style.marginTop = "-10px";
+    desc.style.marginBottom = "15px";
+    const generalSection = containerEl.createDiv();
+    generalSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
+    generalSection.createEl("h4", { text: "General", attr: { style: "margin-top: 0;" } });
+    const periodicNotesSetting = new import_obsidian5.Setting(generalSection).setName("Use Periodic Notes plugin settings").addToggle((toggle) => toggle.setValue(settings.usePeriodicNotesPlugin).onChange(async (value) => {
+      settings.usePeriodicNotesPlugin = value;
+      await this.plugin.saveSettings();
+      this.display();
+    }));
+    periodicNotesSetting.descEl.innerHTML = `If the <a href="https://github.com/liamcain/obsidian-periodic-notes" style="color: var(--text-accent);">Periodic Notes plugin</a> is installed and a note type is enabled there, prioritize its settings over the ones below.`;
+    new import_obsidian5.Setting(generalSection).setName("Template folder source").setDesc("Where to look for template files").addDropdown((dropdown) => {
+      dropdown.addOption("obsidian", "Use Obsidian's template folder").addOption("custom", "Custom folder").setValue(settings.templateFolderSource).onChange(async (value) => {
+        settings.templateFolderSource = value;
+        await this.plugin.saveSettings();
+        this.display();
+      });
+    });
+    if (settings.templateFolderSource === "custom") {
+      new import_obsidian5.Setting(generalSection).setName("Custom template folder").setDesc("Folder to search for template files").addText((text) => {
+        text.setPlaceholder("templates").setValue(settings.templateCustomFolder).onChange(async (value) => {
+          const cleaned = value.replace(/^\/+|\/+$/g, "");
+          settings.templateCustomFolder = cleaned;
+          await this.plugin.saveSettings();
+        });
+        new FolderSuggest(this.app, text.inputEl);
+      });
+    }
+    const weekStartNote = generalSection.createEl("p", {
+      cls: "setting-item-description"
+    });
+    weekStartNote.innerHTML = `Week start day is configured in <strong>Basic Settings</strong> \u2192 <strong>Week starts on</strong>.`;
+    weekStartNote.style.cssText = "margin-top: 10px; color: var(--text-muted); font-size: 0.9em;";
+    this.renderPeriodicNoteTypeSection(containerEl, "weekly", "Weekly Notes", settings.weekly, "gggg-[W]ww");
+    this.renderPeriodicNoteTypeSection(containerEl, "monthly", "Monthly Notes", settings.monthly, "YYYY-MM");
+    this.renderPeriodicNoteTypeSection(containerEl, "quarterly", "Quarterly Notes", settings.quarterly, "YYYY-[Q]Q");
+    this.renderPeriodicNoteTypeSection(containerEl, "yearly", "Yearly Notes", settings.yearly, "YYYY");
+    this.renderCustomPeriodsSection(containerEl);
+  }
+  renderPeriodicNoteTypeSection(containerEl, type, title, config, defaultFormat) {
+    var _a, _b, _c, _d;
+    const settings = this.plugin.settings.periodicNotes;
+    const section = containerEl.createDiv();
+    section.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
+    section.createEl("h4", { text: title, attr: { style: "margin-top: 0;" } });
+    const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+    const periodicNotesTypeEnabled = (_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c[type]) == null ? void 0 : _d.enabled;
+    const usePluginSettings = settings.usePeriodicNotesPlugin && periodicNotesTypeEnabled;
+    new import_obsidian5.Setting(section).setName(`Enable ${type} notes`).setDesc(`Create ${type} notes when clicking ${type === "weekly" ? "week numbers" : type === "quarterly" ? "quarter indicators" : type === "monthly" ? "month names" : "year header"}`).addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+      config.enabled = value;
+      await this.plugin.saveSettings();
+      this.display();
+    }));
+    if (type === "weekly" && config.enabled) {
+      new import_obsidian5.Setting(section).setName("Week number display").setDesc("How to show week numbers in the calendar").addDropdown((dropdown) => {
+        dropdown.addOption("none", "Hidden").addOption("above-day", "Badge below day number").addOption("extra-column", "Divider before first day of week").addOption("header-row", "Row above month with week spans").setValue(settings.weekNumberDisplay).onChange(async (value) => {
+          settings.weekNumberDisplay = value;
+          await this.plugin.saveSettings();
+          this.display();
+        });
+      });
+    }
+    if (!config.enabled) return;
+    if (usePluginSettings) {
+      const notice = section.createDiv();
+      notice.style.cssText = "background: var(--background-primary); padding: 12px; border-radius: 4px; border-left: 3px solid var(--text-accent); margin-top: 10px;";
+      notice.innerHTML = `Using settings from the <a href="https://github.com/liamcain/obsidian-periodic-notes" style="color: var(--text-accent);">Periodic Notes plugin</a>. Disable "Use Periodic Notes plugin settings" above to customize here.`;
+      notice.style.fontSize = "0.9em";
+      notice.style.color = "var(--text-muted)";
+      return;
+    }
+    new import_obsidian5.Setting(section).setName("Folder").setDesc(`Folder where ${type} notes will be stored`).addText((text) => {
+      text.setPlaceholder("Leave empty for vault root").setValue(config.folder).onChange(async (value) => {
+        const cleaned = value.replace(/^\/+|\/+$/g, "");
+        config.folder = cleaned;
+        await this.plugin.saveSettings();
+      });
+      new FolderSuggest(this.app, text.inputEl);
+    });
+    const formatSetting = new import_obsidian5.Setting(section).setName("Format").addText((text) => {
+      text.setPlaceholder(defaultFormat).setValue(config.format).onChange(async (value) => {
+        config.format = value || defaultFormat;
+        await this.plugin.saveSettings();
+        this.updateFormatPreview(previewEl, config.format || defaultFormat);
+      });
+    });
+    const formatDescEl = formatSetting.descEl;
+    formatDescEl.innerHTML = `Filename format for ${type} notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+    const previewEl = formatDescEl.createDiv();
+    previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
+    this.updateFormatPreview(previewEl, config.format || defaultFormat);
+    new import_obsidian5.Setting(section).setName("Template").setDesc(`Template file to use when creating ${type} notes`).addText((text) => {
+      text.setPlaceholder("templates/weekly").setValue(config.template).onChange(async (value) => {
+        config.template = value;
+        await this.plugin.saveSettings();
+      });
+      new FileSuggest(this.app, text.inputEl, this.getTemplateFolderPath());
+    });
+    const colorSetting = new import_obsidian5.Setting(section).setName("Color (optional)").setDesc(`Visual indicator color for ${type} notes in the calendar`);
+    const colorContainer = colorSetting.controlEl.createDiv();
+    colorContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
+    const colorCheckbox = colorContainer.createEl("input", { type: "checkbox" });
+    colorCheckbox.checked = !!config.color;
+    const colorPickerWrapper = colorContainer.createDiv();
+    if (config.color) {
+      this.renderColorPicker(colorPickerWrapper, config.color, async (newColor) => {
+        config.color = newColor;
+        await this.plugin.saveSettings();
+      });
+    } else {
+      colorPickerWrapper.createEl("span", { text: "Using theme accent" }).style.cssText = "color: var(--text-muted); font-size: 0.85em;";
+    }
+    colorCheckbox.onchange = async () => {
+      if (colorCheckbox.checked) {
+        config.color = "#6c849d";
+      } else {
+        config.color = void 0;
+      }
+      await this.plugin.saveSettings();
+      this.display();
+    };
+    if (type === "weekly" && settings.weekNumberDisplay === "header-row") {
+      this.renderWeekBorderColorSetting(section);
+    }
+  }
+  /**
+   * Render the week border color setting with mode options and color picker
+   */
+  renderWeekBorderColorSetting(container) {
+    const settings = this.plugin.settings.periodicNotes;
+    const borderConfig = settings.weekBorderColor;
+    const borderSetting = new import_obsidian5.Setting(container).setName("Week divider color").setDesc("Color for the divider between weeks in the header row and day cells");
+    const controlContainer = borderSetting.controlEl.createDiv();
+    controlContainer.style.cssText = "display: flex; align-items: center; gap: 8px; flex-wrap: wrap;";
+    const modeSelect = controlContainer.createEl("select");
+    modeSelect.style.cssText = "padding: 4px 8px;";
+    const modes = [
+      { value: "neutral", label: "Neutral (theme border)" },
+      { value: "accent", label: "Theme accent" },
+      { value: "custom", label: "Custom color" }
+    ];
+    modes.forEach((mode) => {
+      const option = modeSelect.createEl("option", { text: mode.label, value: mode.value });
+      if (borderConfig.mode === mode.value) option.selected = true;
+    });
+    const colorWrapper = controlContainer.createDiv();
+    colorWrapper.style.cssText = "display: flex; align-items: center; gap: 8px;";
+    const renderColorControl = () => {
+      colorWrapper.empty();
+      if (borderConfig.mode === "custom") {
+        const currentColor = borderConfig.customColor || "#6c849d";
+        this.renderColorPicker(colorWrapper, currentColor, async (newColor) => {
+          borderConfig.customColor = newColor;
+          await this.plugin.saveSettings();
+        });
+      }
+    };
+    renderColorControl();
+    modeSelect.onchange = async () => {
+      borderConfig.mode = modeSelect.value;
+      await this.plugin.saveSettings();
+      renderColorControl();
+    };
+  }
+  updateFormatPreview(previewEl, format) {
+    const moment = window.moment;
+    try {
+      const preview = moment().format(format);
+      previewEl.textContent = `Preview: ${preview}`;
+    } catch (e) {
+      previewEl.textContent = "Preview: (invalid format)";
+    }
+  }
+  renderCustomPeriodsSection(containerEl) {
+    const settings = this.plugin.settings.periodicNotes;
+    const section = containerEl.createDiv();
+    section.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
+    section.createEl("h4", { text: "Custom Period Groups", attr: { style: "margin-top: 0;" } });
+    const desc = section.createEl("p", {
+      cls: "setting-item-description",
+      text: "Create groups of custom periods (e.g., Semesters, Seasons). Each enabled group gets its own column in the calendar. Periods within a group cannot have overlapping months and must use consecutive months."
+    });
+    desc.style.marginBottom = "15px";
+    const addBtn = section.createEl("button", { text: "+ Add Group" });
+    addBtn.style.cssText = "margin-bottom: 15px; padding: 6px 12px; cursor: pointer;";
+    addBtn.onclick = async () => {
+      const newGroup = {
+        id: Date.now().toString(),
+        name: "New Group",
+        enabled: true,
+        folder: "",
+        template: "",
+        color: void 0,
+        periods: []
+      };
+      settings.customPeriodGroups.push(newGroup);
+      await this.plugin.saveSettings();
+      this.display();
+    };
+    if (settings.customPeriodGroups.length === 0) {
+      const emptyMsg = section.createDiv();
+      emptyMsg.style.cssText = "color: var(--text-muted); font-style: italic;";
+      emptyMsg.textContent = 'No custom period groups defined. Click "Add Group" to create one.';
+    } else {
+      const groupsList = section.createDiv();
+      groupsList.style.cssText = "display: flex; flex-direction: column; gap: 12px;";
+      settings.customPeriodGroups.forEach((group, groupIndex) => {
+        const groupEl = groupsList.createDiv();
+        groupEl.style.cssText = "padding: 12px; background: var(--background-primary); border-radius: 4px; border: 1px solid var(--background-modifier-border);";
+        const groupHeader = groupEl.createDiv();
+        groupHeader.style.cssText = "display: flex; align-items: center; gap: 10px; margin-bottom: 10px;";
+        const toggleContainer = groupHeader.createDiv();
+        const toggle = toggleContainer.createEl("input", { type: "checkbox" });
+        toggle.checked = group.enabled;
+        toggle.style.cssText = "cursor: pointer;";
+        toggle.onchange = async () => {
+          group.enabled = toggle.checked;
+          await this.plugin.saveSettings();
+        };
+        const nameInput = groupHeader.createEl("input", {
+          type: "text",
+          value: group.name,
+          attr: { placeholder: "Group name" }
+        });
+        nameInput.style.cssText = "flex: 1; padding: 4px 8px; font-weight: 500;";
+        nameInput.onchange = async () => {
+          group.name = nameInput.value;
+          await this.plugin.saveSettings();
+        };
+        const deleteGroupBtn = groupHeader.createEl("button", { text: "\xD7" });
+        deleteGroupBtn.style.cssText = "padding: 4px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: 1px solid var(--background-modifier-border);";
+        deleteGroupBtn.title = "Delete group";
+        deleteGroupBtn.onclick = async () => {
+          settings.customPeriodGroups.splice(groupIndex, 1);
+          await this.plugin.saveSettings();
+          this.display();
+        };
+        const groupDefaultsSection = groupEl.createDiv();
+        groupDefaultsSection.style.cssText = "padding: 10px; margin: 10px 0; background: var(--background-secondary); border-radius: 4px;";
+        const groupDefaultsLabel = groupDefaultsSection.createDiv();
+        groupDefaultsLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px;";
+        groupDefaultsLabel.textContent = "Default settings for all periods in this group:";
+        const folderRow = groupDefaultsSection.createDiv();
+        folderRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
+        folderRow.createEl("span", { text: "Folder:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
+        const folderInput = folderRow.createEl("input", {
+          type: "text",
+          value: group.folder || "",
+          attr: { placeholder: "Leave empty for vault root" }
+        });
+        folderInput.style.cssText = "flex: 1; padding: 4px 8px; font-size: 0.85em;";
+        folderInput.onchange = async () => {
+          group.folder = folderInput.value.replace(/^\/+|\/+$/g, "");
+          await this.plugin.saveSettings();
+        };
+        new FolderSuggest(this.app, folderInput);
+        const templateRow = groupDefaultsSection.createDiv();
+        templateRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
+        templateRow.createEl("span", { text: "Template:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
+        const templateInput = templateRow.createEl("input", {
+          type: "text",
+          value: group.template || "",
+          attr: { placeholder: "templates/period" }
+        });
+        templateInput.style.cssText = "flex: 1; padding: 4px 8px; font-size: 0.85em;";
+        templateInput.onchange = async () => {
+          group.template = templateInput.value;
+          await this.plugin.saveSettings();
+        };
+        new FileSuggest(this.app, templateInput, this.getTemplateFolderPath());
+        const colorRow = groupDefaultsSection.createDiv();
+        colorRow.style.cssText = "display: flex; align-items: center; gap: 8px; flex-wrap: wrap;";
+        colorRow.createEl("span", { text: "Color:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
+        const colorCheckbox = colorRow.createEl("input", { type: "checkbox" });
+        colorCheckbox.checked = !!group.color;
+        colorCheckbox.style.cssText = "margin-right: 4px;";
+        const colorPickerWrapper = colorRow.createDiv();
+        colorPickerWrapper.style.cssText = group.color ? "display: flex; align-items: center; gap: 8px;" : "display: none;";
+        if (group.color) {
+          this.renderColorPicker(
+            colorPickerWrapper,
+            group.color,
+            async (newColor) => {
+              group.color = newColor;
+              await this.plugin.saveSettings();
+            }
+          );
+        }
+        const colorCheckLabel = colorRow.createEl("span", { text: group.color ? "" : "Enable group color" });
+        colorCheckLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted);";
+        colorCheckbox.onchange = async () => {
+          if (colorCheckbox.checked) {
+            group.color = "#4a90d9";
+          } else {
+            group.color = void 0;
+          }
+          await this.plugin.saveSettings();
+          this.display();
+        };
+        const periodsContainer = groupEl.createDiv();
+        periodsContainer.style.cssText = "margin-left: 20px;";
+        if (group.periods.length === 0) {
+          const emptyPeriodsMsg = periodsContainer.createDiv();
+          emptyPeriodsMsg.style.cssText = "color: var(--text-muted); font-style: italic; font-size: 0.9em; margin-bottom: 8px;";
+          emptyPeriodsMsg.textContent = "No periods in this group.";
+        } else {
+          const periodsList = periodsContainer.createDiv();
+          periodsList.style.cssText = "display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;";
+          group.periods.forEach((period, periodIndex) => {
+            const periodEl = periodsList.createDiv();
+            periodEl.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--background-secondary); border-radius: 3px;";
+            const effectiveColor = period.useGroupSettings ? group.color : period.color;
+            if (effectiveColor) {
+              const colorDot = periodEl.createDiv();
+              colorDot.style.cssText = `width: 10px; height: 10px; border-radius: 50%; background: ${effectiveColor}; flex-shrink: 0;`;
+              if (period.useGroupSettings && group.color) {
+                colorDot.title = "Using group color";
+              }
+            }
+            const infoEl = periodEl.createDiv();
+            infoEl.style.cssText = "flex: 1;";
+            const nameRow = infoEl.createDiv();
+            nameRow.style.cssText = "display: flex; align-items: center; gap: 6px;";
+            const nameEl = nameRow.createEl("span");
+            nameEl.style.cssText = "font-weight: 500; font-size: 0.9em;";
+            nameEl.textContent = period.name;
+            if (period.useGroupSettings === false) {
+              const customBadge = nameRow.createEl("span", { text: "Custom" });
+              customBadge.style.cssText = "font-size: 0.7em; padding: 1px 5px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 8px;";
+              customBadge.title = "Using custom folder, template, or color instead of group defaults";
+            }
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const monthsText = period.months.map((m) => monthNames[m - 1]).join("-");
+            const detailsEl = infoEl.createDiv();
+            detailsEl.style.cssText = "font-size: 0.8em; color: var(--text-muted);";
+            detailsEl.innerHTML = `<code style="font-size: 0.95em; background: var(--background-modifier-border); padding: 0 4px; border-radius: 2px;">${period.format}</code> \xB7 ${monthsText}`;
+            const editBtn = periodEl.createEl("button", { text: "Edit" });
+            editBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 0.85em;";
+            editBtn.onclick = () => {
+              new CustomPeriodEditModal(
+                this.app,
+                this.plugin,
+                period,
+                group,
+                async () => {
+                  await this.plugin.saveSettings();
+                  this.display();
+                },
+                async () => {
+                  group.periods.splice(periodIndex, 1);
+                  await this.plugin.saveSettings();
+                  this.display();
+                }
+              ).open();
+            };
+            const deletePeriodBtn = periodEl.createEl("button", { text: "\xD7" });
+            deletePeriodBtn.style.cssText = "padding: 2px 6px; cursor: pointer; font-size: 1em; background: transparent; border: 1px solid var(--background-modifier-border);";
+            deletePeriodBtn.title = "Delete period";
+            deletePeriodBtn.onclick = async () => {
+              group.periods.splice(periodIndex, 1);
+              await this.plugin.saveSettings();
+              this.display();
+            };
+          });
+        }
+        const addPeriodBtn = periodsContainer.createEl("button", { text: "+ Add Period" });
+        addPeriodBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 0.9em;";
+        addPeriodBtn.onclick = () => {
+          const usedMonths = /* @__PURE__ */ new Set();
+          group.periods.forEach((p) => p.months.forEach((m) => usedMonths.add(m)));
+          const availableMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter((m) => !usedMonths.has(m));
+          const defaultMonths = availableMonths.slice(0, 3);
+          const newPeriod = {
+            id: Date.now().toString(),
+            name: "New Period",
+            format: "YYYY-[P" + (group.periods.length + 1) + "]",
+            months: defaultMonths.length > 0 ? defaultMonths : [1],
+            yearBasis: "majority",
+            useGroupSettings: true,
+            // Use group defaults by default
+            folder: "",
+            template: "",
+            color: void 0
+          };
+          group.periods.push(newPeriod);
+          this.plugin.saveSettings();
+          new CustomPeriodEditModal(
+            this.app,
+            this.plugin,
+            newPeriod,
+            group,
+            async () => {
+              await this.plugin.saveSettings();
+              this.display();
+            },
+            async () => {
+              const idx = group.periods.findIndex((p) => p.id === newPeriod.id);
+              if (idx !== -1) {
+                group.periods.splice(idx, 1);
+                await this.plugin.saveSettings();
+                this.display();
+              }
+            }
+          ).open();
+        };
+      });
+    }
   }
   renderQuickNoteCreationSettings(containerEl) {
     const config = this.plugin.settings.quickNoteCreation;
@@ -3997,13 +4672,13 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     });
     desc.style.marginTop = "-10px";
     desc.style.marginBottom = "15px";
-    new import_obsidian3.Setting(containerEl).setName("Enable quick note creation").setDesc("Create notes directly from the calendar with Cmd/Ctrl+Click").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+    new import_obsidian5.Setting(containerEl).setName("Enable quick note creation").setDesc("Create notes directly from the calendar with Cmd/Ctrl+Click").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
       config.enabled = value;
       await this.plugin.saveSettings();
       this.display();
     }));
     if (!config.enabled) return;
-    new import_obsidian3.Setting(containerEl).setName('Show "Add Note" button').setDesc('Display an "Add Note" button in the calendar header for easy access').addToggle((toggle) => toggle.setValue(config.showAddNoteButton).onChange(async (value) => {
+    new import_obsidian5.Setting(containerEl).setName('Show "Add Note" button').setDesc('Display an "Add Note" button in the calendar header for easy access').addToggle((toggle) => toggle.setValue(config.showAddNoteButton).onChange(async (value) => {
       config.showAddNoteButton = value;
       await this.plugin.saveSettings();
       const leaves = this.plugin.app.workspace.getLeavesOfType("linear-calendar");
@@ -4014,13 +4689,13 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       }
     }));
     this.renderDivider(containerEl);
-    new import_obsidian3.Setting(containerEl).setName("Default save location").setDesc("Where new notes should be saved by default").addDropdown((dropdown) => dropdown.addOption("default", "Same as new notes").addOption("dailynotes", "Same as daily notes").addOption("custom", "Custom folder").setValue(config.defaultFolder).onChange(async (value) => {
+    new import_obsidian5.Setting(containerEl).setName("Default save location").setDesc("Where new notes should be saved by default").addDropdown((dropdown) => dropdown.addOption("default", "Same as new notes").addOption("dailynotes", "Same as daily notes").addOption("custom", "Custom folder").setValue(config.defaultFolder).onChange(async (value) => {
       config.defaultFolder = value;
       await this.plugin.saveSettings();
       this.display();
     }));
     if (config.defaultFolder === "custom") {
-      new import_obsidian3.Setting(containerEl).setName("Custom folder path").setDesc("Path where quick notes should be saved").addText((text) => {
+      new import_obsidian5.Setting(containerEl).setName("Custom folder path").setDesc("Path where quick notes should be saved").addText((text) => {
         text.setPlaceholder("folder/subfolder").setValue(config.customFolder).onChange(async (value) => {
           const cleaned = value.replace(/^\/+|\/+$/g, "");
           config.customFolder = cleaned;
@@ -4031,21 +4706,21 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     }
     this.renderDivider(containerEl);
     containerEl.createEl("h4", { text: "Default Properties" });
-    new import_obsidian3.Setting(containerEl).setName("Start date property").setDesc("Default property name for start date").addText((text) => {
+    new import_obsidian5.Setting(containerEl).setName("Start date property").setDesc("Default property name for start date").addText((text) => {
       text.setValue(config.defaultStartDateProperty).onChange(async (value) => {
         config.defaultStartDateProperty = value;
         await this.plugin.saveSettings();
       });
       new PropertySuggest(this.app, text.inputEl);
     });
-    new import_obsidian3.Setting(containerEl).setName("End date property").setDesc("Default property name for end date").addText((text) => {
+    new import_obsidian5.Setting(containerEl).setName("End date property").setDesc("Default property name for end date").addText((text) => {
       text.setValue(config.defaultEndDateProperty).onChange(async (value) => {
         config.defaultEndDateProperty = value;
         await this.plugin.saveSettings();
       });
       new PropertySuggest(this.app, text.inputEl);
     });
-    new import_obsidian3.Setting(containerEl).setName("Category property").setDesc("Default property name for category").addText((text) => {
+    new import_obsidian5.Setting(containerEl).setName("Category property").setDesc("Default property name for category").addText((text) => {
       text.setValue(config.defaultCategoryProperty).onChange(async (value) => {
         config.defaultCategoryProperty = value;
         await this.plugin.saveSettings();
@@ -4109,7 +4784,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     const exp = this.plugin.settings.experimental;
     const expSection = containerEl.createDiv();
     expSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
-    new import_obsidian3.Setting(expSection).setName("Multi-line note names").setDesc("Allow note names to wrap to multiple lines instead of truncating. Best for wider cells.").addToggle((toggle) => toggle.setValue(exp.multilineNotes).onChange(async (value) => {
+    new import_obsidian5.Setting(expSection).setName("Multi-line note names").setDesc("Allow note names to wrap to multiple lines instead of truncating. Best for wider cells.").addToggle((toggle) => toggle.setValue(exp.multilineNotes).onChange(async (value) => {
       exp.multilineNotes = value;
       if (value) {
         exp.verticalText = false;
@@ -4117,7 +4792,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       await this.plugin.saveSettings();
       this.display();
     }));
-    new import_obsidian3.Setting(expSection).setName("Vertical text rotation").setDesc("Rotate note names 90 degrees vertically. Creative use of vertical space.").addToggle((toggle) => toggle.setValue(exp.verticalText).onChange(async (value) => {
+    new import_obsidian5.Setting(expSection).setName("Vertical text rotation").setDesc("Rotate note names 90 degrees vertically. Creative use of vertical space.").addToggle((toggle) => toggle.setValue(exp.verticalText).onChange(async (value) => {
       exp.verticalText = value;
       if (value) {
         exp.multilineNotes = false;
@@ -4125,11 +4800,11 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       await this.plugin.saveSettings();
       this.display();
     }));
-    new import_obsidian3.Setting(expSection).setName("Compact font size").setDesc("Use smaller font size (0.75em) for note names to fit more text.").addToggle((toggle) => toggle.setValue(exp.compactFontSize).onChange(async (value) => {
+    new import_obsidian5.Setting(expSection).setName("Compact font size").setDesc("Use smaller font size (0.75em) for note names to fit more text.").addToggle((toggle) => toggle.setValue(exp.compactFontSize).onChange(async (value) => {
       exp.compactFontSize = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian3.Setting(expSection).setName("Condensed letter spacing").setDesc("Reduce spacing between letters to fit more text in the same space.").addToggle((toggle) => toggle.setValue(exp.condensedLetters).onChange(async (value) => {
+    new import_obsidian5.Setting(expSection).setName("Condensed letter spacing").setDesc("Reduce spacing between letters to fit more text in the same space.").addToggle((toggle) => toggle.setValue(exp.condensedLetters).onChange(async (value) => {
       exp.condensedLetters = value;
       await this.plugin.saveSettings();
     }));
@@ -4140,7 +4815,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     const descEl = containerEl.createDiv();
     descEl.style.cssText = "color: var(--text-muted); margin-bottom: 15px;";
     descEl.innerHTML = "Visually organize notes with colors and icons based on conditions. Categories are checked in order, first match wins.";
-    new import_obsidian3.Setting(containerEl).setName("Enable color categories").setDesc("Turn the color categories feature on or off.").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+    new import_obsidian5.Setting(containerEl).setName("Enable color categories").setDesc("Turn the color categories feature on or off.").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
       config.enabled = value;
       await this.plugin.saveSettings();
       this.display();
@@ -4155,15 +4830,15 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     settingsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 6px; margin-bottom: 20px;";
     const settingsHeader = settingsSection.createEl("h4", { text: "Category Settings" });
     settingsHeader.style.cssText = "margin-top: 0; margin-bottom: 12px; font-size: 1em; color: var(--text-normal);";
-    new import_obsidian3.Setting(settingsSection).setName("Show category index").setDesc("Display a row at the top of the calendar showing all categories as clickable chips.").addToggle((toggle) => toggle.setValue(config.showCategoryIndex).onChange(async (value) => {
+    new import_obsidian5.Setting(settingsSection).setName("Show category index").setDesc("Display a row at the top of the calendar showing all categories as clickable chips.").addToggle((toggle) => toggle.setValue(config.showCategoryIndex).onChange(async (value) => {
       config.showCategoryIndex = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian3.Setting(settingsSection).setName("Show icons in calendar").setDesc("Display category icons before note titles in the calendar. Turn off to show only colors.").addToggle((toggle) => toggle.setValue(config.showIconsInCalendar).onChange(async (value) => {
+    new import_obsidian5.Setting(settingsSection).setName("Show icons in calendar").setDesc("Display category icons before note titles in the calendar. Turn off to show only colors.").addToggle((toggle) => toggle.setValue(config.showIconsInCalendar).onChange(async (value) => {
       config.showIconsInCalendar = value;
       await this.plugin.saveSettings();
     }));
-    const defaultColorSetting = new import_obsidian3.Setting(settingsSection).setName("Default color").setDesc("Color for notes that don't match any category.");
+    const defaultColorSetting = new import_obsidian5.Setting(settingsSection).setName("Default color").setDesc("Color for notes that don't match any category.");
     const defaultColorContainer = defaultColorSetting.controlEl.createDiv();
     defaultColorContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
     if (config.defaultCategoryColor !== null) {
@@ -4312,7 +4987,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
       if (category.iconType === "emoji") {
         iconPreview.textContent = category.iconValue;
       } else {
-        (0, import_obsidian3.setIcon)(iconPreview, category.iconValue);
+        (0, import_obsidian5.setIcon)(iconPreview, category.iconValue);
         iconPreview.style.color = "#ffffff";
       }
     }
@@ -4405,7 +5080,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
           if (category.iconType === "emoji") {
             iconPreviewEl.textContent = category.iconValue;
           } else {
-            (0, import_obsidian3.setIcon)(iconPreviewEl, category.iconValue);
+            (0, import_obsidian5.setIcon)(iconPreviewEl, category.iconValue);
           }
         }
         const iconInput = iconInputContainer.createEl("input", {
@@ -4432,7 +5107,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
                 if (category.iconType === "emoji") {
                   headerIcon.textContent = category.iconValue;
                 } else {
-                  (0, import_obsidian3.setIcon)(headerIcon, category.iconValue);
+                  (0, import_obsidian5.setIcon)(headerIcon, category.iconValue);
                   headerIcon.style.color = "#ffffff";
                 }
               }
@@ -4508,7 +5183,7 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
     chevron.style.cssText = "font-size: 1.2em; transition: transform 0.2s; display: inline-block;";
     const icon = palettesHeader.createEl("span");
     icon.style.cssText = "display: flex; align-items: center; margin-right: 4px;";
-    (0, import_obsidian3.setIcon)(icon, "palette");
+    (0, import_obsidian5.setIcon)(icon, "palette");
     palettesHeader.createEl("strong", { text: "Color Palettes" });
     const headerDesc = palettesHeader.createEl("span", { text: "(optional - create reusable color sets)" });
     headerDesc.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-left: 8px;";
@@ -4673,118 +5348,15 @@ var CalendarSettingTab = class extends import_obsidian3.PluginSettingTab {
    */
   renderColorPicker(container, currentColor, onColorChange) {
     const config = this.plugin.settings.colorCategories;
-    const colorPickerContainer = container.createDiv();
-    colorPickerContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
-    const colorInput = colorPickerContainer.createEl("input", { type: "color", value: currentColor });
-    colorInput.style.cssText = "width: 60px; height: 32px; cursor: pointer; border-radius: 4px;";
-    colorInput.onchange = async (e) => {
-      await onColorChange(e.target.value);
-    };
-    const hexDisplay = colorPickerContainer.createEl("code");
-    hexDisplay.textContent = currentColor.toUpperCase();
-    hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.9em;";
-    colorInput.oninput = () => {
-      hexDisplay.textContent = colorInput.value.toUpperCase();
-    };
-    if (config.colorPalettes && config.colorPalettes.length > 0) {
-      const paletteBtn = colorPickerContainer.createEl("button");
-      paletteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;";
-      (0, import_obsidian3.setIcon)(paletteBtn, "palette");
-      paletteBtn.title = "Open Color Palettes";
-      let popover = null;
-      const closePopover = () => {
-        if (popover) {
-          popover.remove();
-          popover = null;
-        }
-      };
-      paletteBtn.onclick = (e) => {
-        e.preventDefault();
-        if (popover) {
-          closePopover();
-          return;
-        }
-        popover = document.body.createDiv();
-        popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;";
-        const closeBtn = popover.createEl("button");
-        closeBtn.textContent = "\xD7";
-        closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
-        closeBtn.title = "Close";
-        closeBtn.onmouseenter = () => {
-          closeBtn.style.background = "var(--background-modifier-hover)";
-        };
-        closeBtn.onmouseleave = () => {
-          closeBtn.style.background = "transparent";
-        };
-        closeBtn.onclick = (e2) => {
-          e2.preventDefault();
-          closePopover();
-        };
-        const btnRect = paletteBtn.getBoundingClientRect();
-        popover.style.top = btnRect.bottom + 6 + "px";
-        popover.style.left = btnRect.left + "px";
-        setTimeout(() => {
-          if (popover) {
-            const popoverRect = popover.getBoundingClientRect();
-            if (popoverRect.right > window.innerWidth) {
-              popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
-            }
-            if (popoverRect.bottom > window.innerHeight) {
-              popover.style.top = btnRect.top - popoverRect.height - 6 + "px";
-            }
-          }
-        }, 0);
-        config.colorPalettes.forEach((palette, idx) => {
-          const paletteSection = popover.createDiv();
-          paletteSection.style.cssText = idx > 0 ? "margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);" : "margin-top: 4px;";
-          const paletteName = paletteSection.createEl("div", { text: palette.name });
-          paletteName.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;";
-          const swatchesGrid = paletteSection.createDiv();
-          swatchesGrid.style.cssText = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;";
-          palette.colors.forEach((colorEntry) => {
-            const swatch = swatchesGrid.createEl("button");
-            const isSelected = currentColor.toLowerCase() === colorEntry.hex.toLowerCase();
-            swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
-            swatch.title = `${colorEntry.name}
-${colorEntry.hex}`;
-            swatch.onclick = async (e2) => {
-              e2.preventDefault();
-              colorInput.value = colorEntry.hex;
-              hexDisplay.textContent = colorEntry.hex.toUpperCase();
-              await onColorChange(colorEntry.hex);
-              closePopover();
-            };
-            swatch.onmouseenter = () => {
-              swatch.style.transform = "scale(1.08)";
-              swatch.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
-            };
-            swatch.onmouseleave = () => {
-              swatch.style.transform = "scale(1)";
-              swatch.style.boxShadow = "none";
-            };
-          });
-        });
-        const closeHandler = (e2) => {
-          if (popover && !popover.contains(e2.target) && !paletteBtn.contains(e2.target)) {
-            closePopover();
-            document.removeEventListener("click", closeHandler);
-          }
-        };
-        setTimeout(() => {
-          document.addEventListener("click", closeHandler);
-        }, 0);
-        const keyHandler = (e2) => {
-          if (e2.key === "Escape" && popover) {
-            closePopover();
-            document.removeEventListener("keydown", keyHandler);
-          }
-        };
-        document.addEventListener("keydown", keyHandler);
-      };
-    }
+    ColorPickerRenderer.render({
+      container,
+      currentColor,
+      palettes: config.colorPalettes || [],
+      onColorChange
+    });
   }
 };
-var CategoryEditModal = class extends import_obsidian3.Modal {
+var CategoryEditModal = class extends import_obsidian5.Modal {
   constructor(app, plugin, category, onSave) {
     super(app);
     this.plugin = plugin;
@@ -4814,7 +5386,7 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
    */
   renderConditionsInfoIcon(container) {
     const infoIcon = container.createEl("span");
-    (0, import_obsidian3.setIcon)(infoIcon, "info");
+    (0, import_obsidian5.setIcon)(infoIcon, "info");
     infoIcon.style.cssText = "cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;";
     infoIcon.title = "Click to see examples";
     let popover = null;
@@ -4898,7 +5470,7 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
     const { contentEl } = this;
     contentEl.empty();
     contentEl.createEl("h2", { text: "Edit Category" });
-    new import_obsidian3.Setting(contentEl).setName("Category name").addText((text) => text.setValue(this.category.name).onChange(async (value) => {
+    new import_obsidian5.Setting(contentEl).setName("Category name").addText((text) => text.setValue(this.category.name).onChange(async (value) => {
       this.category.name = value;
       await this.plugin.saveSettings();
       this.onSave();
@@ -4906,7 +5478,7 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
     contentEl.createEl("div", {
       attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
     });
-    const colorSetting = new import_obsidian3.Setting(contentEl).setName("Color").setDesc("Choose a color for this category");
+    const colorSetting = new import_obsidian5.Setting(contentEl).setName("Color").setDesc("Choose a color for this category");
     this.renderColorPickerInModal(colorSetting.controlEl);
     contentEl.createEl("div", {
       attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
@@ -4936,7 +5508,7 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
     useIconDesc.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-left: 24px;";
     useIconDesc.textContent = "Add an emoji or Lucide icon to this category";
     if (this.category.iconType !== null) {
-      const iconSetting = new import_obsidian3.Setting(contentEl).setName("Icon").setDesc("Search for emoji or Lucide icon");
+      const iconSetting = new import_obsidian5.Setting(contentEl).setName("Icon").setDesc("Search for emoji or Lucide icon");
       const inputContainer = iconSetting.controlEl.createDiv();
       inputContainer.style.cssText = "display: flex; gap: 10px; align-items: center; width: 100%;";
       const iconInput = inputContainer.createEl("input", {
@@ -4963,12 +5535,12 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
         if (this.category.iconType === "emoji") {
           iconPreviewEl.textContent = this.category.iconValue;
         } else {
-          (0, import_obsidian3.setIcon)(iconPreviewEl, this.category.iconValue);
+          (0, import_obsidian5.setIcon)(iconPreviewEl, this.category.iconValue);
         }
       }
       new IconSuggest(iconInput, iconPreviewEl);
     }
-    new import_obsidian3.Setting(contentEl).setName("Enabled").setDesc("Toggle this category on/off without deleting it").addToggle((toggle) => toggle.setValue(this.category.enabled).onChange(async (value) => {
+    new import_obsidian5.Setting(contentEl).setName("Enabled").setDesc("Toggle this category on/off without deleting it").addToggle((toggle) => toggle.setValue(this.category.enabled).onChange(async (value) => {
       this.category.enabled = value;
       await this.plugin.saveSettings();
       this.onSave();
@@ -4980,7 +5552,7 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
     conditionsHeader.style.cssText = "display: flex; align-items: center; gap: 8px; margin-top: 0; margin-bottom: 10px;";
     conditionsHeader.createEl("h3", { text: "Conditions", attr: { style: "margin: 0;" } });
     this.renderConditionsInfoIcon(conditionsHeader);
-    new import_obsidian3.Setting(contentEl).setName("Match mode").setDesc("Choose how conditions should be evaluated").addDropdown((dropdown) => dropdown.addOption("all", "AND - All conditions must match").addOption("any", "OR - Any condition can match").setValue(this.category.matchMode).onChange(async (value) => {
+    new import_obsidian5.Setting(contentEl).setName("Match mode").setDesc("Choose how conditions should be evaluated").addDropdown((dropdown) => dropdown.addOption("all", "AND - All conditions must match").addOption("any", "OR - Any condition can match").setValue(this.category.matchMode).onChange(async (value) => {
       this.category.matchMode = value;
       await this.plugin.saveSettings();
       this.onSave();
@@ -4997,7 +5569,7 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
         this.renderCondition(conditionsContainer, condition, index);
       });
     }
-    new import_obsidian3.Setting(contentEl).addButton((btn) => btn.setButtonText("+ Add condition").onClick(async () => {
+    new import_obsidian5.Setting(contentEl).addButton((btn) => btn.setButtonText("+ Add condition").onClick(async () => {
       this.category.conditions.push({
         property: "file.name",
         operator: "contains",
@@ -5007,7 +5579,7 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
       this.onSave();
       this.onOpen();
     }));
-    const footerSetting = new import_obsidian3.Setting(contentEl).setName("").setDesc("").addButton((btn) => btn.setIcon("trash").setTooltip("Delete category").onClick(async () => {
+    const footerSetting = new import_obsidian5.Setting(contentEl).setName("").setDesc("").addButton((btn) => btn.setIcon("trash").setTooltip("Delete category").onClick(async () => {
       const confirmed = confirm(`Are you sure you want to delete the category "${this.category.name}"?`);
       if (confirmed) {
         const config = this.plugin.settings.colorCategories;
@@ -5035,118 +5607,274 @@ var CategoryEditModal = class extends import_obsidian3.Modal {
   }
   renderColorPickerInModal(container) {
     const config = this.plugin.settings.colorCategories;
-    const colorPickerContainer = container.createDiv();
-    colorPickerContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
-    const colorInput = colorPickerContainer.createEl("input", { type: "color", value: this.category.color });
-    colorInput.style.cssText = "width: 60px; height: 32px; cursor: pointer; border-radius: 4px;";
-    colorInput.onchange = async (e) => {
-      this.category.color = e.target.value;
+    ColorPickerRenderer.render({
+      container,
+      currentColor: this.category.color,
+      palettes: config.colorPalettes || [],
+      onColorChange: async (newColor) => {
+        this.category.color = newColor;
+        await this.plugin.saveSettings();
+        this.onSave();
+      }
+    });
+  }
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+};
+var CustomPeriodEditModal = class extends import_obsidian5.Modal {
+  constructor(app, plugin, period, group, onSave, onDelete) {
+    super(app);
+    this.plugin = plugin;
+    this.period = period;
+    this.group = group;
+    this.onSave = onSave;
+    this.onDelete = onDelete;
+  }
+  /**
+   * Get the template folder path based on settings.
+   */
+  getTemplateFolderPath() {
+    var _a, _b, _c, _d, _e, _f, _g;
+    const settings = this.plugin.settings.periodicNotes;
+    if (settings.templateFolderSource === "custom") {
+      return settings.templateCustomFolder || void 0;
+    }
+    const templatesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["templates"];
+    if ((templatesPlugin == null ? void 0 : templatesPlugin.enabled) && ((_d = (_c = templatesPlugin == null ? void 0 : templatesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder)) {
+      return templatesPlugin.instance.options.folder;
+    }
+    const templaterPlugin = (_f = (_e = this.app.plugins) == null ? void 0 : _e.plugins) == null ? void 0 : _f["templater-obsidian"];
+    if ((_g = templaterPlugin == null ? void 0 : templaterPlugin.settings) == null ? void 0 : _g.templates_folder) {
+      return templaterPlugin.settings.templates_folder;
+    }
+    return void 0;
+  }
+  /**
+   * Get months that are used by other periods in this group (not available for selection)
+   */
+  getUnavailableMonths() {
+    const unavailable = /* @__PURE__ */ new Set();
+    for (const p of this.group.periods) {
+      if (p.id !== this.period.id) {
+        p.months.forEach((m) => unavailable.add(m));
+      }
+    }
+    return unavailable;
+  }
+  /**
+   * Check if months array is consecutive (allowing year wrap like [11,12,1,2])
+   */
+  areMonthsConsecutive(months) {
+    if (months.length <= 1) return true;
+    const sorted = [...months].sort((a, b) => a - b);
+    let isConsecutiveNormal = true;
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i] - sorted[i - 1] !== 1) {
+        isConsecutiveNormal = false;
+        break;
+      }
+    }
+    if (isConsecutiveNormal) return true;
+    const hasDecember = sorted.includes(12);
+    const hasJanuary = sorted.includes(1);
+    if (!hasDecember || !hasJanuary) return false;
+    const highMonths = sorted.filter((m) => m >= 7);
+    const lowMonths = sorted.filter((m) => m <= 6);
+    for (let i = 1; i < highMonths.length; i++) {
+      if (highMonths[i] - highMonths[i - 1] !== 1) return false;
+    }
+    if (highMonths.length > 0 && highMonths[highMonths.length - 1] !== 12) return false;
+    for (let i = 1; i < lowMonths.length; i++) {
+      if (lowMonths[i] - lowMonths[i - 1] !== 1) return false;
+    }
+    if (lowMonths.length > 0 && lowMonths[0] !== 1) return false;
+    return true;
+  }
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.createEl("h2", { text: "Edit Custom Period" });
+    new import_obsidian5.Setting(contentEl).setName("Name").setDesc('Display name for this period (e.g., "Semester 1", "Winter")').addText((text) => text.setPlaceholder("Period name").setValue(this.period.name).onChange(async (value) => {
+      this.period.name = value;
       await this.plugin.saveSettings();
       this.onSave();
-    };
-    const hexDisplay = colorPickerContainer.createEl("code");
-    hexDisplay.textContent = this.category.color.toUpperCase();
-    hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.9em;";
-    colorInput.oninput = () => {
-      hexDisplay.textContent = colorInput.value.toUpperCase();
-    };
-    if (config.colorPalettes && config.colorPalettes.length > 0) {
-      const paletteBtn = colorPickerContainer.createEl("button");
-      paletteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;";
-      (0, import_obsidian3.setIcon)(paletteBtn, "palette");
-      paletteBtn.title = "Open Color Palettes";
-      let popover = null;
-      const closePopover = () => {
-        if (popover) {
-          popover.remove();
-          popover = null;
-        }
-      };
-      paletteBtn.onclick = (e) => {
-        e.preventDefault();
-        if (popover) {
-          closePopover();
-          return;
-        }
-        popover = document.body.createDiv();
-        popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;";
-        const closeBtn = popover.createEl("button");
-        closeBtn.textContent = "\xD7";
-        closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
-        closeBtn.title = "Close";
-        closeBtn.onmouseenter = () => {
-          closeBtn.style.background = "var(--background-modifier-hover)";
-        };
-        closeBtn.onmouseleave = () => {
-          closeBtn.style.background = "transparent";
-        };
-        closeBtn.onclick = (e2) => {
-          e2.preventDefault();
-          closePopover();
-        };
-        const btnRect = paletteBtn.getBoundingClientRect();
-        popover.style.top = btnRect.bottom + 6 + "px";
-        popover.style.left = btnRect.left + "px";
-        setTimeout(() => {
-          if (popover) {
-            const popoverRect = popover.getBoundingClientRect();
-            if (popoverRect.right > window.innerWidth) {
-              popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
-            }
-            if (popoverRect.bottom > window.innerHeight) {
-              popover.style.top = btnRect.top - popoverRect.height - 6 + "px";
-            }
+    }));
+    const monthsSection = contentEl.createDiv();
+    monthsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin: 15px 0;";
+    const monthsHeader = monthsSection.createDiv();
+    monthsHeader.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;";
+    monthsHeader.createEl("h4", { text: "Months", attr: { style: "margin: 0;" } });
+    const unavailableMonths = this.getUnavailableMonths();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthsGrid = monthsSection.createDiv();
+    monthsGrid.style.cssText = "display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;";
+    monthNames.forEach((name, index) => {
+      const monthNum = index + 1;
+      const isSelected = this.period.months.includes(monthNum);
+      const isUnavailable = unavailableMonths.has(monthNum);
+      const monthBtn = monthsGrid.createEl("button");
+      monthBtn.textContent = name;
+      if (isUnavailable) {
+        monthBtn.style.cssText = `
+                    padding: 8px 12px;
+                    border: 2px solid var(--background-modifier-border);
+                    background: var(--background-modifier-border);
+                    color: var(--text-muted);
+                    border-radius: 4px;
+                    cursor: not-allowed;
+                    font-weight: 400;
+                    opacity: 0.5;
+                `;
+        monthBtn.title = "Used by another period in this group";
+      } else {
+        monthBtn.style.cssText = `
+                    padding: 8px 12px;
+                    border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"};
+                    background: ${isSelected ? "var(--interactive-accent)" : "var(--background-primary)"};
+                    color: ${isSelected ? "var(--text-on-accent)" : "var(--text-normal)"};
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: ${isSelected ? "600" : "400"};
+                    transition: all 0.15s;
+                `;
+        monthBtn.onclick = async () => {
+          let newMonths;
+          if (isSelected) {
+            newMonths = this.period.months.filter((m) => m !== monthNum);
+          } else {
+            newMonths = [...this.period.months, monthNum];
           }
-        }, 0);
-        config.colorPalettes.forEach((palette, idx) => {
-          const paletteSection = popover.createDiv();
-          paletteSection.style.cssText = idx > 0 ? "margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);" : "margin-top: 4px;";
-          const paletteName = paletteSection.createEl("div", { text: palette.name });
-          paletteName.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;";
-          const swatchesGrid = paletteSection.createDiv();
-          swatchesGrid.style.cssText = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;";
-          palette.colors.forEach((colorEntry) => {
-            const swatch = swatchesGrid.createEl("button");
-            const isSelected = this.category.color.toLowerCase() === colorEntry.hex.toLowerCase();
-            swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
-            swatch.title = `${colorEntry.name}
-${colorEntry.hex}`;
-            swatch.onclick = async (e2) => {
-              e2.preventDefault();
-              colorInput.value = colorEntry.hex;
-              hexDisplay.textContent = colorEntry.hex.toUpperCase();
-              this.category.color = colorEntry.hex;
-              await this.plugin.saveSettings();
-              this.onSave();
-              closePopover();
-            };
-            swatch.onmouseenter = () => {
-              swatch.style.transform = "scale(1.08)";
-              swatch.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
-            };
-            swatch.onmouseleave = () => {
-              swatch.style.transform = "scale(1)";
-              swatch.style.boxShadow = "none";
-            };
-          });
+          if (!this.areMonthsConsecutive(newMonths)) {
+          }
+          this.period.months = newMonths.sort((a, b) => a - b);
+          await this.plugin.saveSettings();
+          this.onSave();
+          this.onOpen();
+        };
+      }
+    });
+    const validationEl = monthsSection.createDiv();
+    validationEl.style.cssText = "margin-top: 10px; font-size: 0.85em;";
+    if (this.period.months.length === 0) {
+      validationEl.style.color = "var(--text-error)";
+      validationEl.textContent = "\u26A0 Please select at least one month.";
+    } else if (!this.areMonthsConsecutive(this.period.months)) {
+      validationEl.style.color = "var(--text-error)";
+      validationEl.textContent = "\u26A0 Months must be consecutive. Remove gaps between selected months.";
+    } else {
+      validationEl.style.color = "var(--text-muted)";
+      validationEl.textContent = "Tip: Months can wrap across year boundary (e.g., Nov-Dec-Jan-Feb for Winter).";
+    }
+    new import_obsidian5.Setting(contentEl).setName("Year basis").setDesc("Which year to use when the period spans across year boundary").addDropdown((dropdown) => dropdown.addOption("start", "Use year of first month").addOption("end", "Use year of last month").addOption("majority", "Use year where most months fall").setValue(this.period.yearBasis).onChange(async (value) => {
+      this.period.yearBasis = value;
+      await this.plugin.saveSettings();
+      this.onSave();
+    }));
+    const formatSetting = new import_obsidian5.Setting(contentEl).setName("Format").addText((text) => text.setPlaceholder("YYYY-[S1]").setValue(this.period.format).onChange(async (value) => {
+      this.period.format = value;
+      await this.plugin.saveSettings();
+      this.onSave();
+      this.updateFormatPreview(previewEl);
+    }));
+    formatSetting.descEl.innerHTML = `Filename format for period notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+    const previewEl = formatSetting.descEl.createDiv();
+    previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
+    this.updateFormatPreview(previewEl);
+    const useGroupSettingsSection = contentEl.createDiv();
+    useGroupSettingsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin: 15px 0;";
+    new import_obsidian5.Setting(useGroupSettingsSection).setName("Use group defaults").setDesc(`Use the group's folder, template, and color settings`).addToggle((toggle) => toggle.setValue(this.period.useGroupSettings !== false).onChange(async (value) => {
+      this.period.useGroupSettings = value;
+      await this.plugin.saveSettings();
+      this.onSave();
+      this.onOpen();
+    }));
+    if (this.period.useGroupSettings !== false) {
+      const groupInfoEl = useGroupSettingsSection.createDiv();
+      groupInfoEl.style.cssText = "font-size: 0.85em; color: var(--text-muted); padding: 8px; background: var(--background-primary); border-radius: 4px; margin-top: 8px;";
+      groupInfoEl.innerHTML = `
+                <div style="margin-bottom: 4px;"><strong>Group "${this.group.name}" defaults:</strong></div>
+                <div>Folder: ${this.group.folder || "(vault root)"}</div>
+                <div>Template: ${this.group.template || "(none)"}</div>
+                <div>Color: ${this.group.color ? `<span style="display:inline-block; width:12px; height:12px; background:${this.group.color}; border-radius:2px; vertical-align:middle;"></span> ${this.group.color}` : "(none)"}</div>
+            `;
+    } else {
+      const individualSettingsLabel = useGroupSettingsSection.createDiv();
+      individualSettingsLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-top: 8px; margin-bottom: 4px;";
+      individualSettingsLabel.textContent = "Custom settings for this period:";
+      new import_obsidian5.Setting(useGroupSettingsSection).setName("Folder").setDesc("Folder where notes for this period will be stored").addText((text) => {
+        text.setPlaceholder("Leave empty for vault root").setValue(this.period.folder).onChange(async (value) => {
+          const cleaned = value.replace(/^\/+|\/+$/g, "");
+          this.period.folder = cleaned;
+          await this.plugin.saveSettings();
+          this.onSave();
         });
-        const closeHandler = (e2) => {
-          if (popover && !popover.contains(e2.target) && !paletteBtn.contains(e2.target)) {
-            closePopover();
-            document.removeEventListener("click", closeHandler);
+        new FolderSuggest(this.app, text.inputEl);
+      });
+      new import_obsidian5.Setting(useGroupSettingsSection).setName("Template").setDesc("Template file to use when creating notes for this period").addText((text) => {
+        text.setPlaceholder("templates/semester").setValue(this.period.template).onChange(async (value) => {
+          this.period.template = value;
+          await this.plugin.saveSettings();
+          this.onSave();
+        });
+        new FileSuggest(this.app, text.inputEl, this.getTemplateFolderPath());
+      });
+      const colorSetting = new import_obsidian5.Setting(useGroupSettingsSection).setName("Color (optional)").setDesc("Visual indicator color for this period in the calendar");
+      const colorContainer = colorSetting.controlEl.createDiv();
+      colorContainer.style.cssText = "display: flex; align-items: center; gap: 8px; flex-wrap: wrap;";
+      const colorEnabled = colorContainer.createEl("input", { type: "checkbox" });
+      colorEnabled.checked = !!this.period.color;
+      const colorPickerWrapper = colorContainer.createDiv();
+      colorPickerWrapper.style.cssText = this.period.color ? "display: flex; align-items: center;" : "display: none;";
+      if (this.period.color) {
+        const config = this.plugin.settings.colorCategories;
+        ColorPickerRenderer.render({
+          container: colorPickerWrapper,
+          currentColor: this.period.color,
+          palettes: config.colorPalettes || [],
+          onColorChange: async (newColor) => {
+            this.period.color = newColor;
+            await this.plugin.saveSettings();
+            this.onSave();
           }
-        };
-        setTimeout(() => {
-          document.addEventListener("click", closeHandler);
-        }, 0);
-        const escHandler = (e2) => {
-          if (e2.key === "Escape") {
-            closePopover();
-            document.removeEventListener("keydown", escHandler);
-          }
-        };
-        document.addEventListener("keydown", escHandler);
+        });
+      }
+      const colorLabel = colorContainer.createSpan({ text: this.period.color ? "" : "Enable color" });
+      colorLabel.style.cssText = "font-size: 0.9em; color: var(--text-muted);";
+      colorEnabled.onchange = async () => {
+        if (colorEnabled.checked) {
+          this.period.color = "#4a90d9";
+        } else {
+          this.period.color = void 0;
+        }
+        await this.plugin.saveSettings();
+        this.onSave();
+        this.onOpen();
       };
+    }
+    const footer = contentEl.createDiv();
+    footer.style.cssText = "display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--background-modifier-border);";
+    const deleteBtn = footer.createEl("button", { text: "Delete Period" });
+    deleteBtn.style.cssText = "padding: 8px 16px; cursor: pointer; color: var(--text-error); background: transparent; border: 1px solid var(--text-error); border-radius: 4px;";
+    deleteBtn.onclick = async () => {
+      const confirmed = confirm(`Are you sure you want to delete "${this.period.name}"?`);
+      if (confirmed) {
+        await this.onDelete();
+        this.close();
+      }
+    };
+    const closeBtn = footer.createEl("button", { text: "Close", cls: "mod-cta" });
+    closeBtn.style.cssText = "padding: 8px 16px; cursor: pointer;";
+    closeBtn.onclick = () => this.close();
+  }
+  updateFormatPreview(previewEl) {
+    const moment = window.moment;
+    try {
+      const preview = moment().format(this.period.format || "YYYY-[P1]");
+      previewEl.textContent = `Preview: ${preview}`;
+    } catch (e) {
+      previewEl.textContent = "Preview: (invalid format)";
     }
   }
   onClose() {
@@ -5156,7 +5884,7 @@ ${colorEntry.hex}`;
 };
 
 // src/CalendarView.ts
-var LinearCalendarView = class extends import_obsidian5.ItemView {
+var LinearCalendarView = class extends import_obsidian7.ItemView {
   constructor(leaf, plugin) {
     super(leaf);
     this.resizeObserver = null;
@@ -5225,14 +5953,27 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
     header.createDiv({ cls: "header-spacer" });
     const centerSection = header.createDiv({ cls: "header-center" });
     const prevBtn = centerSection.createEl("button", { text: "\u2190", cls: "year-nav-btn" });
-    centerSection.createEl("span", { text: `${year}`, cls: "year-title" });
+    const yearlyEnabled = this.plugin.settings.periodicNotes.yearly.enabled;
+    if (yearlyEnabled) {
+      const yearLink = centerSection.createEl("a", { text: `${year}`, cls: "year-title year-title-link" });
+      const yearlyColor = this.plugin.settings.periodicNotes.yearly.color;
+      if (yearlyColor) {
+        yearLink.style.color = yearlyColor;
+      }
+      yearLink.onclick = async (e) => {
+        e.preventDefault();
+        await this.openOrCreateYearlyNote(year);
+      };
+    } else {
+      centerSection.createEl("span", { text: `${year}`, cls: "year-title" });
+    }
     const nextBtn = centerSection.createEl("button", { text: "\u2192", cls: "year-nav-btn" });
     const rightSection = header.createDiv({ cls: "header-right" });
     if (this.plugin.settings.quickNoteCreation.enabled && this.plugin.settings.quickNoteCreation.showAddNoteButton) {
       const addNoteBtn = rightSection.createEl("button", { cls: "add-note-btn" });
       addNoteBtn.setAttribute("aria-label", "Add note");
       const icon = addNoteBtn.createSpan({ cls: "add-note-icon" });
-      (0, import_obsidian5.setIcon)(icon, "calendar-plus");
+      (0, import_obsidian7.setIcon)(icon, "calendar-plus");
       addNoteBtn.createSpan({ text: "Add Note", cls: "add-note-text" });
       addNoteBtn.onclick = async () => {
         await this.openQuickNoteModal(null, null);
@@ -5306,6 +6047,21 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
     const maxDayCells = 37;
     const thead = calendarTable.createEl("thead");
     const headerRow = thead.createEl("tr");
+    const enabledGroups = this.plugin.settings.periodicNotes.customPeriodGroups.filter((g) => g.enabled);
+    for (const group of enabledGroups) {
+      const th = headerRow.createEl("th", { text: group.name, cls: "custom-period-header-cell" });
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.font = "0.8em var(--font-interface)";
+        const textWidth = ctx.measureText(group.name).width;
+        th.style.width = `${Math.ceil(textWidth) + 16}px`;
+      }
+    }
+    const showQuarterColumn = this.plugin.settings.periodicNotes.quarterly.enabled;
+    if (showQuarterColumn) {
+      headerRow.createEl("th", { text: "Qtr", cls: "quarter-header-cell" });
+    }
     headerRow.createEl("th", { cls: "month-label-cell" });
     if (this.plugin.settings.columnAlignment === "date") {
       for (let i = 0; i < 31; i++) {
@@ -5343,9 +6099,15 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
     ];
     const cellsPerRow = this.plugin.settings.columnAlignment === "date" ? 31 : maxDayCells;
     for (let month = 0; month < 12; month++) {
-      await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, cellsPerRow);
+      await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, cellsPerRow, showQuarterColumn, enabledGroups);
     }
     const footerRow = calendarTable.createEl("tfoot").createEl("tr");
+    for (const group of enabledGroups) {
+      footerRow.createEl("td", { text: group.name, cls: "custom-period-header-cell" });
+    }
+    if (showQuarterColumn) {
+      footerRow.createEl("td", { text: "Qtr", cls: "quarter-header-cell" });
+    }
     footerRow.createEl("td", { cls: "month-label-cell" });
     if (this.plugin.settings.columnAlignment === "date") {
       for (let i = 0; i < 31; i++) {
@@ -5746,6 +6508,290 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
       await this.app.workspace.getLeaf(false).openFile(newFile);
     }
   }
+  async openOrCreateWeeklyNote(date) {
+    var _a, _b, _c, _d;
+    const settings = this.plugin.settings.periodicNotes;
+    const moment = window.moment;
+    const targetMoment = moment(date);
+    let folder = settings.weekly.folder;
+    let format = settings.weekly.format || "gggg-[W]ww";
+    let template = settings.weekly.template;
+    if (settings.usePeriodicNotesPlugin) {
+      const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+      if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.weekly) == null ? void 0 : _d.enabled) {
+        folder = periodicNotesPlugin.settings.weekly.folder || folder;
+        format = periodicNotesPlugin.settings.weekly.format || format;
+        template = periodicNotesPlugin.settings.weekly.template || template;
+      }
+    }
+    const filename = targetMoment.format(format);
+    const folderPath = folder ? `${folder}/` : "";
+    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    if (existingFile instanceof import_obsidian7.TFile) {
+      await this.app.workspace.getLeaf(false).openFile(existingFile);
+    } else {
+      if (folder) {
+        const folderExists = this.app.vault.getAbstractFileByPath(folder);
+        if (!folderExists) {
+          await this.app.vault.createFolder(folder);
+        }
+      }
+      let content = "";
+      if (template) {
+        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+        if (templateFile instanceof import_obsidian7.TFile) {
+          content = await this.app.vault.read(templateFile);
+          content = this.processWeeklyTemplateVariables(content, date, filename);
+        }
+      }
+      const fullPath = `${folderPath}${filename}.md`;
+      const newFile = await this.app.vault.create(fullPath, content);
+      await this.app.workspace.getLeaf(false).openFile(newFile);
+    }
+  }
+  processWeeklyTemplateVariables(content, date, filename) {
+    const moment = window.moment;
+    const targetMoment = moment(date);
+    const format = this.plugin.settings.periodicNotes.weekly.format || "gggg-[W]ww";
+    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.startOf("week").format(customFormat || format);
+    });
+    content = content.replace(/\{\{title\}\}/g, filename);
+    content = content.replace(/\{\{week\}\}/g, String(targetMoment.week()));
+    content = content.replace(/\{\{year\}\}/g, String(targetMoment.weekYear()));
+    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    days.forEach((dayName, dayIndex) => {
+      const regex = new RegExp(`\\{\\{${dayName}(?::([^}]+))?\\}\\}`, "g");
+      content = content.replace(regex, (_, customFormat) => {
+        return targetMoment.clone().startOf("week").add(dayIndex, "days").format(customFormat || "YYYY-MM-DD");
+      });
+    });
+    return content;
+  }
+  async openOrCreateQuarterlyNote(date) {
+    var _a, _b, _c, _d;
+    const settings = this.plugin.settings.periodicNotes;
+    const moment = window.moment;
+    const targetMoment = moment(date);
+    let folder = settings.quarterly.folder;
+    let format = settings.quarterly.format || "YYYY-[Q]Q";
+    let template = settings.quarterly.template;
+    if (settings.usePeriodicNotesPlugin) {
+      const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+      if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.quarterly) == null ? void 0 : _d.enabled) {
+        folder = periodicNotesPlugin.settings.quarterly.folder || folder;
+        format = periodicNotesPlugin.settings.quarterly.format || format;
+        template = periodicNotesPlugin.settings.quarterly.template || template;
+      }
+    }
+    const filename = targetMoment.format(format);
+    const folderPath = folder ? `${folder}/` : "";
+    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    if (existingFile instanceof import_obsidian7.TFile) {
+      await this.app.workspace.getLeaf(false).openFile(existingFile);
+    } else {
+      if (folder) {
+        const folderExists = this.app.vault.getAbstractFileByPath(folder);
+        if (!folderExists) {
+          await this.app.vault.createFolder(folder);
+        }
+      }
+      let content = "";
+      if (template) {
+        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+        if (templateFile instanceof import_obsidian7.TFile) {
+          content = await this.app.vault.read(templateFile);
+          content = this.processQuarterlyTemplateVariables(content, date, filename);
+        }
+      }
+      const fullPath = `${folderPath}${filename}.md`;
+      const newFile = await this.app.vault.create(fullPath, content);
+      await this.app.workspace.getLeaf(false).openFile(newFile);
+    }
+  }
+  processQuarterlyTemplateVariables(content, date, filename) {
+    const moment = window.moment;
+    const targetMoment = moment(date);
+    const format = this.plugin.settings.periodicNotes.quarterly.format || "YYYY-[Q]Q";
+    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.startOf("quarter").format(customFormat || format);
+    });
+    content = content.replace(/\{\{title\}\}/g, filename);
+    content = content.replace(/\{\{quarter\}\}/g, String(targetMoment.quarter()));
+    content = content.replace(/\{\{year\}\}/g, String(targetMoment.year()));
+    return content;
+  }
+  async openOrCreateMonthlyNote(date) {
+    var _a, _b, _c, _d;
+    const settings = this.plugin.settings.periodicNotes;
+    const moment = window.moment;
+    const targetMoment = moment(date);
+    let folder = settings.monthly.folder;
+    let format = settings.monthly.format || "YYYY-MM";
+    let template = settings.monthly.template;
+    if (settings.usePeriodicNotesPlugin) {
+      const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+      if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.monthly) == null ? void 0 : _d.enabled) {
+        folder = periodicNotesPlugin.settings.monthly.folder || folder;
+        format = periodicNotesPlugin.settings.monthly.format || format;
+        template = periodicNotesPlugin.settings.monthly.template || template;
+      }
+    }
+    const filename = targetMoment.format(format);
+    const folderPath = folder ? `${folder}/` : "";
+    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    if (existingFile instanceof import_obsidian7.TFile) {
+      await this.app.workspace.getLeaf(false).openFile(existingFile);
+    } else {
+      if (folder) {
+        const folderExists = this.app.vault.getAbstractFileByPath(folder);
+        if (!folderExists) {
+          await this.app.vault.createFolder(folder);
+        }
+      }
+      let content = "";
+      if (template) {
+        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+        if (templateFile instanceof import_obsidian7.TFile) {
+          content = await this.app.vault.read(templateFile);
+          content = this.processMonthlyTemplateVariables(content, date, filename);
+        }
+      }
+      const fullPath = `${folderPath}${filename}.md`;
+      const newFile = await this.app.vault.create(fullPath, content);
+      await this.app.workspace.getLeaf(false).openFile(newFile);
+    }
+  }
+  processMonthlyTemplateVariables(content, date, filename) {
+    const moment = window.moment;
+    const targetMoment = moment(date);
+    const format = this.plugin.settings.periodicNotes.monthly.format || "YYYY-MM";
+    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.startOf("month").format(customFormat || format);
+    });
+    content = content.replace(/\{\{title\}\}/g, filename);
+    content = content.replace(/\{\{month(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.format(customFormat || "MMMM");
+    });
+    content = content.replace(/\{\{year\}\}/g, String(targetMoment.year()));
+    return content;
+  }
+  async openOrCreateYearlyNote(year) {
+    var _a, _b, _c, _d;
+    const settings = this.plugin.settings.periodicNotes;
+    const moment = window.moment;
+    const targetMoment = moment({ year, month: 0, day: 1 });
+    let folder = settings.yearly.folder;
+    let format = settings.yearly.format || "YYYY";
+    let template = settings.yearly.template;
+    if (settings.usePeriodicNotesPlugin) {
+      const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+      if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.yearly) == null ? void 0 : _d.enabled) {
+        folder = periodicNotesPlugin.settings.yearly.folder || folder;
+        format = periodicNotesPlugin.settings.yearly.format || format;
+        template = periodicNotesPlugin.settings.yearly.template || template;
+      }
+    }
+    const filename = targetMoment.format(format);
+    const folderPath = folder ? `${folder}/` : "";
+    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    if (existingFile instanceof import_obsidian7.TFile) {
+      await this.app.workspace.getLeaf(false).openFile(existingFile);
+    } else {
+      if (folder) {
+        const folderExists = this.app.vault.getAbstractFileByPath(folder);
+        if (!folderExists) {
+          await this.app.vault.createFolder(folder);
+        }
+      }
+      let content = "";
+      if (template) {
+        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+        if (templateFile instanceof import_obsidian7.TFile) {
+          content = await this.app.vault.read(templateFile);
+          content = this.processYearlyTemplateVariables(content, year, filename);
+        }
+      }
+      const fullPath = `${folderPath}${filename}.md`;
+      const newFile = await this.app.vault.create(fullPath, content);
+      await this.app.workspace.getLeaf(false).openFile(newFile);
+    }
+  }
+  processYearlyTemplateVariables(content, year, filename) {
+    const moment = window.moment;
+    const targetMoment = moment({ year, month: 0, day: 1 });
+    const format = this.plugin.settings.periodicNotes.yearly.format || "YYYY";
+    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.format(customFormat || format);
+    });
+    content = content.replace(/\{\{title\}\}/g, filename);
+    content = content.replace(/\{\{year\}\}/g, String(year));
+    return content;
+  }
+  async openOrCreateCustomPeriodNote(period, year, group) {
+    const moment = window.moment;
+    const firstMonth = Math.min(...period.months) - 1;
+    const targetMoment = moment({ year, month: firstMonth, day: 1 });
+    const useGroupDefaults = period.useGroupSettings !== false && group;
+    const folder = useGroupDefaults ? group.folder || period.folder : period.folder;
+    const format = period.format || `YYYY-[${period.name}]`;
+    const template = useGroupDefaults ? group.template || period.template : period.template;
+    const filename = targetMoment.format(format);
+    const folderPath = folder ? `${folder}/` : "";
+    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    if (existingFile instanceof import_obsidian7.TFile) {
+      await this.app.workspace.getLeaf(false).openFile(existingFile);
+    } else {
+      if (folder) {
+        const folderExists = this.app.vault.getAbstractFileByPath(folder);
+        if (!folderExists) {
+          await this.app.vault.createFolder(folder);
+        }
+      }
+      let content = "";
+      if (template) {
+        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+        if (templateFile instanceof import_obsidian7.TFile) {
+          content = await this.app.vault.read(templateFile);
+          content = this.processCustomPeriodTemplateVariables(content, period, year, filename);
+        }
+      }
+      const fullPath = `${folderPath}${filename}.md`;
+      const newFile = await this.app.vault.create(fullPath, content);
+      await this.app.workspace.getLeaf(false).openFile(newFile);
+    }
+  }
+  processCustomPeriodTemplateVariables(content, period, year, filename) {
+    const moment = window.moment;
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ];
+    const sortedMonths = [...period.months].sort((a, b) => a - b);
+    const firstMonth = sortedMonths[0] - 1;
+    const lastMonth = sortedMonths[sortedMonths.length - 1] - 1;
+    const targetMoment = moment({ year, month: firstMonth, day: 1 });
+    const format = period.format || `YYYY-[${period.name}]`;
+    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+      return targetMoment.format(customFormat || format);
+    });
+    content = content.replace(/\{\{title\}\}/g, filename);
+    content = content.replace(/\{\{period\}\}/g, period.name);
+    content = content.replace(/\{\{year\}\}/g, String(year));
+    content = content.replace(/\{\{startMonth\}\}/g, monthNames[firstMonth]);
+    content = content.replace(/\{\{endMonth\}\}/g, monthNames[lastMonth]);
+    return content;
+  }
   async getDailyNoteTemplateContent(date, filename) {
     var _a, _b, _c, _d;
     const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
@@ -5757,7 +6803,7 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
       return "";
     }
     const templateFile = this.app.vault.getAbstractFileByPath(templatePath + ".md") || this.app.vault.getAbstractFileByPath(templatePath);
-    if (templateFile instanceof import_obsidian5.TFile) {
+    if (templateFile instanceof import_obsidian7.TFile) {
       const rawContent = await this.app.vault.read(templateFile);
       return this.processTemplateVariables(rawContent, date, filename);
     }
@@ -5917,7 +6963,7 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
         if (category.iconType === "emoji") {
           iconEl.textContent = category.iconValue;
         } else {
-          (0, import_obsidian5.setIcon)(iconEl, category.iconValue);
+          (0, import_obsidian7.setIcon)(iconEl, category.iconValue);
           iconEl.style.color = "#ffffff";
         }
       }
@@ -5972,9 +7018,261 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
       addBtn.style.opacity = "1";
     });
   }
-  async renderMonthRow(tbody, year, month, monthName, notesMap, multiDayEntries, maxDayCells) {
-    const row = tbody.createEl("tr", { cls: "month-row" });
-    row.createEl("td", { text: monthName, cls: "month-label" });
+  /**
+   * Get the custom period that a given month belongs to within a specific group
+   * Returns the period and whether this month is the first month of that period in this year
+   */
+  getCustomPeriodForMonth(year, month, group) {
+    if (group.periods.length === 0) return null;
+    const monthNum = month + 1;
+    for (const period of group.periods) {
+      if (period.months.includes(monthNum)) {
+        const sortedMonths = [...period.months].sort((a, b) => a - b);
+        const wrapsYear = sortedMonths.length > 1 && sortedMonths[sortedMonths.length - 1] - sortedMonths[0] > 6;
+        let isFirstMonthInYear = false;
+        let consecutiveMonths = 0;
+        if (wrapsYear) {
+          const highMonths = sortedMonths.filter((m) => m > 6);
+          const lowMonths = sortedMonths.filter((m) => m <= 6);
+          if (highMonths.includes(monthNum)) {
+            isFirstMonthInYear = monthNum === Math.min(...highMonths);
+            consecutiveMonths = highMonths.filter((m) => m >= monthNum).length;
+          } else if (lowMonths.includes(monthNum)) {
+            isFirstMonthInYear = monthNum === Math.min(...lowMonths);
+            consecutiveMonths = lowMonths.filter((m) => m >= monthNum).length;
+          }
+        } else {
+          isFirstMonthInYear = monthNum === sortedMonths[0];
+          consecutiveMonths = sortedMonths.filter((m) => m >= monthNum).length;
+        }
+        return {
+          period,
+          isFirstMonth: isFirstMonthInYear,
+          rowSpan: consecutiveMonths
+        };
+      }
+    }
+    return null;
+  }
+  /**
+   * Calculate the year for a custom period note based on yearBasis setting
+   */
+  getCustomPeriodYear(period, calendarYear, month) {
+    const monthNum = month + 1;
+    const sortedMonths = [...period.months].sort((a, b) => a - b);
+    const wrapsYear = sortedMonths.length > 1 && sortedMonths[sortedMonths.length - 1] - sortedMonths[0] > 6;
+    if (!wrapsYear) {
+      return calendarYear;
+    }
+    const highMonths = sortedMonths.filter((m) => m > 6);
+    const lowMonths = sortedMonths.filter((m) => m <= 6);
+    switch (period.yearBasis) {
+      case "start":
+        return highMonths.includes(monthNum) ? calendarYear : calendarYear;
+      case "end":
+        return lowMonths.includes(monthNum) ? calendarYear : calendarYear + 1;
+      case "majority":
+      default:
+        if (lowMonths.length >= highMonths.length) {
+          return lowMonths.includes(monthNum) ? calendarYear : calendarYear + 1;
+        } else {
+          return highMonths.includes(monthNum) ? calendarYear : calendarYear;
+        }
+    }
+  }
+  async renderMonthRow(tbody, year, month, monthName, notesMap, multiDayEntries, maxDayCells, showQuarterColumn = false, enabledGroups = []) {
+    const periodicSettings = this.plugin.settings.periodicNotes;
+    const weekDisplayMode = periodicSettings.weekly.enabled ? periodicSettings.weekNumberDisplay : "none";
+    const moment = window.moment;
+    if (weekDisplayMode === "header-row") {
+      const weekRowClass = month > 0 ? "week-header-row month-first-row" : "week-header-row";
+      const weekRow = tbody.createEl("tr", { cls: weekRowClass });
+      for (const group of enabledGroups) {
+        const periodInfo = this.getCustomPeriodForMonth(year, month, group);
+        if (periodInfo && periodInfo.isFirstMonth) {
+          const { period, rowSpan } = periodInfo;
+          const periodYear = this.getCustomPeriodYear(period, year, month);
+          const periodCell = weekRow.createEl("td", { cls: "custom-period-cell" });
+          periodCell.textContent = period.name;
+          periodCell.rowSpan = rowSpan * 2;
+          periodCell.style.cursor = "pointer";
+          const effectiveColor = period.useGroupSettings !== false && (group == null ? void 0 : group.color) ? group.color : period.color;
+          if (effectiveColor) {
+            periodCell.style.borderLeft = `3px solid ${effectiveColor}`;
+          }
+          periodCell.dataset.periodId = period.id;
+          periodCell.dataset.groupId = group.id;
+          periodCell.dataset.year = String(periodYear);
+          periodCell.onclick = async (e) => {
+            e.preventDefault();
+            await this.openOrCreateCustomPeriodNote(period, periodYear, group);
+          };
+        } else if (!periodInfo) {
+          const emptyCell = weekRow.createEl("td", { cls: "custom-period-cell empty" });
+          emptyCell.rowSpan = 2;
+        }
+      }
+      if (showQuarterColumn) {
+        const isFirstMonthOfQuarter = month % 3 === 0;
+        if (isFirstMonthOfQuarter) {
+          const quarterNum = Math.floor(month / 3) + 1;
+          const quarterCell = weekRow.createEl("td", { cls: "quarter-cell" });
+          quarterCell.textContent = `Q${quarterNum}`;
+          quarterCell.rowSpan = 6;
+          quarterCell.style.cursor = "pointer";
+          const quarterlyColor = periodicSettings.quarterly.color;
+          if (quarterlyColor) {
+            quarterCell.style.color = quarterlyColor;
+            quarterCell.style.borderColor = quarterlyColor;
+          }
+          quarterCell.onclick = async (e) => {
+            e.preventDefault();
+            const quarterDate = new Date(year, month, 1);
+            await this.openOrCreateQuarterlyNote(quarterDate);
+          };
+        }
+      }
+      weekRow.createEl("td", { cls: "month-label empty" });
+      const firstDay2 = new Date(year, month, 1);
+      const lastDay2 = new Date(year, month + 1, 0);
+      const daysInMonth2 = lastDay2.getDate();
+      const weekStartDay = this.plugin.settings.weekStartDay;
+      const useWeekdayAlignment2 = this.plugin.settings.columnAlignment === "weekday";
+      let colOffset = 0;
+      if (useWeekdayAlignment2) {
+        colOffset = (firstDay2.getDay() - weekStartDay + 7) % 7;
+      }
+      if (colOffset > 0) {
+        const emptyCell = weekRow.createEl("td", { cls: "week-header-cell empty" });
+        emptyCell.colSpan = colOffset;
+      }
+      let totalCellsUsed = colOffset;
+      let currentDay = 1;
+      let isFirstWeek = true;
+      while (currentDay <= daysInMonth2) {
+        const currentDate = new Date(year, month, currentDay);
+        const currentDayOfWeek = currentDate.getDay();
+        const daysFromWeekStart = (currentDayOfWeek - weekStartDay + 7) % 7;
+        const weekStartDate = new Date(year, month, currentDay - daysFromWeekStart);
+        const weekNumber = moment(weekStartDate).week();
+        let daysInThisWeek = 0;
+        let tempDay = currentDay;
+        while (tempDay <= daysInMonth2) {
+          const tempDate = new Date(year, month, tempDay);
+          const tempDayOfWeek = tempDate.getDay();
+          daysInThisWeek++;
+          if (tempDayOfWeek === (weekStartDay + 6) % 7) break;
+          tempDay++;
+        }
+        const weekCell = weekRow.createEl("td", { cls: "week-header-cell" });
+        weekCell.colSpan = daysInThisWeek;
+        totalCellsUsed += daysInThisWeek;
+        if (!isFirstWeek) {
+          weekCell.addClass("week-divider");
+          const borderConfig = periodicSettings.weekBorderColor;
+          let borderColor = "var(--background-modifier-border)";
+          if (borderConfig.mode === "accent") {
+            borderColor = "var(--interactive-accent)";
+          } else if (borderConfig.mode === "custom" && borderConfig.customColor) {
+            borderColor = borderConfig.customColor;
+          }
+          weekCell.style.borderLeft = `2px solid ${borderColor}`;
+        }
+        const weekLink = weekCell.createEl("a", {
+          text: `W${String(weekNumber).padStart(2, "0")}`,
+          cls: "week-header-link"
+        });
+        weekLink.dataset.date = currentDate.toISOString();
+        const weeklyColor = periodicSettings.weekly.color;
+        if (weeklyColor) {
+          weekLink.style.color = weeklyColor;
+        }
+        weekLink.onclick = async (e) => {
+          e.preventDefault();
+          await this.openOrCreateWeeklyNote(currentDate);
+        };
+        currentDay += daysInThisWeek;
+        isFirstWeek = false;
+      }
+      const remainingCells2 = maxDayCells - totalCellsUsed;
+      if (remainingCells2 > 0) {
+        const emptyCell = weekRow.createEl("td", { cls: "week-header-cell empty" });
+        emptyCell.colSpan = remainingCells2;
+      }
+      weekRow.createEl("td", { cls: "month-label-right empty" });
+    }
+    const monthRowClass = month > 0 && weekDisplayMode !== "header-row" ? "month-row month-first-row" : "month-row";
+    const row = tbody.createEl("tr", { cls: monthRowClass });
+    if (weekDisplayMode !== "header-row") {
+      for (const group of enabledGroups) {
+        const periodInfo = this.getCustomPeriodForMonth(year, month, group);
+        if (periodInfo && periodInfo.isFirstMonth) {
+          const { period, rowSpan } = periodInfo;
+          const periodYear = this.getCustomPeriodYear(period, year, month);
+          const periodCell = row.createEl("td", { cls: "custom-period-cell" });
+          periodCell.textContent = period.name;
+          periodCell.rowSpan = rowSpan;
+          periodCell.style.cursor = "pointer";
+          const effectiveColor = period.useGroupSettings !== false && (group == null ? void 0 : group.color) ? group.color : period.color;
+          if (effectiveColor) {
+            periodCell.style.borderLeft = `3px solid ${effectiveColor}`;
+          }
+          periodCell.dataset.periodId = period.id;
+          periodCell.dataset.groupId = group.id;
+          periodCell.dataset.year = String(periodYear);
+          periodCell.onclick = async (e) => {
+            e.preventDefault();
+            await this.openOrCreateCustomPeriodNote(period, periodYear, group);
+          };
+        } else if (!periodInfo) {
+          row.createEl("td", { cls: "custom-period-cell empty" });
+        }
+      }
+    }
+    if (showQuarterColumn && weekDisplayMode !== "header-row") {
+      const isFirstMonthOfQuarter = month % 3 === 0;
+      if (isFirstMonthOfQuarter) {
+        const quarterNum = Math.floor(month / 3) + 1;
+        const quarterCell = row.createEl("td", {
+          text: `Q${quarterNum}`,
+          cls: "quarter-cell"
+        });
+        quarterCell.rowSpan = 3;
+        quarterCell.style.cursor = "pointer";
+        quarterCell.dataset.quarter = String(quarterNum);
+        quarterCell.dataset.year = String(year);
+        const quarterlyColor = periodicSettings.quarterly.color;
+        if (quarterlyColor) {
+          quarterCell.style.color = quarterlyColor;
+          quarterCell.style.borderColor = quarterlyColor;
+        }
+        quarterCell.onclick = async (e) => {
+          e.preventDefault();
+          const quarterStartMonth = (quarterNum - 1) * 3;
+          const quarterDate = new Date(year, quarterStartMonth, 1);
+          await this.openOrCreateQuarterlyNote(quarterDate);
+        };
+      }
+    }
+    const monthLabelCell = row.createEl("td", { cls: "month-label" });
+    const monthlyEnabled = this.plugin.settings.periodicNotes.monthly.enabled;
+    if (monthlyEnabled) {
+      const monthLink = monthLabelCell.createEl("a", {
+        text: monthName,
+        cls: "month-label-link"
+      });
+      const monthlyColor = periodicSettings.monthly.color;
+      if (monthlyColor) {
+        monthLink.style.color = monthlyColor;
+      }
+      monthLink.onclick = async (e) => {
+        e.preventDefault();
+        const monthDate = new Date(year, month, 1);
+        await this.openOrCreateMonthlyNote(monthDate);
+      };
+    } else {
+      monthLabelCell.textContent = monthName;
+    }
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
@@ -6021,13 +7319,58 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       const dateKey = this.dateToKey(date);
+      const dayOfWeek = date.getDay();
+      const isWeekStart = dayOfWeek === this.plugin.settings.weekStartDay || day === 1;
+      const moment2 = window.moment;
+      const weekNumber = moment2(date).week();
       const dayCell = row.createEl("td", { cls: "day-cell" });
+      const highlightedWeekdays = this.plugin.settings.highlightedWeekdays || [0, 6];
+      if (highlightedWeekdays.includes(dayOfWeek)) {
+        dayCell.addClass("day-cell-highlighted");
+      }
+      if (weekDisplayMode === "extra-column" && isWeekStart && day > 1) {
+        dayCell.addClass("week-start-cell");
+        const weekIndicator = dayCell.createEl("a", {
+          text: `W${String(weekNumber).padStart(2, "0")}`,
+          cls: "week-divider-label"
+        });
+        weekIndicator.dataset.date = date.toISOString();
+        weekIndicator.onclick = async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          await this.openOrCreateWeeklyNote(date);
+        };
+      }
+      if (weekDisplayMode === "header-row" && isWeekStart && day > 1) {
+        dayCell.addClass("week-boundary");
+        const borderConfig = periodicSettings.weekBorderColor;
+        let borderColor = "var(--background-modifier-border)";
+        if (borderConfig.mode === "accent") {
+          borderColor = "var(--interactive-accent)";
+        } else if (borderConfig.mode === "custom" && borderConfig.customColor) {
+          borderColor = borderConfig.customColor;
+        }
+        dayCell.style.borderLeft = `2px solid ${borderColor}`;
+      }
       const dayIndex = columnOffset + day - 1;
       const barsAbove = occupiedRows.filter((o) => o.start <= dayIndex && o.end > dayIndex).length;
       if (barsAbove > 0) {
         dayCell.style.paddingTop = `${topPadding}px`;
       }
       dayCells.push(dayCell);
+      const isActualWeekStart = dayOfWeek === this.plugin.settings.weekStartDay;
+      if (weekDisplayMode === "above-day" && isActualWeekStart) {
+        const weekIndicator = dayCell.createEl("a", {
+          text: `W${String(weekNumber).padStart(2, "0")}`,
+          cls: "week-indicator"
+        });
+        weekIndicator.dataset.date = date.toISOString();
+        weekIndicator.onclick = async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          await this.openOrCreateWeeklyNote(date);
+        };
+      }
       const dayNumber = dayCell.createEl("a", {
         text: String(day).padStart(2, "0"),
         cls: "day-number day-number-link"
@@ -6078,7 +7421,7 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
             if (icon.type === "emoji") {
               iconSpan.textContent = icon.value;
             } else {
-              (0, import_obsidian5.setIcon)(iconSpan, icon.value);
+              (0, import_obsidian7.setIcon)(iconSpan, icon.value);
               iconSpan.style.color = "#ffffff";
             }
           }
@@ -6137,7 +7480,7 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
           if (icon.type === "emoji") {
             iconSpan.textContent = icon.value;
           } else {
-            (0, import_obsidian5.setIcon)(iconSpan, icon.value);
+            (0, import_obsidian7.setIcon)(iconSpan, icon.value);
             iconSpan.style.color = "#ffffff";
           }
         }
@@ -6178,7 +7521,24 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
         }, 0);
       }
     });
-    row.createEl("td", { text: monthName, cls: "month-label-right" });
+    const monthLabelRightCell = row.createEl("td", { cls: "month-label-right" });
+    if (monthlyEnabled) {
+      const monthLinkRight = monthLabelRightCell.createEl("a", {
+        text: monthName,
+        cls: "month-label-link"
+      });
+      const monthlyColor = periodicSettings.monthly.color;
+      if (monthlyColor) {
+        monthLinkRight.style.color = monthlyColor;
+      }
+      monthLinkRight.onclick = async (e) => {
+        e.preventDefault();
+        const monthDate = new Date(year, month, 1);
+        await this.openOrCreateMonthlyNote(monthDate);
+      };
+    } else {
+      monthLabelRightCell.textContent = monthName;
+    }
   }
   async onClose() {
     if (this.resizeObserver) {
@@ -6206,7 +7566,7 @@ var LinearCalendarView = class extends import_obsidian5.ItemView {
 };
 
 // src/main.ts
-var LinearCalendarPlugin = class extends import_obsidian6.Plugin {
+var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
   constructor() {
     super(...arguments);
     // Plugin icon shown in settings sidebar, ribbon, and tabs

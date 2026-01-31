@@ -1,11 +1,13 @@
 import { App, PluginSettingTab, Setting, setIcon, Modal } from 'obsidian';
 import LinearCalendarPlugin from './main';
-import { Condition, ColorCategory } from './types';
+import { Condition, ColorCategory, CustomPeriod, CustomPeriodGroup } from './types';
 import { FolderSuggest } from './FolderSuggest';
+import { FileSuggest } from './FileSuggest';
 import { IconSuggest } from './IconSuggest';
 import { PropertySuggest } from './PropertySuggest';
 import { ConditionRenderer } from './helpers/ConditionRenderer';
 import { MetadataRowRenderer } from './helpers/MetadataRowRenderer';
+import { ColorPickerRenderer } from './helpers/ColorPickerRenderer';
 import { LinearCalendarView } from './CalendarView';
 
 export class CalendarSettingTab extends PluginSettingTab {
@@ -13,7 +15,7 @@ export class CalendarSettingTab extends PluginSettingTab {
     private expandedCategories: Set<string> = new Set();
     private isPalettesExpanded: boolean = false;
     private paletteEditModes: Map<number, 'visual' | 'source'> = new Map();
-    private activeTab: 'basic' | 'categories' | 'daily-notes' | 'quicknotes' | 'experimental' = 'basic';
+    private activeTab: 'basic' | 'categories' | 'daily-notes' | 'periodic-notes' | 'quicknotes' | 'experimental' = 'basic';
 
     // Icon displayed in the settings sidebar
     icon = 'calendar-range';
@@ -46,6 +48,32 @@ export class CalendarSettingTab extends PluginSettingTab {
         label.style.cssText = 'font-weight: 500; cursor: default;';
 
         return checkbox;
+    }
+
+    /**
+     * Get the template folder path based on settings.
+     * Returns the Obsidian templates folder or the custom folder.
+     */
+    getTemplateFolderPath(): string | undefined {
+        const settings = this.plugin.settings.periodicNotes;
+
+        if (settings.templateFolderSource === 'custom') {
+            return settings.templateCustomFolder || undefined;
+        }
+
+        // Try to get Obsidian's templates folder from core plugin
+        const templatesPlugin = (this.app as any).internalPlugins?.plugins?.['templates'];
+        if (templatesPlugin?.enabled && templatesPlugin?.instance?.options?.folder) {
+            return templatesPlugin.instance.options.folder;
+        }
+
+        // Try Templater plugin as fallback
+        const templaterPlugin = (this.app as any).plugins?.plugins?.['templater-obsidian'];
+        if (templaterPlugin?.settings?.templates_folder) {
+            return templaterPlugin.settings.templates_folder;
+        }
+
+        return undefined;
     }
 
     /**
@@ -192,6 +220,8 @@ export class CalendarSettingTab extends PluginSettingTab {
             this.renderColorCategoriesSection(contentEl);
         } else if (this.activeTab === 'daily-notes') {
             this.renderDailyNotesSection(contentEl);
+        } else if (this.activeTab === 'periodic-notes') {
+            this.renderPeriodicNotesSection(contentEl);
         } else if (this.activeTab === 'quicknotes') {
             this.renderQuickNoteCreationSettings(contentEl);
         } else if (this.activeTab === 'experimental') {
@@ -212,6 +242,7 @@ export class CalendarSettingTab extends PluginSettingTab {
             { id: 'basic' as const, label: 'Basic Settings' },
             { id: 'categories' as const, label: 'Categories (Colors & Icons)' },
             { id: 'daily-notes' as const, label: 'Daily Notes' },
+            { id: 'periodic-notes' as const, label: 'Periodic Notes' },
             { id: 'quicknotes' as const, label: 'Quick Notes' },
             { id: 'experimental' as const, label: 'Experimental' }
         ];
@@ -377,6 +408,49 @@ export class CalendarSettingTab extends PluginSettingTab {
                         });
                 });
         }
+
+        // Highlighted weekdays setting
+        const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const highlightedSetting = new Setting(containerEl)
+            .setName('Highlighted weekdays')
+            .setDesc('Choose which weekdays to visually highlight (typically weekends)');
+
+        const checkboxContainer = highlightedSetting.controlEl.createDiv();
+        checkboxContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px;';
+
+        weekdayNames.forEach((name, index) => {
+            const label = checkboxContainer.createEl('label');
+            label.style.cssText = 'display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.9em;';
+
+            const checkbox = label.createEl('input', { type: 'checkbox' });
+            checkbox.checked = this.plugin.settings.highlightedWeekdays.includes(index);
+            checkbox.onchange = async () => {
+                const current = this.plugin.settings.highlightedWeekdays;
+                if (checkbox.checked) {
+                    if (!current.includes(index)) {
+                        current.push(index);
+                        current.sort((a, b) => a - b);
+                    }
+                } else {
+                    const idx = current.indexOf(index);
+                    if (idx > -1) current.splice(idx, 1);
+                }
+                await this.plugin.saveSettings();
+            };
+
+            label.createEl('span', { text: name.slice(0, 3) });
+        });
+
+        // Cell borders toggle
+        new Setting(containerEl)
+            .setName('Show cell borders')
+            .setDesc('Display thin borders around day cells and week span cells')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showCellBorders)
+                .onChange(async (value) => {
+                    this.plugin.settings.showCellBorders = value;
+                    await this.plugin.saveSettings();
+                }));
     }
 
     renderDateExtractionSection(containerEl: HTMLElement): void {
@@ -983,6 +1057,617 @@ export class CalendarSettingTab extends PluginSettingTab {
                 }));
     }
 
+    renderPeriodicNotesSection(containerEl: HTMLElement): void {
+        const settings = this.plugin.settings.periodicNotes;
+
+        containerEl.createEl('h3', { text: 'Periodic Notes' });
+
+        const desc = containerEl.createEl('p', {
+            cls: 'setting-item-description',
+            text: 'Configure weekly, monthly, quarterly, yearly, and custom period notes. Compatible with the Periodic Notes plugin.'
+        });
+        desc.style.marginTop = '-10px';
+        desc.style.marginBottom = '15px';
+
+        // General settings section
+        const generalSection = containerEl.createDiv();
+        generalSection.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;';
+        generalSection.createEl('h4', { text: 'General', attr: { style: 'margin-top: 0;' } });
+
+        // Use Periodic Notes plugin toggle with GitHub link
+        const periodicNotesSetting = new Setting(generalSection)
+            .setName('Use Periodic Notes plugin settings (enable only if you know what you are doing)')
+            .addToggle(toggle => toggle
+                .setValue(settings.usePeriodicNotesPlugin)
+                .onChange(async (value) => {
+                    settings.usePeriodicNotesPlugin = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        // Set description with HTML link inside the setting
+        periodicNotesSetting.descEl.innerHTML = `If the <a href="https://github.com/liamcain/obsidian-periodic-notes" style="color: var(--text-accent);">Periodic Notes plugin</a> is installed and a note type is enabled there, prioritize its settings over the ones below.`;
+
+        // Template folder source setting
+        new Setting(generalSection)
+            .setName('Template folder source')
+            .setDesc('Where to look for template files')
+            .addDropdown(dropdown => {
+                dropdown
+                    .addOption('obsidian', 'Use Obsidian\'s template folder')
+                    .addOption('custom', 'Custom folder')
+                    .setValue(settings.templateFolderSource)
+                    .onChange(async (value) => {
+                        settings.templateFolderSource = value as 'obsidian' | 'custom';
+                        await this.plugin.saveSettings();
+                        this.display();
+                    });
+            });
+
+        // Custom template folder (only shown when custom is selected)
+        if (settings.templateFolderSource === 'custom') {
+            new Setting(generalSection)
+                .setName('Custom template folder')
+                .setDesc('Folder to search for template files')
+                .addText(text => {
+                    text
+                        .setPlaceholder('templates')
+                        .setValue(settings.templateCustomFolder)
+                        .onChange(async (value) => {
+                            const cleaned = value.replace(/^\/+|\/+$/g, '');
+                            settings.templateCustomFolder = cleaned;
+                            await this.plugin.saveSettings();
+                        });
+                    new FolderSuggest(this.app, text.inputEl);
+                });
+        }
+
+        // Note about week start day
+        const weekStartNote = generalSection.createEl('p', {
+            cls: 'setting-item-description'
+        });
+        weekStartNote.innerHTML = `Week start day is configured in <strong>Basic Settings</strong> → <strong>Week starts on</strong>.`;
+        weekStartNote.style.cssText = 'margin-top: 10px; color: var(--text-muted); font-size: 0.9em;';
+
+        // Weekly Notes section
+        this.renderPeriodicNoteTypeSection(containerEl, 'weekly', 'Weekly Notes', settings.weekly, 'gggg-[W]ww');
+
+        // Monthly Notes section
+        this.renderPeriodicNoteTypeSection(containerEl, 'monthly', 'Monthly Notes', settings.monthly, 'YYYY-MM');
+
+        // Quarterly Notes section
+        this.renderPeriodicNoteTypeSection(containerEl, 'quarterly', 'Quarterly Notes', settings.quarterly, 'YYYY-[Q]Q');
+
+        // Yearly Notes section
+        this.renderPeriodicNoteTypeSection(containerEl, 'yearly', 'Yearly Notes', settings.yearly, 'YYYY');
+
+        // Custom Periods section
+        this.renderCustomPeriodsSection(containerEl);
+    }
+
+    renderPeriodicNoteTypeSection(
+        containerEl: HTMLElement,
+        type: 'weekly' | 'monthly' | 'quarterly' | 'yearly',
+        title: string,
+        config: { enabled: boolean; folder: string; format: string; template: string; color?: string },
+        defaultFormat: string
+    ): void {
+        const settings = this.plugin.settings.periodicNotes;
+        const section = containerEl.createDiv();
+        section.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;';
+        section.createEl('h4', { text: title, attr: { style: 'margin-top: 0;' } });
+
+        // Check if Periodic Notes plugin has this type enabled
+        const periodicNotesPlugin = (this.app as any).plugins?.plugins?.['periodic-notes'];
+        const periodicNotesTypeEnabled = periodicNotesPlugin?.settings?.[type]?.enabled;
+        const usePluginSettings = settings.usePeriodicNotesPlugin && periodicNotesTypeEnabled;
+
+        // Enable toggle
+        new Setting(section)
+            .setName(`Enable ${type} notes`)
+            .setDesc(`Create ${type} notes when clicking ${type === 'weekly' ? 'week numbers' : type === 'quarterly' ? 'quarter indicators' : type === 'monthly' ? 'month names' : 'year header'}`)
+            .addToggle(toggle => toggle
+                .setValue(config.enabled)
+                .onChange(async (value) => {
+                    config.enabled = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        // Week number display mode (only for weekly notes, always shown)
+        if (type === 'weekly' && config.enabled) {
+            new Setting(section)
+                .setName('Week number display')
+                .setDesc('How to show week numbers in the calendar')
+                .addDropdown(dropdown => {
+                    dropdown
+                        .addOption('none', 'Hidden')
+                        .addOption('above-day', 'Badge below day number')
+                        .addOption('extra-column', 'Divider before first day of week')
+                        .addOption('header-row', 'Row above month with week spans')
+                        .setValue(settings.weekNumberDisplay)
+                        .onChange(async (value) => {
+                            settings.weekNumberDisplay = value as 'none' | 'above-day' | 'extra-column' | 'header-row';
+                            await this.plugin.saveSettings();
+                            this.display();
+                        });
+                });
+
+            // Header-row mode specific settings
+            if (settings.weekNumberDisplay === 'header-row') {
+                const headerRowSettings = section.createDiv();
+                headerRowSettings.style.cssText = 'margin-left: 20px; padding-left: 15px; border-left: 2px solid var(--background-modifier-border); margin-top: 10px; margin-bottom: 10px;';
+
+                this.renderWeekBorderColorSetting(headerRowSettings);
+
+                // Week span borders toggle
+                new Setting(headerRowSettings)
+                    .setName('Show week span borders')
+                    .setDesc('Display thin borders on the bottom of week span cells')
+                    .addToggle(toggle => toggle
+                        .setValue(this.plugin.settings.showWeekSpanBorders)
+                        .onChange(async (value) => {
+                            this.plugin.settings.showWeekSpanBorders = value;
+                            await this.plugin.saveSettings();
+                        }));
+
+                // Tip about cell borders
+                const tipNote = headerRowSettings.createDiv();
+                tipNote.style.cssText = 'background: var(--background-primary); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--text-muted); margin-top: 10px; font-size: 0.85em; color: var(--text-muted);';
+                tipNote.innerHTML = `<strong>Tip:</strong> Try turning off cell borders in <code style="background: var(--background-modifier-border); padding: 2px 5px; border-radius: 3px; font-size: 0.9em;">Basic Settings → Calendar Appearance → Show cell borders</code> when using week rows. This calms down the look and improves readability.`;
+            }
+        }
+
+        if (!config.enabled) return;
+
+        // If using Periodic Notes plugin settings, show notice instead of editable fields
+        if (usePluginSettings) {
+            const notice = section.createDiv();
+            notice.style.cssText = 'background: var(--background-primary); padding: 12px; border-radius: 4px; border-left: 3px solid var(--text-accent); margin-top: 10px;';
+            notice.innerHTML = `Using settings from the <a href="https://github.com/liamcain/obsidian-periodic-notes" style="color: var(--text-accent);">Periodic Notes plugin</a>. Disable "Use Periodic Notes plugin settings" above to customize here.`;
+            notice.style.fontSize = '0.9em';
+            notice.style.color = 'var(--text-muted)';
+            return;
+        }
+
+        // Folder
+        new Setting(section)
+            .setName('Folder')
+            .setDesc(`Folder where ${type} notes will be stored`)
+            .addText(text => {
+                text
+                    .setPlaceholder('Leave empty for vault root')
+                    .setValue(config.folder)
+                    .onChange(async (value) => {
+                        const cleaned = value.replace(/^\/+|\/+$/g, '');
+                        config.folder = cleaned;
+                        await this.plugin.saveSettings();
+                    });
+                new FolderSuggest(this.app, text.inputEl);
+            });
+
+        // Format with reference link
+        const formatSetting = new Setting(section)
+            .setName('Format')
+            .addText(text => {
+                text
+                    .setPlaceholder(defaultFormat)
+                    .setValue(config.format)
+                    .onChange(async (value) => {
+                        config.format = value || defaultFormat;
+                        await this.plugin.saveSettings();
+                        // Update preview
+                        this.updateFormatPreview(previewEl, config.format || defaultFormat);
+                    });
+            });
+
+        // Add description with format reference link
+        const formatDescEl = formatSetting.descEl;
+        formatDescEl.innerHTML = `Filename format for ${type} notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+
+        // Add format preview
+        const previewEl = formatDescEl.createDiv();
+        previewEl.style.cssText = 'margin-top: 4px; color: var(--text-muted); font-size: 0.85em;';
+        this.updateFormatPreview(previewEl, config.format || defaultFormat);
+
+        // Template
+        new Setting(section)
+            .setName('Template')
+            .setDesc(`Template file to use when creating ${type} notes`)
+            .addText(text => {
+                text
+                    .setPlaceholder('templates/weekly')
+                    .setValue(config.template)
+                    .onChange(async (value) => {
+                        config.template = value;
+                        await this.plugin.saveSettings();
+                    });
+                new FileSuggest(this.app, text.inputEl, this.getTemplateFolderPath());
+            });
+
+        // Color (optional) with palette support
+        const colorSetting = new Setting(section)
+            .setName('Color (optional)')
+            .setDesc(`Visual indicator color for ${type} notes in the calendar`);
+
+        const colorContainer = colorSetting.controlEl.createDiv();
+        colorContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+
+        const colorCheckbox = colorContainer.createEl('input', { type: 'checkbox' });
+        colorCheckbox.checked = !!config.color;
+
+        const colorPickerWrapper = colorContainer.createDiv();
+
+        if (config.color) {
+            this.renderColorPicker(colorPickerWrapper, config.color, async (newColor) => {
+                config.color = newColor;
+                await this.plugin.saveSettings();
+            });
+        } else {
+            colorPickerWrapper.createEl('span', { text: 'Using theme accent' }).style.cssText = 'color: var(--text-muted); font-size: 0.85em;';
+        }
+
+        colorCheckbox.onchange = async () => {
+            if (colorCheckbox.checked) {
+                config.color = '#6c849d';
+            } else {
+                config.color = undefined;
+            }
+            await this.plugin.saveSettings();
+            this.display();
+        };
+
+    }
+
+    /**
+     * Render the week border color setting with mode options and color picker
+     */
+    renderWeekBorderColorSetting(container: HTMLElement): void {
+        const settings = this.plugin.settings.periodicNotes;
+        const borderConfig = settings.weekBorderColor;
+
+        // Color picker wrapper (for custom mode, shown after dropdown)
+        let colorWrapper: HTMLElement | null = null;
+
+        const borderSetting = new Setting(container)
+            .setName('Week divider color')
+            .setDesc('Color for the divider between weeks in the header row and day cells')
+            .addDropdown(dropdown => {
+                dropdown
+                    .addOption('neutral', 'Neutral (theme border)')
+                    .addOption('accent', 'Theme accent')
+                    .addOption('custom', 'Custom color')
+                    .setValue(borderConfig.mode)
+                    .onChange(async (value) => {
+                        borderConfig.mode = value as 'neutral' | 'accent' | 'custom';
+                        await this.plugin.saveSettings();
+                        renderColorControl();
+                    });
+            });
+
+        // Create color wrapper after the dropdown
+        colorWrapper = borderSetting.controlEl.createDiv();
+        colorWrapper.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-left: 8px;';
+
+        const renderColorControl = () => {
+            if (!colorWrapper) return;
+            colorWrapper.empty();
+
+            if (borderConfig.mode === 'custom') {
+                const currentColor = borderConfig.customColor || '#6c849d';
+                this.renderColorPicker(colorWrapper, currentColor, async (newColor) => {
+                    borderConfig.customColor = newColor;
+                    await this.plugin.saveSettings();
+                });
+            }
+        };
+
+        renderColorControl();
+    }
+
+    private updateFormatPreview(previewEl: HTMLElement, format: string): void {
+        const moment = (window as any).moment;
+        try {
+            const preview = moment().format(format);
+            previewEl.textContent = `Preview: ${preview}`;
+        } catch {
+            previewEl.textContent = 'Preview: (invalid format)';
+        }
+    }
+
+    renderCustomPeriodsSection(containerEl: HTMLElement): void {
+        const settings = this.plugin.settings.periodicNotes;
+
+        const section = containerEl.createDiv();
+        section.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;';
+        section.createEl('h4', { text: 'Custom Period Groups', attr: { style: 'margin-top: 0;' } });
+
+        const desc = section.createEl('p', {
+            cls: 'setting-item-description',
+            text: 'Create groups of custom periods (e.g., Semesters, Seasons). Each enabled group gets its own column in the calendar. Periods within a group cannot have overlapping months and must use consecutive months.'
+        });
+        desc.style.marginBottom = '15px';
+
+        // Add group button
+        const addBtn = section.createEl('button', { text: '+ Add Group' });
+        addBtn.style.cssText = 'margin-bottom: 15px; padding: 6px 12px; cursor: pointer;';
+        addBtn.onclick = async () => {
+            const newGroup: CustomPeriodGroup = {
+                id: Date.now().toString(),
+                name: 'New Group',
+                enabled: true,
+                folder: '',
+                template: '',
+                color: undefined,
+                periods: []
+            };
+            settings.customPeriodGroups.push(newGroup);
+            await this.plugin.saveSettings();
+            this.display();
+        };
+
+        // List existing groups
+        if (settings.customPeriodGroups.length === 0) {
+            const emptyMsg = section.createDiv();
+            emptyMsg.style.cssText = 'color: var(--text-muted); font-style: italic;';
+            emptyMsg.textContent = 'No custom period groups defined. Click "Add Group" to create one.';
+        } else {
+            const groupsList = section.createDiv();
+            groupsList.style.cssText = 'display: flex; flex-direction: column; gap: 12px;';
+
+            settings.customPeriodGroups.forEach((group, groupIndex) => {
+                const groupEl = groupsList.createDiv();
+                groupEl.style.cssText = 'padding: 12px; background: var(--background-primary); border-radius: 4px; border: 1px solid var(--background-modifier-border);';
+
+                // Group header
+                const groupHeader = groupEl.createDiv();
+                groupHeader.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 10px;';
+
+                // Enable toggle
+                const toggleContainer = groupHeader.createDiv();
+                const toggle = toggleContainer.createEl('input', { type: 'checkbox' });
+                toggle.checked = group.enabled;
+                toggle.style.cssText = 'cursor: pointer;';
+                toggle.onchange = async () => {
+                    group.enabled = toggle.checked;
+                    await this.plugin.saveSettings();
+                };
+
+                // Group name input
+                const nameInput = groupHeader.createEl('input', {
+                    type: 'text',
+                    value: group.name,
+                    attr: { placeholder: 'Group name' }
+                });
+                nameInput.style.cssText = 'flex: 1; padding: 4px 8px; font-weight: 500;';
+                nameInput.onchange = async () => {
+                    group.name = nameInput.value;
+                    await this.plugin.saveSettings();
+                };
+
+                // Delete group button
+                const deleteGroupBtn = groupHeader.createEl('button', { text: '×' });
+                deleteGroupBtn.style.cssText = 'padding: 4px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: 1px solid var(--background-modifier-border);';
+                deleteGroupBtn.title = 'Delete group';
+                deleteGroupBtn.onclick = async () => {
+                    settings.customPeriodGroups.splice(groupIndex, 1);
+                    await this.plugin.saveSettings();
+                    this.display();
+                };
+
+                // Group-level defaults section
+                const groupDefaultsSection = groupEl.createDiv();
+                groupDefaultsSection.style.cssText = 'padding: 10px; margin: 10px 0; background: var(--background-secondary); border-radius: 4px;';
+
+                const groupDefaultsLabel = groupDefaultsSection.createDiv();
+                groupDefaultsLabel.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px;';
+                groupDefaultsLabel.textContent = 'Default settings for all periods in this group:';
+
+                // Folder setting
+                const folderRow = groupDefaultsSection.createDiv();
+                folderRow.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 6px;';
+                folderRow.createEl('span', { text: 'Folder:' }).style.cssText = 'font-size: 0.85em; min-width: 60px;';
+                const folderInput = folderRow.createEl('input', {
+                    type: 'text',
+                    value: group.folder || '',
+                    attr: { placeholder: 'Leave empty for vault root' }
+                });
+                folderInput.style.cssText = 'flex: 1; padding: 4px 8px; font-size: 0.85em;';
+                folderInput.onchange = async () => {
+                    group.folder = folderInput.value.replace(/^\/+|\/+$/g, '');
+                    await this.plugin.saveSettings();
+                };
+                new FolderSuggest(this.app, folderInput);
+
+                // Template setting
+                const templateRow = groupDefaultsSection.createDiv();
+                templateRow.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 6px;';
+                templateRow.createEl('span', { text: 'Template:' }).style.cssText = 'font-size: 0.85em; min-width: 60px;';
+                const templateInput = templateRow.createEl('input', {
+                    type: 'text',
+                    value: group.template || '',
+                    attr: { placeholder: 'templates/period' }
+                });
+                templateInput.style.cssText = 'flex: 1; padding: 4px 8px; font-size: 0.85em;';
+                templateInput.onchange = async () => {
+                    group.template = templateInput.value;
+                    await this.plugin.saveSettings();
+                };
+                new FileSuggest(this.app, templateInput, this.getTemplateFolderPath());
+
+                // Color setting with enable checkbox and palette support
+                const colorRow = groupDefaultsSection.createDiv();
+                colorRow.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-wrap: wrap;';
+                colorRow.createEl('span', { text: 'Color:' }).style.cssText = 'font-size: 0.85em; min-width: 60px;';
+
+                const colorCheckbox = colorRow.createEl('input', { type: 'checkbox' });
+                colorCheckbox.checked = !!group.color;
+                colorCheckbox.style.cssText = 'margin-right: 4px;';
+
+                // Color picker container (only visible when enabled)
+                const colorPickerWrapper = colorRow.createDiv();
+                colorPickerWrapper.style.cssText = group.color ? 'display: flex; align-items: center; gap: 8px;' : 'display: none;';
+
+                if (group.color) {
+                    this.renderColorPicker(
+                        colorPickerWrapper,
+                        group.color,
+                        async (newColor) => {
+                            group.color = newColor;
+                            await this.plugin.saveSettings();
+                        }
+                    );
+                }
+
+                const colorCheckLabel = colorRow.createEl('span', { text: group.color ? '' : 'Enable group color' });
+                colorCheckLabel.style.cssText = 'font-size: 0.85em; color: var(--text-muted);';
+
+                colorCheckbox.onchange = async () => {
+                    if (colorCheckbox.checked) {
+                        group.color = '#4a90d9';  // Default color
+                    } else {
+                        group.color = undefined;
+                    }
+                    await this.plugin.saveSettings();
+                    this.display();
+                };
+
+                // Periods within group
+                const periodsContainer = groupEl.createDiv();
+                periodsContainer.style.cssText = 'margin-left: 20px;';
+
+                if (group.periods.length === 0) {
+                    const emptyPeriodsMsg = periodsContainer.createDiv();
+                    emptyPeriodsMsg.style.cssText = 'color: var(--text-muted); font-style: italic; font-size: 0.9em; margin-bottom: 8px;';
+                    emptyPeriodsMsg.textContent = 'No periods in this group.';
+                } else {
+                    const periodsList = periodsContainer.createDiv();
+                    periodsList.style.cssText = 'display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;';
+
+                    group.periods.forEach((period, periodIndex) => {
+                        const periodEl = periodsList.createDiv();
+                        periodEl.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--background-secondary); border-radius: 3px;';
+
+                        // Color indicator - show effective color (period's own or group's)
+                        const effectiveColor = period.useGroupSettings ? group.color : period.color;
+                        if (effectiveColor) {
+                            const colorDot = periodEl.createDiv();
+                            colorDot.style.cssText = `width: 10px; height: 10px; border-radius: 50%; background: ${effectiveColor}; flex-shrink: 0;`;
+                            if (period.useGroupSettings && group.color) {
+                                colorDot.title = 'Using group color';
+                            }
+                        }
+
+                        // Period name, format, months, and custom settings indicator
+                        const infoEl = periodEl.createDiv();
+                        infoEl.style.cssText = 'flex: 1;';
+
+                        // Name row with custom settings badge
+                        const nameRow = infoEl.createDiv();
+                        nameRow.style.cssText = 'display: flex; align-items: center; gap: 6px;';
+
+                        const nameEl = nameRow.createEl('span');
+                        nameEl.style.cssText = 'font-weight: 500; font-size: 0.9em;';
+                        nameEl.textContent = period.name;
+
+                        // Show "Custom" badge if not using group defaults
+                        if (period.useGroupSettings === false) {
+                            const customBadge = nameRow.createEl('span', { text: 'Custom' });
+                            customBadge.style.cssText = 'font-size: 0.7em; padding: 1px 5px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 8px;';
+                            customBadge.title = 'Using custom folder, template, or color instead of group defaults';
+                        }
+
+                        // Format and months info
+                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const monthsText = period.months.map(m => monthNames[m - 1]).join('-');
+
+                        const detailsEl = infoEl.createDiv();
+                        detailsEl.style.cssText = 'font-size: 0.8em; color: var(--text-muted);';
+                        detailsEl.innerHTML = `<code style="font-size: 0.95em; background: var(--background-modifier-border); padding: 0 4px; border-radius: 2px;">${period.format}</code> · ${monthsText}`;
+
+                        // Edit button
+                        const editBtn = periodEl.createEl('button', { text: 'Edit' });
+                        editBtn.style.cssText = 'padding: 2px 8px; cursor: pointer; font-size: 0.85em;';
+                        editBtn.onclick = () => {
+                            new CustomPeriodEditModal(
+                                this.app,
+                                this.plugin,
+                                period,
+                                group,
+                                async () => {
+                                    await this.plugin.saveSettings();
+                                    this.display();
+                                },
+                                async () => {
+                                    group.periods.splice(periodIndex, 1);
+                                    await this.plugin.saveSettings();
+                                    this.display();
+                                }
+                            ).open();
+                        };
+
+                        // Delete period button
+                        const deletePeriodBtn = periodEl.createEl('button', { text: '×' });
+                        deletePeriodBtn.style.cssText = 'padding: 2px 6px; cursor: pointer; font-size: 1em; background: transparent; border: 1px solid var(--background-modifier-border);';
+                        deletePeriodBtn.title = 'Delete period';
+                        deletePeriodBtn.onclick = async () => {
+                            group.periods.splice(periodIndex, 1);
+                            await this.plugin.saveSettings();
+                            this.display();
+                        };
+                    });
+                }
+
+                // Add period button
+                const addPeriodBtn = periodsContainer.createEl('button', { text: '+ Add Period' });
+                addPeriodBtn.style.cssText = 'padding: 4px 10px; cursor: pointer; font-size: 0.9em;';
+                addPeriodBtn.onclick = () => {
+                    // Find available months (not used by other periods in this group)
+                    const usedMonths = new Set<number>();
+                    group.periods.forEach(p => p.months.forEach(m => usedMonths.add(m)));
+                    const availableMonths = [1,2,3,4,5,6,7,8,9,10,11,12].filter(m => !usedMonths.has(m));
+
+                    // Default to first 3 available months, or empty if none available
+                    const defaultMonths = availableMonths.slice(0, 3);
+
+                    const newPeriod: CustomPeriod = {
+                        id: Date.now().toString(),
+                        name: 'New Period',
+                        format: 'YYYY-[P' + (group.periods.length + 1) + ']',
+                        months: defaultMonths.length > 0 ? defaultMonths : [1],
+                        yearBasis: 'majority' as const,
+                        useGroupSettings: true,  // Use group defaults by default
+                        folder: '',
+                        template: '',
+                        color: undefined
+                    };
+                    group.periods.push(newPeriod);
+                    this.plugin.saveSettings();
+
+                    // Open edit modal for new period
+                    new CustomPeriodEditModal(
+                        this.app,
+                        this.plugin,
+                        newPeriod,
+                        group,
+                        async () => {
+                            await this.plugin.saveSettings();
+                            this.display();
+                        },
+                        async () => {
+                            const idx = group.periods.findIndex(p => p.id === newPeriod.id);
+                            if (idx !== -1) {
+                                group.periods.splice(idx, 1);
+                                await this.plugin.saveSettings();
+                                this.display();
+                            }
+                        }
+                    ).open();
+                };
+            });
+        }
+    }
+
     renderQuickNoteCreationSettings(containerEl: HTMLElement): void {
         const config = this.plugin.settings.quickNoteCreation;
 
@@ -1233,6 +1918,41 @@ export class CalendarSettingTab extends PluginSettingTab {
                 .onChange(async (value) => {
                     exp.condensedLetters = value;
                     await this.plugin.saveSettings();
+                }));
+
+        // Welcome Banners Section
+        containerEl.createEl('h3', { text: 'Welcome Banners', attr: { style: 'margin-top: 25px;' } });
+
+        const bannerDesc = containerEl.createEl('p', {
+            cls: 'setting-item-description',
+            text: 'Show welcome banners again to see tips and instructions.'
+        });
+        bannerDesc.style.marginTop = '-10px';
+        bannerDesc.style.marginBottom = '15px';
+
+        const bannerSection = containerEl.createDiv();
+        bannerSection.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 5px;';
+
+        new Setting(bannerSection)
+            .setName('Show Quick Notes banner')
+            .setDesc('Display the Quick Notes welcome banner with tips about creating notes quickly')
+            .addButton(button => button
+                .setButtonText('Show again')
+                .onClick(async () => {
+                    this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = false;
+                    await this.plugin.saveSettings();
+                    new (require('obsidian').Notice)('Quick Notes banner will show on next calendar view');
+                }));
+
+        new Setting(bannerSection)
+            .setName('Show Periodic Notes banner')
+            .setDesc('Display the Periodic Notes welcome banner with tips about weekly, monthly, and quarterly notes')
+            .addButton(button => button
+                .setButtonText('Show again')
+                .onClick(async () => {
+                    this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = false;
+                    await this.plugin.saveSettings();
+                    new (require('obsidian').Notice)('Periodic Notes banner will show on next calendar view');
                 }));
     }
 
@@ -1976,148 +2696,12 @@ export class CalendarSettingTab extends PluginSettingTab {
         onColorChange: (color: string) => Promise<void>
     ): void {
         const config = this.plugin.settings.colorCategories;
-
-        // Main container
-        const colorPickerContainer = container.createDiv();
-        colorPickerContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
-
-        // Color input
-        const colorInput = colorPickerContainer.createEl('input', { type: 'color', value: currentColor });
-        colorInput.style.cssText = 'width: 60px; height: 32px; cursor: pointer; border-radius: 4px;';
-        colorInput.onchange = async (e) => {
-            await onColorChange((e.target as HTMLInputElement).value);
-        };
-
-        // Hex display
-        const hexDisplay = colorPickerContainer.createEl('code');
-        hexDisplay.textContent = currentColor.toUpperCase();
-        hexDisplay.style.cssText = 'color: var(--text-muted); font-size: 0.9em;';
-
-        // Update hex display on color change
-        colorInput.oninput = () => {
-            hexDisplay.textContent = colorInput.value.toUpperCase();
-        };
-
-        // Palette button (only if palettes exist)
-        if (config.colorPalettes && config.colorPalettes.length > 0) {
-            const paletteBtn = colorPickerContainer.createEl('button');
-            paletteBtn.style.cssText = 'padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;';
-            setIcon(paletteBtn, 'palette');
-            paletteBtn.title = 'Open Color Palettes';
-
-            // Create popover (hidden by default)
-            let popover: HTMLElement | null = null;
-
-            const closePopover = () => {
-                if (popover) {
-                    popover.remove();
-                    popover = null;
-                }
-            };
-
-            paletteBtn.onclick = (e) => {
-                e.preventDefault();
-
-                // Close existing popover if open
-                if (popover) {
-                    closePopover();
-                    return;
-                }
-
-                // Create popover
-                popover = document.body.createDiv();
-                popover.style.cssText = 'position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;';
-
-                // Close button
-                const closeBtn = popover.createEl('button');
-                closeBtn.textContent = '×';
-                closeBtn.style.cssText = 'position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;';
-                closeBtn.title = 'Close';
-                closeBtn.onmouseenter = () => {
-                    closeBtn.style.background = 'var(--background-modifier-hover)';
-                };
-                closeBtn.onmouseleave = () => {
-                    closeBtn.style.background = 'transparent';
-                };
-                closeBtn.onclick = (e) => {
-                    e.preventDefault();
-                    closePopover();
-                };
-
-                // Position near button
-                const btnRect = paletteBtn.getBoundingClientRect();
-                popover.style.top = (btnRect.bottom + 6) + 'px';
-                popover.style.left = btnRect.left + 'px';
-
-                // Adjust if off-screen
-                setTimeout(() => {
-                    if (popover) {
-                        const popoverRect = popover.getBoundingClientRect();
-                        if (popoverRect.right > window.innerWidth) {
-                            popover.style.left = (window.innerWidth - popoverRect.width - 10) + 'px';
-                        }
-                        if (popoverRect.bottom > window.innerHeight) {
-                            popover.style.top = (btnRect.top - popoverRect.height - 6) + 'px';
-                        }
-                    }
-                }, 0);
-
-                // Render palettes
-                config.colorPalettes.forEach((palette, idx) => {
-                    const paletteSection = popover!.createDiv();
-                    paletteSection.style.cssText = idx > 0 ? 'margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);' : 'margin-top: 4px;';
-
-                    const paletteName = paletteSection.createEl('div', { text: palette.name });
-                    paletteName.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;';
-
-                    const swatchesGrid = paletteSection.createDiv();
-                    swatchesGrid.style.cssText = 'display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;';
-
-                    palette.colors.forEach(colorEntry => {
-                        const swatch = swatchesGrid.createEl('button');
-                        const isSelected = currentColor.toLowerCase() === colorEntry.hex.toLowerCase();
-                        swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? 'var(--interactive-accent)' : 'var(--background-modifier-border)'}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
-                        swatch.title = `${colorEntry.name}\n${colorEntry.hex}`;
-                        swatch.onclick = async (e) => {
-                            e.preventDefault();
-                            colorInput.value = colorEntry.hex;
-                            hexDisplay.textContent = colorEntry.hex.toUpperCase();
-                            await onColorChange(colorEntry.hex);
-                            closePopover();
-                        };
-                        swatch.onmouseenter = () => {
-                            swatch.style.transform = 'scale(1.08)';
-                            swatch.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
-                        };
-                        swatch.onmouseleave = () => {
-                            swatch.style.transform = 'scale(1)';
-                            swatch.style.boxShadow = 'none';
-                        };
-                    });
-                });
-
-                // Close on click outside
-                const closeHandler = (e: MouseEvent) => {
-                    if (popover && !popover.contains(e.target as Node) && !paletteBtn.contains(e.target as Node)) {
-                        closePopover();
-                        document.removeEventListener('click', closeHandler);
-                    }
-                };
-
-                setTimeout(() => {
-                    document.addEventListener('click', closeHandler);
-                }, 0);
-
-                // Close on Escape key
-                const keyHandler = (e: KeyboardEvent) => {
-                    if (e.key === 'Escape' && popover) {
-                        closePopover();
-                        document.removeEventListener('keydown', keyHandler);
-                    }
-                };
-                document.addEventListener('keydown', keyHandler);
-            };
-        }
+        ColorPickerRenderer.render({
+            container,
+            currentColor,
+            palettes: config.colorPalettes || [],
+            onColorChange
+        });
     }
 }
 
@@ -2492,151 +3076,403 @@ export class CategoryEditModal extends Modal {
 
     renderColorPickerInModal(container: HTMLElement): void {
         const config = this.plugin.settings.colorCategories;
+        ColorPickerRenderer.render({
+            container,
+            currentColor: this.category.color,
+            palettes: config.colorPalettes || [],
+            onColorChange: async (newColor) => {
+                this.category.color = newColor;
+                await this.plugin.saveSettings();
+                this.onSave();
+            }
+        });
+    }
 
-        // Main container
-        const colorPickerContainer = container.createDiv();
-        colorPickerContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+    onClose() {
+        const { contentEl } = this;
+        contentEl.empty();
+    }
+}
 
-        // Color input
-        const colorInput = colorPickerContainer.createEl('input', { type: 'color', value: this.category.color });
-        colorInput.style.cssText = 'width: 60px; height: 32px; cursor: pointer; border-radius: 4px;';
-        colorInput.onchange = async (e) => {
-            this.category.color = (e.target as HTMLInputElement).value;
-            await this.plugin.saveSettings();
-            this.onSave();
-        };
+/**
+ * Modal for editing a custom period within a group
+ */
+export class CustomPeriodEditModal extends Modal {
+    plugin: LinearCalendarPlugin;
+    period: CustomPeriod;
+    group: CustomPeriodGroup;
+    onSave: () => void;
+    onDelete: () => void;
 
-        // Hex display
-        const hexDisplay = colorPickerContainer.createEl('code');
-        hexDisplay.textContent = this.category.color.toUpperCase();
-        hexDisplay.style.cssText = 'color: var(--text-muted); font-size: 0.9em;';
+    constructor(
+        app: App,
+        plugin: LinearCalendarPlugin,
+        period: CustomPeriod,
+        group: CustomPeriodGroup,
+        onSave: () => void,
+        onDelete: () => void
+    ) {
+        super(app);
+        this.plugin = plugin;
+        this.period = period;
+        this.group = group;
+        this.onSave = onSave;
+        this.onDelete = onDelete;
+    }
 
-        // Update hex display on color change
-        colorInput.oninput = () => {
-            hexDisplay.textContent = colorInput.value.toUpperCase();
-        };
+    /**
+     * Get the template folder path based on settings.
+     */
+    getTemplateFolderPath(): string | undefined {
+        const settings = this.plugin.settings.periodicNotes;
 
-        // Palette button (only if palettes exist)
-        if (config.colorPalettes && config.colorPalettes.length > 0) {
-            const paletteBtn = colorPickerContainer.createEl('button');
-            paletteBtn.style.cssText = 'padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;';
-            setIcon(paletteBtn, 'palette');
-            paletteBtn.title = 'Open Color Palettes';
+        if (settings.templateFolderSource === 'custom') {
+            return settings.templateCustomFolder || undefined;
+        }
 
-            // Create popover (hidden by default)
-            let popover: HTMLElement | null = null;
+        // Try to get Obsidian's templates folder from core plugin
+        const templatesPlugin = (this.app as any).internalPlugins?.plugins?.['templates'];
+        if (templatesPlugin?.enabled && templatesPlugin?.instance?.options?.folder) {
+            return templatesPlugin.instance.options.folder;
+        }
 
-            const closePopover = () => {
-                if (popover) {
-                    popover.remove();
-                    popover = null;
-                }
-            };
+        // Try Templater plugin as fallback
+        const templaterPlugin = (this.app as any).plugins?.plugins?.['templater-obsidian'];
+        if (templaterPlugin?.settings?.templates_folder) {
+            return templaterPlugin.settings.templates_folder;
+        }
 
-            paletteBtn.onclick = (e) => {
-                e.preventDefault();
+        return undefined;
+    }
 
-                // Close existing popover if open
-                if (popover) {
-                    closePopover();
-                    return;
-                }
+    /**
+     * Get months that are used by other periods in this group (not available for selection)
+     */
+    getUnavailableMonths(): Set<number> {
+        const unavailable = new Set<number>();
+        for (const p of this.group.periods) {
+            if (p.id !== this.period.id) {
+                p.months.forEach((m: number) => unavailable.add(m));
+            }
+        }
+        return unavailable;
+    }
 
-                // Create popover
-                popover = document.body.createDiv();
-                popover.style.cssText = 'position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;';
+    /**
+     * Check if months array is consecutive (allowing year wrap like [11,12,1,2])
+     */
+    areMonthsConsecutive(months: number[]): boolean {
+        if (months.length <= 1) return true;
 
-                // Close button
-                const closeBtn = popover.createEl('button');
-                closeBtn.textContent = '×';
-                closeBtn.style.cssText = 'position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;';
-                closeBtn.title = 'Close';
-                closeBtn.onmouseenter = () => {
-                    closeBtn.style.background = 'var(--background-modifier-hover)';
-                };
-                closeBtn.onmouseleave = () => {
-                    closeBtn.style.background = 'transparent';
-                };
-                closeBtn.onclick = (e) => {
-                    e.preventDefault();
-                    closePopover();
-                };
+        const sorted = [...months].sort((a, b) => a - b);
 
-                // Position near button
-                const btnRect = paletteBtn.getBoundingClientRect();
-                popover.style.top = (btnRect.bottom + 6) + 'px';
-                popover.style.left = btnRect.left + 'px';
+        // Check if consecutive without wrap
+        let isConsecutiveNormal = true;
+        for (let i = 1; i < sorted.length; i++) {
+            if (sorted[i] - sorted[i-1] !== 1) {
+                isConsecutiveNormal = false;
+                break;
+            }
+        }
+        if (isConsecutiveNormal) return true;
 
-                // Adjust if off-screen
-                setTimeout(() => {
-                    if (popover) {
-                        const popoverRect = popover.getBoundingClientRect();
-                        if (popoverRect.right > window.innerWidth) {
-                            popover.style.left = (window.innerWidth - popoverRect.width - 10) + 'px';
-                        }
-                        if (popoverRect.bottom > window.innerHeight) {
-                            popover.style.top = (btnRect.top - popoverRect.height - 6) + 'px';
-                        }
+        // Check if consecutive with year wrap (e.g., [11,12,1,2])
+        // This means the gap should only be between the highest and lowest month
+        // and should wrap around: highest -> 12 -> 1 -> lowest
+        const hasDecember = sorted.includes(12);
+        const hasJanuary = sorted.includes(1);
+        if (!hasDecember || !hasJanuary) return false;
+
+        // Split into high months (>=7) and low months (<=6)
+        const highMonths = sorted.filter(m => m >= 7);
+        const lowMonths = sorted.filter(m => m <= 6);
+
+        // Check high months are consecutive ending at 12
+        for (let i = 1; i < highMonths.length; i++) {
+            if (highMonths[i] - highMonths[i-1] !== 1) return false;
+        }
+        if (highMonths.length > 0 && highMonths[highMonths.length - 1] !== 12) return false;
+
+        // Check low months are consecutive starting at 1
+        for (let i = 1; i < lowMonths.length; i++) {
+            if (lowMonths[i] - lowMonths[i-1] !== 1) return false;
+        }
+        if (lowMonths.length > 0 && lowMonths[0] !== 1) return false;
+
+        return true;
+    }
+
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.empty();
+
+        contentEl.createEl('h2', { text: 'Edit Custom Period' });
+
+        // Name
+        new Setting(contentEl)
+            .setName('Name')
+            .setDesc('Display name for this period (e.g., "Semester 1", "Winter")')
+            .addText(text => text
+                .setPlaceholder('Period name')
+                .setValue(this.period.name)
+                .onChange(async (value) => {
+                    this.period.name = value;
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                }));
+
+        // Months selection
+        const monthsSection = contentEl.createDiv();
+        monthsSection.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 5px; margin: 15px 0;';
+
+        const monthsHeader = monthsSection.createDiv();
+        monthsHeader.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;';
+        monthsHeader.createEl('h4', { text: 'Months', attr: { style: 'margin: 0;' } });
+
+        const unavailableMonths = this.getUnavailableMonths();
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthsGrid = monthsSection.createDiv();
+        monthsGrid.style.cssText = 'display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;';
+
+        monthNames.forEach((name, index) => {
+            const monthNum = index + 1;
+            const isSelected = this.period.months.includes(monthNum);
+            const isUnavailable = unavailableMonths.has(monthNum);
+
+            const monthBtn = monthsGrid.createEl('button');
+            monthBtn.textContent = name;
+
+            if (isUnavailable) {
+                monthBtn.style.cssText = `
+                    padding: 8px 12px;
+                    border: 2px solid var(--background-modifier-border);
+                    background: var(--background-modifier-border);
+                    color: var(--text-muted);
+                    border-radius: 4px;
+                    cursor: not-allowed;
+                    font-weight: 400;
+                    opacity: 0.5;
+                `;
+                monthBtn.title = 'Used by another period in this group';
+            } else {
+                monthBtn.style.cssText = `
+                    padding: 8px 12px;
+                    border: 2px solid ${isSelected ? 'var(--interactive-accent)' : 'var(--background-modifier-border)'};
+                    background: ${isSelected ? 'var(--interactive-accent)' : 'var(--background-primary)'};
+                    color: ${isSelected ? 'var(--text-on-accent)' : 'var(--text-normal)'};
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: ${isSelected ? '600' : '400'};
+                    transition: all 0.15s;
+                `;
+
+                monthBtn.onclick = async () => {
+                    let newMonths: number[];
+                    if (isSelected) {
+                        newMonths = this.period.months.filter(m => m !== monthNum);
+                    } else {
+                        newMonths = [...this.period.months, monthNum];
                     }
-                }, 0);
 
-                // Render palettes
-                config.colorPalettes.forEach((palette, idx) => {
-                    const paletteSection = popover!.createDiv();
-                    paletteSection.style.cssText = idx > 0 ? 'margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);' : 'margin-top: 4px;';
+                    // Validate consecutive months
+                    if (!this.areMonthsConsecutive(newMonths)) {
+                        // Show warning but still allow (will show error message)
+                    }
 
-                    const paletteName = paletteSection.createEl('div', { text: palette.name });
-                    paletteName.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;';
+                    this.period.months = newMonths.sort((a, b) => a - b);
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                    this.onOpen(); // Refresh
+                };
+            }
+        });
 
-                    const swatchesGrid = paletteSection.createDiv();
-                    swatchesGrid.style.cssText = 'display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;';
+        // Validation message
+        const validationEl = monthsSection.createDiv();
+        validationEl.style.cssText = 'margin-top: 10px; font-size: 0.85em;';
 
-                    palette.colors.forEach(colorEntry => {
-                        const swatch = swatchesGrid.createEl('button');
-                        const isSelected = this.category.color.toLowerCase() === colorEntry.hex.toLowerCase();
-                        swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? 'var(--interactive-accent)' : 'var(--background-modifier-border)'}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
-                        swatch.title = `${colorEntry.name}\n${colorEntry.hex}`;
-                        swatch.onclick = async (e) => {
-                            e.preventDefault();
-                            colorInput.value = colorEntry.hex;
-                            hexDisplay.textContent = colorEntry.hex.toUpperCase();
-                            this.category.color = colorEntry.hex;
+        if (this.period.months.length === 0) {
+            validationEl.style.color = 'var(--text-error)';
+            validationEl.textContent = '⚠ Please select at least one month.';
+        } else if (!this.areMonthsConsecutive(this.period.months)) {
+            validationEl.style.color = 'var(--text-error)';
+            validationEl.textContent = '⚠ Months must be consecutive. Remove gaps between selected months.';
+        } else {
+            validationEl.style.color = 'var(--text-muted)';
+            validationEl.textContent = 'Tip: Months can wrap across year boundary (e.g., Nov-Dec-Jan-Feb for Winter).';
+        }
+
+        // Year basis (for year-spanning periods)
+        new Setting(contentEl)
+            .setName('Year basis')
+            .setDesc('Which year to use when the period spans across year boundary')
+            .addDropdown(dropdown => dropdown
+                .addOption('start', 'Use year of first month')
+                .addOption('end', 'Use year of last month')
+                .addOption('majority', 'Use year where most months fall')
+                .setValue(this.period.yearBasis)
+                .onChange(async (value) => {
+                    this.period.yearBasis = value as 'start' | 'end' | 'majority';
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                }));
+
+        // Format (always needed, not tied to group settings)
+        const formatSetting = new Setting(contentEl)
+            .setName('Format')
+            .addText(text => text
+                .setPlaceholder('YYYY-[S1]')
+                .setValue(this.period.format)
+                .onChange(async (value) => {
+                    this.period.format = value;
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                    // Update preview
+                    this.updateFormatPreview(previewEl);
+                }));
+
+        // Add description with format reference link
+        formatSetting.descEl.innerHTML = `Filename format for period notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+
+        // Format preview
+        const previewEl = formatSetting.descEl.createDiv();
+        previewEl.style.cssText = 'margin-top: 4px; color: var(--text-muted); font-size: 0.85em;';
+        this.updateFormatPreview(previewEl);
+
+        // Use group settings toggle
+        const useGroupSettingsSection = contentEl.createDiv();
+        useGroupSettingsSection.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 5px; margin: 15px 0;';
+
+        new Setting(useGroupSettingsSection)
+            .setName('Use group defaults')
+            .setDesc(`Use the group's folder, template, and color settings`)
+            .addToggle(toggle => toggle
+                .setValue(this.period.useGroupSettings !== false)  // Default to true
+                .onChange(async (value) => {
+                    this.period.useGroupSettings = value;
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                    this.onOpen();  // Refresh to show/hide individual settings
+                }));
+
+        // Show group defaults info when using group settings
+        if (this.period.useGroupSettings !== false) {
+            const groupInfoEl = useGroupSettingsSection.createDiv();
+            groupInfoEl.style.cssText = 'font-size: 0.85em; color: var(--text-muted); padding: 8px; background: var(--background-primary); border-radius: 4px; margin-top: 8px;';
+            groupInfoEl.innerHTML = `
+                <div style="margin-bottom: 4px;"><strong>Group "${this.group.name}" defaults:</strong></div>
+                <div>Folder: ${this.group.folder || '(vault root)'}</div>
+                <div>Template: ${this.group.template || '(none)'}</div>
+                <div>Color: ${this.group.color ? `<span style="display:inline-block; width:12px; height:12px; background:${this.group.color}; border-radius:2px; vertical-align:middle;"></span> ${this.group.color}` : '(none)'}</div>
+            `;
+        } else {
+            // Individual settings - only shown when not using group defaults
+            const individualSettingsLabel = useGroupSettingsSection.createDiv();
+            individualSettingsLabel.style.cssText = 'font-size: 0.85em; color: var(--text-muted); margin-top: 8px; margin-bottom: 4px;';
+            individualSettingsLabel.textContent = 'Custom settings for this period:';
+
+            // Folder
+            new Setting(useGroupSettingsSection)
+                .setName('Folder')
+                .setDesc('Folder where notes for this period will be stored')
+                .addText(text => {
+                    text
+                        .setPlaceholder('Leave empty for vault root')
+                        .setValue(this.period.folder)
+                        .onChange(async (value) => {
+                            const cleaned = value.replace(/^\/+|\/+$/g, '');
+                            this.period.folder = cleaned;
                             await this.plugin.saveSettings();
                             this.onSave();
-                            closePopover();
-                        };
-                        swatch.onmouseenter = () => {
-                            swatch.style.transform = 'scale(1.08)';
-                            swatch.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
-                        };
-                        swatch.onmouseleave = () => {
-                            swatch.style.transform = 'scale(1)';
-                            swatch.style.boxShadow = 'none';
-                        };
-                    });
+                        });
+                    new FolderSuggest(this.app, text.inputEl);
                 });
 
-                // Close on click outside
-                const closeHandler = (e: MouseEvent) => {
-                    if (popover && !popover.contains(e.target as Node) && !paletteBtn.contains(e.target as Node)) {
-                        closePopover();
-                        document.removeEventListener('click', closeHandler);
-                    }
-                };
+            // Template
+            new Setting(useGroupSettingsSection)
+                .setName('Template')
+                .setDesc('Template file to use when creating notes for this period')
+                .addText(text => {
+                    text
+                        .setPlaceholder('templates/semester')
+                        .setValue(this.period.template)
+                        .onChange(async (value) => {
+                            this.period.template = value;
+                            await this.plugin.saveSettings();
+                            this.onSave();
+                        });
+                    new FileSuggest(this.app, text.inputEl, this.getTemplateFolderPath());
+                });
 
-                setTimeout(() => {
-                    document.addEventListener('click', closeHandler);
-                }, 0);
+            // Color (optional) with palette support
+            const colorSetting = new Setting(useGroupSettingsSection)
+                .setName('Color (optional)')
+                .setDesc('Visual indicator color for this period in the calendar');
 
-                // Close on Escape key
-                const escHandler = (e: KeyboardEvent) => {
-                    if (e.key === 'Escape') {
-                        closePopover();
-                        document.removeEventListener('keydown', escHandler);
+            const colorContainer = colorSetting.controlEl.createDiv();
+            colorContainer.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-wrap: wrap;';
+
+            const colorEnabled = colorContainer.createEl('input', { type: 'checkbox' });
+            colorEnabled.checked = !!this.period.color;
+
+            const colorPickerWrapper = colorContainer.createDiv();
+            colorPickerWrapper.style.cssText = this.period.color ? 'display: flex; align-items: center;' : 'display: none;';
+
+            if (this.period.color) {
+                const config = this.plugin.settings.colorCategories;
+                ColorPickerRenderer.render({
+                    container: colorPickerWrapper,
+                    currentColor: this.period.color,
+                    palettes: config.colorPalettes || [],
+                    onColorChange: async (newColor) => {
+                        this.period.color = newColor;
+                        await this.plugin.saveSettings();
+                        this.onSave();
                     }
-                };
-                document.addEventListener('keydown', escHandler);
+                });
+            }
+
+            const colorLabel = colorContainer.createSpan({ text: this.period.color ? '' : 'Enable color' });
+            colorLabel.style.cssText = 'font-size: 0.9em; color: var(--text-muted);';
+
+            colorEnabled.onchange = async () => {
+                if (colorEnabled.checked) {
+                    this.period.color = '#4a90d9';  // Default color
+                } else {
+                    this.period.color = undefined;
+                }
+                await this.plugin.saveSettings();
+                this.onSave();
+                this.onOpen();  // Refresh to show/hide color picker
             };
+        }
+
+        // Footer with delete and close buttons
+        const footer = contentEl.createDiv();
+        footer.style.cssText = 'display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--background-modifier-border);';
+
+        const deleteBtn = footer.createEl('button', { text: 'Delete Period' });
+        deleteBtn.style.cssText = 'padding: 8px 16px; cursor: pointer; color: var(--text-error); background: transparent; border: 1px solid var(--text-error); border-radius: 4px;';
+        deleteBtn.onclick = async () => {
+            const confirmed = confirm(`Are you sure you want to delete "${this.period.name}"?`);
+            if (confirmed) {
+                await this.onDelete();
+                this.close();
+            }
+        };
+
+        const closeBtn = footer.createEl('button', { text: 'Close', cls: 'mod-cta' });
+        closeBtn.style.cssText = 'padding: 8px 16px; cursor: pointer;';
+        closeBtn.onclick = () => this.close();
+    }
+
+    updateFormatPreview(previewEl: HTMLElement): void {
+        const moment = (window as any).moment;
+        try {
+            const preview = moment().format(this.period.format || 'YYYY-[P1]');
+            previewEl.textContent = `Preview: ${preview}`;
+        } catch {
+            previewEl.textContent = 'Preview: (invalid format)';
         }
     }
 

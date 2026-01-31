@@ -12,6 +12,9 @@ export interface LinearCalendarSettings {
     cellMinWidth: number;  // Minimum width per day cell in pixels (when scrollable)
     columnAlignment: 'weekday' | 'date';  // Align columns by weekday or by date
     weekStartDay: number;  // 0 = Sunday, 1 = Monday, etc.
+    highlightedWeekdays: number[];  // Weekdays to highlight (0 = Sunday, 6 = Saturday)
+    showCellBorders: boolean;  // Show thin borders around day cells
+    showWeekSpanBorders: boolean;  // Show borders on bottom of week span cells (header-row mode)
 
     // Simplified date extraction settings
     dateExtraction: DateExtractionConfig;
@@ -25,6 +28,9 @@ export interface LinearCalendarSettings {
 
     // Quick note creation
     quickNoteCreation: QuickNoteCreationConfig;
+
+    // Periodic notes (weekly, monthly, quarterly, yearly, custom)
+    periodicNotes: PeriodicNotesSettings;
 
     // Experimental features
     experimental: ExperimentalFeatures;
@@ -132,6 +138,162 @@ export interface MultiDayEntry {
     year: number;
 }
 
+// Periodic Notes Types
+export interface PeriodicNoteConfig {
+    enabled: boolean;
+    folder: string;
+    format: string;
+    template: string;
+    color?: string;  // Optional color for visual indicator in calendar
+}
+
+export interface CustomPeriod {
+    id: string;           // Unique identifier
+    name: string;         // Display name (e.g., "Semester 1", "Winter")
+    format: string;       // Filename format (e.g., "YYYY-[S]1", "YYYY-[Winter]")
+    months: number[];     // Array of months (1-12), must be consecutive (can wrap year)
+    yearBasis: 'start' | 'end' | 'majority';  // Which year to use when spanning year boundary
+    useGroupSettings: boolean;  // If true, use group's folder/template/color; if false, use custom
+    folder: string;       // Custom folder (only used if useGroupSettings is false)
+    template: string;     // Custom template (only used if useGroupSettings is false)
+    color?: string;       // Custom color (only used if useGroupSettings is false)
+}
+
+export interface CustomPeriodGroup {
+    id: string;           // Unique identifier
+    name: string;         // Group name (e.g., "Semesters", "Seasons", "Trimesters")
+    enabled: boolean;     // Toggle for showing this group's column
+    folder: string;       // Default folder for all periods in group
+    template: string;     // Default template for all periods in group
+    color?: string;       // Default color for all periods in group
+    periods: CustomPeriod[];  // Periods within this group (months cannot overlap)
+}
+
+export type WeekNumberDisplay = 'none' | 'above-day' | 'extra-column' | 'header-row';
+
+export type WeekBorderColorMode = 'neutral' | 'accent' | 'custom';
+
+export interface WeekBorderColorConfig {
+    mode: WeekBorderColorMode;
+    customColor?: string;  // Used when mode is 'custom'
+}
+
+export interface PeriodicNotesSettings {
+    usePeriodicNotesPlugin: boolean;  // Use Periodic Notes plugin settings if available
+    templateFolderSource: 'obsidian' | 'custom';  // Where to get templates from
+    templateCustomFolder: string;  // Custom template folder path
+    weekStart: 0 | 1 | 2 | 3 | 4 | 5 | 6;  // 0=Sunday, 1=Monday, etc.
+    weekNumberDisplay: WeekNumberDisplay;  // How to display week numbers in the calendar
+    weekBorderColor: WeekBorderColorConfig;  // Border color between weeks in header-row mode
+    showWeekNumbers: boolean;
+    showQuarters: boolean;
+    hasSeenWelcomeBanner: boolean;  // Track if user has dismissed periodic notes welcome banner
+    weekly: PeriodicNoteConfig;
+    monthly: PeriodicNoteConfig;
+    quarterly: PeriodicNoteConfig;
+    yearly: PeriodicNoteConfig;
+    customPeriodGroups: CustomPeriodGroup[];  // Groups of custom periods, each gets own column
+}
+
+export const DEFAULT_PERIODIC_NOTES: PeriodicNotesSettings = {
+    usePeriodicNotesPlugin: true,
+    templateFolderSource: 'obsidian',  // Use Obsidian's template folder by default
+    templateCustomFolder: '',
+    weekStart: 1,  // Monday
+    weekNumberDisplay: 'header-row',  // Default to row above month with week spans
+    weekBorderColor: {
+        mode: 'neutral',  // Neutral border color by default
+    },
+    showWeekNumbers: true,
+    showQuarters: false,
+    hasSeenWelcomeBanner: false,
+    weekly: {
+        enabled: false,
+        folder: '',
+        format: 'gggg-[W]ww',
+        template: ''
+    },
+    monthly: {
+        enabled: false,
+        folder: '',
+        format: 'YYYY-MM',
+        template: ''
+    },
+    quarterly: {
+        enabled: false,
+        folder: '',
+        format: 'YYYY-[Q]Q',
+        template: ''
+    },
+    yearly: {
+        enabled: false,
+        folder: '',
+        format: 'YYYY',
+        template: ''
+    },
+    customPeriodGroups: [
+        {
+            id: 'quinter-example',
+            name: 'Quinter',
+            enabled: false,
+            folder: '',
+            template: '',
+            periods: [
+                {
+                    id: 'q1',
+                    name: 'Q1',
+                    format: 'YYYY-[Q1]',
+                    months: [1, 2, 3],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                },
+                {
+                    id: 'q2',
+                    name: 'Q2',
+                    format: 'YYYY-[Q2]',
+                    months: [4, 5],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                },
+                {
+                    id: 'q3',
+                    name: 'Q3',
+                    format: 'YYYY-[Q3]',
+                    months: [6, 7, 8],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                },
+                {
+                    id: 'q4',
+                    name: 'Q4',
+                    format: 'YYYY-[Q4]',
+                    months: [9, 10],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                },
+                {
+                    id: 'q5',
+                    name: 'Q5',
+                    format: 'YYYY-[Q5]',
+                    months: [11, 12],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                }
+            ]
+        }
+    ]
+};
+
 export const DEFAULT_SETTINGS: LinearCalendarSettings = {
     currentYear: new Date().getFullYear(),
     dailyNoteFormat: 'YYYY-MM-DD',
@@ -144,6 +306,9 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
     cellMinWidth: 30,  // Minimum 30px per cell when scrollable
     columnAlignment: 'weekday',  // Align by weekday by default
     weekStartDay: 0,  // Sunday by default
+    highlightedWeekdays: [0, 6],  // Saturday and Sunday by default
+    showCellBorders: true,  // Show cell borders by default
+    showWeekSpanBorders: false,  // No week span borders by default
 
     dateExtraction: {
         startFromProperties: ['date'],
@@ -191,6 +356,8 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
             { key: 'category', value: '' }
         ]
     },
+
+    periodicNotes: { ...DEFAULT_PERIODIC_NOTES },
 
     experimental: {
         multilineNotes: false,

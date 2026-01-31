@@ -1,6 +1,6 @@
 import { ItemView, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 import LinearCalendarPlugin from './main';
-import { VIEW_TYPE_CALENDAR, NoteInfo, MultiDayEntry, Condition, ColorCategory } from './types';
+import { VIEW_TYPE_CALENDAR, NoteInfo, MultiDayEntry, Condition, ColorCategory, CustomPeriod, CustomPeriodGroup } from './types';
 import { CategoryEditModal } from './SettingsTab';
 
 export class LinearCalendarView extends ItemView {
@@ -94,7 +94,24 @@ export class LinearCalendarView extends ItemView {
         // Center section with year navigation
         const centerSection = header.createDiv({ cls: 'header-center' });
         const prevBtn = centerSection.createEl('button', { text: '←', cls: 'year-nav-btn' });
-        centerSection.createEl('span', { text: `${year}`, cls: 'year-title' });
+
+        // Make year title clickable if yearly notes enabled
+        const yearlyEnabled = this.plugin.settings.periodicNotes.yearly.enabled;
+        if (yearlyEnabled) {
+            const yearLink = centerSection.createEl('a', { text: `${year}`, cls: 'year-title year-title-link' });
+            // Apply yearly color if set
+            const yearlyColor = this.plugin.settings.periodicNotes.yearly.color;
+            if (yearlyColor) {
+                yearLink.style.color = yearlyColor;
+            }
+            yearLink.onclick = async (e) => {
+                e.preventDefault();
+                await this.openOrCreateYearlyNote(year);
+            };
+        } else {
+            centerSection.createEl('span', { text: `${year}`, cls: 'year-title' });
+        }
+
         const nextBtn = centerSection.createEl('button', { text: '→', cls: 'year-nav-btn' });
 
         // Right section with Add Note button
@@ -138,6 +155,11 @@ export class LinearCalendarView extends ItemView {
             this.renderWelcomeBanner(container);
         }
 
+        // Show periodic notes welcome banner if not yet dismissed
+        if (!this.plugin.settings.periodicNotes.hasSeenWelcomeBanner) {
+            this.renderPeriodicNotesWelcomeBanner(container);
+        }
+
         // Render category index row (if enabled) - between header and calendar
         // Show welcome message if no categories, or chips if categories exist
         if (this.plugin.settings.colorCategories.enabled &&
@@ -172,6 +194,16 @@ export class LinearCalendarView extends ItemView {
         }
 
         const calendarTable = calendarWrapper.createEl('table', { cls: 'linear-calendar' });
+
+        // Add cell borders class if enabled
+        if (this.plugin.settings.showCellBorders) {
+            calendarTable.addClass('show-cell-borders');
+        }
+
+        // Add week span borders class if enabled
+        if (this.plugin.settings.showWeekSpanBorders) {
+            calendarTable.addClass('show-week-span-borders');
+        }
 
         // Set minimum cell width for scrollable mode
         if (this.plugin.settings.calendarWidth === 'scrollable') {
@@ -216,6 +248,27 @@ export class LinearCalendarView extends ItemView {
 
         const thead = calendarTable.createEl('thead');
         const headerRow = thead.createEl('tr');
+
+        // Get enabled custom period groups - each gets its own column (leftmost)
+        const enabledGroups = this.plugin.settings.periodicNotes.customPeriodGroups.filter(g => g.enabled);
+        for (const group of enabledGroups) {
+            const th = headerRow.createEl('th', { text: group.name, cls: 'custom-period-header-cell' });
+            // Measure text width and set column width dynamically
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.font = '0.8em var(--font-interface)';
+                const textWidth = ctx.measureText(group.name).width;
+                th.style.width = `${Math.ceil(textWidth) + 16}px`;  // Add padding
+            }
+        }
+
+        // Add quarter column header if quarterly notes enabled (left of month)
+        const showQuarterColumn = this.plugin.settings.periodicNotes.quarterly.enabled;
+        if (showQuarterColumn) {
+            headerRow.createEl('th', { text: 'Qtr', cls: 'quarter-header-cell' });
+        }
+
         headerRow.createEl('th', { cls: 'month-label-cell' });
 
         // Choose header based on alignment mode
@@ -248,10 +301,21 @@ export class LinearCalendarView extends ItemView {
         const cellsPerRow = this.plugin.settings.columnAlignment === 'date' ? 31 : maxDayCells;
 
         for (let month = 0; month < 12; month++) {
-            await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, cellsPerRow);
+            await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, cellsPerRow, showQuarterColumn, enabledGroups);
         }
 
         const footerRow = calendarTable.createEl('tfoot').createEl('tr');
+
+        // Add custom period group column footers (leftmost)
+        for (const group of enabledGroups) {
+            footerRow.createEl('td', { text: group.name, cls: 'custom-period-header-cell' });
+        }
+
+        // Add quarter column footer if enabled (left of month)
+        if (showQuarterColumn) {
+            footerRow.createEl('td', { text: 'Qtr', cls: 'quarter-header-cell' });
+        }
+
         footerRow.createEl('td', { cls: 'month-label-cell' });
 
         // Footer matches header
@@ -790,6 +854,403 @@ export class LinearCalendarView extends ItemView {
         }
     }
 
+    async openOrCreateWeeklyNote(date: Date): Promise<void> {
+        const settings = this.plugin.settings.periodicNotes;
+        const moment = (window as any).moment;
+        const targetMoment = moment(date);
+
+        // Get weekly note settings (check if using Periodic Notes plugin)
+        let folder = settings.weekly.folder;
+        let format = settings.weekly.format || 'gggg-[W]ww';
+        let template = settings.weekly.template;
+
+        // Check if we should use Periodic Notes plugin settings
+        if (settings.usePeriodicNotesPlugin) {
+            const periodicNotesPlugin = (this.app as any).plugins?.plugins?.['periodic-notes'];
+            if (periodicNotesPlugin?.settings?.weekly?.enabled) {
+                folder = periodicNotesPlugin.settings.weekly.folder || folder;
+                format = periodicNotesPlugin.settings.weekly.format || format;
+                template = periodicNotesPlugin.settings.weekly.template || template;
+            }
+        }
+
+        // Format the filename using moment
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : '';
+
+        // Try to find existing weekly note
+        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+
+        if (existingFile instanceof TFile) {
+            await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+            // Ensure folder exists
+            if (folder) {
+                const folderExists = this.app.vault.getAbstractFileByPath(folder);
+                if (!folderExists) {
+                    await this.app.vault.createFolder(folder);
+                }
+            }
+
+            // Get template content if specified
+            let content = '';
+            if (template) {
+                const templateFile = this.app.vault.getAbstractFileByPath(template + '.md')
+                    || this.app.vault.getAbstractFileByPath(template);
+                if (templateFile instanceof TFile) {
+                    content = await this.app.vault.read(templateFile);
+                    content = this.processWeeklyTemplateVariables(content, date, filename);
+                }
+            }
+
+            const fullPath = `${folderPath}${filename}.md`;
+            const newFile = await this.app.vault.create(fullPath, content);
+            await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+    }
+
+    processWeeklyTemplateVariables(content: string, date: Date, filename: string): string {
+        const moment = (window as any).moment;
+        const targetMoment = moment(date);
+        const format = this.plugin.settings.periodicNotes.weekly.format || 'gggg-[W]ww';
+
+        // Process {{date}} and {{date:FORMAT}} - first day of week
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.startOf('week').format(customFormat || format);
+        });
+
+        // Process {{title}}
+        content = content.replace(/\{\{title\}\}/g, filename);
+
+        // Process {{week}}
+        content = content.replace(/\{\{week\}\}/g, String(targetMoment.week()));
+
+        // Process {{year}}
+        content = content.replace(/\{\{year\}\}/g, String(targetMoment.weekYear()));
+
+        // Process day-of-week variables {{sunday}}, {{monday}}, etc.
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        days.forEach((dayName, dayIndex) => {
+            const regex = new RegExp(`\\{\\{${dayName}(?::([^}]+))?\\}\\}`, 'g');
+            content = content.replace(regex, (_, customFormat) => {
+                return targetMoment.clone().startOf('week').add(dayIndex, 'days').format(customFormat || 'YYYY-MM-DD');
+            });
+        });
+
+        return content;
+    }
+
+    async openOrCreateQuarterlyNote(date: Date): Promise<void> {
+        const settings = this.plugin.settings.periodicNotes;
+        const moment = (window as any).moment;
+        const targetMoment = moment(date);
+
+        // Get quarterly note settings (check if using Periodic Notes plugin)
+        let folder = settings.quarterly.folder;
+        let format = settings.quarterly.format || 'YYYY-[Q]Q';
+        let template = settings.quarterly.template;
+
+        // Check if we should use Periodic Notes plugin settings
+        if (settings.usePeriodicNotesPlugin) {
+            const periodicNotesPlugin = (this.app as any).plugins?.plugins?.['periodic-notes'];
+            if (periodicNotesPlugin?.settings?.quarterly?.enabled) {
+                folder = periodicNotesPlugin.settings.quarterly.folder || folder;
+                format = periodicNotesPlugin.settings.quarterly.format || format;
+                template = periodicNotesPlugin.settings.quarterly.template || template;
+            }
+        }
+
+        // Format the filename using moment
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : '';
+
+        // Try to find existing quarterly note
+        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+
+        if (existingFile instanceof TFile) {
+            await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+            // Ensure folder exists
+            if (folder) {
+                const folderExists = this.app.vault.getAbstractFileByPath(folder);
+                if (!folderExists) {
+                    await this.app.vault.createFolder(folder);
+                }
+            }
+
+            // Get template content if specified
+            let content = '';
+            if (template) {
+                const templateFile = this.app.vault.getAbstractFileByPath(template + '.md')
+                    || this.app.vault.getAbstractFileByPath(template);
+                if (templateFile instanceof TFile) {
+                    content = await this.app.vault.read(templateFile);
+                    content = this.processQuarterlyTemplateVariables(content, date, filename);
+                }
+            }
+
+            const fullPath = `${folderPath}${filename}.md`;
+            const newFile = await this.app.vault.create(fullPath, content);
+            await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+    }
+
+    processQuarterlyTemplateVariables(content: string, date: Date, filename: string): string {
+        const moment = (window as any).moment;
+        const targetMoment = moment(date);
+        const format = this.plugin.settings.periodicNotes.quarterly.format || 'YYYY-[Q]Q';
+
+        // Process {{date}} and {{date:FORMAT}} - first day of quarter
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.startOf('quarter').format(customFormat || format);
+        });
+
+        // Process {{title}}
+        content = content.replace(/\{\{title\}\}/g, filename);
+
+        // Process {{quarter}}
+        content = content.replace(/\{\{quarter\}\}/g, String(targetMoment.quarter()));
+
+        // Process {{year}}
+        content = content.replace(/\{\{year\}\}/g, String(targetMoment.year()));
+
+        return content;
+    }
+
+    async openOrCreateMonthlyNote(date: Date): Promise<void> {
+        const settings = this.plugin.settings.periodicNotes;
+        const moment = (window as any).moment;
+        const targetMoment = moment(date);
+
+        // Get monthly note settings (check if using Periodic Notes plugin)
+        let folder = settings.monthly.folder;
+        let format = settings.monthly.format || 'YYYY-MM';
+        let template = settings.monthly.template;
+
+        // Check if we should use Periodic Notes plugin settings
+        if (settings.usePeriodicNotesPlugin) {
+            const periodicNotesPlugin = (this.app as any).plugins?.plugins?.['periodic-notes'];
+            if (periodicNotesPlugin?.settings?.monthly?.enabled) {
+                folder = periodicNotesPlugin.settings.monthly.folder || folder;
+                format = periodicNotesPlugin.settings.monthly.format || format;
+                template = periodicNotesPlugin.settings.monthly.template || template;
+            }
+        }
+
+        // Format the filename using moment
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : '';
+
+        // Try to find existing monthly note
+        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+
+        if (existingFile instanceof TFile) {
+            await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+            // Ensure folder exists
+            if (folder) {
+                const folderExists = this.app.vault.getAbstractFileByPath(folder);
+                if (!folderExists) {
+                    await this.app.vault.createFolder(folder);
+                }
+            }
+
+            // Get template content if specified
+            let content = '';
+            if (template) {
+                const templateFile = this.app.vault.getAbstractFileByPath(template + '.md')
+                    || this.app.vault.getAbstractFileByPath(template);
+                if (templateFile instanceof TFile) {
+                    content = await this.app.vault.read(templateFile);
+                    content = this.processMonthlyTemplateVariables(content, date, filename);
+                }
+            }
+
+            const fullPath = `${folderPath}${filename}.md`;
+            const newFile = await this.app.vault.create(fullPath, content);
+            await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+    }
+
+    processMonthlyTemplateVariables(content: string, date: Date, filename: string): string {
+        const moment = (window as any).moment;
+        const targetMoment = moment(date);
+        const format = this.plugin.settings.periodicNotes.monthly.format || 'YYYY-MM';
+
+        // Process {{date}} and {{date:FORMAT}} - first day of month
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.startOf('month').format(customFormat || format);
+        });
+
+        // Process {{title}}
+        content = content.replace(/\{\{title\}\}/g, filename);
+
+        // Process {{month}} and {{month:FORMAT}}
+        content = content.replace(/\{\{month(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.format(customFormat || 'MMMM');
+        });
+
+        // Process {{year}}
+        content = content.replace(/\{\{year\}\}/g, String(targetMoment.year()));
+
+        return content;
+    }
+
+    async openOrCreateYearlyNote(year: number): Promise<void> {
+        const settings = this.plugin.settings.periodicNotes;
+        const moment = (window as any).moment;
+        const targetMoment = moment({ year: year, month: 0, day: 1 });
+
+        // Get yearly note settings (check if using Periodic Notes plugin)
+        let folder = settings.yearly.folder;
+        let format = settings.yearly.format || 'YYYY';
+        let template = settings.yearly.template;
+
+        // Check if we should use Periodic Notes plugin settings
+        if (settings.usePeriodicNotesPlugin) {
+            const periodicNotesPlugin = (this.app as any).plugins?.plugins?.['periodic-notes'];
+            if (periodicNotesPlugin?.settings?.yearly?.enabled) {
+                folder = periodicNotesPlugin.settings.yearly.folder || folder;
+                format = periodicNotesPlugin.settings.yearly.format || format;
+                template = periodicNotesPlugin.settings.yearly.template || template;
+            }
+        }
+
+        // Format the filename using moment
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : '';
+
+        // Try to find existing yearly note
+        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+
+        if (existingFile instanceof TFile) {
+            await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+            // Ensure folder exists
+            if (folder) {
+                const folderExists = this.app.vault.getAbstractFileByPath(folder);
+                if (!folderExists) {
+                    await this.app.vault.createFolder(folder);
+                }
+            }
+
+            // Get template content if specified
+            let content = '';
+            if (template) {
+                const templateFile = this.app.vault.getAbstractFileByPath(template + '.md')
+                    || this.app.vault.getAbstractFileByPath(template);
+                if (templateFile instanceof TFile) {
+                    content = await this.app.vault.read(templateFile);
+                    content = this.processYearlyTemplateVariables(content, year, filename);
+                }
+            }
+
+            const fullPath = `${folderPath}${filename}.md`;
+            const newFile = await this.app.vault.create(fullPath, content);
+            await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+    }
+
+    processYearlyTemplateVariables(content: string, year: number, filename: string): string {
+        const moment = (window as any).moment;
+        const targetMoment = moment({ year: year, month: 0, day: 1 });
+        const format = this.plugin.settings.periodicNotes.yearly.format || 'YYYY';
+
+        // Process {{date}} and {{date:FORMAT}} - first day of year
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.format(customFormat || format);
+        });
+
+        // Process {{title}}
+        content = content.replace(/\{\{title\}\}/g, filename);
+
+        // Process {{year}}
+        content = content.replace(/\{\{year\}\}/g, String(year));
+
+        return content;
+    }
+
+    async openOrCreateCustomPeriodNote(period: CustomPeriod, year: number, group?: CustomPeriodGroup): Promise<void> {
+        const moment = (window as any).moment;
+
+        // Use the first month of the period to create the date
+        const firstMonth = Math.min(...period.months) - 1; // Convert to 0-indexed
+        const targetMoment = moment({ year: year, month: firstMonth, day: 1 });
+
+        // Get custom period note settings - use group settings if useGroupSettings is true
+        const useGroupDefaults = period.useGroupSettings !== false && group;
+        const folder = useGroupDefaults ? (group.folder || period.folder) : period.folder;
+        const format = period.format || `YYYY-[${period.name}]`;
+        const template = useGroupDefaults ? (group.template || period.template) : period.template;
+
+        // Format the filename using moment
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : '';
+
+        // Try to find existing custom period note
+        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+
+        if (existingFile instanceof TFile) {
+            await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+            // Ensure folder exists
+            if (folder) {
+                const folderExists = this.app.vault.getAbstractFileByPath(folder);
+                if (!folderExists) {
+                    await this.app.vault.createFolder(folder);
+                }
+            }
+
+            // Get template content if specified
+            let content = '';
+            if (template) {
+                const templateFile = this.app.vault.getAbstractFileByPath(template + '.md')
+                    || this.app.vault.getAbstractFileByPath(template);
+                if (templateFile instanceof TFile) {
+                    content = await this.app.vault.read(templateFile);
+                    content = this.processCustomPeriodTemplateVariables(content, period, year, filename);
+                }
+            }
+
+            const fullPath = `${folderPath}${filename}.md`;
+            const newFile = await this.app.vault.create(fullPath, content);
+            await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+    }
+
+    processCustomPeriodTemplateVariables(content: string, period: CustomPeriod, year: number, filename: string): string {
+        const moment = (window as any).moment;
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'];
+
+        const sortedMonths = [...period.months].sort((a, b) => a - b);
+        const firstMonth = sortedMonths[0] - 1; // 0-indexed
+        const lastMonth = sortedMonths[sortedMonths.length - 1] - 1; // 0-indexed
+
+        const targetMoment = moment({ year: year, month: firstMonth, day: 1 });
+        const format = period.format || `YYYY-[${period.name}]`;
+
+        // Process {{date}} and {{date:FORMAT}} - first day of period
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+            return targetMoment.format(customFormat || format);
+        });
+
+        // Process {{title}}
+        content = content.replace(/\{\{title\}\}/g, filename);
+
+        // Process {{period}}
+        content = content.replace(/\{\{period\}\}/g, period.name);
+
+        // Process {{year}}
+        content = content.replace(/\{\{year\}\}/g, String(year));
+
+        // Process {{startMonth}} and {{endMonth}}
+        content = content.replace(/\{\{startMonth\}\}/g, monthNames[firstMonth]);
+        content = content.replace(/\{\{endMonth\}\}/g, monthNames[lastMonth]);
+
+        return content;
+    }
+
     async getDailyNoteTemplateContent(date: Date, filename: string): Promise<string> {
         const dailyNotesPlugin = (this.app as any).internalPlugins?.plugins?.['daily-notes'];
 
@@ -950,6 +1411,70 @@ export class LinearCalendarView extends ItemView {
         };
     }
 
+    /**
+     * Render the periodic notes welcome banner with tips about weekly, monthly, quarterly notes.
+     */
+    renderPeriodicNotesWelcomeBanner(container: HTMLElement): void {
+        const banner = container.createDiv({ cls: 'periodic-notes-welcome-banner' });
+        banner.style.cssText = `
+            background: var(--background-secondary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            border: 2px solid var(--text-accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        `;
+
+        const contentWrapper = banner.createDiv();
+        contentWrapper.style.cssText = 'flex: 1;';
+
+        const title = contentWrapper.createEl('div', { text: '📅 Periodic Notes' });
+        title.style.cssText = 'font-weight: 600; font-size: 1.05em; margin-bottom: 8px;';
+
+        const message = contentWrapper.createEl('div');
+        message.style.cssText = 'color: var(--text-muted); font-size: 0.95em; line-height: 1.5;';
+        message.innerHTML = `
+            <strong>Click on month names</strong> to create or open monthly notes<br>
+            <strong>Click on week numbers</strong> (W01, W02...) to create or open weekly notes<br>
+            <strong>Click on quarter labels</strong> (Q1, Q2...) for quarterly notes<br>
+            ⚙️ <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
+        `;
+
+        const closeBtn = banner.createEl('button', { text: '×' });
+        closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        `;
+        closeBtn.setAttribute('aria-label', 'Dismiss banner');
+        closeBtn.onmouseenter = () => {
+            closeBtn.style.background = 'var(--background-modifier-hover)';
+        };
+        closeBtn.onmouseleave = () => {
+            closeBtn.style.background = 'none';
+        };
+        closeBtn.onclick = async () => {
+            this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = true;
+            await this.plugin.saveSettings();
+            banner.remove();
+        };
+    }
+
     renderCategoryIndexRow(container: HTMLElement): void {
         const config = this.plugin.settings.colorCategories;
 
@@ -1072,6 +1597,99 @@ export class LinearCalendarView extends ItemView {
         });
     }
 
+    /**
+     * Get the custom period that a given month belongs to within a specific group
+     * Returns the period and whether this month is the first month of that period in this year
+     */
+    getCustomPeriodForMonth(year: number, month: number, group: CustomPeriodGroup): { period: CustomPeriod; isFirstMonth: boolean; rowSpan: number } | null {
+        if (group.periods.length === 0) return null;
+
+        // Month is 0-indexed (0-11), but periods use 1-indexed months (1-12)
+        const monthNum = month + 1;
+
+        for (const period of group.periods) {
+            if (period.months.includes(monthNum)) {
+                // Check if this is the first month of the period that appears in this year
+                // For year-spanning periods like Winter [12,1,2], we need to determine based on yearBasis
+                const sortedMonths = [...period.months].sort((a, b) => a - b);
+
+                // Check if period wraps around year (e.g., [12,1,2])
+                const wrapsYear = sortedMonths.length > 1 &&
+                    sortedMonths[sortedMonths.length - 1] - sortedMonths[0] > 6;
+
+                let isFirstMonthInYear = false;
+                let consecutiveMonths = 0;
+
+                if (wrapsYear) {
+                    // For year-wrapping periods, split into two parts
+                    // e.g., [12,1,2] -> high months [12] and low months [1,2]
+                    const highMonths = sortedMonths.filter(m => m > 6);
+                    const lowMonths = sortedMonths.filter(m => m <= 6);
+
+                    // Determine if this month starts a new period display in this calendar year
+                    if (highMonths.includes(monthNum)) {
+                        // December part - this is the start of a new period (e.g., Winter 2025 starts in Dec 2024)
+                        isFirstMonthInYear = monthNum === Math.min(...highMonths);
+                        consecutiveMonths = highMonths.filter(m => m >= monthNum).length;
+                    } else if (lowMonths.includes(monthNum)) {
+                        // Jan/Feb part - continuation from previous year
+                        isFirstMonthInYear = monthNum === Math.min(...lowMonths);
+                        consecutiveMonths = lowMonths.filter(m => m >= monthNum).length;
+                    }
+                } else {
+                    // Non-wrapping period - simple case
+                    isFirstMonthInYear = monthNum === sortedMonths[0];
+                    consecutiveMonths = sortedMonths.filter(m => m >= monthNum).length;
+                }
+
+                return {
+                    period,
+                    isFirstMonth: isFirstMonthInYear,
+                    rowSpan: consecutiveMonths
+                };
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Calculate the year for a custom period note based on yearBasis setting
+     */
+    getCustomPeriodYear(period: CustomPeriod, calendarYear: number, month: number): number {
+        const monthNum = month + 1;
+        const sortedMonths = [...period.months].sort((a, b) => a - b);
+
+        // Check if period wraps year
+        const wrapsYear = sortedMonths.length > 1 &&
+            sortedMonths[sortedMonths.length - 1] - sortedMonths[0] > 6;
+
+        if (!wrapsYear) {
+            return calendarYear;
+        }
+
+        // For year-wrapping periods, determine the note's year based on yearBasis
+        const highMonths = sortedMonths.filter(m => m > 6);
+        const lowMonths = sortedMonths.filter(m => m <= 6);
+
+        switch (period.yearBasis) {
+            case 'start':
+                // Year of the first month (e.g., Dec 2024 -> 2024)
+                return highMonths.includes(monthNum) ? calendarYear : calendarYear;
+            case 'end':
+                // Year of the last month (e.g., Feb 2025 -> 2025)
+                return lowMonths.includes(monthNum) ? calendarYear : calendarYear + 1;
+            case 'majority':
+            default:
+                // Year where most months fall
+                if (lowMonths.length >= highMonths.length) {
+                    return lowMonths.includes(monthNum) ? calendarYear : calendarYear + 1;
+                } else {
+                    return highMonths.includes(monthNum) ? calendarYear : calendarYear;
+                }
+        }
+    }
+
     async renderMonthRow(
         tbody: HTMLTableSectionElement,
         year: number,
@@ -1079,11 +1697,265 @@ export class LinearCalendarView extends ItemView {
         monthName: string,
         notesMap: Map<string, NoteInfo[]>,
         multiDayEntries: Map<string, MultiDayEntry>,
-        maxDayCells: number
+        maxDayCells: number,
+        showQuarterColumn: boolean = false,
+        enabledGroups: CustomPeriodGroup[] = []
     ): Promise<void> {
-        const row = tbody.createEl('tr', { cls: 'month-row' });
+        const periodicSettings = this.plugin.settings.periodicNotes;
+        const weekDisplayMode = periodicSettings.weekly.enabled ? periodicSettings.weekNumberDisplay : 'none';
+        const moment = (window as any).moment;
 
-        row.createEl('td', { text: monthName, cls: 'month-label' });
+        // For 'header-row' mode: add a week numbers row above the month row
+        // Note: Custom period and quarter cells are created in the week row (first row) with doubled rowSpan
+        // to cover both the week row and month row for each month in the span
+        if (weekDisplayMode === 'header-row') {
+            // Add month-first-row class to create thicker border between months (except first month)
+            const weekRowClass = month > 0 ? 'week-header-row month-first-row' : 'week-header-row';
+            const weekRow = tbody.createEl('tr', { cls: weekRowClass });
+
+            // Add custom period cells - these go in the week row with doubled rowSpan
+            for (const group of enabledGroups) {
+                const periodInfo = this.getCustomPeriodForMonth(year, month, group);
+                if (periodInfo && periodInfo.isFirstMonth) {
+                    const { period, rowSpan } = periodInfo;
+                    const periodYear = this.getCustomPeriodYear(period, year, month);
+                    const periodCell = weekRow.createEl('td', { cls: 'custom-period-cell' });
+                    periodCell.textContent = period.name;
+                    // Double the rowSpan to cover both week row and month row for each month
+                    periodCell.rowSpan = rowSpan * 2;
+                    periodCell.style.cursor = 'pointer';
+                    const effectiveColor = (period.useGroupSettings !== false && group?.color) ? group.color : period.color;
+                    if (effectiveColor) {
+                        periodCell.style.color = effectiveColor;
+                    }
+                    periodCell.dataset.periodId = period.id;
+                    periodCell.dataset.groupId = group.id;
+                    periodCell.dataset.year = String(periodYear);
+                    periodCell.onclick = async (e) => {
+                        e.preventDefault();
+                        await this.openOrCreateCustomPeriodNote(period, periodYear, group);
+                    };
+                } else if (!periodInfo) {
+                    // Month doesn't belong to any period - create empty cell spanning both rows
+                    const emptyCell = weekRow.createEl('td', { cls: 'custom-period-cell empty' });
+                    emptyCell.rowSpan = 2;
+                }
+                // If periodInfo exists but isFirstMonth is false, the cell is covered by previous rowSpan
+            }
+
+            // Add quarter cell if enabled - in week row with doubled rowSpan
+            if (showQuarterColumn) {
+                const isFirstMonthOfQuarter = month % 3 === 0;
+                if (isFirstMonthOfQuarter) {
+                    const quarterNum = Math.floor(month / 3) + 1;
+                    const quarterCell = weekRow.createEl('td', { cls: 'quarter-cell' });
+                    quarterCell.textContent = `Q${quarterNum}`;
+                    // 3 months × 2 rows each = 6 rows
+                    quarterCell.rowSpan = 6;
+                    quarterCell.style.cursor = 'pointer';
+                    // Apply quarterly color if set
+                    const quarterlyColor = periodicSettings.quarterly.color;
+                    if (quarterlyColor) {
+                        quarterCell.style.color = quarterlyColor;
+                    }
+                    quarterCell.onclick = async (e) => {
+                        e.preventDefault();
+                        const quarterDate = new Date(year, month, 1);
+                        await this.openOrCreateQuarterlyNote(quarterDate);
+                    };
+                }
+                // Non-first months of quarter: cell is covered by rowSpan from first month
+            }
+
+            weekRow.createEl('td', { cls: 'month-label empty' }); // Empty cell for month label column
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            const weekStartDay = this.plugin.settings.weekStartDay;
+
+            // Calculate column offset for alignment
+            const useWeekdayAlignment = this.plugin.settings.columnAlignment === 'weekday';
+            let colOffset = 0;
+            if (useWeekdayAlignment) {
+                colOffset = (firstDay.getDay() - weekStartDay + 7) % 7;
+            }
+
+            // Add empty cells for alignment offset
+            if (colOffset > 0) {
+                const emptyCell = weekRow.createEl('td', { cls: 'week-header-cell empty' });
+                emptyCell.colSpan = colOffset;
+            }
+
+            // Track total cells added for alignment
+            let totalCellsUsed = colOffset;
+
+            // Calculate week spans
+            let currentDay = 1;
+            let isFirstWeek = true;
+            while (currentDay <= daysInMonth) {
+                const currentDate = new Date(year, month, currentDay);
+
+                // Get the actual start of this week to calculate the correct week number
+                const currentDayOfWeek = currentDate.getDay();
+                const daysFromWeekStart = (currentDayOfWeek - weekStartDay + 7) % 7;
+                const weekStartDate = new Date(year, month, currentDay - daysFromWeekStart);
+                const weekNumber = moment(weekStartDate).week();
+
+                // Find how many days until end of week or end of month
+                let daysInThisWeek = 0;
+                let tempDay = currentDay;
+                while (tempDay <= daysInMonth) {
+                    const tempDate = new Date(year, month, tempDay);
+                    const tempDayOfWeek = tempDate.getDay();
+                    daysInThisWeek++;
+                    // Stop if we reach the last day of the week (day before week start)
+                    if (tempDayOfWeek === (weekStartDay + 6) % 7) break;
+                    tempDay++;
+                }
+
+                const weekCell = weekRow.createEl('td', { cls: 'week-header-cell' });
+                weekCell.colSpan = daysInThisWeek;
+                totalCellsUsed += daysInThisWeek;
+
+                // Add left border for visual divider (except first week)
+                if (!isFirstWeek) {
+                    weekCell.addClass('week-divider');
+                    // Apply week border color based on settings
+                    const borderConfig = periodicSettings.weekBorderColor;
+                    let borderColor = 'var(--background-modifier-border)';
+                    if (borderConfig.mode === 'accent') {
+                        borderColor = 'var(--interactive-accent)';
+                    } else if (borderConfig.mode === 'custom' && borderConfig.customColor) {
+                        borderColor = borderConfig.customColor;
+                    }
+                    weekCell.style.borderLeft = `1px solid ${borderColor}`;
+                }
+
+                const weekLink = weekCell.createEl('a', {
+                    text: `W${String(weekNumber).padStart(2, '0')}`,
+                    cls: 'week-header-link'
+                });
+                weekLink.dataset.date = currentDate.toISOString();
+
+                // Apply weekly color if set
+                const weeklyColor = periodicSettings.weekly.color;
+                if (weeklyColor) {
+                    weekLink.style.color = weeklyColor;
+                }
+
+                weekLink.onclick = async (e) => {
+                    e.preventDefault();
+                    await this.openOrCreateWeeklyNote(currentDate);
+                };
+
+                currentDay += daysInThisWeek;
+                isFirstWeek = false;
+            }
+
+            // Add remaining empty cells to match maxDayCells
+            const remainingCells = maxDayCells - totalCellsUsed;
+            if (remainingCells > 0) {
+                const emptyCell = weekRow.createEl('td', { cls: 'week-header-cell empty' });
+                emptyCell.colSpan = remainingCells;
+            }
+
+            // Add empty cell for right month label column
+            weekRow.createEl('td', { cls: 'month-label-right empty' });
+        }
+
+        // Add month-first-row class to create thicker border between months (except first month)
+        // Only add to month row when weekDisplayMode is not 'header-row' (in that case, week row has the class)
+        const monthRowClass = (month > 0 && weekDisplayMode !== 'header-row') ? 'month-row month-first-row' : 'month-row';
+        const row = tbody.createEl('tr', { cls: monthRowClass });
+
+        // Add custom period cells for each enabled group (leftmost columns)
+        // Skip if weekDisplayMode is 'header-row' - cells are created in the week row with doubled rowSpan
+        if (weekDisplayMode !== 'header-row') {
+            for (const group of enabledGroups) {
+                const periodInfo = this.getCustomPeriodForMonth(year, month, group);
+                if (periodInfo && periodInfo.isFirstMonth) {
+                    const { period, rowSpan } = periodInfo;
+                    const periodYear = this.getCustomPeriodYear(period, year, month);
+                    const periodCell = row.createEl('td', { cls: 'custom-period-cell' });
+
+                    // Show period name (user-defined display name)
+                    periodCell.textContent = period.name;
+
+                    periodCell.rowSpan = rowSpan;
+                    periodCell.style.cursor = 'pointer';
+                    // Use effective color - period's own color or group's color if using group settings
+                    const effectiveColor = (period.useGroupSettings !== false && group?.color) ? group.color : period.color;
+                    if (effectiveColor) {
+                        periodCell.style.color = effectiveColor;
+                    }
+                    periodCell.dataset.periodId = period.id;
+                    periodCell.dataset.groupId = group.id;
+                    periodCell.dataset.year = String(periodYear);
+                    periodCell.onclick = async (e) => {
+                        e.preventDefault();
+                        await this.openOrCreateCustomPeriodNote(period, periodYear, group);
+                    };
+                } else if (!periodInfo) {
+                    // Month doesn't belong to any period in this group - add empty cell
+                    row.createEl('td', { cls: 'custom-period-cell empty' });
+                }
+                // If periodInfo exists but isFirstMonth is false, the cell is covered by rowSpan from previous month
+            }
+        }
+
+        // Add quarter cell (left of month) for first month of each quarter (rowSpan=3)
+        // Skip if weekDisplayMode is 'header-row' - cells are created in the week row with doubled rowSpan
+        if (showQuarterColumn && weekDisplayMode !== 'header-row') {
+            const isFirstMonthOfQuarter = month % 3 === 0;
+            if (isFirstMonthOfQuarter) {
+                const quarterNum = Math.floor(month / 3) + 1;
+                const quarterCell = row.createEl('td', {
+                    text: `Q${quarterNum}`,
+                    cls: 'quarter-cell'
+                });
+                quarterCell.rowSpan = 3;
+                quarterCell.style.cursor = 'pointer';
+                quarterCell.dataset.quarter = String(quarterNum);
+                quarterCell.dataset.year = String(year);
+                // Apply quarterly color if set
+                const quarterlyColor = periodicSettings.quarterly.color;
+                if (quarterlyColor) {
+                    quarterCell.style.color = quarterlyColor;
+                }
+                quarterCell.onclick = async (e) => {
+                    e.preventDefault();
+                    // Create date for first day of quarter
+                    const quarterStartMonth = (quarterNum - 1) * 3;
+                    const quarterDate = new Date(year, quarterStartMonth, 1);
+                    await this.openOrCreateQuarterlyNote(quarterDate);
+                };
+            }
+            // For other months in the quarter, no cell needed (covered by rowSpan)
+        }
+
+        // Create month label cell - make clickable if monthly notes enabled
+        const monthLabelCell = row.createEl('td', { cls: 'month-label' });
+        const monthlyEnabled = this.plugin.settings.periodicNotes.monthly.enabled;
+
+        if (monthlyEnabled) {
+            const monthLink = monthLabelCell.createEl('a', {
+                text: monthName,
+                cls: 'month-label-link'
+            });
+            // Apply monthly color if set
+            const monthlyColor = periodicSettings.monthly.color;
+            if (monthlyColor) {
+                monthLink.style.color = monthlyColor;
+            }
+            monthLink.onclick = async (e) => {
+                e.preventDefault();
+                const monthDate = new Date(year, month, 1);
+                await this.openOrCreateMonthlyNote(monthDate);
+            };
+        } else {
+            monthLabelCell.textContent = monthName;
+        }
 
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
@@ -1152,7 +2024,47 @@ export class LinearCalendarView extends ItemView {
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
             const dateKey = this.dateToKey(date);
+            const dayOfWeek = date.getDay();
+            const isWeekStart = dayOfWeek === this.plugin.settings.weekStartDay || day === 1;
+            const moment = (window as any).moment;
+            const weekNumber = moment(date).week();
+
             const dayCell = row.createEl('td', { cls: 'day-cell' });
+
+            // Add highlighted class for weekends or other highlighted weekdays
+            const highlightedWeekdays = this.plugin.settings.highlightedWeekdays || [0, 6];
+            if (highlightedWeekdays.includes(dayOfWeek)) {
+                dayCell.addClass('day-cell-highlighted');
+            }
+
+            // For 'extra-column' mode: add border and week number to week start cells
+            if (weekDisplayMode === 'extra-column' && isWeekStart && day > 1) {
+                dayCell.addClass('week-start-cell');
+                const weekIndicator = dayCell.createEl('a', {
+                    text: `W${String(weekNumber).padStart(2, '0')}`,
+                    cls: 'week-divider-label'
+                });
+                weekIndicator.dataset.date = date.toISOString();
+                weekIndicator.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    await this.openOrCreateWeeklyNote(date);
+                };
+            }
+
+            // For 'header-row' mode: add visual divider at week boundaries
+            if (weekDisplayMode === 'header-row' && isWeekStart && day > 1) {
+                dayCell.addClass('week-boundary');
+                // Apply week border color based on settings
+                const borderConfig = periodicSettings.weekBorderColor;
+                let borderColor = 'var(--background-modifier-border)';
+                if (borderConfig.mode === 'accent') {
+                    borderColor = 'var(--interactive-accent)';
+                } else if (borderConfig.mode === 'custom' && borderConfig.customColor) {
+                    borderColor = borderConfig.customColor;
+                }
+                dayCell.style.borderLeft = `1px solid ${borderColor}`;
+            }
 
             const dayIndex = columnOffset + day - 1;
             const barsAbove = occupiedRows.filter(o => o.start <= dayIndex && o.end > dayIndex).length;
@@ -1161,6 +2073,21 @@ export class LinearCalendarView extends ItemView {
             }
 
             dayCells.push(dayCell);
+
+            // For 'above-day' mode: add week indicator badge only on actual week starts (not day 1 if mid-week)
+            const isActualWeekStart = dayOfWeek === this.plugin.settings.weekStartDay;
+            if (weekDisplayMode === 'above-day' && isActualWeekStart) {
+                const weekIndicator = dayCell.createEl('a', {
+                    text: `W${String(weekNumber).padStart(2, '0')}`,
+                    cls: 'week-indicator'
+                });
+                weekIndicator.dataset.date = date.toISOString();
+                weekIndicator.onclick = async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    await this.openOrCreateWeeklyNote(date);
+                };
+            }
 
             const dayNumber = dayCell.createEl('a', {
                 text: String(day).padStart(2, '0'),
@@ -1368,7 +2295,27 @@ export class LinearCalendarView extends ItemView {
             }
         });
 
-        row.createEl('td', { text: monthName, cls: 'month-label-right' });
+        // Create right month label cell - make clickable if monthly notes enabled
+        const monthLabelRightCell = row.createEl('td', { cls: 'month-label-right' });
+
+        if (monthlyEnabled) {
+            const monthLinkRight = monthLabelRightCell.createEl('a', {
+                text: monthName,
+                cls: 'month-label-link'
+            });
+            // Apply monthly color if set
+            const monthlyColor = periodicSettings.monthly.color;
+            if (monthlyColor) {
+                monthLinkRight.style.color = monthlyColor;
+            }
+            monthLinkRight.onclick = async (e) => {
+                e.preventDefault();
+                const monthDate = new Date(year, month, 1);
+                await this.openOrCreateMonthlyNote(monthDate);
+            };
+        } else {
+            monthLabelRightCell.textContent = monthName;
+        }
     }
 
     async onClose(): Promise<void> {

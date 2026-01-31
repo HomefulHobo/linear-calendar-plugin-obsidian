@@ -11,8 +11,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 15px;
-    background: transparent;
+    padding: 8px 15px;
+    background: var(--background-secondary);
     border-bottom: 1px solid var(--background-modifier-border);
     flex-shrink: 0;
     z-index: 100;
@@ -113,40 +113,16 @@
     table-layout: fixed;
 }
 
-/* ============================================
-   BORDER SYSTEM
-   All column borders: 1px
-   Week borders: 1px
-   Days: none (unless showCellBorders enabled)
-   ============================================ */
-
-/* Optional cell borders (toggled via settings) */
-.show-cell-borders .day-cell {
-    border: 0.5px solid var(--background-modifier-border);
-}
-
-/* Optional week span borders (toggled via settings, separate from day cell borders) */
-.show-week-span-borders .week-header-cell {
-    border-bottom: 0.5px solid var(--background-modifier-border);
-}
-
 .weekday-header {
-    padding: 4px 2px;
+    padding: 3px 2px;
     text-align: center;
-    font-weight: 600;
-    font-size: 0.7em;
+    font-weight: bold;
+    font-size: 0.75em;
     color: var(--text-muted);
-    border: none;
-    border-bottom: 1px solid var(--background-modifier-border);
-    background: transparent;
+    border: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
     width: calc((100% - 70px) / 37);
     min-width: 0;
-}
-
-/* Footer row - border on top, no border on bottom */
-tfoot td {
-    border-top: 1px solid var(--background-modifier-border) !important;
-    border-bottom: none !important;
 }
 
 .month-label-cell,
@@ -154,65 +130,52 @@ tfoot td {
     width: 35px;
     min-width: 35px;
     max-width: 35px;
-    background: transparent;
-    border: none;
-}
-
-.month-label-cell {
-    border-right: 1px solid var(--background-modifier-border);
-    border-bottom: 1px solid var(--background-modifier-border);
-}
-
-.month-label-cell-right {
-    border-left: 1px solid var(--background-modifier-border);
-    border-bottom: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
 }
 
 .month-label {
-    font-weight: 600;
+    font-weight: bold;
     text-align: center;
     padding: 8px 4px;
-    background: transparent;
-    border-right: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
     width: 35px;
     min-width: 35px;
     max-width: 35px;
-    font-size: 0.85em;
+    font-size: 0.9em;
     vertical-align: middle;
-    color: var(--text-muted);
 }
 
 .month-label-right {
-    font-weight: 600;
+    font-weight: bold;
     text-align: center;
     padding: 8px 4px;
-    background: transparent;
-    border-left: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
     width: 35px;
     min-width: 35px;
     max-width: 35px;
-    font-size: 0.85em;
+    font-size: 0.9em;
     vertical-align: middle;
     position: relative;
-    color: var(--text-muted);
 }
 
 .month-row {
     height: clamp(50px, 8vh, 80px);
 }
 
-/* MONTH BORDERS */
+/* Thicker border between months */
 .month-row.month-first-row td {
-    border-top: 1px solid var(--background-modifier-border);
+    border-top: 3px solid var(--background-modifier-border);
 }
 
 .week-header-row.month-first-row td {
-    border-top: 1px solid var(--background-modifier-border);
+    border-top: 3px solid var(--background-modifier-border);
 }
 
-/* DAY CELLS - No borders (clean look) */
 .day-cell {
-    border: none;
+    border: 1px solid var(--background-modifier-border);
     padding: 3px;
     padding-top: 18px;
     vertical-align: top;
@@ -236,14 +199,12 @@ tfoot td {
 }
 
 .day-cell.day-cell-highlighted .day-number {
-    color: var(--text-faint);
+    color: var(--text-muted);
 }
 
-/* Today cell - accent highlight */
 .day-cell.today {
     background: var(--interactive-accent);
-    border: none;
-    box-shadow: inset 0 0 0 2px var(--interactive-accent-hover);
+    border: 2px solid var(--interactive-accent-hover);
 }
 
 .day-cell.today .day-number {
@@ -893,29 +854,28 @@ select.dropdown {
 /* 'above-day' mode - Badge below day number on week start */
 .week-indicator {
     display: block;
-    font-size: 0.55em;
-    color: var(--text-faint);
-    background: var(--background-secondary);
-    padding: 1px 3px;
-    border-radius: 2px;
+    font-size: 0.6em;
+    color: var(--text-accent);
+    background: var(--background-modifier-hover);
+    padding: 1px 4px;
+    border-radius: 3px;
     margin-bottom: 2px;
     cursor: pointer;
     text-decoration: none;
     text-align: center;
-    font-weight: 500;
+    font-weight: 600;
     transition: background 0.15s, color 0.15s;
 }
 
 .week-indicator:hover {
-    background: var(--background-modifier-hover);
-    color: var(--text-muted);
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
 }
 
-/* 'extra-column' mode - Divider before first day of week */
-/* WEEK BORDERS - Subtle (1px) */
+/* 'extra-column' mode - Divider before first day of week (default: overlapping label) */
 .day-cell.week-start-cell {
     position: relative;
-    border-left: 1px solid var(--background-modifier-border) !important;
+    border-left: 4px solid var(--background-modifier-border);
 }
 
 .week-divider-label {
@@ -923,15 +883,15 @@ select.dropdown {
     left: -2px;
     top: 50%;
     transform: translate(-50%, -50%);
-    font-size: 0.55em;
-    color: var(--text-faint);
-    background: var(--background-primary);
+    font-size: 0.6em;
+    color: var(--text-accent);
+    background: var(--background-secondary);
     border: 1px solid var(--background-modifier-border);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    padding: 2px 4px;
-    border-radius: 2px;
+    padding: 3px 5px;
+    border-radius: 3px;
     transition: background 0.15s, color 0.15s;
     z-index: 5;
     white-space: nowrap;
@@ -939,44 +899,46 @@ select.dropdown {
 
 .week-divider-label:hover {
     background: var(--background-modifier-hover);
-    color: var(--text-muted);
+    color: var(--interactive-accent);
 }
 
 /* 'header-row' mode - Row above month with week spans */
 .week-header-row {
-    height: 22px;
-    background: transparent;
+    height: 20px;
+    background: var(--background-secondary);
+}
+
+.week-header-row td {
+    border-bottom: 1px solid var(--background-modifier-border);
 }
 
 .week-header-cell {
     text-align: center;
     vertical-align: middle;
     padding: 2px 0 !important;
-    background: transparent;
+    background: var(--background-secondary);
 }
 
 .week-header-cell.empty {
-    background: var(--background-secondary);
-    opacity: 0.3;
+    background: var(--background-primary);
 }
 
-/* WEEK BORDERS - Subtle (1px) */
 .week-header-cell.week-divider {
-    border-left: 1px solid var(--background-modifier-border);
+    border-left: 2px solid var(--text-accent);
 }
 
 /* Week boundary divider on day cells (for header-row mode) */
 .day-cell.week-boundary {
-    border-left: 1px solid var(--background-modifier-border);
+    border-left: 2px solid var(--text-accent);
 }
 
 .week-header-link {
-    font-size: 0.65em;
-    color: var(--text-muted);
+    font-size: 0.7em;
+    color: var(--text-accent);
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    padding: 2px 4px;
+    padding: 2px 6px;
     border-radius: 3px;
     transition: background 0.15s, color 0.15s;
     display: inline-block;
@@ -987,50 +949,47 @@ select.dropdown {
     color: var(--text-on-accent);
 }
 
-/* QUARTER COLUMN */
+/* Quarter column styles */
 .quarter-header-cell {
-    width: 28px;
-    min-width: 28px;
+    width: 30px;
+    min-width: 30px;
     text-align: center;
-    font-size: 0.75em;
+    font-size: 0.8em;
     color: var(--text-muted);
-    background: transparent;
-    border-right: 1px solid var(--background-modifier-border);
-    border-bottom: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
+    border: 2px solid var(--background-modifier-border);
 }
 
 .quarter-cell {
-    width: 28px;
-    min-width: 28px;
+    width: 30px;
+    min-width: 30px;
     text-align: center;
     vertical-align: middle;
-    font-size: 0.8em;
+    font-size: 0.85em;
     font-weight: 600;
-    color: var(--text-muted);
-    background: transparent;
-    border-right: 1px solid var(--background-modifier-border);
+    color: var(--text-accent);
+    background: var(--background-secondary);
+    border: 2px solid var(--background-modifier-border);
     transition: background 0.15s, color 0.15s;
-    cursor: pointer;
 }
 
 .quarter-cell:hover {
-    background: var(--background-modifier-hover);
-    color: var(--text-normal);
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
 }
 
 .quarter-cell.empty {
-    background: transparent;
-    border-right: 1px solid var(--background-modifier-border);
+    background: var(--background-primary);
+    border: 2px solid var(--background-modifier-border);
 }
 
-/* CUSTOM PERIOD COLUMN */
+/* Custom period column styles */
 .custom-period-header-cell {
     text-align: center;
-    font-size: 0.75em;
+    font-size: 0.8em;
     color: var(--text-muted);
-    background: transparent;
-    border-right: 1px solid var(--background-modifier-border);
-    border-bottom: 1px solid var(--background-modifier-border);
+    background: var(--background-secondary);
+    border: 2px solid var(--background-modifier-border);
     padding: 4px 6px;
     white-space: nowrap;
 }
@@ -1038,30 +997,29 @@ select.dropdown {
 .custom-period-cell {
     text-align: center;
     vertical-align: middle;
-    font-size: 0.7em;
+    font-size: 0.75em;
     font-weight: 600;
-    color: var(--text-muted);
-    background: transparent;
-    border-right: 1px solid var(--background-modifier-border);
+    color: var(--text-accent);
+    background: var(--background-secondary);
+    border: 2px solid var(--background-modifier-border);
     transition: background 0.15s, color 0.15s;
     padding: 4px 6px;
     white-space: nowrap;
-    cursor: pointer;
 }
 
 .custom-period-cell:hover {
-    background: var(--background-modifier-hover);
-    color: var(--text-normal);
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
 }
 
 .custom-period-cell.empty {
-    background: transparent;
-    border-right: 1px solid var(--background-modifier-border);
+    background: var(--background-primary);
+    border: 2px solid var(--background-modifier-border);
 }
 
 /* Month label link styles */
 .month-label-link {
-    color: var(--text-muted);
+    color: inherit;
     text-decoration: none;
     cursor: pointer;
     padding: 2px 4px;
@@ -1071,8 +1029,8 @@ select.dropdown {
 }
 
 .month-label-link:hover {
-    background: var(--background-modifier-hover);
-    color: var(--text-normal);
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
 }
 
 /* Year title link styles */
@@ -1086,6 +1044,6 @@ select.dropdown {
 }
 
 .year-title-link:hover {
-    background: var(--background-modifier-hover);
-    color: var(--text-normal);
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
 }

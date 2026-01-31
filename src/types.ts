@@ -13,6 +13,8 @@ export interface LinearCalendarSettings {
     columnAlignment: 'weekday' | 'date';  // Align columns by weekday or by date
     weekStartDay: number;  // 0 = Sunday, 1 = Monday, etc.
     highlightedWeekdays: number[];  // Weekdays to highlight (0 = Sunday, 6 = Saturday)
+    showCellBorders: boolean;  // Show thin borders around day cells
+    showWeekSpanBorders: boolean;  // Show borders on bottom of week span cells (header-row mode)
 
     // Simplified date extraction settings
     dateExtraction: DateExtractionConfig;
@@ -185,6 +187,7 @@ export interface PeriodicNotesSettings {
     weekBorderColor: WeekBorderColorConfig;  // Border color between weeks in header-row mode
     showWeekNumbers: boolean;
     showQuarters: boolean;
+    hasSeenWelcomeBanner: boolean;  // Track if user has dismissed periodic notes welcome banner
     weekly: PeriodicNoteConfig;
     monthly: PeriodicNoteConfig;
     quarterly: PeriodicNoteConfig;
@@ -203,6 +206,7 @@ export const DEFAULT_PERIODIC_NOTES: PeriodicNotesSettings = {
     },
     showWeekNumbers: true,
     showQuarters: false,
+    hasSeenWelcomeBanner: false,
     weekly: {
         enabled: false,
         folder: '',
@@ -227,7 +231,67 @@ export const DEFAULT_PERIODIC_NOTES: PeriodicNotesSettings = {
         format: 'YYYY',
         template: ''
     },
-    customPeriodGroups: []
+    customPeriodGroups: [
+        {
+            id: 'quinter-example',
+            name: 'Quinter',
+            enabled: false,
+            folder: '',
+            template: '',
+            periods: [
+                {
+                    id: 'q1',
+                    name: 'Q1',
+                    format: 'YYYY-[Q1]',
+                    months: [1, 2, 3],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                },
+                {
+                    id: 'q2',
+                    name: 'Q2',
+                    format: 'YYYY-[Q2]',
+                    months: [4, 5],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                },
+                {
+                    id: 'q3',
+                    name: 'Q3',
+                    format: 'YYYY-[Q3]',
+                    months: [6, 7, 8],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                },
+                {
+                    id: 'q4',
+                    name: 'Q4',
+                    format: 'YYYY-[Q4]',
+                    months: [9, 10],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                },
+                {
+                    id: 'q5',
+                    name: 'Q5',
+                    format: 'YYYY-[Q5]',
+                    months: [11, 12],
+                    yearBasis: 'start',
+                    useGroupSettings: true,
+                    folder: '',
+                    template: ''
+                }
+            ]
+        }
+    ]
 };
 
 export const DEFAULT_SETTINGS: LinearCalendarSettings = {
@@ -243,6 +307,8 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
     columnAlignment: 'weekday',  // Align by weekday by default
     weekStartDay: 0,  // Sunday by default
     highlightedWeekdays: [0, 6],  // Saturday and Sunday by default
+    showCellBorders: true,  // Show cell borders by default
+    showWeekSpanBorders: false,  // No week span borders by default
 
     dateExtraction: {
         startFromProperties: ['date'],

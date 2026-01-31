@@ -772,6 +772,7 @@ var DEFAULT_PERIODIC_NOTES = {
   },
   showWeekNumbers: true,
   showQuarters: false,
+  hasSeenWelcomeBanner: false,
   weekly: {
     enabled: false,
     folder: "",
@@ -796,7 +797,67 @@ var DEFAULT_PERIODIC_NOTES = {
     format: "YYYY",
     template: ""
   },
-  customPeriodGroups: []
+  customPeriodGroups: [
+    {
+      id: "quinter-example",
+      name: "Quinter",
+      enabled: false,
+      folder: "",
+      template: "",
+      periods: [
+        {
+          id: "q1",
+          name: "Q1",
+          format: "YYYY-[Q1]",
+          months: [1, 2, 3],
+          yearBasis: "start",
+          useGroupSettings: true,
+          folder: "",
+          template: ""
+        },
+        {
+          id: "q2",
+          name: "Q2",
+          format: "YYYY-[Q2]",
+          months: [4, 5],
+          yearBasis: "start",
+          useGroupSettings: true,
+          folder: "",
+          template: ""
+        },
+        {
+          id: "q3",
+          name: "Q3",
+          format: "YYYY-[Q3]",
+          months: [6, 7, 8],
+          yearBasis: "start",
+          useGroupSettings: true,
+          folder: "",
+          template: ""
+        },
+        {
+          id: "q4",
+          name: "Q4",
+          format: "YYYY-[Q4]",
+          months: [9, 10],
+          yearBasis: "start",
+          useGroupSettings: true,
+          folder: "",
+          template: ""
+        },
+        {
+          id: "q5",
+          name: "Q5",
+          format: "YYYY-[Q5]",
+          months: [11, 12],
+          yearBasis: "start",
+          useGroupSettings: true,
+          folder: "",
+          template: ""
+        }
+      ]
+    }
+  ]
 };
 var DEFAULT_SETTINGS = {
   currentYear: (/* @__PURE__ */ new Date()).getFullYear(),
@@ -819,6 +880,10 @@ var DEFAULT_SETTINGS = {
   // Sunday by default
   highlightedWeekdays: [0, 6],
   // Saturday and Sunday by default
+  showCellBorders: true,
+  // Show cell borders by default
+  showWeekSpanBorders: false,
+  // No week span borders by default
   dateExtraction: {
     startFromProperties: ["date"],
     startFromFilename: false,
@@ -3799,6 +3864,10 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
       };
       label.createEl("span", { text: name.slice(0, 3) });
     });
+    new import_obsidian5.Setting(containerEl).setName("Show cell borders").setDesc("Display thin borders around day cells and week span cells").addToggle((toggle) => toggle.setValue(this.plugin.settings.showCellBorders).onChange(async (value) => {
+      this.plugin.settings.showCellBorders = value;
+      await this.plugin.saveSettings();
+    }));
   }
   renderDateExtractionSection(containerEl) {
     containerEl.createEl("h3", { text: "Date Extraction" });
@@ -4260,7 +4329,7 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
     const generalSection = containerEl.createDiv();
     generalSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
     generalSection.createEl("h4", { text: "General", attr: { style: "margin-top: 0;" } });
-    const periodicNotesSetting = new import_obsidian5.Setting(generalSection).setName("Use Periodic Notes plugin settings").addToggle((toggle) => toggle.setValue(settings.usePeriodicNotesPlugin).onChange(async (value) => {
+    const periodicNotesSetting = new import_obsidian5.Setting(generalSection).setName("Use Periodic Notes plugin settings (enable only if you know what you are doing)").addToggle((toggle) => toggle.setValue(settings.usePeriodicNotesPlugin).onChange(async (value) => {
       settings.usePeriodicNotesPlugin = value;
       await this.plugin.saveSettings();
       this.display();
@@ -4316,6 +4385,18 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
           this.display();
         });
       });
+      if (settings.weekNumberDisplay === "header-row") {
+        const headerRowSettings = section.createDiv();
+        headerRowSettings.style.cssText = "margin-left: 20px; padding-left: 15px; border-left: 2px solid var(--background-modifier-border); margin-top: 10px; margin-bottom: 10px;";
+        this.renderWeekBorderColorSetting(headerRowSettings);
+        new import_obsidian5.Setting(headerRowSettings).setName("Show week span borders").setDesc("Display thin borders on the bottom of week span cells").addToggle((toggle) => toggle.setValue(this.plugin.settings.showWeekSpanBorders).onChange(async (value) => {
+          this.plugin.settings.showWeekSpanBorders = value;
+          await this.plugin.saveSettings();
+        }));
+        const tipNote = headerRowSettings.createDiv();
+        tipNote.style.cssText = "background: var(--background-primary); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--text-muted); margin-top: 10px; font-size: 0.85em; color: var(--text-muted);";
+        tipNote.innerHTML = `<strong>Tip:</strong> Try turning off cell borders in <code style="background: var(--background-modifier-border); padding: 2px 5px; border-radius: 3px; font-size: 0.9em;">Basic Settings \u2192 Calendar Appearance \u2192 Show cell borders</code> when using week rows. This calms down the look and improves readability.`;
+      }
     }
     if (!config.enabled) return;
     if (usePluginSettings) {
@@ -4376,9 +4457,6 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
       await this.plugin.saveSettings();
       this.display();
     };
-    if (type === "weekly" && settings.weekNumberDisplay === "header-row") {
-      this.renderWeekBorderColorSetting(section);
-    }
   }
   /**
    * Render the week border color setting with mode options and color picker
@@ -4386,23 +4464,18 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
   renderWeekBorderColorSetting(container) {
     const settings = this.plugin.settings.periodicNotes;
     const borderConfig = settings.weekBorderColor;
-    const borderSetting = new import_obsidian5.Setting(container).setName("Week divider color").setDesc("Color for the divider between weeks in the header row and day cells");
-    const controlContainer = borderSetting.controlEl.createDiv();
-    controlContainer.style.cssText = "display: flex; align-items: center; gap: 8px; flex-wrap: wrap;";
-    const modeSelect = controlContainer.createEl("select");
-    modeSelect.style.cssText = "padding: 4px 8px;";
-    const modes = [
-      { value: "neutral", label: "Neutral (theme border)" },
-      { value: "accent", label: "Theme accent" },
-      { value: "custom", label: "Custom color" }
-    ];
-    modes.forEach((mode) => {
-      const option = modeSelect.createEl("option", { text: mode.label, value: mode.value });
-      if (borderConfig.mode === mode.value) option.selected = true;
+    let colorWrapper = null;
+    const borderSetting = new import_obsidian5.Setting(container).setName("Week divider color").setDesc("Color for the divider between weeks in the header row and day cells").addDropdown((dropdown) => {
+      dropdown.addOption("neutral", "Neutral (theme border)").addOption("accent", "Theme accent").addOption("custom", "Custom color").setValue(borderConfig.mode).onChange(async (value) => {
+        borderConfig.mode = value;
+        await this.plugin.saveSettings();
+        renderColorControl();
+      });
     });
-    const colorWrapper = controlContainer.createDiv();
-    colorWrapper.style.cssText = "display: flex; align-items: center; gap: 8px;";
+    colorWrapper = borderSetting.controlEl.createDiv();
+    colorWrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-left: 8px;";
     const renderColorControl = () => {
+      if (!colorWrapper) return;
       colorWrapper.empty();
       if (borderConfig.mode === "custom") {
         const currentColor = borderConfig.customColor || "#6c849d";
@@ -4413,11 +4486,6 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
       }
     };
     renderColorControl();
-    modeSelect.onchange = async () => {
-      borderConfig.mode = modeSelect.value;
-      await this.plugin.saveSettings();
-      renderColorControl();
-    };
   }
   updateFormatPreview(previewEl, format) {
     const moment = window.moment;
@@ -4807,6 +4875,25 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
     new import_obsidian5.Setting(expSection).setName("Condensed letter spacing").setDesc("Reduce spacing between letters to fit more text in the same space.").addToggle((toggle) => toggle.setValue(exp.condensedLetters).onChange(async (value) => {
       exp.condensedLetters = value;
       await this.plugin.saveSettings();
+    }));
+    containerEl.createEl("h3", { text: "Welcome Banners", attr: { style: "margin-top: 25px;" } });
+    const bannerDesc = containerEl.createEl("p", {
+      cls: "setting-item-description",
+      text: "Show welcome banners again to see tips and instructions."
+    });
+    bannerDesc.style.marginTop = "-10px";
+    bannerDesc.style.marginBottom = "15px";
+    const bannerSection = containerEl.createDiv();
+    bannerSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
+    new import_obsidian5.Setting(bannerSection).setName("Show Quick Notes banner").setDesc("Display the Quick Notes welcome banner with tips about creating notes quickly").addButton((button) => button.setButtonText("Show again").onClick(async () => {
+      this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = false;
+      await this.plugin.saveSettings();
+      new (require("obsidian")).Notice("Quick Notes banner will show on next calendar view");
+    }));
+    new import_obsidian5.Setting(bannerSection).setName("Show Periodic Notes banner").setDesc("Display the Periodic Notes welcome banner with tips about weekly, monthly, and quarterly notes").addButton((button) => button.setButtonText("Show again").onClick(async () => {
+      this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = false;
+      await this.plugin.saveSettings();
+      new (require("obsidian")).Notice("Periodic Notes banner will show on next calendar view");
     }));
   }
   renderColorCategoriesSection(containerEl) {
@@ -5996,6 +6083,9 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     if (this.plugin.settings.quickNoteCreation.enabled && !this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner) {
       this.renderWelcomeBanner(container);
     }
+    if (!this.plugin.settings.periodicNotes.hasSeenWelcomeBanner) {
+      this.renderPeriodicNotesWelcomeBanner(container);
+    }
     if (this.plugin.settings.colorCategories.enabled && this.plugin.settings.colorCategories.showCategoryIndex) {
       this.renderCategoryIndexRow(container);
     }
@@ -6021,6 +6111,12 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
       calendarWrapper.style.overflowX = "";
     }
     const calendarTable = calendarWrapper.createEl("table", { cls: "linear-calendar" });
+    if (this.plugin.settings.showCellBorders) {
+      calendarTable.addClass("show-cell-borders");
+    }
+    if (this.plugin.settings.showWeekSpanBorders) {
+      calendarTable.addClass("show-week-span-borders");
+    }
     if (this.plugin.settings.calendarWidth === "scrollable") {
       calendarTable.style.minWidth = "max-content";
       calendarTable.style.setProperty("--cell-min-width", `${this.plugin.settings.cellMinWidth}px`);
@@ -6918,6 +7014,65 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
       banner.remove();
     };
   }
+  /**
+   * Render the periodic notes welcome banner with tips about weekly, monthly, quarterly notes.
+   */
+  renderPeriodicNotesWelcomeBanner(container) {
+    const banner = container.createDiv({ cls: "periodic-notes-welcome-banner" });
+    banner.style.cssText = `
+            background: var(--background-secondary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            border: 2px solid var(--text-accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        `;
+    const contentWrapper = banner.createDiv();
+    contentWrapper.style.cssText = "flex: 1;";
+    const title = contentWrapper.createEl("div", { text: "\u{1F4C5} Periodic Notes" });
+    title.style.cssText = "font-weight: 600; font-size: 1.05em; margin-bottom: 8px;";
+    const message = contentWrapper.createEl("div");
+    message.style.cssText = "color: var(--text-muted); font-size: 0.95em; line-height: 1.5;";
+    message.innerHTML = `
+            <strong>Click on month names</strong> to create or open monthly notes<br>
+            <strong>Click on week numbers</strong> (W01, W02...) to create or open weekly notes<br>
+            <strong>Click on quarter labels</strong> (Q1, Q2...) for quarterly notes<br>
+            \u2699\uFE0F <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
+        `;
+    const closeBtn = banner.createEl("button", { text: "\xD7" });
+    closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        `;
+    closeBtn.setAttribute("aria-label", "Dismiss banner");
+    closeBtn.onmouseenter = () => {
+      closeBtn.style.background = "var(--background-modifier-hover)";
+    };
+    closeBtn.onmouseleave = () => {
+      closeBtn.style.background = "none";
+    };
+    closeBtn.onclick = async () => {
+      this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = true;
+      await this.plugin.saveSettings();
+      banner.remove();
+    };
+  }
   renderCategoryIndexRow(container) {
     const config = this.plugin.settings.colorCategories;
     const categoryIndexDiv = container.createDiv({ cls: "category-index-section" });
@@ -7098,7 +7253,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
           periodCell.style.cursor = "pointer";
           const effectiveColor = period.useGroupSettings !== false && (group == null ? void 0 : group.color) ? group.color : period.color;
           if (effectiveColor) {
-            periodCell.style.borderLeft = `3px solid ${effectiveColor}`;
+            periodCell.style.color = effectiveColor;
           }
           periodCell.dataset.periodId = period.id;
           periodCell.dataset.groupId = group.id;
@@ -7123,7 +7278,6 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
           const quarterlyColor = periodicSettings.quarterly.color;
           if (quarterlyColor) {
             quarterCell.style.color = quarterlyColor;
-            quarterCell.style.borderColor = quarterlyColor;
           }
           quarterCell.onclick = async (e) => {
             e.preventDefault();
@@ -7176,7 +7330,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
           } else if (borderConfig.mode === "custom" && borderConfig.customColor) {
             borderColor = borderConfig.customColor;
           }
-          weekCell.style.borderLeft = `2px solid ${borderColor}`;
+          weekCell.style.borderLeft = `1px solid ${borderColor}`;
         }
         const weekLink = weekCell.createEl("a", {
           text: `W${String(weekNumber).padStart(2, "0")}`,
@@ -7215,7 +7369,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
           periodCell.style.cursor = "pointer";
           const effectiveColor = period.useGroupSettings !== false && (group == null ? void 0 : group.color) ? group.color : period.color;
           if (effectiveColor) {
-            periodCell.style.borderLeft = `3px solid ${effectiveColor}`;
+            periodCell.style.color = effectiveColor;
           }
           periodCell.dataset.periodId = period.id;
           periodCell.dataset.groupId = group.id;
@@ -7244,7 +7398,6 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
         const quarterlyColor = periodicSettings.quarterly.color;
         if (quarterlyColor) {
           quarterCell.style.color = quarterlyColor;
-          quarterCell.style.borderColor = quarterlyColor;
         }
         quarterCell.onclick = async (e) => {
           e.preventDefault();
@@ -7350,7 +7503,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
         } else if (borderConfig.mode === "custom" && borderConfig.customColor) {
           borderColor = borderConfig.customColor;
         }
-        dayCell.style.borderLeft = `2px solid ${borderColor}`;
+        dayCell.style.borderLeft = `1px solid ${borderColor}`;
       }
       const dayIndex = columnOffset + day - 1;
       const barsAbove = occupiedRows.filter((o) => o.start <= dayIndex && o.end > dayIndex).length;

@@ -440,6 +440,17 @@ export class CalendarSettingTab extends PluginSettingTab {
 
             label.createEl('span', { text: name.slice(0, 3) });
         });
+
+        // Cell borders toggle
+        new Setting(containerEl)
+            .setName('Show cell borders')
+            .setDesc('Display thin borders around day cells and week span cells')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.showCellBorders)
+                .onChange(async (value) => {
+                    this.plugin.settings.showCellBorders = value;
+                    await this.plugin.saveSettings();
+                }));
     }
 
     renderDateExtractionSection(containerEl: HTMLElement): void {
@@ -1065,7 +1076,7 @@ export class CalendarSettingTab extends PluginSettingTab {
 
         // Use Periodic Notes plugin toggle with GitHub link
         const periodicNotesSetting = new Setting(generalSection)
-            .setName('Use Periodic Notes plugin settings')
+            .setName('Use Periodic Notes plugin settings (enable only if you know what you are doing)')
             .addToggle(toggle => toggle
                 .setValue(settings.usePeriodicNotesPlugin)
                 .onChange(async (value) => {
@@ -1182,6 +1193,29 @@ export class CalendarSettingTab extends PluginSettingTab {
                         });
                 });
 
+            // Header-row mode specific settings
+            if (settings.weekNumberDisplay === 'header-row') {
+                const headerRowSettings = section.createDiv();
+                headerRowSettings.style.cssText = 'margin-left: 20px; padding-left: 15px; border-left: 2px solid var(--background-modifier-border); margin-top: 10px; margin-bottom: 10px;';
+
+                this.renderWeekBorderColorSetting(headerRowSettings);
+
+                // Week span borders toggle
+                new Setting(headerRowSettings)
+                    .setName('Show week span borders')
+                    .setDesc('Display thin borders on the bottom of week span cells')
+                    .addToggle(toggle => toggle
+                        .setValue(this.plugin.settings.showWeekSpanBorders)
+                        .onChange(async (value) => {
+                            this.plugin.settings.showWeekSpanBorders = value;
+                            await this.plugin.saveSettings();
+                        }));
+
+                // Tip about cell borders
+                const tipNote = headerRowSettings.createDiv();
+                tipNote.style.cssText = 'background: var(--background-primary); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--text-muted); margin-top: 10px; font-size: 0.85em; color: var(--text-muted);';
+                tipNote.innerHTML = `<strong>Tip:</strong> Try turning off cell borders in <code style="background: var(--background-modifier-border); padding: 2px 5px; border-radius: 3px; font-size: 0.9em;">Basic Settings → Calendar Appearance → Show cell borders</code> when using week rows. This calms down the look and improves readability.`;
+            }
         }
 
         if (!config.enabled) return;
@@ -1283,10 +1317,6 @@ export class CalendarSettingTab extends PluginSettingTab {
             this.display();
         };
 
-        // Week border color setting (only for weekly notes in header-row mode)
-        if (type === 'weekly' && settings.weekNumberDisplay === 'header-row') {
-            this.renderWeekBorderColorSetting(section);
-        }
     }
 
     /**
@@ -1296,33 +1326,31 @@ export class CalendarSettingTab extends PluginSettingTab {
         const settings = this.plugin.settings.periodicNotes;
         const borderConfig = settings.weekBorderColor;
 
+        // Color picker wrapper (for custom mode, shown after dropdown)
+        let colorWrapper: HTMLElement | null = null;
+
         const borderSetting = new Setting(container)
             .setName('Week divider color')
-            .setDesc('Color for the divider between weeks in the header row and day cells');
+            .setDesc('Color for the divider between weeks in the header row and day cells')
+            .addDropdown(dropdown => {
+                dropdown
+                    .addOption('neutral', 'Neutral (theme border)')
+                    .addOption('accent', 'Theme accent')
+                    .addOption('custom', 'Custom color')
+                    .setValue(borderConfig.mode)
+                    .onChange(async (value) => {
+                        borderConfig.mode = value as 'neutral' | 'accent' | 'custom';
+                        await this.plugin.saveSettings();
+                        renderColorControl();
+                    });
+            });
 
-        const controlContainer = borderSetting.controlEl.createDiv();
-        controlContainer.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-wrap: wrap;';
-
-        // Mode dropdown
-        const modeSelect = controlContainer.createEl('select');
-        modeSelect.style.cssText = 'padding: 4px 8px;';
-
-        const modes = [
-            { value: 'neutral', label: 'Neutral (theme border)' },
-            { value: 'accent', label: 'Theme accent' },
-            { value: 'custom', label: 'Custom color' }
-        ];
-
-        modes.forEach(mode => {
-            const option = modeSelect.createEl('option', { text: mode.label, value: mode.value });
-            if (borderConfig.mode === mode.value) option.selected = true;
-        });
-
-        // Color picker wrapper (shown for custom mode)
-        const colorWrapper = controlContainer.createDiv();
-        colorWrapper.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+        // Create color wrapper after the dropdown
+        colorWrapper = borderSetting.controlEl.createDiv();
+        colorWrapper.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-left: 8px;';
 
         const renderColorControl = () => {
+            if (!colorWrapper) return;
             colorWrapper.empty();
 
             if (borderConfig.mode === 'custom') {
@@ -1335,12 +1363,6 @@ export class CalendarSettingTab extends PluginSettingTab {
         };
 
         renderColorControl();
-
-        modeSelect.onchange = async () => {
-            borderConfig.mode = modeSelect.value as 'neutral' | 'accent' | 'custom';
-            await this.plugin.saveSettings();
-            renderColorControl();
-        };
     }
 
     private updateFormatPreview(previewEl: HTMLElement, format: string): void {
@@ -1896,6 +1918,41 @@ export class CalendarSettingTab extends PluginSettingTab {
                 .onChange(async (value) => {
                     exp.condensedLetters = value;
                     await this.plugin.saveSettings();
+                }));
+
+        // Welcome Banners Section
+        containerEl.createEl('h3', { text: 'Welcome Banners', attr: { style: 'margin-top: 25px;' } });
+
+        const bannerDesc = containerEl.createEl('p', {
+            cls: 'setting-item-description',
+            text: 'Show welcome banners again to see tips and instructions.'
+        });
+        bannerDesc.style.marginTop = '-10px';
+        bannerDesc.style.marginBottom = '15px';
+
+        const bannerSection = containerEl.createDiv();
+        bannerSection.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 5px;';
+
+        new Setting(bannerSection)
+            .setName('Show Quick Notes banner')
+            .setDesc('Display the Quick Notes welcome banner with tips about creating notes quickly')
+            .addButton(button => button
+                .setButtonText('Show again')
+                .onClick(async () => {
+                    this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = false;
+                    await this.plugin.saveSettings();
+                    new (require('obsidian').Notice)('Quick Notes banner will show on next calendar view');
+                }));
+
+        new Setting(bannerSection)
+            .setName('Show Periodic Notes banner')
+            .setDesc('Display the Periodic Notes welcome banner with tips about weekly, monthly, and quarterly notes')
+            .addButton(button => button
+                .setButtonText('Show again')
+                .onClick(async () => {
+                    this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = false;
+                    await this.plugin.saveSettings();
+                    new (require('obsidian').Notice)('Periodic Notes banner will show on next calendar view');
                 }));
     }
 

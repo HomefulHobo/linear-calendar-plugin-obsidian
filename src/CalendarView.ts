@@ -155,6 +155,11 @@ export class LinearCalendarView extends ItemView {
             this.renderWelcomeBanner(container);
         }
 
+        // Show periodic notes welcome banner if not yet dismissed
+        if (!this.plugin.settings.periodicNotes.hasSeenWelcomeBanner) {
+            this.renderPeriodicNotesWelcomeBanner(container);
+        }
+
         // Render category index row (if enabled) - between header and calendar
         // Show welcome message if no categories, or chips if categories exist
         if (this.plugin.settings.colorCategories.enabled &&
@@ -189,6 +194,16 @@ export class LinearCalendarView extends ItemView {
         }
 
         const calendarTable = calendarWrapper.createEl('table', { cls: 'linear-calendar' });
+
+        // Add cell borders class if enabled
+        if (this.plugin.settings.showCellBorders) {
+            calendarTable.addClass('show-cell-borders');
+        }
+
+        // Add week span borders class if enabled
+        if (this.plugin.settings.showWeekSpanBorders) {
+            calendarTable.addClass('show-week-span-borders');
+        }
 
         // Set minimum cell width for scrollable mode
         if (this.plugin.settings.calendarWidth === 'scrollable') {
@@ -1396,6 +1411,70 @@ export class LinearCalendarView extends ItemView {
         };
     }
 
+    /**
+     * Render the periodic notes welcome banner with tips about weekly, monthly, quarterly notes.
+     */
+    renderPeriodicNotesWelcomeBanner(container: HTMLElement): void {
+        const banner = container.createDiv({ cls: 'periodic-notes-welcome-banner' });
+        banner.style.cssText = `
+            background: var(--background-secondary);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            border: 2px solid var(--text-accent);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        `;
+
+        const contentWrapper = banner.createDiv();
+        contentWrapper.style.cssText = 'flex: 1;';
+
+        const title = contentWrapper.createEl('div', { text: '📅 Periodic Notes' });
+        title.style.cssText = 'font-weight: 600; font-size: 1.05em; margin-bottom: 8px;';
+
+        const message = contentWrapper.createEl('div');
+        message.style.cssText = 'color: var(--text-muted); font-size: 0.95em; line-height: 1.5;';
+        message.innerHTML = `
+            <strong>Click on month names</strong> to create or open monthly notes<br>
+            <strong>Click on week numbers</strong> (W01, W02...) to create or open weekly notes<br>
+            <strong>Click on quarter labels</strong> (Q1, Q2...) for quarterly notes<br>
+            ⚙️ <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
+        `;
+
+        const closeBtn = banner.createEl('button', { text: '×' });
+        closeBtn.style.cssText = `
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        `;
+        closeBtn.setAttribute('aria-label', 'Dismiss banner');
+        closeBtn.onmouseenter = () => {
+            closeBtn.style.background = 'var(--background-modifier-hover)';
+        };
+        closeBtn.onmouseleave = () => {
+            closeBtn.style.background = 'none';
+        };
+        closeBtn.onclick = async () => {
+            this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = true;
+            await this.plugin.saveSettings();
+            banner.remove();
+        };
+    }
+
     renderCategoryIndexRow(container: HTMLElement): void {
         const config = this.plugin.settings.colorCategories;
 
@@ -1647,7 +1726,7 @@ export class LinearCalendarView extends ItemView {
                     periodCell.style.cursor = 'pointer';
                     const effectiveColor = (period.useGroupSettings !== false && group?.color) ? group.color : period.color;
                     if (effectiveColor) {
-                        periodCell.style.borderLeft = `3px solid ${effectiveColor}`;
+                        periodCell.style.color = effectiveColor;
                     }
                     periodCell.dataset.periodId = period.id;
                     periodCell.dataset.groupId = group.id;
@@ -1678,7 +1757,6 @@ export class LinearCalendarView extends ItemView {
                     const quarterlyColor = periodicSettings.quarterly.color;
                     if (quarterlyColor) {
                         quarterCell.style.color = quarterlyColor;
-                        quarterCell.style.borderColor = quarterlyColor;
                     }
                     quarterCell.onclick = async (e) => {
                         e.preventDefault();
@@ -1751,7 +1829,7 @@ export class LinearCalendarView extends ItemView {
                     } else if (borderConfig.mode === 'custom' && borderConfig.customColor) {
                         borderColor = borderConfig.customColor;
                     }
-                    weekCell.style.borderLeft = `2px solid ${borderColor}`;
+                    weekCell.style.borderLeft = `1px solid ${borderColor}`;
                 }
 
                 const weekLink = weekCell.createEl('a', {
@@ -1809,7 +1887,7 @@ export class LinearCalendarView extends ItemView {
                     // Use effective color - period's own color or group's color if using group settings
                     const effectiveColor = (period.useGroupSettings !== false && group?.color) ? group.color : period.color;
                     if (effectiveColor) {
-                        periodCell.style.borderLeft = `3px solid ${effectiveColor}`;
+                        periodCell.style.color = effectiveColor;
                     }
                     periodCell.dataset.periodId = period.id;
                     periodCell.dataset.groupId = group.id;
@@ -1844,7 +1922,6 @@ export class LinearCalendarView extends ItemView {
                 const quarterlyColor = periodicSettings.quarterly.color;
                 if (quarterlyColor) {
                     quarterCell.style.color = quarterlyColor;
-                    quarterCell.style.borderColor = quarterlyColor;
                 }
                 quarterCell.onclick = async (e) => {
                     e.preventDefault();
@@ -1986,7 +2063,7 @@ export class LinearCalendarView extends ItemView {
                 } else if (borderConfig.mode === 'custom' && borderConfig.customColor) {
                     borderColor = borderConfig.customColor;
                 }
-                dayCell.style.borderLeft = `2px solid ${borderColor}`;
+                dayCell.style.borderLeft = `1px solid ${borderColor}`;
             }
 
             const dayIndex = columnOffset + day - 1;

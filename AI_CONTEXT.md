@@ -79,7 +79,8 @@ Simple and intuitive filtering:
   - `include`: Only show notes matching ALL conditions (AND logic)
   - `exclude`: Hide notes matching ALL conditions (AND logic)
 - **Conditions**: Array of property/operator/value checks
-- **Operators**: is, isNot, contains, doesNotContain, startsWith, endsWith, matches (regex), exists, doesNotExist, hasTag, matchesDatePattern
+- **Operators**: is, isNot, contains, doesNotContain, startsWith, endsWith, matches (regex), exists, doesNotExist, hasTag
+- **Date Pattern Matching**: matchesDatePattern operator with user-specified format (supports all Moment.js tokens)
 
 **Implementation**: See `CalendarView.ts:filePassesFilter()` and `evaluateCondition()` (lines 186-275)
 
@@ -115,6 +116,11 @@ Events spanning multiple days are rendered as horizontal bars:
 - **Scrollable**: Calendar cells expand to minimum width, enabling horizontal scroll when needed
 - Configurable minimum cell width (20-200px, default: 30px) for scrollable mode
 - Uses CSS custom property `--cell-min-width` for dynamic sizing
+
+**Calendar UI Customization** (v0.4.0):
+- **Highlighted Weekdays**: Option to highlight specific days of the week (e.g., weekends)
+- **Cell Borders**: Toggle to show/hide day cell borders for cleaner appearance
+- **Settings Tabs**: Tabs wrap to multiple rows to prevent overflow
 
 **Implementation**:
 - Tooltip methods: `CalendarView.ts:showTooltip()`, `hideTooltip()` (lines 678-699)
@@ -178,7 +184,29 @@ Create notes directly from the calendar with customizable metadata:
 - Settings: `SettingsTab.ts` QuickNotes tab
 - Types: `QuickNoteConfig` in `types.ts`
 
-### 9. Helper Components (DRY/SSOT Architecture) (v0.3.1)
+### 9. Periodic Notes Feature (v0.4.0)
+
+Show, open, or create periodic notes directly in the calendar:
+- **Supported Periods**:
+  - Weekly, Monthly, Quarterly, Yearly
+  - Custom Period Groups with flexible date ranges
+- **Calendar Integration**: Periods shown as colored rows in calendar, click to create/open notes
+- **Periodic Notes Plugin Compatibility**: Reads settings from community "Periodic Notes" plugin when enabled
+- **Format Support**: Full Moment.js format support (YYYY, MM, DD, ww, gggg, Q, etc.)
+- **Customization**:
+  - Custom colors for each period type
+  - Configurable folder locations
+  - Template support for each period
+  - Custom period groups with month ranges and year basis options
+- **Smart Formatting**: Comprehensive date formatting with ISO week numbers, quarters, month names
+
+**Implementation**:
+- Types: `PeriodicNotesSettings`, `PeriodicNoteConfig`, `CustomPeriod` in `types.ts`
+- Formatting: `CalendarView.ts:formatDate()`, helper methods for week/quarter calculation
+- Regex Conversion: `CalendarView.ts:formatToRegexPattern()` for pattern matching
+- Settings: `SettingsTab.ts` Periodic Notes tab
+
+### 10. Helper Components (DRY/SSOT Architecture) (v0.3.1)
 
 Reusable UI components to eliminate code duplication:
 
@@ -388,6 +416,36 @@ interface NoteInfo {
 
 ## Version History
 
+- **v0.4.0** (2026-01-31): Periodic Notes and enhanced date formatting
+  - **Periodic Notes Feature**: Show, open, or create periodic notes directly in calendar
+    - Periods: Weekly, Monthly, Quarterly, Yearly, Custom Period Groups
+    - Click to create or open periodic notes
+    - Compatible with "Periodic Notes" plugin
+    - Full Moment.js format support (YYYY, MM, DD, ww, gggg, Q, etc.)
+    - Custom colors and folder configurations
+  - **Comprehensive Date Formatting**: Added full Moment.js token support
+    - ISO week numbers (ww, w), week years (gggg)
+    - Quarter support (Q)
+    - Full and abbreviated month names (MMMM, MMM)
+    - Enables formats like "MMMM D, YYYY", "YYYY-[W]ww", "YYYY-Q[Q]"
+  - **Enhanced Daily Notes Format Field**: Matches periodic notes style
+    - Clickable format reference link to Moment.js documentation
+    - Live preview that updates as you type
+  - **Date Pattern Matching Condition**: New flexible filtering
+    - "File Name" + "matches date pattern" with user-specified format
+    - Optional "require additional text" checkbox
+    - Separated from simple "is" matching
+  - **UI Improvements**:
+    - Settings tabs now wrap to prevent overflow
+    - Highlighted weekdays option (e.g., highlight weekends)
+    - Toggle to show/hide day cell borders
+    - Cleaner calendar appearance
+  - **Code Quality**: Reusable date formatting utilities
+    - `formatToRegexPattern()` for DRY pattern conversion
+    - `formatDate()` with comprehensive token support
+    - Helper methods: `getISOWeek()`, `getISOWeekYear()`, `getQuarter()`, `getMonthName()`
+  - **Fixes**: Daily notes templates now get added when created through calendar
+
 - **v0.3.1** (2025-01-21): QuickNote feature and DRY refactoring
   - **QuickNote Feature**: Create notes directly from calendar
     - Cmd+Click on any date to create a new note, drag to make multi-day entries
@@ -456,7 +514,6 @@ interface NoteInfo {
 ## Future Considerations
 
 Potential features to add:
-- Week numbers display
 - Search/filter within calendar view
 - Keyboard navigation
 - Loading indicators for large vaults
@@ -488,6 +545,6 @@ When working on this project:
 
 ---
 
-**Last Updated**: 2025-01-21
-**Plugin Version**: 0.3.1
+**Last Updated**: 2026-01-31
+**Plugin Version**: 0.4.0
 **Maintained for**: Claude Code and other AI assistants

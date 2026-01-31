@@ -4,6 +4,30 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.0] - 2026-01-31
+
+### Added
+- **Periodic Notes Feature**: Show, open or create periodic notes direcly in the calendar
+  - Periods: Weekly, Mothly, Quarterly, Yearly, Custom Period
+  - Show periods directly in the calendar
+  - Click to create or open the periodic note
+  - Compatible with the "Periodic Notes" plugin
+  - Format support: https://momentjs.com/docs/#/displaying/format/ (same as "Periodic Notes" plugin)
+  - Custom colors for the periods
+  - Custom period groups with great customization options
+- **Toggle Welcome Banners**: Show the welcome banners again after dismissing
+  - Note: this primarilly helps me to test them
+### Changed
+- **Simpler Calendar UI**
+  - Changes on borders, background coloring etc.
+  - Overall cleaner look
+### Improved
+- **Improved Calendar UI Customization**
+  - Highlighted weekdays option (e.g. hihglight weekend days)
+  - Show/hide day cell borders
+### Fixed
+- **Daily Notes Template**: templates now get added to the daily notes when created through calendar
+
 ## [0.3.1] - 2025-01-21
 
 ### Added

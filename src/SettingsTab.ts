@@ -236,7 +236,7 @@ export class CalendarSettingTab extends PluginSettingTab {
 
     renderTabs(containerEl: HTMLElement): void {
         const tabsContainer = containerEl.createDiv();
-        tabsContainer.style.cssText = 'display: flex; gap: 4px; border-bottom: 2px solid var(--background-modifier-border); margin-top: 20px;';
+        tabsContainer.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid var(--background-modifier-border); margin-top: 20px; padding-bottom: 8px;';
 
         const tabs = [
             { id: 'basic' as const, label: 'Basic Settings' },
@@ -307,16 +307,28 @@ export class CalendarSettingTab extends PluginSettingTab {
 
         const feedbackTitle = feedbackBox.createEl('div');
         feedbackTitle.style.cssText = 'font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;';
-        feedbackTitle.textContent = '💬 Feedback wanted – Version 0.3.1';
+        feedbackTitle.textContent = '💬 Feedback wanted – Version 0.4.0';
 
         const feedbackList = feedbackBox.createEl('ul');
         feedbackList.style.cssText = 'margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;';
         feedbackList.innerHTML = `
-            <li>Does the QuickAdd feature work as you would like?</li>
-            <li>Are the color categories working as you would like?</li>
+            <li>Do the periodic notes work and behave as expected?</li>
+            <li>Do you like the new look?</li>
+            <li>Is it clear how to edit the calendar's look?</li>
             <li>Did switching from an older version to the new one go smoothly?</li>
             <li>Is there anything weird, annoying, unexpected happening?</li>
             <li>Is anything hard to understand or unclear how to configure?</li>
+        `;
+
+        const olderVersionsPara = feedbackBox.createEl('p');
+        olderVersionsPara.style.cssText = 'margin: 12px 0 4px 0; color: var(--text-normal); font-size: 0.95em; font-weight: 500;';
+        olderVersionsPara.textContent = 'Older versions:';
+
+        const olderVersionsList = feedbackBox.createEl('ul');
+        olderVersionsList.style.cssText = 'margin: 4px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;';
+        olderVersionsList.innerHTML = `
+            <li>Does the QuickAdd feature work as you would like?</li>
+            <li>Are the color categories working as you would like?</li>
         `;
 
         const feedbackFooter = feedbackBox.createEl('div');
@@ -972,16 +984,26 @@ export class CalendarSettingTab extends PluginSettingTab {
         desc.style.marginTop = '-10px';
         desc.style.marginBottom = '15px';
 
-        new Setting(containerEl)
+        const formatSetting = new Setting(containerEl)
             .setName('Daily note format')
-            .setDesc('Format for daily note filenames (use YYYY for year, MM for month, DD for day)')
             .addText(text => text
                 .setPlaceholder('YYYY-MM-DD')
                 .setValue(this.plugin.settings.dailyNoteFormat)
                 .onChange(async (value) => {
                     this.plugin.settings.dailyNoteFormat = value;
                     await this.plugin.saveSettings();
+                    // Update preview
+                    this.updateFormatPreview(previewEl, value || 'YYYY-MM-DD');
                 }));
+
+        // Add description with format reference link
+        const formatDescEl = formatSetting.descEl;
+        formatDescEl.innerHTML = `Filename format for daily notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+
+        // Add format preview
+        const previewEl = formatDescEl.createDiv();
+        previewEl.style.cssText = 'margin-top: 4px; color: var(--text-muted); font-size: 0.85em;';
+        this.updateFormatPreview(previewEl, this.plugin.settings.dailyNoteFormat);
 
         new Setting(containerEl)
             .setName('Daily notes folder mode')

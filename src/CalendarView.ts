@@ -494,8 +494,10 @@ export class LinearCalendarView extends ItemView {
                 return allTags.some(tag => tag.toLowerCase() === value.toLowerCase());
 
             case 'matchesDatePattern':
-                // Special operator for YYYY-MM-DD pattern
-                const datePattern = /^(\d{4}-\d{2}-\d{2})/;
+                // Uses user-specified date format (e.g., YYYY-MM-DD, DD/MM/YYYY, etc.)
+                const dateFormat = condition.value || 'YYYY-MM-DD';
+                const pattern = this.formatToRegexPattern(dateFormat);
+                const datePattern = new RegExp(`^(${pattern})`);
                 const match = file.basename.match(datePattern);
 
                 if (!match) return false;
@@ -733,16 +735,38 @@ export class LinearCalendarView extends ItemView {
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
 
+    /**
+     * Converts a date format string to a regex pattern.
+     * Supports common Moment.js tokens: YYYY, MM, DD, ww, gggg, Q, etc.
+     * Escapes special regex characters in the format string.
+     */
+    formatToRegexPattern(format: string): string {
+        // First escape special regex characters (except those we'll replace)
+        let pattern = format.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // Replace date format tokens with regex patterns
+        pattern = pattern
+            .replace(/YYYY/g, '\\d{4}')  // Year (4 digits)
+            .replace(/YY/g, '\\d{2}')    // Year (2 digits)
+            .replace(/MMMM/g, '\\w+')    // Month name (full)
+            .replace(/MMM/g, '\\w+')     // Month name (short)
+            .replace(/MM/g, '\\d{2}')    // Month (2 digits)
+            .replace(/M/g, '\\d{1,2}')   // Month (1-2 digits)
+            .replace(/DD/g, '\\d{2}')    // Day (2 digits)
+            .replace(/D/g, '\\d{1,2}')   // Day (1-2 digits)
+            .replace(/ww/g, '\\d{2}')    // Week (2 digits)
+            .replace(/w/g, '\\d{1,2}')   // Week (1-2 digits)
+            .replace(/gggg/g, '\\d{4}')  // Week year (4 digits)
+            .replace(/Q/g, '\\d');       // Quarter (1 digit)
+
+        return pattern;
+    }
+
     isDailyNote(file: TFile): boolean {
         const format = this.plugin.settings.dailyNoteFormat;
         const basename = file.basename;
 
-        // Convert format to regex pattern
-        const pattern = format
-            .replace('YYYY', '\\d{4}')
-            .replace('MM', '\\d{2}')
-            .replace('DD', '\\d{2}');
-
+        const pattern = this.formatToRegexPattern(format);
         const regex = new RegExp(`^${pattern}$`);
         return regex.test(basename);
     }
@@ -819,16 +843,79 @@ export class LinearCalendarView extends ItemView {
         return null;
     }
 
-    formatDateForDailyNote(date: Date): string {
-        const format = this.plugin.settings.dailyNoteFormat;
+    /**
+     * Get ISO week number (1-53) for a date.
+     * ISO week starts on Monday, week 1 is the week with the first Thursday.
+     */
+    getISOWeek(date: Date): number {
+        const tempDate = new Date(date.getTime());
+        tempDate.setHours(0, 0, 0, 0);
+        // Set to nearest Thursday: current date + 4 - current day number
+        // Make Sunday's day number 7
+        tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+        // Get first day of year
+        const yearStart = new Date(tempDate.getFullYear(), 0, 1);
+        // Calculate full weeks to nearest Thursday
+        const weekNo = Math.ceil((((tempDate.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+        return weekNo;
+    }
+
+    /**
+     * Get the ISO week year (may differ from calendar year for dates in week 1 or 53).
+     */
+    getISOWeekYear(date: Date): number {
+        const tempDate = new Date(date.getTime());
+        tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+        return tempDate.getFullYear();
+    }
+
+    /**
+     * Get quarter (1-4) for a date.
+     */
+    getQuarter(date: Date): number {
+        return Math.floor(date.getMonth() / 3) + 1;
+    }
+
+    /**
+     * Get month names.
+     */
+    getMonthName(date: Date, short: boolean = false): string {
+        const months = short
+            ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        return months[date.getMonth()];
+    }
+
+    /**
+     * Format a date using Moment.js-style format tokens.
+     * Supports: YYYY, YY, MMMM, MMM, MM, M, DD, D, ww, w, gggg, Q
+     */
+    formatDate(date: Date, format: string): string {
         const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const week = this.getISOWeek(date);
+        const weekYear = this.getISOWeekYear(date);
+        const quarter = this.getQuarter(date);
 
         return format
-            .replace('YYYY', String(year))
-            .replace('MM', month)
-            .replace('DD', day);
+            .replace(/YYYY/g, String(year))
+            .replace(/YY/g, String(year).slice(-2))
+            .replace(/MMMM/g, this.getMonthName(date, false))
+            .replace(/MMM/g, this.getMonthName(date, true))
+            .replace(/MM/g, String(month).padStart(2, '0'))
+            .replace(/M/g, String(month))
+            .replace(/DD/g, String(day).padStart(2, '0'))
+            .replace(/D/g, String(day))
+            .replace(/ww/g, String(week).padStart(2, '0'))
+            .replace(/w/g, String(week))
+            .replace(/gggg/g, String(weekYear))
+            .replace(/Q/g, String(quarter));
+    }
+
+    formatDateForDailyNote(date: Date): string {
+        const format = this.plugin.settings.dailyNoteFormat;
+        return this.formatDate(date, format);
     }
 
     async openOrCreateDailyNote(date: Date): Promise<void> {
@@ -1438,9 +1525,10 @@ export class LinearCalendarView extends ItemView {
         const message = contentWrapper.createEl('div');
         message.style.cssText = 'color: var(--text-muted); font-size: 0.95em; line-height: 1.5;';
         message.innerHTML = `
-            <strong>Click on month names</strong> to create or open monthly notes<br>
-            <strong>Click on week numbers</strong> (W01, W02...) to create or open weekly notes<br>
-            <strong>Click on quarter labels</strong> (Q1, Q2...) for quarterly notes<br>
+            <strong>Show periodic notes</strong> in the calendar<br>
+            <strong>Click on periodic notes</strong> to create or open them<br>
+            <strong>Compatible with the Periodic Notes Plugin</strong> so you don't have to transfer anything<br>
+            <strong>Show various periods:</strong> Weekly, Monthly, Quarterly, Yearly, Custom Period<br>
             ⚙️ <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
         `;
 

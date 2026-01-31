@@ -26,6 +26,16 @@ function getValidOperators(property: string): { value: string, label: string }[]
             { value: 'contains', label: 'contains' },
             { value: 'doesNotContain', label: 'does not contain' }
         ];
+    } else if (property === 'file.name' || property === 'file.basename') {
+        return [
+            { value: 'is', label: 'is' },
+            { value: 'isNot', label: 'is not' },
+            { value: 'contains', label: 'contains' },
+            { value: 'doesNotContain', label: 'does not contain' },
+            { value: 'exists', label: 'exists' },
+            { value: 'doesNotExist', label: 'does not exist' },
+            { value: 'matchesDatePattern', label: 'matches date pattern' }
+        ];
     } else {
         return [
             { value: 'is', label: 'is' },
@@ -65,8 +75,8 @@ export class ConditionRenderer {
         // Value input (context-aware)
         this.renderValueInput(fieldsContainer, condition, app, callbacks);
 
-        // Subfolders checkbox (if folder property)
-        this.renderSubfoldersCheckbox(fieldsContainer, condition, callbacks);
+        // Conditional checkboxes (subfolders, additional text, etc.)
+        this.renderConditionalCheckboxes(fieldsContainer, condition, callbacks);
 
         // Delete button
         this.renderDeleteButton(condEl, conditions, condIndex, callbacks);
@@ -182,6 +192,21 @@ export class ConditionRenderer {
             return; // No value input needed
         }
 
+        // Special handling for matchesDatePattern - format input
+        if (condition.operator === 'matchesDatePattern') {
+            const formatInput = container.createEl('input', {
+                type: 'text',
+                attr: { placeholder: 'YYYY-MM-DD' },
+                value: condition.value || 'YYYY-MM-DD'
+            });
+            formatInput.style.cssText = 'padding: 4px 8px; flex: 1; min-width: 150px;';
+            formatInput.onchange = async (e) => {
+                condition.value = (e.target as HTMLInputElement).value;
+                await callbacks.onSave();
+            };
+            return;
+        }
+
         // Special handling for file.tags - use tag pill UI
         if (condition.property === 'file.tags') {
             const tags = condition.value ? condition.value.split(',').map(t => t.trim()).filter(t => t) : [];
@@ -218,11 +243,12 @@ export class ConditionRenderer {
         }
     }
 
-    private static renderSubfoldersCheckbox(
+    private static renderConditionalCheckboxes(
         container: HTMLElement,
         condition: Condition,
         callbacks: ConditionCallbacks
     ): void {
+        // Include subfolders checkbox for folder property
         if (condition.property === 'file.folder' && condition.operator === 'is') {
             const subfolderLabel = container.createEl('label');
             subfolderLabel.style.cssText = 'display: flex; align-items: center; gap: 5px;';
@@ -233,6 +259,19 @@ export class ConditionRenderer {
                 await callbacks.onSave();
             };
             subfolderLabel.createEl('span', { text: 'Include subfolders' });
+        }
+
+        // Require additional text checkbox for matchesDatePattern operator
+        if (condition.operator === 'matchesDatePattern') {
+            const additionalTextLabel = container.createEl('label');
+            additionalTextLabel.style.cssText = 'display: flex; align-items: center; gap: 5px;';
+            const additionalTextCheckbox = additionalTextLabel.createEl('input', { type: 'checkbox' });
+            additionalTextCheckbox.checked = condition.requireAdditionalText || false;
+            additionalTextCheckbox.onchange = async (e) => {
+                condition.requireAdditionalText = (e.target as HTMLInputElement).checked;
+                await callbacks.onSave();
+            };
+            additionalTextLabel.createEl('span', { text: 'And contains additional text' });
         }
     }
 

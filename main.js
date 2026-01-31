@@ -3271,6 +3271,16 @@ function getValidOperators(property) {
       { value: "contains", label: "contains" },
       { value: "doesNotContain", label: "does not contain" }
     ];
+  } else if (property === "file.name" || property === "file.basename") {
+    return [
+      { value: "is", label: "is" },
+      { value: "isNot", label: "is not" },
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" },
+      { value: "exists", label: "exists" },
+      { value: "doesNotExist", label: "does not exist" },
+      { value: "matchesDatePattern", label: "matches date pattern" }
+    ];
   } else {
     return [
       { value: "is", label: "is" },
@@ -3292,7 +3302,7 @@ var ConditionRenderer = class {
     this.renderCustomPropertyInput(fieldsContainer, condition, app, callbacks);
     this.renderOperatorSelector(fieldsContainer, condition, callbacks);
     this.renderValueInput(fieldsContainer, condition, app, callbacks);
-    this.renderSubfoldersCheckbox(fieldsContainer, condition, callbacks);
+    this.renderConditionalCheckboxes(fieldsContainer, condition, callbacks);
     this.renderDeleteButton(condEl, conditions, condIndex, callbacks);
   }
   static renderPropertySelector(container, condition, callbacks) {
@@ -3376,6 +3386,19 @@ var ConditionRenderer = class {
     if (["exists", "doesNotExist"].includes(condition.operator)) {
       return;
     }
+    if (condition.operator === "matchesDatePattern") {
+      const formatInput = container.createEl("input", {
+        type: "text",
+        attr: { placeholder: "YYYY-MM-DD" },
+        value: condition.value || "YYYY-MM-DD"
+      });
+      formatInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 150px;";
+      formatInput.onchange = async (e) => {
+        condition.value = e.target.value;
+        await callbacks.onSave();
+      };
+      return;
+    }
     if (condition.property === "file.tags") {
       const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
       const tagContainer = container.createDiv();
@@ -3406,7 +3429,7 @@ var ConditionRenderer = class {
       }
     }
   }
-  static renderSubfoldersCheckbox(container, condition, callbacks) {
+  static renderConditionalCheckboxes(container, condition, callbacks) {
     if (condition.property === "file.folder" && condition.operator === "is") {
       const subfolderLabel = container.createEl("label");
       subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
@@ -3417,6 +3440,17 @@ var ConditionRenderer = class {
         await callbacks.onSave();
       };
       subfolderLabel.createEl("span", { text: "Include subfolders" });
+    }
+    if (condition.operator === "matchesDatePattern") {
+      const additionalTextLabel = container.createEl("label");
+      additionalTextLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+      const additionalTextCheckbox = additionalTextLabel.createEl("input", { type: "checkbox" });
+      additionalTextCheckbox.checked = condition.requireAdditionalText || false;
+      additionalTextCheckbox.onchange = async (e) => {
+        condition.requireAdditionalText = e.target.checked;
+        await callbacks.onSave();
+      };
+      additionalTextLabel.createEl("span", { text: "And contains additional text" });
     }
   }
   static renderDeleteButton(container, conditions, condIndex, callbacks) {
@@ -3723,7 +3757,7 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
   }
   renderTabs(containerEl) {
     const tabsContainer = containerEl.createDiv();
-    tabsContainer.style.cssText = "display: flex; gap: 4px; border-bottom: 2px solid var(--background-modifier-border); margin-top: 20px;";
+    tabsContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid var(--background-modifier-border); margin-top: 20px; padding-bottom: 8px;";
     const tabs = [
       { id: "basic", label: "Basic Settings" },
       { id: "categories", label: "Categories (Colors & Icons)" },
@@ -3782,15 +3816,25 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
     feedbackBox.style.cssText = "background: var(--background-primary); border: 2px solid var(--interactive-accent); padding: 15px 20px; margin: 0 0 20px 0; border-radius: 6px;";
     const feedbackTitle = feedbackBox.createEl("div");
     feedbackTitle.style.cssText = "font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;";
-    feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.3.1";
+    feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.4.0";
     const feedbackList = feedbackBox.createEl("ul");
     feedbackList.style.cssText = "margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
     feedbackList.innerHTML = `
-            <li>Does the QuickAdd feature work as you would like?</li>
-            <li>Are the color categories working as you would like?</li>
+            <li>Do the periodic notes work and behave as expected?</li>
+            <li>Do you like the new look?</li>
+            <li>Is it clear how to edit the calendar's look?</li>
             <li>Did switching from an older version to the new one go smoothly?</li>
             <li>Is there anything weird, annoying, unexpected happening?</li>
             <li>Is anything hard to understand or unclear how to configure?</li>
+        `;
+    const olderVersionsPara = feedbackBox.createEl("p");
+    olderVersionsPara.style.cssText = "margin: 12px 0 4px 0; color: var(--text-normal); font-size: 0.95em; font-weight: 500;";
+    olderVersionsPara.textContent = "Older versions:";
+    const olderVersionsList = feedbackBox.createEl("ul");
+    olderVersionsList.style.cssText = "margin: 4px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
+    olderVersionsList.innerHTML = `
+            <li>Does the QuickAdd feature work as you would like?</li>
+            <li>Are the color categories working as you would like?</li>
         `;
     const feedbackFooter = feedbackBox.createEl("div");
     feedbackFooter.style.cssText = "font-size: 0.95em; color: var(--text-muted); margin-top: 8px;";
@@ -4277,10 +4321,16 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
     });
     desc.style.marginTop = "-10px";
     desc.style.marginBottom = "15px";
-    new import_obsidian5.Setting(containerEl).setName("Daily note format").setDesc("Format for daily note filenames (use YYYY for year, MM for month, DD for day)").addText((text) => text.setPlaceholder("YYYY-MM-DD").setValue(this.plugin.settings.dailyNoteFormat).onChange(async (value) => {
+    const formatSetting = new import_obsidian5.Setting(containerEl).setName("Daily note format").addText((text) => text.setPlaceholder("YYYY-MM-DD").setValue(this.plugin.settings.dailyNoteFormat).onChange(async (value) => {
       this.plugin.settings.dailyNoteFormat = value;
       await this.plugin.saveSettings();
+      this.updateFormatPreview(previewEl, value || "YYYY-MM-DD");
     }));
+    const formatDescEl = formatSetting.descEl;
+    formatDescEl.innerHTML = `Filename format for daily notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+    const previewEl = formatDescEl.createDiv();
+    previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
+    this.updateFormatPreview(previewEl, this.plugin.settings.dailyNoteFormat);
     new import_obsidian5.Setting(containerEl).setName("Daily notes folder mode").setDesc("Choose where to look for and create daily notes").addDropdown((dropdown) => {
       dropdown.addOption("obsidian", `Use native Daily Notes plugin's "New file location"`).addOption("custom", "Use custom folder").setValue(this.plugin.settings.dailyNoteFolderMode).onChange(async (value) => {
         this.plugin.settings.dailyNoteFolderMode = value;
@@ -6344,7 +6394,9 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
         const allTags = [...tags, ...frontmatterTags];
         return allTags.some((tag) => tag.toLowerCase() === value.toLowerCase());
       case "matchesDatePattern":
-        const datePattern = /^(\d{4}-\d{2}-\d{2})/;
+        const dateFormat = condition.value || "YYYY-MM-DD";
+        const pattern = this.formatToRegexPattern(dateFormat);
+        const datePattern = new RegExp(`^(${pattern})`);
         const match = file.basename.match(datePattern);
         if (!match) return false;
         if (condition.requireAdditionalText) {
@@ -6526,10 +6578,20 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
   dateToKey(date) {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   }
+  /**
+   * Converts a date format string to a regex pattern.
+   * Supports common Moment.js tokens: YYYY, MM, DD, ww, gggg, Q, etc.
+   * Escapes special regex characters in the format string.
+   */
+  formatToRegexPattern(format) {
+    let pattern = format.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    pattern = pattern.replace(/YYYY/g, "\\d{4}").replace(/YY/g, "\\d{2}").replace(/MMMM/g, "\\w+").replace(/MMM/g, "\\w+").replace(/MM/g, "\\d{2}").replace(/M/g, "\\d{1,2}").replace(/DD/g, "\\d{2}").replace(/D/g, "\\d{1,2}").replace(/ww/g, "\\d{2}").replace(/w/g, "\\d{1,2}").replace(/gggg/g, "\\d{4}").replace(/Q/g, "\\d");
+    return pattern;
+  }
   isDailyNote(file) {
     const format = this.plugin.settings.dailyNoteFormat;
     const basename = file.basename;
-    const pattern = format.replace("YYYY", "\\d{4}").replace("MM", "\\d{2}").replace("DD", "\\d{2}");
+    const pattern = this.formatToRegexPattern(format);
     const regex = new RegExp(`^${pattern}$`);
     return regex.test(basename);
   }
@@ -6584,12 +6646,55 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     }
     return null;
   }
+  /**
+   * Get ISO week number (1-53) for a date.
+   * ISO week starts on Monday, week 1 is the week with the first Thursday.
+   */
+  getISOWeek(date) {
+    const tempDate = new Date(date.getTime());
+    tempDate.setHours(0, 0, 0, 0);
+    tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+    const yearStart = new Date(tempDate.getFullYear(), 0, 1);
+    const weekNo = Math.ceil(((tempDate.getTime() - yearStart.getTime()) / 864e5 + 1) / 7);
+    return weekNo;
+  }
+  /**
+   * Get the ISO week year (may differ from calendar year for dates in week 1 or 53).
+   */
+  getISOWeekYear(date) {
+    const tempDate = new Date(date.getTime());
+    tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+    return tempDate.getFullYear();
+  }
+  /**
+   * Get quarter (1-4) for a date.
+   */
+  getQuarter(date) {
+    return Math.floor(date.getMonth() / 3) + 1;
+  }
+  /**
+   * Get month names.
+   */
+  getMonthName(date, short = false) {
+    const months = short ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    return months[date.getMonth()];
+  }
+  /**
+   * Format a date using Moment.js-style format tokens.
+   * Supports: YYYY, YY, MMMM, MMM, MM, M, DD, D, ww, w, gggg, Q
+   */
+  formatDate(date, format) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const week = this.getISOWeek(date);
+    const weekYear = this.getISOWeekYear(date);
+    const quarter = this.getQuarter(date);
+    return format.replace(/YYYY/g, String(year)).replace(/YY/g, String(year).slice(-2)).replace(/MMMM/g, this.getMonthName(date, false)).replace(/MMM/g, this.getMonthName(date, true)).replace(/MM/g, String(month).padStart(2, "0")).replace(/M/g, String(month)).replace(/DD/g, String(day).padStart(2, "0")).replace(/D/g, String(day)).replace(/ww/g, String(week).padStart(2, "0")).replace(/w/g, String(week)).replace(/gggg/g, String(weekYear)).replace(/Q/g, String(quarter));
+  }
   formatDateForDailyNote(date) {
     const format = this.plugin.settings.dailyNoteFormat;
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return format.replace("YYYY", String(year)).replace("MM", month).replace("DD", day);
+    return this.formatDate(date, format);
   }
   async openOrCreateDailyNote(date) {
     const filename = this.formatDateForDailyNote(date);
@@ -7038,9 +7143,10 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     const message = contentWrapper.createEl("div");
     message.style.cssText = "color: var(--text-muted); font-size: 0.95em; line-height: 1.5;";
     message.innerHTML = `
-            <strong>Click on month names</strong> to create or open monthly notes<br>
-            <strong>Click on week numbers</strong> (W01, W02...) to create or open weekly notes<br>
-            <strong>Click on quarter labels</strong> (Q1, Q2...) for quarterly notes<br>
+            <strong>Show periodic notes</strong> in the calendar<br>
+            <strong>Click on periodic notes</strong> to create or open them<br>
+            <strong>Compatible with the Periodic Notes Plugin</strong> so you don't have to transfer anything<br>
+            <strong>Show various periods:</strong> Weekly, Monthly, Quarterly, Yearly, Custom Period<br>
             \u2699\uFE0F <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
         `;
     const closeBtn = banner.createEl("button", { text: "\xD7" });

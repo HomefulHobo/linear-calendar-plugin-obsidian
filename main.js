@@ -7281,9 +7281,9 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
   }
   /**
    * Get the custom period that a given month belongs to within a specific group
-   * Returns the period and whether this month is the first month of that period in this year
+   * Returns the period and whether this month is the first month of that period
    */
-  getCustomPeriodForMonth(year, month, group) {
+  getCustomPeriodForMonth(month, group) {
     if (group.periods.length === 0) return null;
     const monthNum = month + 1;
     for (const period of group.periods) {
@@ -7349,7 +7349,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
       const weekRowClass = month > 0 ? "week-header-row month-first-row" : "week-header-row";
       const weekRow = tbody.createEl("tr", { cls: weekRowClass });
       for (const group of enabledGroups) {
-        const periodInfo = this.getCustomPeriodForMonth(year, month, group);
+        const periodInfo = this.getCustomPeriodForMonth(month, group);
         if (periodInfo && periodInfo.isFirstMonth) {
           const { period, rowSpan } = periodInfo;
           const periodYear = this.getCustomPeriodYear(period, year, month);
@@ -7465,7 +7465,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     const row = tbody.createEl("tr", { cls: monthRowClass });
     if (weekDisplayMode !== "header-row") {
       for (const group of enabledGroups) {
-        const periodInfo = this.getCustomPeriodForMonth(year, month, group);
+        const periodInfo = this.getCustomPeriodForMonth(month, group);
         if (periodInfo && periodInfo.isFirstMonth) {
           const { period, rowSpan } = periodInfo;
           const periodYear = this.getCustomPeriodYear(period, year, month);

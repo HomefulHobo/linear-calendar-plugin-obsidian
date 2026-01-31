@@ -1687,9 +1687,9 @@ export class LinearCalendarView extends ItemView {
 
     /**
      * Get the custom period that a given month belongs to within a specific group
-     * Returns the period and whether this month is the first month of that period in this year
+     * Returns the period and whether this month is the first month of that period
      */
-    getCustomPeriodForMonth(year: number, month: number, group: CustomPeriodGroup): { period: CustomPeriod; isFirstMonth: boolean; rowSpan: number } | null {
+    getCustomPeriodForMonth(month: number, group: CustomPeriodGroup): { period: CustomPeriod; isFirstMonth: boolean; rowSpan: number } | null {
         if (group.periods.length === 0) return null;
 
         // Month is 0-indexed (0-11), but periods use 1-indexed months (1-12)
@@ -1803,7 +1803,7 @@ export class LinearCalendarView extends ItemView {
 
             // Add custom period cells - these go in the week row with doubled rowSpan
             for (const group of enabledGroups) {
-                const periodInfo = this.getCustomPeriodForMonth(year, month, group);
+                const periodInfo = this.getCustomPeriodForMonth(month, group);
                 if (periodInfo && periodInfo.isFirstMonth) {
                     const { period, rowSpan } = periodInfo;
                     const periodYear = this.getCustomPeriodYear(period, year, month);
@@ -1961,7 +1961,7 @@ export class LinearCalendarView extends ItemView {
         // Skip if weekDisplayMode is 'header-row' - cells are created in the week row with doubled rowSpan
         if (weekDisplayMode !== 'header-row') {
             for (const group of enabledGroups) {
-                const periodInfo = this.getCustomPeriodForMonth(year, month, group);
+                const periodInfo = this.getCustomPeriodForMonth(month, group);
                 if (periodInfo && periodInfo.isFirstMonth) {
                     const { period, rowSpan } = periodInfo;
                     const periodYear = this.getCustomPeriodYear(period, year, month);

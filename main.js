@@ -806,29 +806,29 @@ var DEFAULT_PERIODIC_NOTES = {
       template: "",
       periods: [
         {
-          id: "q1",
-          name: "Q1",
-          format: "YYYY-[Q1]",
-          months: [1, 2, 3],
+          id: "a",
+          name: "A",
+          format: "YYYY-[A]",
+          months: [1, 2],
           yearBasis: "start",
           useGroupSettings: true,
           folder: "",
           template: ""
         },
         {
-          id: "q2",
-          name: "Q2",
-          format: "YYYY-[Q2]",
-          months: [4, 5],
+          id: "b",
+          name: "B",
+          format: "YYYY-[B]",
+          months: [3, 4, 5],
           yearBasis: "start",
           useGroupSettings: true,
           folder: "",
           template: ""
         },
         {
-          id: "q3",
-          name: "Q3",
-          format: "YYYY-[Q3]",
+          id: "c",
+          name: "C",
+          format: "YYYY-[C]",
           months: [6, 7, 8],
           yearBasis: "start",
           useGroupSettings: true,
@@ -836,20 +836,20 @@ var DEFAULT_PERIODIC_NOTES = {
           template: ""
         },
         {
-          id: "q4",
-          name: "Q4",
-          format: "YYYY-[Q4]",
-          months: [9, 10],
+          id: "d",
+          name: "D",
+          format: "YYYY-[D]",
+          months: [9, 10, 11],
           yearBasis: "start",
           useGroupSettings: true,
           folder: "",
           template: ""
         },
         {
-          id: "q5",
-          name: "Q5",
-          format: "YYYY-[Q5]",
-          months: [11, 12],
+          id: "e",
+          name: "E",
+          format: "YYYY-[E]",
+          months: [12],
           yearBasis: "start",
           useGroupSettings: true,
           folder: "",
@@ -7884,6 +7884,11 @@ var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
   async loadSettings() {
     const loadedData = await this.loadData();
     this.settings = this.deepMerge(DEFAULT_SETTINGS, loadedData || {});
+    let migrated = false;
+    migrated = this.migrateQuinterExample() || migrated;
+    if (migrated) {
+      await this.saveData(this.settings);
+    }
   }
   /**
    * Deep merge two objects, preserving user values while adding new defaults.
@@ -7907,6 +7912,59 @@ var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
    */
   isPlainObject(value) {
     return value !== null && typeof value === "object" && !Array.isArray(value) && Object.prototype.toString.call(value) === "[object Object]";
+  }
+  /**
+   * Migrate Quinter example from v0.4.0 with incorrect months, names, and formats.
+   * Returns true if migration was performed.
+   */
+  migrateQuinterExample() {
+    const quintersGroup = this.settings.periodicNotes.customPeriodGroups.find(
+      (group) => group.id === "quinter-example"
+    );
+    if (!quintersGroup) {
+      return false;
+    }
+    const oldConfigs = {
+      "q1": { months: [1, 2, 3], name: "Q1", format: "YYYY-[Q1]" },
+      "q2": { months: [4, 5], name: "Q2", format: "YYYY-[Q2]" },
+      "q3": { months: [6, 7, 8], name: "Q3", format: "YYYY-[Q3]" },
+      "q4": { months: [9, 10], name: "Q4", format: "YYYY-[Q4]" },
+      "q5": { months: [11, 12], name: "Q5", format: "YYYY-[Q5]" }
+    };
+    const correctConfigs = {
+      "q1": { id: "a", months: [1, 2], name: "A", format: "YYYY-[A]" },
+      "q2": { id: "b", months: [3, 4, 5], name: "B", format: "YYYY-[B]" },
+      "q3": { id: "c", months: [6, 7, 8], name: "C", format: "YYYY-[C]" },
+      "q4": { id: "d", months: [9, 10, 11], name: "D", format: "YYYY-[D]" },
+      "q5": { id: "e", months: [12], name: "E", format: "YYYY-[E]" }
+    };
+    let needsMigration = false;
+    for (const period of quintersGroup.periods) {
+      const oldConfig = oldConfigs[period.id];
+      if (oldConfig && this.arraysEqual(period.months, oldConfig.months)) {
+        needsMigration = true;
+        break;
+      }
+    }
+    if (needsMigration) {
+      for (const period of quintersGroup.periods) {
+        const correctConfig = correctConfigs[period.id];
+        if (correctConfig) {
+          period.id = correctConfig.id;
+          period.name = correctConfig.name;
+          period.format = correctConfig.format;
+          period.months = correctConfig.months;
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+  /**
+   * Helper to compare two arrays for equality
+   */
+  arraysEqual(a, b) {
+    return a.length === b.length && a.every((val, index) => val === b[index]);
   }
   async saveSettings() {
     await this.saveData(this.settings);

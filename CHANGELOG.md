@@ -4,6 +4,14 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.1] – 2026-02-09
+
+### Fixed
+- **Quinters**:
+  - Fixed Quinter example naming (Q1-Q5 → A-E)
+  - Fixed Quinter example months to match my actual idea
+  - Added migration to update existing user settings
+
 ## [0.4.0] - 2026-01-31
 
 ### Added

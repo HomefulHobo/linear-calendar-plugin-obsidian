@@ -416,6 +416,18 @@ interface NoteInfo {
 
 ## Version History
 
+- **v0.4.1** (2026-02-09): Quinter example fixes and migration system
+  - **Quinter Example Corrections**:
+    - Fixed Quinter period naming: Q1-Q5 → A-E
+    - Fixed Quinter period IDs: q1-q5 → a-e
+    - Fixed Quinter format strings: YYYY-[Q1-Q5] → YYYY-[A-E]
+    - Fixed Quinter month distributions to match intended design
+  - **Migration System**: Automatic settings migration on plugin load
+    - `migrateQuinterExample()` method in `main.ts` detects old v0.4.0 Quinter configuration
+    - Automatically updates user settings to correct values
+    - Runs once on load, saves if migration performed
+    - Simple pattern: check for specific old values, replace with correct ones
+
 - **v0.4.0** (2026-01-31): Periodic Notes and enhanced date formatting
   - **Periodic Notes Feature**: Show, open, or create periodic notes directly in calendar
     - Periods: Weekly, Monthly, Quarterly, Yearly, Custom Period Groups
@@ -545,6 +557,6 @@ When working on this project:
 
 ---
 
-**Last Updated**: 2026-01-31
-**Plugin Version**: 0.4.0
+**Last Updated**: 2026-02-09
+**Plugin Version**: 0.4.1
 **Maintained for**: Claude Code and other AI assistants

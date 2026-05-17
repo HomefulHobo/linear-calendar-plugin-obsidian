@@ -10,7 +10,7 @@ A linear calendar plugin that displays all 365 days of the year in a single view
 
 ## ⚠️ Development Status
 
-This plugin is in **early development** and may undergo significant changes. The core functionality—how notes are recognized and dates are extracted—will remain stable. If you use properties or dates in filenames, these will continue to work.
+This plugin is in **active development** and may undergo significant changes. The core functionality—how notes are recognized and dates are extracted—will remain stable. If you use properties or dates in filenames, these will continue to work.
 
 New features are actively being developed. If you encounter any issues or have feedback, please reach out via [GitHub](https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/) or via [e-mail](https://www.homefulhobo.com/contact/).
 
@@ -126,9 +126,15 @@ Organize and visualize your notes with custom colors and icons:
 
 ## 📥 Installation
 
-### Via BRAT (Recommended)
+### From Obsidian Community Plugins (Recommended)
 
-[BRAT](https://github.com/TfTHacker/obsidian42-brat) (Beta Reviewers Auto-update Tester) is the recommended installation method because it's easy to use and allows you to automatically receive the newest updates.
+1. Open Obsidian **Settings → Community plugins**
+2. Select **Browse** and search for "Linear Calendar"
+3. Select **Install**, then **Enable**
+
+### Via BRAT (Alternative)
+
+[BRAT](https://github.com/TfTHacker/obsidian42-brat) (Beta Reviewers Auto-update Tester) is an alternative installation method. It also gives access to pre-release versions. Note that all versions prior to 0.4.3 are pre-releases and only available via BRAT or manual installation.
 
 1. Install the BRAT plugin from Obsidian's Community Plugins
 2. Open BRAT settings (Settings → BRAT)
@@ -140,8 +146,7 @@ Organize and visualize your notes with custom colors and icons:
 8. Click "Add Plugin"
 9. Check if Linear Calendar is enabled in Settings → Community Plugins
 
-### From Obsidian Community Plugins
-*Coming soon - plugin will be submitted to the official community plugins directory*
+> **Migrating from BRAT to Community Plugins?** The migration is seamless — your plugin folder stays the same, just the updating method changes. Your settings are stored in your vault's plugin folder at `.obsidian/plugins/linear-calendar/data.json` and are not affected by the switch. Simply remove the plugin in BRAT settings (this will not remove the plugin), then install it through Community Plugins. To be sure, always back up your vault before migration.
 
 ## 🚀 Getting Started
 

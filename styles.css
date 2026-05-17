@@ -144,9 +144,9 @@
 }
 
 /* Footer row - border on top, no border on bottom */
-tfoot td {
-    border-top: 1px solid var(--background-modifier-border) !important;
-    border-bottom: none !important;
+.linear-calendar tfoot td {
+    border-top: 1px solid var(--background-modifier-border);
+    border-bottom: none;
 }
 
 .month-label-cell,
@@ -223,6 +223,7 @@ tfoot td {
     overflow: visible;
     word-wrap: break-word;
     box-sizing: border-box;
+    user-select: none;
 }
 
 .day-cell.empty {
@@ -288,13 +289,13 @@ tfoot td {
     max-width: 100%;
 }
 
-.note-link {
+.linear-calendar-container .note-link {
     padding: 1px 3px;
     background: var(--interactive-accent);
-    color: var(--text-on-accent) !important;
+    color: var(--text-on-accent);
     border-radius: 2px;
     cursor: pointer;
-    text-decoration: none !important;
+    text-decoration: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -305,7 +306,7 @@ tfoot td {
     box-sizing: border-box;
 }
 
-.note-link:hover {
+.linear-calendar-container .note-link:hover {
     background: var(--interactive-accent-hover);
 }
 
@@ -324,23 +325,21 @@ tfoot td {
     pointer-events: all;
 }
 
-.multi-day-link {
-    color: var(--text-on-accent) !important;
+.linear-calendar-container .multi-day-link {
+    color: var(--text-on-accent);
     font-size: 0.65em;
     font-weight: 500;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    text-decoration: none !important;
+    display: block;
+    text-decoration: none;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
-    display: block;
 }
 
 .multi-day-bar:hover {
-    background: var(--interactive-accent-hover) !important;
+    background: var(--interactive-accent-hover);
 }
 
 /* Ensure table fits viewport */
@@ -370,8 +369,8 @@ tfoot td {
 }
 
 /* Settings page dropdown styling */
-.dropdown,
-select.dropdown {
+.setting-item-control .dropdown,
+.setting-item-control select.dropdown {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -379,7 +378,7 @@ select.dropdown {
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 12px;
-    padding-right: 28px !important;
+    padding-right: 28px;
 }
 
 /* All select elements in settings should have dropdown arrows */
@@ -488,7 +487,7 @@ select.dropdown {
 }
 
 .lc-rule-collapsed .lc-rule-collapsible-content {
-    max-height: 0 !important;
+    max-height: 0;
     opacity: 0;
     margin: 0;
 }
@@ -756,7 +755,7 @@ select.dropdown {
 
 /* Multi-line notes */
 .exp-multiline .note-link {
-    white-space: normal !important;
+    white-space: normal;
     word-wrap: break-word;
     overflow-wrap: break-word;
     line-height: 1.2;
@@ -869,15 +868,12 @@ select.dropdown {
 }
 
 /* Quick Note Creation - Drag Selection */
-.day-number.drag-selecting {
-    background: var(--interactive-accent) !important;
-    color: var(--text-on-accent) !important;
+/* user-select: none is set on .day-cell above */
+.day-cell .day-number.drag-selecting {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
     opacity: 0.7;
     transition: background 0.1s, opacity 0.1s;
-}
-
-.day-cell {
-    user-select: none;  /* Prevent text selection during drag */
 }
 
 /* Quick Note Modal Styling */
@@ -915,7 +911,7 @@ select.dropdown {
 /* WEEK BORDERS - Subtle (1px) */
 .day-cell.week-start-cell {
     position: relative;
-    border-left: 1px solid var(--background-modifier-border) !important;
+    border-left: 1px solid var(--background-modifier-border);
 }
 
 .week-divider-label {
@@ -948,10 +944,10 @@ select.dropdown {
     background: transparent;
 }
 
-.week-header-cell {
+.linear-calendar .week-header-cell {
     text-align: center;
     vertical-align: middle;
-    padding: 2px 0 !important;
+    padding: 2px 0;
     background: transparent;
 }
 

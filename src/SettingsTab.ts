@@ -297,7 +297,7 @@ export class CalendarSettingTab extends PluginSettingTab {
         const textEl = noticeEl.createEl('div');
         textEl.style.cssText = 'font-size: 0.95em; line-height: 1.5; color: var(--text-muted);';
         textEl.innerHTML = `
-            This plugin is in early development and may undergo significant changes. The core functionality—how notes are recognized and dates are extracted—will remain stable. If you use properties or dates in filenames, these will continue to work.<br><br>
+            This plugin is still in development and may undergo significant changes. The core functionality—how notes are recognized and dates are extracted—will remain stable. If you use properties or dates in filenames, these will continue to work.<br><br>
             New features are actively being developed. If you encounter any issues or have feedback, please reach out via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or via <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
         `;
 

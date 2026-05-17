@@ -4,6 +4,17 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.4] - 2026-05-17
+
+### Fixed
+- **CSS Lint**: Resolved all CSS warnings flagged by the Obsidian plugin validator.
+  - Replaced `!important` declarations with higher-specificity selectors throughout
+  - Removed duplicate `display` property in `.multi-day-link`
+  - Merged duplicate `.day-cell` selector block
+
+### Changed
+- **README**: Updated installation section — Community Plugins is now the recommended method, BRAT listed as alternative with pre-release access note and migration instructions.
+
 ## [0.4.3] - 2026-05-17
 
 ### Changed
@@ -141,6 +152,7 @@ This is the first version of the Linear Calendar Obsidian plugin
 
 ---
 
+[0.4.4]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.4
 [0.4.3]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.3
 [0.4.2]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.2
 [0.4.1]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.1

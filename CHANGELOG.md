@@ -4,6 +4,15 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.2] - 2026-05-17
+
+### Changed
+- **Obsidian Community Submission Prep**: Adapted plugin to meet official Obsidian community plugin guidelines.
+  - Fixed manifest description to end with a period (required by submission validator)
+  - Removed unsupported `icon` field from manifest
+  - Added `authorUrl` pointing to author website
+  - Updated release workflow to use version tags without `v` prefix
+
 ## [0.4.1] – 2026-02-09
 
 ### Fixed
@@ -127,6 +136,8 @@ This is the first version of the Linear Calendar Obsidian plugin
 
 ---
 
+[0.4.2]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.2
+[0.4.1]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.1
 [0.3.1]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.3.1
 [0.3.0]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.3.0
 [0.2.2]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.2.2

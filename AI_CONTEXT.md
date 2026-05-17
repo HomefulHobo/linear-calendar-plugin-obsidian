@@ -322,19 +322,28 @@ interface NoteInfo {
 - **Source Code**: All TypeScript source files in `src/` directory are committed to GitHub
 - **Releases**: Automated via GitHub Actions
 
+### Obsidian Community Plugin
+
+This plugin is officially listed in the Obsidian community plugins directory (submitted via community.obsidian.md). Key guidelines to follow:
+
+- **Submission requirements**: https://docs.obsidian.md/Plugins/Releasing/Submission+requirements+for+plugins
+- **Style guide**: https://obsidian.md/help/style-guide
+- **manifest.json rules**: description must end with `.`, no `icon` field, `authorUrl` must be filled or omitted, description max 250 chars, no emoji in description
+- **CSS**: avoid `!important` — use higher-specificity selectors instead (e.g. `.linear-calendar-container .note-link` rather than `.note-link !important`)
+
 ### Automated Workflows
 
 #### Release Workflow (`.github/workflows/release.yml`)
-- **Trigger**: Pushing a tag matching `v*.*.*` or `*.*.*` (e.g., `v0.2.4`)
+- **Trigger**: Pushing a tag matching `*.*.*` — **no `v` prefix** (e.g. `0.4.4`, not `v0.4.4`)
 - **Process**:
   1. Checks out code
   2. Installs Node.js 20
   3. Runs `npm ci` to install dependencies
   4. Runs `npm run build` to compile TypeScript → JavaScript
-  5. Creates GitHub release with auto-generated notes
-  6. Attaches required plugin files: `main.js`, `manifest.json`, `styles.css`
-- **Permissions**: Requires `contents: write` permission to upload release assets
-- **Note**: Pre-releases are supported (mark as pre-release when creating)
+  5. Generates artifact attestations for `main.js` and `styles.css` (cryptographic build provenance)
+  6. Creates GitHub release with auto-generated notes
+  7. Attaches required plugin files: `main.js`, `manifest.json`, `styles.css`
+- **Permissions**: Requires `contents: write`, `id-token: write`, `attestations: write`
 
 #### CI Workflow (`.github/workflows/ci.yml`)
 - **Trigger**: Push to main/master branch or pull requests
@@ -356,19 +365,18 @@ interface NoteInfo {
 1. **Update version numbers**:
    - `manifest.json`: Update `version` field
    - `package.json`: Update `version` field
+   - `versions.json`: Add `"x.x.x": "1.5.0"` entry for the new version
    - `CHANGELOG.md`: Add new version section with changes
 2. **Build and test locally**: Run `npm run build` and test in Obsidian
-3. **Commit changes**: Using GitHub Desktop or git CLI
-4. **Push to GitHub**: Ensure all changes are pushed
-5. **Create release**:
-   - Go to GitHub repository → Releases → "Create a new release"
-   - Create tag: `v0.2.x` (with "v" prefix)
-   - Add title: `v0.2.x`
-   - Description: Auto-generated from commits (or write custom notes)
-   - Mark as pre-release if needed
+3. **Commit changes and push to GitHub**
+4. **Create release via GitHub website** (no terminal needed):
+   - Go to GitHub repository → Releases → "Draft a new release"
+   - Create tag: `0.x.x` — **no `v` prefix**
+   - Add title and description
+   - **Do NOT check "Set as a pre-release"** (required for Obsidian community listing)
    - Click "Publish release"
-6. **Automated build**: GitHub Actions automatically builds and attaches files
-7. **Verify**: Check Actions tab for green checkmark, confirm files attached to release
+5. **Automated build**: GitHub Actions triggers on the tag, builds plugin, attests artifacts, and attaches files
+6. **Verify**: Check Actions tab for green checkmark, confirm files attached to release
 
 ### README Badges
 - **Release Badge**: Shows latest version (includes pre-releases with `?include_prereleases` parameter)
@@ -415,6 +423,19 @@ interface NoteInfo {
 4. **Performance**: No caching of metadata - re-reads all files on each render
 
 ## Version History
+
+- **0.4.4** (2026-05-18): CSS lint fixes and README update
+  - Resolved all CSS warnings from Obsidian plugin validator
+  - Replaced all `!important` declarations with higher-specificity selectors
+  - Fixed duplicate `display` property and duplicate `.day-cell` selector block
+  - Updated README installation section: Community Plugins now primary, BRAT as alternative
+
+- **0.4.3** (2026-05-17): Build security
+  - Added GitHub artifact attestations to release workflow for cryptographic build provenance
+
+- **0.4.2** (2026-05-17): Obsidian community submission prep
+  - Fixed manifest: description now ends with period, removed unsupported `icon` field, added `authorUrl`
+  - Updated release workflow to only trigger on tags without `v` prefix
 
 - **v0.4.1** (2026-02-09): Quinter example fixes and migration system
   - **Quinter Example Corrections**:
@@ -557,6 +578,6 @@ When working on this project:
 
 ---
 
-**Last Updated**: 2026-02-09
-**Plugin Version**: 0.4.1
+**Last Updated**: 2026-05-18
+**Plugin Version**: 0.4.4
 **Maintained for**: Claude Code and other AI assistants

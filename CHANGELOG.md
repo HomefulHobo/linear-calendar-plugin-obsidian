@@ -4,6 +4,11 @@ All notable changes to the Linear Calendar plugin will be documented in this fil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [0.4.3] - 2026-05-17
+
+### Changed
+- **Build Security**: Added GitHub artifact attestations to release workflow, allowing cryptographic verification that release assets were built directly from source.
+
 ## [0.4.2] - 2026-05-17
 
 ### Changed
@@ -136,6 +141,7 @@ This is the first version of the Linear Calendar Obsidian plugin
 
 ---
 
+[0.4.3]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.3
 [0.4.2]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.2
 [0.4.1]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.4.1
 [0.3.1]: https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/releases/tag/0.3.1

@@ -148,6 +148,7 @@ export interface MultiDayEntry {
 export interface PeriodicNoteConfig {
     enabled: boolean;
     folder: string;
+    includeSubfolders: boolean;
     format: string;
     template: string;
     color?: string;  // Optional color for visual indicator in calendar
@@ -161,6 +162,7 @@ export interface CustomPeriod {
     yearBasis: 'start' | 'end' | 'majority';  // Which year to use when spanning year boundary
     useGroupSettings: boolean;  // If true, use group's folder/template/color; if false, use custom
     folder: string;       // Custom folder (only used if useGroupSettings is false)
+    includeSubfolders?: boolean;  // Search sub-folders (only used if useGroupSettings is false)
     template: string;     // Custom template (only used if useGroupSettings is false)
     color?: string;       // Custom color (only used if useGroupSettings is false)
 }
@@ -170,6 +172,7 @@ export interface CustomPeriodGroup {
     name: string;         // Group name (e.g., "Semesters", "Seasons", "Trimesters")
     enabled: boolean;     // Toggle for showing this group's column
     folder: string;       // Default folder for all periods in group
+    includeSubfolders?: boolean;  // Search sub-folders when looking for existing notes
     template: string;     // Default template for all periods in group
     color?: string;       // Default color for all periods in group
     periods: CustomPeriod[];  // Periods within this group (months cannot overlap)
@@ -214,24 +217,28 @@ export const DEFAULT_PERIODIC_NOTES: PeriodicNotesSettings = {
     weekly: {
         enabled: false,
         folder: '',
+        includeSubfolders: true,
         format: 'gggg-[W]ww',
         template: ''
     },
     monthly: {
         enabled: false,
         folder: '',
+        includeSubfolders: true,
         format: 'YYYY-MM',
         template: ''
     },
     quarterly: {
         enabled: false,
         folder: '',
+        includeSubfolders: true,
         format: 'YYYY-[Q]Q',
         template: ''
     },
     yearly: {
         enabled: false,
         folder: '',
+        includeSubfolders: true,
         format: 'YYYY',
         template: ''
     },

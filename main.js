@@ -775,24 +775,28 @@ var DEFAULT_PERIODIC_NOTES = {
   weekly: {
     enabled: false,
     folder: "",
+    includeSubfolders: true,
     format: "gggg-[W]ww",
     template: ""
   },
   monthly: {
     enabled: false,
     folder: "",
+    includeSubfolders: true,
     format: "YYYY-MM",
     template: ""
   },
   quarterly: {
     enabled: false,
     folder: "",
+    includeSubfolders: true,
     format: "YYYY-[Q]Q",
     template: ""
   },
   yearly: {
     enabled: false,
     folder: "",
+    includeSubfolders: true,
     format: "YYYY",
     template: ""
   },
@@ -3891,12 +3895,11 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
     feedbackBox.style.cssText = "background: var(--background-primary); border: 2px solid var(--interactive-accent); padding: 15px 20px; margin: 0 0 20px 0; border-radius: 6px;";
     const feedbackTitle = feedbackBox.createEl("div");
     feedbackTitle.style.cssText = "font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;";
-    feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.4.0";
+    feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.4.0+";
     const feedbackList = feedbackBox.createEl("ul");
     feedbackList.style.cssText = "margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
     feedbackList.innerHTML = `
             <li>Do the periodic notes work and behave as expected?</li>
-            <li>Do you like the new look?</li>
             <li>Is it clear how to edit the calendar's look?</li>
             <li>Did switching from an older version to the new one go smoothly?</li>
             <li>Is there anything weird, annoying, unexpected happening?</li>
@@ -4532,13 +4535,24 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
       notice.style.color = "var(--text-muted)";
       return;
     }
-    new import_obsidian5.Setting(section).setName("Folder").setDesc(`Folder where ${type} notes will be stored`).addText((text) => {
+    const folderSetting = new import_obsidian5.Setting(section).setName("Folder").addText((text) => {
       text.setPlaceholder("Leave empty for vault root").setValue(config.folder).onChange(async (value) => {
         const cleaned = value.replace(/^\/+|\/+$/g, "");
         config.folder = cleaned;
         await this.plugin.saveSettings();
       });
       new FolderSuggest(this.app, text.inputEl);
+    });
+    folderSetting.controlEl.style.cssText = "display: flex; flex-direction: column; align-items: flex-end; gap: 4px;";
+    const subfolderLabel = folderSetting.controlEl.createEl("label");
+    subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
+    const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
+    subfolderCheckbox.checked = config.includeSubfolders;
+    subfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
+    subfolderLabel.appendText("Include sub-folders");
+    subfolderCheckbox.addEventListener("change", async () => {
+      config.includeSubfolders = subfolderCheckbox.checked;
+      await this.plugin.saveSettings();
     });
     const formatSetting = new import_obsidian5.Setting(section).setName("Format").addText((text) => {
       text.setPlaceholder(defaultFormat).setValue(config.format).onChange(async (value) => {
@@ -4655,6 +4669,7 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
       const groupsList = section.createDiv();
       groupsList.style.cssText = "display: flex; flex-direction: column; gap: 12px;";
       settings.customPeriodGroups.forEach((group, groupIndex) => {
+        var _a;
         const groupEl = groupsList.createDiv();
         groupEl.style.cssText = "padding: 12px; background: var(--background-primary); border-radius: 4px; border: 1px solid var(--background-modifier-border);";
         const groupHeader = groupEl.createDiv();
@@ -4704,6 +4719,20 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
           await this.plugin.saveSettings();
         };
         new FolderSuggest(this.app, folderInput);
+        const groupSubfolderRow = groupDefaultsSection.createDiv();
+        groupSubfolderRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
+        const groupSubfolderPlaceholder = groupSubfolderRow.createEl("span");
+        groupSubfolderPlaceholder.style.cssText = "min-width: 60px; flex-shrink: 0;";
+        const groupSubfolderLabel = groupSubfolderRow.createEl("label");
+        groupSubfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
+        const groupSubfolderCheckbox = groupSubfolderLabel.createEl("input", { type: "checkbox" });
+        groupSubfolderCheckbox.checked = (_a = group.includeSubfolders) != null ? _a : true;
+        groupSubfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
+        groupSubfolderLabel.appendText("Include sub-folders");
+        groupSubfolderCheckbox.addEventListener("change", async () => {
+          group.includeSubfolders = groupSubfolderCheckbox.checked;
+          await this.plugin.saveSettings();
+        });
         const templateRow = groupDefaultsSection.createDiv();
         templateRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
         templateRow.createEl("span", { text: "Template:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
@@ -5904,6 +5933,7 @@ var CustomPeriodEditModal = class extends import_obsidian5.Modal {
     return true;
   }
   onOpen() {
+    var _a;
     const { contentEl } = this;
     contentEl.empty();
     contentEl.createEl("h2", { text: "Edit Custom Period" });
@@ -6014,7 +6044,7 @@ var CustomPeriodEditModal = class extends import_obsidian5.Modal {
       const individualSettingsLabel = useGroupSettingsSection.createDiv();
       individualSettingsLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-top: 8px; margin-bottom: 4px;";
       individualSettingsLabel.textContent = "Custom settings for this period:";
-      new import_obsidian5.Setting(useGroupSettingsSection).setName("Folder").setDesc("Folder where notes for this period will be stored").addText((text) => {
+      const periodFolderSetting = new import_obsidian5.Setting(useGroupSettingsSection).setName("Folder").addText((text) => {
         text.setPlaceholder("Leave empty for vault root").setValue(this.period.folder).onChange(async (value) => {
           const cleaned = value.replace(/^\/+|\/+$/g, "");
           this.period.folder = cleaned;
@@ -6022,6 +6052,18 @@ var CustomPeriodEditModal = class extends import_obsidian5.Modal {
           this.onSave();
         });
         new FolderSuggest(this.app, text.inputEl);
+      });
+      periodFolderSetting.controlEl.style.cssText = "display: flex; flex-direction: column; align-items: flex-end; gap: 4px;";
+      const periodSubfolderLabel = periodFolderSetting.controlEl.createEl("label");
+      periodSubfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
+      const periodSubfolderCheckbox = periodSubfolderLabel.createEl("input", { type: "checkbox" });
+      periodSubfolderCheckbox.checked = (_a = this.period.includeSubfolders) != null ? _a : true;
+      periodSubfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
+      periodSubfolderLabel.appendText("Include sub-folders");
+      periodSubfolderCheckbox.addEventListener("change", async () => {
+        this.period.includeSubfolders = periodSubfolderCheckbox.checked;
+        await this.plugin.saveSettings();
+        this.onSave();
       });
       new import_obsidian5.Setting(useGroupSettingsSection).setName("Template").setDesc("Template file to use when creating notes for this period").addText((text) => {
         text.setPlaceholder("templates/semester").setValue(this.period.template).onChange(async (value) => {
@@ -6720,6 +6762,18 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     }
     return null;
   }
+  findPeriodicNoteInFolder(filename, folderPath, includeSubfolders) {
+    if (!includeSubfolders) {
+      return this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    }
+    const files = this.app.vault.getMarkdownFiles();
+    for (const file of files) {
+      if (file.name === `${filename}.md` && (folderPath === "" || file.path.startsWith(folderPath))) {
+        return file;
+      }
+    }
+    return null;
+  }
   /**
    * Get ISO week number (1-53) for a date.
    * ISO week starts on Monday, week 1 is the week with the first Thursday.
@@ -6791,17 +6845,19 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     let folder = settings.weekly.folder;
     let format = settings.weekly.format || "gggg-[W]ww";
     let template = settings.weekly.template;
+    let includeSubfolders = settings.weekly.includeSubfolders;
     if (settings.usePeriodicNotesPlugin) {
       const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
       if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.weekly) == null ? void 0 : _d.enabled) {
         folder = periodicNotesPlugin.settings.weekly.folder || folder;
         format = periodicNotesPlugin.settings.weekly.format || format;
         template = periodicNotesPlugin.settings.weekly.template || template;
+        includeSubfolders = true;
       }
     }
     const filename = targetMoment.format(format);
     const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
     if (existingFile instanceof import_obsidian7.TFile) {
       await this.app.workspace.getLeaf(false).openFile(existingFile);
     } else {
@@ -6851,17 +6907,19 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     let folder = settings.quarterly.folder;
     let format = settings.quarterly.format || "YYYY-[Q]Q";
     let template = settings.quarterly.template;
+    let includeSubfolders = settings.quarterly.includeSubfolders;
     if (settings.usePeriodicNotesPlugin) {
       const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
       if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.quarterly) == null ? void 0 : _d.enabled) {
         folder = periodicNotesPlugin.settings.quarterly.folder || folder;
         format = periodicNotesPlugin.settings.quarterly.format || format;
         template = periodicNotesPlugin.settings.quarterly.template || template;
+        includeSubfolders = true;
       }
     }
     const filename = targetMoment.format(format);
     const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
     if (existingFile instanceof import_obsidian7.TFile) {
       await this.app.workspace.getLeaf(false).openFile(existingFile);
     } else {
@@ -6904,17 +6962,19 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     let folder = settings.monthly.folder;
     let format = settings.monthly.format || "YYYY-MM";
     let template = settings.monthly.template;
+    let includeSubfolders = settings.monthly.includeSubfolders;
     if (settings.usePeriodicNotesPlugin) {
       const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
       if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.monthly) == null ? void 0 : _d.enabled) {
         folder = periodicNotesPlugin.settings.monthly.folder || folder;
         format = periodicNotesPlugin.settings.monthly.format || format;
         template = periodicNotesPlugin.settings.monthly.template || template;
+        includeSubfolders = true;
       }
     }
     const filename = targetMoment.format(format);
     const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
     if (existingFile instanceof import_obsidian7.TFile) {
       await this.app.workspace.getLeaf(false).openFile(existingFile);
     } else {
@@ -6959,17 +7019,19 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     let folder = settings.yearly.folder;
     let format = settings.yearly.format || "YYYY";
     let template = settings.yearly.template;
+    let includeSubfolders = settings.yearly.includeSubfolders;
     if (settings.usePeriodicNotesPlugin) {
       const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
       if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.yearly) == null ? void 0 : _d.enabled) {
         folder = periodicNotesPlugin.settings.yearly.folder || folder;
         format = periodicNotesPlugin.settings.yearly.format || format;
         template = periodicNotesPlugin.settings.yearly.template || template;
+        includeSubfolders = true;
       }
     }
     const filename = targetMoment.format(format);
     const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
     if (existingFile instanceof import_obsidian7.TFile) {
       await this.app.workspace.getLeaf(false).openFile(existingFile);
     } else {
@@ -7004,6 +7066,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     return content;
   }
   async openOrCreateCustomPeriodNote(period, year, group) {
+    var _a, _b;
     const moment = window.moment;
     const firstMonth = Math.min(...period.months) - 1;
     const targetMoment = moment({ year, month: firstMonth, day: 1 });
@@ -7011,9 +7074,10 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     const folder = useGroupDefaults ? group.folder || period.folder : period.folder;
     const format = period.format || `YYYY-[${period.name}]`;
     const template = useGroupDefaults ? group.template || period.template : period.template;
+    const includeSubfolders = useGroupDefaults ? (_a = group.includeSubfolders) != null ? _a : true : (_b = period.includeSubfolders) != null ? _b : true;
     const filename = targetMoment.format(format);
     const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
     if (existingFile instanceof import_obsidian7.TFile) {
       await this.app.workspace.getLeaf(false).openFile(existingFile);
     } else {

@@ -1171,7 +1171,7 @@ export class CalendarSettingTab extends PluginSettingTab {
         containerEl: HTMLElement,
         type: 'weekly' | 'monthly' | 'quarterly' | 'yearly',
         title: string,
-        config: { enabled: boolean; folder: string; format: string; template: string; color?: string },
+        config: { enabled: boolean; folder: string; includeSubfolders: boolean; format: string; template: string; color?: string },
         defaultFormat: string
     ): void {
         const settings = this.plugin.settings.periodicNotes;
@@ -1253,9 +1253,8 @@ export class CalendarSettingTab extends PluginSettingTab {
         }
 
         // Folder
-        new Setting(section)
+        const folderSetting = new Setting(section)
             .setName('Folder')
-            .setDesc(`Folder where ${type} notes will be stored`)
             .addText(text => {
                 text
                     .setPlaceholder('Leave empty for vault root')
@@ -1267,6 +1266,19 @@ export class CalendarSettingTab extends PluginSettingTab {
                     });
                 new FolderSuggest(this.app, text.inputEl);
             });
+
+        // Checkbox under the folder input (right-aligned to match input position)
+        folderSetting.controlEl.style.cssText = 'display: flex; flex-direction: column; align-items: flex-end; gap: 4px;';
+        const subfolderLabel = folderSetting.controlEl.createEl('label');
+        subfolderLabel.style.cssText = 'display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);';
+        const subfolderCheckbox = subfolderLabel.createEl('input', { type: 'checkbox' });
+        subfolderCheckbox.checked = config.includeSubfolders;
+        subfolderCheckbox.style.cssText = 'margin: 0; cursor: pointer;';
+        subfolderLabel.appendText('Include sub-folders');
+        subfolderCheckbox.addEventListener('change', async () => {
+            config.includeSubfolders = subfolderCheckbox.checked;
+            await this.plugin.saveSettings();
+        });
 
         // Format with reference link
         const formatSetting = new Setting(section)
@@ -1500,6 +1512,22 @@ export class CalendarSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 };
                 new FolderSuggest(this.app, folderInput);
+
+                // Include sub-folders row — same flex structure as folderRow, placeholder aligns checkbox under the input
+                const groupSubfolderRow = groupDefaultsSection.createDiv();
+                groupSubfolderRow.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 6px;';
+                const groupSubfolderPlaceholder = groupSubfolderRow.createEl('span');
+                groupSubfolderPlaceholder.style.cssText = 'min-width: 60px; flex-shrink: 0;';
+                const groupSubfolderLabel = groupSubfolderRow.createEl('label');
+                groupSubfolderLabel.style.cssText = 'display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);';
+                const groupSubfolderCheckbox = groupSubfolderLabel.createEl('input', { type: 'checkbox' });
+                groupSubfolderCheckbox.checked = group.includeSubfolders ?? true;
+                groupSubfolderCheckbox.style.cssText = 'margin: 0; cursor: pointer;';
+                groupSubfolderLabel.appendText('Include sub-folders');
+                groupSubfolderCheckbox.addEventListener('change', async () => {
+                    group.includeSubfolders = groupSubfolderCheckbox.checked;
+                    await this.plugin.saveSettings();
+                });
 
                 // Template setting
                 const templateRow = groupDefaultsSection.createDiv();
@@ -3387,9 +3415,8 @@ export class CustomPeriodEditModal extends Modal {
             individualSettingsLabel.textContent = 'Custom settings for this period:';
 
             // Folder
-            new Setting(useGroupSettingsSection)
+            const periodFolderSetting = new Setting(useGroupSettingsSection)
                 .setName('Folder')
-                .setDesc('Folder where notes for this period will be stored')
                 .addText(text => {
                     text
                         .setPlaceholder('Leave empty for vault root')
@@ -3402,6 +3429,19 @@ export class CustomPeriodEditModal extends Modal {
                         });
                     new FolderSuggest(this.app, text.inputEl);
                 });
+
+            periodFolderSetting.controlEl.style.cssText = 'display: flex; flex-direction: column; align-items: flex-end; gap: 4px;';
+            const periodSubfolderLabel = periodFolderSetting.controlEl.createEl('label');
+            periodSubfolderLabel.style.cssText = 'display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);';
+            const periodSubfolderCheckbox = periodSubfolderLabel.createEl('input', { type: 'checkbox' });
+            periodSubfolderCheckbox.checked = this.period.includeSubfolders ?? true;
+            periodSubfolderCheckbox.style.cssText = 'margin: 0; cursor: pointer;';
+            periodSubfolderLabel.appendText('Include sub-folders');
+            periodSubfolderCheckbox.addEventListener('change', async () => {
+                this.period.includeSubfolders = periodSubfolderCheckbox.checked;
+                await this.plugin.saveSettings();
+                this.onSave();
+            });
 
             // Template
             new Setting(useGroupSettingsSection)

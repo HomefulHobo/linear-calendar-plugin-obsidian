@@ -840,6 +840,19 @@ export class LinearCalendarView extends ItemView {
         return null;
     }
 
+    findPeriodicNoteInFolder(filename: string, folderPath: string, includeSubfolders: boolean): TFile | null {
+        if (!includeSubfolders) {
+            return this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`) as TFile | null;
+        }
+        const files = this.app.vault.getMarkdownFiles();
+        for (const file of files) {
+            if (file.name === `${filename}.md` && (folderPath === '' || file.path.startsWith(folderPath))) {
+                return file;
+            }
+        }
+        return null;
+    }
+
     /**
      * Get ISO week number (1-53) for a date.
      * ISO week starts on Monday, week 1 is the week with the first Thursday.
@@ -947,6 +960,7 @@ export class LinearCalendarView extends ItemView {
         let folder = settings.weekly.folder;
         let format = settings.weekly.format || 'gggg-[W]ww';
         let template = settings.weekly.template;
+        let includeSubfolders = settings.weekly.includeSubfolders;
 
         // Check if we should use Periodic Notes plugin settings
         if (settings.usePeriodicNotesPlugin) {
@@ -955,6 +969,7 @@ export class LinearCalendarView extends ItemView {
                 folder = periodicNotesPlugin.settings.weekly.folder || folder;
                 format = periodicNotesPlugin.settings.weekly.format || format;
                 template = periodicNotesPlugin.settings.weekly.template || template;
+                includeSubfolders = true;
             }
         }
 
@@ -963,7 +978,7 @@ export class LinearCalendarView extends ItemView {
         const folderPath = folder ? `${folder}/` : '';
 
         // Try to find existing weekly note
-        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
 
         if (existingFile instanceof TFile) {
             await this.app.workspace.getLeaf(false).openFile(existingFile);
@@ -1033,6 +1048,7 @@ export class LinearCalendarView extends ItemView {
         let folder = settings.quarterly.folder;
         let format = settings.quarterly.format || 'YYYY-[Q]Q';
         let template = settings.quarterly.template;
+        let includeSubfolders = settings.quarterly.includeSubfolders;
 
         // Check if we should use Periodic Notes plugin settings
         if (settings.usePeriodicNotesPlugin) {
@@ -1041,6 +1057,7 @@ export class LinearCalendarView extends ItemView {
                 folder = periodicNotesPlugin.settings.quarterly.folder || folder;
                 format = periodicNotesPlugin.settings.quarterly.format || format;
                 template = periodicNotesPlugin.settings.quarterly.template || template;
+                includeSubfolders = true;
             }
         }
 
@@ -1049,7 +1066,7 @@ export class LinearCalendarView extends ItemView {
         const folderPath = folder ? `${folder}/` : '';
 
         // Try to find existing quarterly note
-        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
 
         if (existingFile instanceof TFile) {
             await this.app.workspace.getLeaf(false).openFile(existingFile);
@@ -1110,6 +1127,7 @@ export class LinearCalendarView extends ItemView {
         let folder = settings.monthly.folder;
         let format = settings.monthly.format || 'YYYY-MM';
         let template = settings.monthly.template;
+        let includeSubfolders = settings.monthly.includeSubfolders;
 
         // Check if we should use Periodic Notes plugin settings
         if (settings.usePeriodicNotesPlugin) {
@@ -1118,6 +1136,7 @@ export class LinearCalendarView extends ItemView {
                 folder = periodicNotesPlugin.settings.monthly.folder || folder;
                 format = periodicNotesPlugin.settings.monthly.format || format;
                 template = periodicNotesPlugin.settings.monthly.template || template;
+                includeSubfolders = true;
             }
         }
 
@@ -1126,7 +1145,7 @@ export class LinearCalendarView extends ItemView {
         const folderPath = folder ? `${folder}/` : '';
 
         // Try to find existing monthly note
-        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
 
         if (existingFile instanceof TFile) {
             await this.app.workspace.getLeaf(false).openFile(existingFile);
@@ -1189,6 +1208,7 @@ export class LinearCalendarView extends ItemView {
         let folder = settings.yearly.folder;
         let format = settings.yearly.format || 'YYYY';
         let template = settings.yearly.template;
+        let includeSubfolders = settings.yearly.includeSubfolders;
 
         // Check if we should use Periodic Notes plugin settings
         if (settings.usePeriodicNotesPlugin) {
@@ -1197,6 +1217,7 @@ export class LinearCalendarView extends ItemView {
                 folder = periodicNotesPlugin.settings.yearly.folder || folder;
                 format = periodicNotesPlugin.settings.yearly.format || format;
                 template = periodicNotesPlugin.settings.yearly.template || template;
+                includeSubfolders = true;
             }
         }
 
@@ -1205,7 +1226,7 @@ export class LinearCalendarView extends ItemView {
         const folderPath = folder ? `${folder}/` : '';
 
         // Try to find existing yearly note
-        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
 
         if (existingFile instanceof TFile) {
             await this.app.workspace.getLeaf(false).openFile(existingFile);
@@ -1266,13 +1287,16 @@ export class LinearCalendarView extends ItemView {
         const folder = useGroupDefaults ? (group.folder || period.folder) : period.folder;
         const format = period.format || `YYYY-[${period.name}]`;
         const template = useGroupDefaults ? (group.template || period.template) : period.template;
+        const includeSubfolders = useGroupDefaults
+            ? (group.includeSubfolders ?? true)
+            : (period.includeSubfolders ?? true);
 
         // Format the filename using moment
         const filename = targetMoment.format(format);
         const folderPath = folder ? `${folder}/` : '';
 
         // Try to find existing custom period note
-        const existingFile = this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
 
         if (existingFile instanceof TFile) {
             await this.app.workspace.getLeaf(false).openFile(existingFile);

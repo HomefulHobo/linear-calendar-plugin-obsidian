@@ -873,6 +873,7 @@ var DEFAULT_SETTINGS = {
   // Show notes with date + text by default
   hideDateInTitle: false,
   // Show full title by default
+  hideSecondDateInTitle: false,
   calendarWidth: "fit-screen",
   // Fit to screen width by default
   cellMinWidth: 30,
@@ -4440,10 +4441,22 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
       this.plugin.settings.showNotesWithDateAndText = value;
       await this.plugin.saveSettings();
     }));
-    new import_obsidian5.Setting(dateTextSection).setName("Hide date portion in titles").setDesc('When displaying notes in the calendar, hide the date portion of the title and only show the text (e.g., show "Meeting Notes" instead of "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideDateInTitle).onChange(async (value) => {
-      this.plugin.settings.hideDateInTitle = value;
+    const hideSecondDateSetting = new import_obsidian5.Setting(dateTextSection).setName("Hide second date portion (for multi-day notes)").setDesc('Also hide the second date in multi-day note titles (e.g., show "Trip" instead of "to 2024-01-17 Trip"). Note: enabling this will also hide whatever appears between the two dates (e.g., "to" or "\u2013").').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideSecondDateInTitle).onChange(async (value) => {
+      this.plugin.settings.hideSecondDateInTitle = value;
       await this.plugin.saveSettings();
     }));
+    hideSecondDateSetting.settingEl.style.cssText = `
+            margin-left: 24px;
+            border-left: 2px solid var(--background-modifier-border);
+            padding-left: 12px;
+            display: ${this.plugin.settings.hideDateInTitle ? "flex" : "none"};
+        `;
+    new import_obsidian5.Setting(dateTextSection).setName("Hide date portion in titles").setDesc('When displaying notes in the calendar, hide the date portion of the title and only show the text (e.g., show "Meeting Notes" instead of "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideDateInTitle).onChange(async (value) => {
+      this.plugin.settings.hideDateInTitle = value;
+      hideSecondDateSetting.settingEl.style.display = value ? "flex" : "none";
+      await this.plugin.saveSettings();
+    }));
+    dateTextSection.insertBefore(hideSecondDateSetting.settingEl, null);
   }
   renderPeriodicNotesSection(containerEl) {
     const settings = this.plugin.settings.periodicNotes;
@@ -6724,7 +6737,12 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     const datePattern = /\d{4}-\d{2}-\d{2}/g;
     const matches = file.basename.match(datePattern);
     if (matches && matches.length > 1) {
-      return file.basename;
+      if (!this.plugin.settings.hideSecondDateInTitle) {
+        const startDatePattern2 = /^\d{4}-\d{2}-\d{2}\s*/;
+        return file.basename.replace(startDatePattern2, "").trim() || file.basename;
+      }
+      const multiDatePattern = /^\d{4}-\d{2}-\d{2}\s*.*?\d{4}-\d{2}-\d{2}\s*/;
+      return file.basename.replace(multiDatePattern, "").trim() || file.basename;
     }
     const startDatePattern = /^\d{4}-\d{2}-\d{2}\s*/;
     return file.basename.replace(startDatePattern, "").trim() || file.basename;

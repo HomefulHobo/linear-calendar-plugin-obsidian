@@ -107,11 +107,13 @@ Events spanning multiple days are rendered as horizontal bars:
 - Implementation uses `mouseenter`/`mouseleave` events instead of native HTML `title` attribute
 
 **Smart Date Hiding**:
-- Optional setting to hide date portion from displayed titles
-- Smart logic: If multiple dates exist in title, always shows full title to preserve context
-- Examples where full title is preserved:
-  - "2024-01-15 Meeting about 2024-02-20" (referencing another date)
-  - "2024-01-01–2024-01-20 Event" (multi-day events with date range)
+- `hideDateInTitle`: hides the first (or only) date from displayed titles
+- `hideSecondDateInTitle`: child setting — only shown in UI when `hideDateInTitle` is on; strips the second date *and* whatever connector text sits between the two dates (e.g., "to", "–")
+- Behaviour matrix:
+  - Single date + `hideDateInTitle` on → strips leading date
+  - Two dates + `hideDateInTitle` on, `hideSecondDateInTitle` off → strips first date only, keeps connector + second date
+  - Two dates + both on → strips everything from first date through second date, leaves trailing text only
+- The child setting is rendered first in the DOM, then `insertBefore(…, null)` moves it after the parent to achieve correct visual order while keeping the parent's `onChange` a clean reference to the child element
 
 **Calendar Width Modes**:
 - **Fit to screen**: Default mode, calendar adjusts to fit available screen width (table-layout: fixed)
@@ -201,12 +203,19 @@ Show, open, or create periodic notes directly in the calendar:
   - Template support for each period
   - Custom period groups with month ranges and year basis options
 - **Smart Formatting**: Comprehensive date formatting with ISO week numbers, quarters, month names
+- **Sub-folder Search**: All note types (weekly/monthly/quarterly/yearly/custom) search sub-folders of the configured folder by default. Controlled per note type via `includeSubfolders` field (default `true`). When the Periodic Notes plugin is active for a type, sub-folders are always searched automatically regardless of the setting.
 
 **Implementation**:
-- Types: `PeriodicNotesSettings`, `PeriodicNoteConfig`, `CustomPeriod` in `types.ts`
+- Types: `PeriodicNotesSettings`, `PeriodicNoteConfig`, `CustomPeriod`, `CustomPeriodGroup` in `types.ts`
 - Formatting: `CalendarView.ts:formatDate()`, helper methods for week/quarter calculation
 - Regex Conversion: `CalendarView.ts:formatToRegexPattern()` for pattern matching
-- Settings: `SettingsTab.ts` Periodic Notes tab
+- Sub-folder lookup: `CalendarView.ts:findPeriodicNoteInFolder()` — scans all markdown files when `includeSubfolders` is true, falls back to exact-path lookup when false
+- Settings: `SettingsTab.ts` Periodic Notes tab — "Include sub-folders" checkbox rendered inline under each folder input (in `controlEl`, column layout); custom period group uses a placeholder-span row to align checkbox under the input
+
+**`includeSubfolders` field placement**:
+- `PeriodicNoteConfig` (weekly/monthly/quarterly/yearly): non-optional `boolean`, default `true` in `DEFAULT_PERIODIC_NOTES`
+- `CustomPeriodGroup`: optional `boolean?` — use `?? true` in code because arrays aren't deep-merged (user data replaces defaults entirely)
+- `CustomPeriod`: optional `boolean?` — same reason, same pattern
 
 ### 10. Banner System
 
@@ -450,7 +459,7 @@ This plugin is officially listed in the Obsidian community plugins directory (su
 
 ## Version History
 
-- **next** (unreleased): Banner registry refactor and BRAT migration notice — see `CHANGELOG_NEXT.md`
+- **next** (unreleased): Banner registry refactor, BRAT migration notice, periodic notes sub-folder search — see `CHANGELOG_NEXT.md`
 
 - **0.4.4** (2026-05-18): CSS lint fixes and README update
   - Resolved all CSS warnings from Obsidian plugin validator
@@ -606,6 +615,6 @@ When working on this project:
 
 ---
 
-**Last Updated**: 2026-05-18
+**Last Updated**: 2026-05-19
 **Plugin Version**: 0.4.4 (next in progress — see CHANGELOG_NEXT.md)
 **Maintained for**: Claude Code and other AI assistants

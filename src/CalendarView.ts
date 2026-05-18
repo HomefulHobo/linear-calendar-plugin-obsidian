@@ -787,12 +787,19 @@ export class LinearCalendarView extends ItemView {
         const datePattern = /\d{4}-\d{2}-\d{2}/g;
         const matches = file.basename.match(datePattern);
 
-        // If there are multiple dates, don't hide any of them
         if (matches && matches.length > 1) {
-            return file.basename;
+            if (!this.plugin.settings.hideSecondDateInTitle) {
+                // Only hide the first date, keep everything after it
+                const startDatePattern = /^\d{4}-\d{2}-\d{2}\s*/;
+                return file.basename.replace(startDatePattern, '').trim() || file.basename;
+            }
+            // Hide first date, the connector, and the second date
+            // Pattern: leading date, optional whitespace, any non-date connector text, second date, optional trailing whitespace
+            const multiDatePattern = /^\d{4}-\d{2}-\d{2}\s*.*?\d{4}-\d{2}-\d{2}\s*/;
+            return file.basename.replace(multiDatePattern, '').trim() || file.basename;
         }
 
-        // Remove date portion from the beginning
+        // Single date: remove date portion from the beginning
         const startDatePattern = /^\d{4}-\d{2}-\d{2}\s*/;
         return file.basename.replace(startDatePattern, '').trim() || file.basename;
     }

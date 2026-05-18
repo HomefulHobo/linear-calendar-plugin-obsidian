@@ -1068,6 +1068,22 @@ export class CalendarSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        const hideSecondDateSetting = new Setting(dateTextSection)
+            .setName('Hide second date portion (for multi-day notes)')
+            .setDesc('Also hide the second date in multi-day note titles (e.g., show "Trip" instead of "to 2024-01-17 Trip"). Note: enabling this will also hide whatever appears between the two dates (e.g., "to" or "–").')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.hideSecondDateInTitle)
+                .onChange(async (value) => {
+                    this.plugin.settings.hideSecondDateInTitle = value;
+                    await this.plugin.saveSettings();
+                }));
+        hideSecondDateSetting.settingEl.style.cssText = `
+            margin-left: 24px;
+            border-left: 2px solid var(--background-modifier-border);
+            padding-left: 12px;
+            display: ${this.plugin.settings.hideDateInTitle ? 'flex' : 'none'};
+        `;
+
         new Setting(dateTextSection)
             .setName('Hide date portion in titles')
             .setDesc('When displaying notes in the calendar, hide the date portion of the title and only show the text (e.g., show "Meeting Notes" instead of "2024-01-15 Meeting Notes")')
@@ -1075,8 +1091,11 @@ export class CalendarSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.hideDateInTitle)
                 .onChange(async (value) => {
                     this.plugin.settings.hideDateInTitle = value;
+                    hideSecondDateSetting.settingEl.style.display = value ? 'flex' : 'none';
                     await this.plugin.saveSettings();
                 }));
+
+        dateTextSection.insertBefore(hideSecondDateSetting.settingEl, null);
     }
 
     renderPeriodicNotesSection(containerEl: HTMLElement): void {

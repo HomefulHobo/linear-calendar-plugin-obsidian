@@ -8,6 +8,7 @@ export interface LinearCalendarSettings {
     showDailyNotesInCells: boolean;  // Show daily notes as separate note cells
     showNotesWithDateAndText: boolean;  // Show notes with date + text in title
     hideDateInTitle: boolean;  // Hide the date portion in note titles
+    hideSecondDateInTitle: boolean;  // Also hide the second date (and connector) for multi-day notes
     calendarWidth: 'fit-screen' | 'scrollable';  // Calendar width mode
     cellMinWidth: number;  // Minimum width per day cell in pixels (when scrollable)
     columnAlignment: 'weekday' | 'date';  // Align columns by weekday or by date
@@ -313,6 +314,7 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
     showDailyNotesInCells: false,  // Don't show daily notes as cells by default
     showNotesWithDateAndText: true,  // Show notes with date + text by default
     hideDateInTitle: false,  // Show full title by default
+    hideSecondDateInTitle: false,
     calendarWidth: 'fit-screen',  // Fit to screen width by default
     cellMinWidth: 30,  // Minimum 30px per cell when scrollable
     columnAlignment: 'weekday',  // Align by weekday by default

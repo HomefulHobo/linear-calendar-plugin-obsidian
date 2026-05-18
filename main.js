@@ -772,7 +772,6 @@ var DEFAULT_PERIODIC_NOTES = {
   },
   showWeekNumbers: true,
   showQuarters: false,
-  hasSeenWelcomeBanner: false,
   weekly: {
     enabled: false,
     folder: "",
@@ -917,7 +916,6 @@ var DEFAULT_SETTINGS = {
   quickNoteCreation: {
     enabled: true,
     showAddNoteButton: true,
-    hasSeenWelcomeBanner: false,
     defaultFolder: "dailynotes",
     customFolder: "",
     defaultStartDateProperty: "date",
@@ -928,6 +926,11 @@ var DEFAULT_SETTINGS = {
     ]
   },
   periodicNotes: { ...DEFAULT_PERIODIC_NOTES },
+  banners: {
+    quickNotes: false,
+    periodicNotes: false,
+    communityPlugin: false
+  },
   experimental: {
     multilineNotes: false,
     verticalText: false,
@@ -936,6 +939,78 @@ var DEFAULT_SETTINGS = {
   }
 };
 var VIEW_TYPE_CALENDAR = "linear-calendar-view";
+
+// src/banners.ts
+var BANNERS = [
+  {
+    id: "quick-notes",
+    cssClass: "quick-note-welcome-banner",
+    borderColor: "var(--interactive-accent)",
+    title: "\u{1F988}\u2728 Get Faster",
+    contentHtml: `
+            <strong>Click "Add Note"</strong> above to create a new note, or<br>
+            <strong>Cmd/Ctrl+Click on any day</strong> number to create a dated note instantly<br>
+            <strong>Cmd/Ctrl+Click and drag</strong> across days to create a multi-day note<br>
+            \u2699\uFE0F <strong>Configure</strong> your preferred default behavior in this plugin's settings
+        `,
+    settingsName: "Show Quick Notes banner",
+    settingsDesc: "Display the Quick Notes welcome banner with tips about creating notes quickly",
+    shouldShow: (s) => s.quickNoteCreation.enabled && !s.banners.quickNotes,
+    dismiss: (s) => {
+      s.banners.quickNotes = true;
+    },
+    reset: (s) => {
+      s.banners.quickNotes = false;
+    }
+  },
+  {
+    id: "periodic-notes",
+    cssClass: "periodic-notes-welcome-banner",
+    borderColor: "var(--text-accent)",
+    title: "\u{1F4C5} Periodic Notes",
+    contentHtml: `
+            <strong>Show periodic notes</strong> in the calendar<br>
+            <strong>Click on periodic notes</strong> to create or open them<br>
+            <strong>Compatible with the Periodic Notes Plugin</strong> so you don't have to transfer anything<br>
+            <strong>Show various periods:</strong> Weekly, Monthly, Quarterly, Yearly, Custom Period<br>
+            \u2699\uFE0F <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
+        `,
+    settingsName: "Show Periodic Notes banner",
+    settingsDesc: "Display the Periodic Notes welcome banner with tips about weekly, monthly, and quarterly notes",
+    shouldShow: (s) => !s.banners.periodicNotes,
+    dismiss: (s) => {
+      s.banners.periodicNotes = true;
+    },
+    reset: (s) => {
+      s.banners.periodicNotes = false;
+    }
+  },
+  {
+    id: "community-plugin",
+    cssClass: "community-plugin-banner",
+    borderColor: "var(--text-accent)",
+    title: "\u{1F389} Now on Community Plugins",
+    contentHtml: `
+            <strong>Linear Calendar is now available in Obsidian's Community Plugins</strong> \u2014 for more transparency and ease of use!<br><br>
+            <strong>Migration is seamless</strong> \u2014 your plugin folder and settings stay exactly the same, only the update method changes.<br>
+            Your settings are stored in your vault at <code>.obsidian/plugins/linear-calendar/data.json</code> and are not affected.<br><br>
+            <strong>How to migrate:</strong><br>
+            1. Remove this plugin in BRAT settings (this will <em>not</em> uninstall the plugin)<br>
+            2. Go to <strong>Linear Calendar</strong> through Settings \u2192 Community Plugins \u2013 it should already be installed<br>
+            \u26A0\uFE0F Always back up your vault before migrating, just to be safe.
+        `,
+    settingsName: "Show Community Plugin banner",
+    settingsDesc: "Display the migration banner for users who installed via BRAT",
+    shouldShow: (s, ctx) => ctx.isBratUser && !s.banners.communityPlugin,
+    dismiss: (s) => {
+      s.banners.communityPlugin = true;
+    },
+    reset: (s) => {
+      s.banners.communityPlugin = false;
+    },
+    settingsVisible: (ctx) => ctx.isBratUser
+  }
+];
 
 // src/SettingsTab.ts
 var import_obsidian5 = require("obsidian");
@@ -4935,16 +5010,15 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
     bannerDesc.style.marginBottom = "15px";
     const bannerSection = containerEl.createDiv();
     bannerSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
-    new import_obsidian5.Setting(bannerSection).setName("Show Quick Notes banner").setDesc("Display the Quick Notes welcome banner with tips about creating notes quickly").addButton((button) => button.setButtonText("Show again").onClick(async () => {
-      this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = false;
-      await this.plugin.saveSettings();
-      new (require("obsidian")).Notice("Quick Notes banner will show on next calendar view");
-    }));
-    new import_obsidian5.Setting(bannerSection).setName("Show Periodic Notes banner").setDesc("Display the Periodic Notes welcome banner with tips about weekly, monthly, and quarterly notes").addButton((button) => button.setButtonText("Show again").onClick(async () => {
-      this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = false;
-      await this.plugin.saveSettings();
-      new (require("obsidian")).Notice("Periodic Notes banner will show on next calendar view");
-    }));
+    const bannerCtx = { isBratUser: this.plugin.isBratUser };
+    for (const banner of BANNERS) {
+      if (banner.settingsVisible && !banner.settingsVisible(bannerCtx)) continue;
+      new import_obsidian5.Setting(bannerSection).setName(banner.settingsName).setDesc(banner.settingsDesc).addButton((button) => button.setButtonText("Show again").onClick(async () => {
+        banner.reset(this.plugin.settings);
+        await this.plugin.saveSettings();
+        new import_obsidian5.Notice(`${banner.settingsName} will show on next calendar view`);
+      }));
+    }
   }
   renderColorCategoriesSection(containerEl) {
     const config = this.plugin.settings.colorCategories;
@@ -6130,11 +6204,11 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     };
     const notesWithDates = await this.getNotesWithDates();
     const multiDayEntries = this.processMultiDayEntries(notesWithDates);
-    if (this.plugin.settings.quickNoteCreation.enabled && !this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner) {
-      this.renderWelcomeBanner(container);
-    }
-    if (!this.plugin.settings.periodicNotes.hasSeenWelcomeBanner) {
-      this.renderPeriodicNotesWelcomeBanner(container);
+    const bannerCtx = { isBratUser: this.plugin.isBratUser };
+    for (const banner of BANNERS) {
+      if (banner.shouldShow(this.plugin.settings, bannerCtx)) {
+        this.renderBanner(container, banner);
+      }
     }
     if (this.plugin.settings.colorCategories.enabled && this.plugin.settings.colorCategories.showCategoryIndex) {
       this.renderCategoryIndexRow(container);
@@ -7059,19 +7133,15 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     this.dragEndDate = null;
     this.isDragging = false;
   }
-  /**
-   * Render the category index as a standalone section between header and calendar.
-   * Shows all enabled categories as clickable chips, or a welcome message if no categories exist.
-   */
-  renderWelcomeBanner(container) {
-    const banner = container.createDiv({ cls: "quick-note-welcome-banner" });
+  renderBanner(container, def) {
+    const banner = container.createDiv({ cls: def.cssClass });
     banner.style.cssText = `
             background: var(--background-secondary);
             padding: 16px 20px;
             border-radius: 8px;
             margin-top: 16px;
             margin-bottom: 16px;
-            border: 2px solid var(--interactive-accent);
+            border: 2px solid ${def.borderColor};
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -7079,16 +7149,11 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
         `;
     const contentWrapper = banner.createDiv();
     contentWrapper.style.cssText = "flex: 1;";
-    const title = contentWrapper.createEl("div", { text: "\u{1F988}\u2728 Get Faster" });
+    const title = contentWrapper.createEl("div", { text: def.title });
     title.style.cssText = "font-weight: 600; font-size: 1.05em; margin-bottom: 8px;";
     const message = contentWrapper.createEl("div");
     message.style.cssText = "color: var(--text-muted); font-size: 0.95em; line-height: 1.5;";
-    message.innerHTML = `
-            <strong>Click "Add Note"</strong> above to create a new note, or<br>
-            <strong>Cmd/Ctrl+Click on any day</strong> number to create a dated note instantly<br>
-            <strong>Cmd/Ctrl+Click and drag</strong> across days to create a multi-day note<br>
-            \u2699\uFE0F <strong>Configure</strong> your preferred default behavior in this plugin's settings
-        `;
+    message.innerHTML = def.contentHtml;
     const closeBtn = banner.createEl("button", { text: "\xD7" });
     closeBtn.style.cssText = `
             background: none;
@@ -7114,67 +7179,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
       closeBtn.style.background = "none";
     };
     closeBtn.onclick = async () => {
-      this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = true;
-      await this.plugin.saveSettings();
-      banner.remove();
-    };
-  }
-  /**
-   * Render the periodic notes welcome banner with tips about weekly, monthly, quarterly notes.
-   */
-  renderPeriodicNotesWelcomeBanner(container) {
-    const banner = container.createDiv({ cls: "periodic-notes-welcome-banner" });
-    banner.style.cssText = `
-            background: var(--background-secondary);
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-top: 16px;
-            margin-bottom: 16px;
-            border: 2px solid var(--text-accent);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        `;
-    const contentWrapper = banner.createDiv();
-    contentWrapper.style.cssText = "flex: 1;";
-    const title = contentWrapper.createEl("div", { text: "\u{1F4C5} Periodic Notes" });
-    title.style.cssText = "font-weight: 600; font-size: 1.05em; margin-bottom: 8px;";
-    const message = contentWrapper.createEl("div");
-    message.style.cssText = "color: var(--text-muted); font-size: 0.95em; line-height: 1.5;";
-    message.innerHTML = `
-            <strong>Show periodic notes</strong> in the calendar<br>
-            <strong>Click on periodic notes</strong> to create or open them<br>
-            <strong>Compatible with the Periodic Notes Plugin</strong> so you don't have to transfer anything<br>
-            <strong>Show various periods:</strong> Weekly, Monthly, Quarterly, Yearly, Custom Period<br>
-            \u2699\uFE0F <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
-        `;
-    const closeBtn = banner.createEl("button", { text: "\xD7" });
-    closeBtn.style.cssText = `
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 24px;
-            line-height: 1;
-            cursor: pointer;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            flex-shrink: 0;
-        `;
-    closeBtn.setAttribute("aria-label", "Dismiss banner");
-    closeBtn.onmouseenter = () => {
-      closeBtn.style.background = "var(--background-modifier-hover)";
-    };
-    closeBtn.onmouseleave = () => {
-      closeBtn.style.background = "none";
-    };
-    closeBtn.onclick = async () => {
-      this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = true;
+      def.dismiss(this.plugin.settings);
       await this.plugin.saveSettings();
       banner.remove();
     };
@@ -7828,11 +7833,13 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
 var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
   constructor() {
     super(...arguments);
+    this.isBratUser = false;
     // Plugin icon shown in settings sidebar, ribbon, and tabs
     this.icon = "calendar-range";
   }
   async onload() {
     await this.loadSettings();
+    this.isBratUser = await this.detectBratUser();
     this.registerView(
       VIEW_TYPE_CALENDAR,
       (leaf) => new LinearCalendarView(leaf, this)
@@ -7885,6 +7892,7 @@ var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
     const loadedData = await this.loadData();
     this.settings = this.deepMerge(DEFAULT_SETTINGS, loadedData || {});
     let migrated = false;
+    migrated = this.migrateBannerSettings() || migrated;
     migrated = this.migrateQuinterExample() || migrated;
     if (migrated) {
       await this.saveData(this.settings);
@@ -7912,6 +7920,36 @@ var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
    */
   isPlainObject(value) {
     return value !== null && typeof value === "object" && !Array.isArray(value) && Object.prototype.toString.call(value) === "[object Object]";
+  }
+  async detectBratUser() {
+    try {
+      const bratPath = `${this.app.vault.configDir}/plugins/obsidian42-brat/data.json`;
+      const raw = await this.app.vault.adapter.read(bratPath);
+      const data = JSON.parse(raw);
+      return Array.isArray(data.pluginList) && data.pluginList.includes("HomefulHobo/linear-calendar-plugin-obsidian");
+    } catch (e) {
+      return false;
+    }
+  }
+  /**
+   * Migrate banner dismissed state from per-feature hasSeenWelcomeBanner flags
+   * to the unified settings.banners object.
+   */
+  migrateBannerSettings() {
+    var _a, _b;
+    const raw = this.settings;
+    let migrated = false;
+    if ("hasSeenWelcomeBanner" in ((_a = raw.quickNoteCreation) != null ? _a : {})) {
+      this.settings.banners.quickNotes = raw.quickNoteCreation.hasSeenWelcomeBanner;
+      delete raw.quickNoteCreation.hasSeenWelcomeBanner;
+      migrated = true;
+    }
+    if ("hasSeenWelcomeBanner" in ((_b = raw.periodicNotes) != null ? _b : {})) {
+      this.settings.banners.periodicNotes = raw.periodicNotes.hasSeenWelcomeBanner;
+      delete raw.periodicNotes.hasSeenWelcomeBanner;
+      migrated = true;
+    }
+    return migrated;
   }
   /**
    * Migrate Quinter example from v0.4.0 with incorrect months, names, and formats.

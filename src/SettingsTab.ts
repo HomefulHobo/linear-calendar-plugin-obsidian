@@ -1,6 +1,7 @@
-import { App, PluginSettingTab, Setting, setIcon, Modal } from 'obsidian';
+import { App, Notice, PluginSettingTab, Setting, setIcon, Modal } from 'obsidian';
 import LinearCalendarPlugin from './main';
 import { Condition, ColorCategory, CustomPeriod, CustomPeriodGroup } from './types';
+import { BANNERS } from './banners';
 import { FolderSuggest } from './FolderSuggest';
 import { FileSuggest } from './FileSuggest';
 import { IconSuggest } from './IconSuggest';
@@ -1955,27 +1956,20 @@ export class CalendarSettingTab extends PluginSettingTab {
         const bannerSection = containerEl.createDiv();
         bannerSection.style.cssText = 'background: var(--background-secondary); padding: 15px; border-radius: 5px;';
 
-        new Setting(bannerSection)
-            .setName('Show Quick Notes banner')
-            .setDesc('Display the Quick Notes welcome banner with tips about creating notes quickly')
-            .addButton(button => button
-                .setButtonText('Show again')
-                .onClick(async () => {
-                    this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = false;
-                    await this.plugin.saveSettings();
-                    new (require('obsidian').Notice)('Quick Notes banner will show on next calendar view');
-                }));
-
-        new Setting(bannerSection)
-            .setName('Show Periodic Notes banner')
-            .setDesc('Display the Periodic Notes welcome banner with tips about weekly, monthly, and quarterly notes')
-            .addButton(button => button
-                .setButtonText('Show again')
-                .onClick(async () => {
-                    this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = false;
-                    await this.plugin.saveSettings();
-                    new (require('obsidian').Notice)('Periodic Notes banner will show on next calendar view');
-                }));
+        const bannerCtx = { isBratUser: this.plugin.isBratUser };
+        for (const banner of BANNERS) {
+            if (banner.settingsVisible && !banner.settingsVisible(bannerCtx)) continue;
+            new Setting(bannerSection)
+                .setName(banner.settingsName)
+                .setDesc(banner.settingsDesc)
+                .addButton(button => button
+                    .setButtonText('Show again')
+                    .onClick(async () => {
+                        banner.reset(this.plugin.settings);
+                        await this.plugin.saveSettings();
+                        new Notice(`${banner.settingsName} will show on next calendar view`);
+                    }));
+        }
     }
 
     renderColorCategoriesSection(containerEl: HTMLElement): void {

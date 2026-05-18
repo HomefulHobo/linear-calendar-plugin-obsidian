@@ -1,6 +1,7 @@
 import { ItemView, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 import LinearCalendarPlugin from './main';
 import { VIEW_TYPE_CALENDAR, NoteInfo, MultiDayEntry, Condition, ColorCategory, CustomPeriod, CustomPeriodGroup } from './types';
+import { BANNERS, BannerDef } from './banners';
 import { CategoryEditModal } from './SettingsTab';
 
 export class LinearCalendarView extends ItemView {
@@ -149,15 +150,11 @@ export class LinearCalendarView extends ItemView {
         const notesWithDates = await this.getNotesWithDates();
         const multiDayEntries = this.processMultiDayEntries(notesWithDates);
 
-        // Show welcome banner if user hasn't seen it yet
-        if (this.plugin.settings.quickNoteCreation.enabled &&
-            !this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner) {
-            this.renderWelcomeBanner(container);
-        }
-
-        // Show periodic notes welcome banner if not yet dismissed
-        if (!this.plugin.settings.periodicNotes.hasSeenWelcomeBanner) {
-            this.renderPeriodicNotesWelcomeBanner(container);
+        const bannerCtx = { isBratUser: this.plugin.isBratUser };
+        for (const banner of BANNERS) {
+            if (banner.shouldShow(this.plugin.settings, bannerCtx)) {
+                this.renderBanner(container, banner);
+            }
         }
 
         // Render category index row (if enabled) - between header and calendar
@@ -1433,19 +1430,15 @@ export class LinearCalendarView extends ItemView {
         this.isDragging = false;
     }
 
-    /**
-     * Render the category index as a standalone section between header and calendar.
-     * Shows all enabled categories as clickable chips, or a welcome message if no categories exist.
-     */
-    renderWelcomeBanner(container: HTMLElement): void {
-        const banner = container.createDiv({ cls: 'quick-note-welcome-banner' });
+    renderBanner(container: HTMLElement, def: BannerDef): void {
+        const banner = container.createDiv({ cls: def.cssClass });
         banner.style.cssText = `
             background: var(--background-secondary);
             padding: 16px 20px;
             border-radius: 8px;
             margin-top: 16px;
             margin-bottom: 16px;
-            border: 2px solid var(--interactive-accent);
+            border: 2px solid ${def.borderColor};
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -1455,17 +1448,12 @@ export class LinearCalendarView extends ItemView {
         const contentWrapper = banner.createDiv();
         contentWrapper.style.cssText = 'flex: 1;';
 
-        const title = contentWrapper.createEl('div', { text: '🦈✨ Get Faster' });
+        const title = contentWrapper.createEl('div', { text: def.title });
         title.style.cssText = 'font-weight: 600; font-size: 1.05em; margin-bottom: 8px;';
 
         const message = contentWrapper.createEl('div');
         message.style.cssText = 'color: var(--text-muted); font-size: 0.95em; line-height: 1.5;';
-        message.innerHTML = `
-            <strong>Click "Add Note"</strong> above to create a new note, or<br>
-            <strong>Cmd/Ctrl+Click on any day</strong> number to create a dated note instantly<br>
-            <strong>Cmd/Ctrl+Click and drag</strong> across days to create a multi-day note<br>
-            ⚙️ <strong>Configure</strong> your preferred default behavior in this plugin's settings
-        `;
+        message.innerHTML = def.contentHtml;
 
         const closeBtn = banner.createEl('button', { text: '×' });
         closeBtn.style.cssText = `
@@ -1492,72 +1480,7 @@ export class LinearCalendarView extends ItemView {
             closeBtn.style.background = 'none';
         };
         closeBtn.onclick = async () => {
-            this.plugin.settings.quickNoteCreation.hasSeenWelcomeBanner = true;
-            await this.plugin.saveSettings();
-            banner.remove();
-        };
-    }
-
-    /**
-     * Render the periodic notes welcome banner with tips about weekly, monthly, quarterly notes.
-     */
-    renderPeriodicNotesWelcomeBanner(container: HTMLElement): void {
-        const banner = container.createDiv({ cls: 'periodic-notes-welcome-banner' });
-        banner.style.cssText = `
-            background: var(--background-secondary);
-            padding: 16px 20px;
-            border-radius: 8px;
-            margin-top: 16px;
-            margin-bottom: 16px;
-            border: 2px solid var(--text-accent);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        `;
-
-        const contentWrapper = banner.createDiv();
-        contentWrapper.style.cssText = 'flex: 1;';
-
-        const title = contentWrapper.createEl('div', { text: '📅 Periodic Notes' });
-        title.style.cssText = 'font-weight: 600; font-size: 1.05em; margin-bottom: 8px;';
-
-        const message = contentWrapper.createEl('div');
-        message.style.cssText = 'color: var(--text-muted); font-size: 0.95em; line-height: 1.5;';
-        message.innerHTML = `
-            <strong>Show periodic notes</strong> in the calendar<br>
-            <strong>Click on periodic notes</strong> to create or open them<br>
-            <strong>Compatible with the Periodic Notes Plugin</strong> so you don't have to transfer anything<br>
-            <strong>Show various periods:</strong> Weekly, Monthly, Quarterly, Yearly, Custom Period<br>
-            ⚙️ <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
-        `;
-
-        const closeBtn = banner.createEl('button', { text: '×' });
-        closeBtn.style.cssText = `
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 24px;
-            line-height: 1;
-            cursor: pointer;
-            padding: 0;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            flex-shrink: 0;
-        `;
-        closeBtn.setAttribute('aria-label', 'Dismiss banner');
-        closeBtn.onmouseenter = () => {
-            closeBtn.style.background = 'var(--background-modifier-hover)';
-        };
-        closeBtn.onmouseleave = () => {
-            closeBtn.style.background = 'none';
-        };
-        closeBtn.onclick = async () => {
-            this.plugin.settings.periodicNotes.hasSeenWelcomeBanner = true;
+            def.dismiss(this.plugin.settings);
             await this.plugin.saveSettings();
             banner.remove();
         };

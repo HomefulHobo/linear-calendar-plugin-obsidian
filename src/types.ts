@@ -31,9 +31,16 @@ export interface LinearCalendarSettings {
 
     // Periodic notes (weekly, monthly, quarterly, yearly, custom)
     periodicNotes: PeriodicNotesSettings;
+    banners: BannerSettings;
 
     // Experimental features
     experimental: ExperimentalFeatures;
+}
+
+export interface BannerSettings {
+    quickNotes: boolean;
+    periodicNotes: boolean;
+    communityPlugin: boolean;
 }
 
 export interface ExperimentalFeatures {
@@ -101,7 +108,6 @@ export interface MetadataEntry {
 export interface QuickNoteCreationConfig {
     enabled: boolean;                           // Master toggle
     showAddNoteButton: boolean;                 // Show "Add Note" button in top bar
-    hasSeenWelcomeBanner: boolean;              // Track if user has dismissed welcome banner
     defaultFolder: 'default' | 'dailynotes' | 'custom';  // Folder mode
     customFolder: string;                       // Custom folder path
     defaultStartDateProperty: string;           // Default: "date"
@@ -187,7 +193,6 @@ export interface PeriodicNotesSettings {
     weekBorderColor: WeekBorderColorConfig;  // Border color between weeks in header-row mode
     showWeekNumbers: boolean;
     showQuarters: boolean;
-    hasSeenWelcomeBanner: boolean;  // Track if user has dismissed periodic notes welcome banner
     weekly: PeriodicNoteConfig;
     monthly: PeriodicNoteConfig;
     quarterly: PeriodicNoteConfig;
@@ -206,7 +211,6 @@ export const DEFAULT_PERIODIC_NOTES: PeriodicNotesSettings = {
     },
     showWeekNumbers: true,
     showQuarters: false,
-    hasSeenWelcomeBanner: false,
     weekly: {
         enabled: false,
         folder: '',
@@ -346,7 +350,6 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
     quickNoteCreation: {
         enabled: true,
         showAddNoteButton: true,
-        hasSeenWelcomeBanner: false,
         defaultFolder: 'dailynotes',
         customFolder: '',
         defaultStartDateProperty: 'date',
@@ -358,6 +361,12 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
     },
 
     periodicNotes: { ...DEFAULT_PERIODIC_NOTES },
+
+    banners: {
+        quickNotes: false,
+        periodicNotes: false,
+        communityPlugin: false,
+    },
 
     experimental: {
         multilineNotes: false,

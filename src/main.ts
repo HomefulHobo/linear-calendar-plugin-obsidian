@@ -5,12 +5,14 @@ import { LinearCalendarSettings, DEFAULT_SETTINGS, VIEW_TYPE_CALENDAR } from './
 
 export default class LinearCalendarPlugin extends Plugin {
     settings!: LinearCalendarSettings;
+    isBratUser: boolean = false;
 
     // Plugin icon shown in settings sidebar, ribbon, and tabs
     icon = 'calendar-range';
 
     async onload(): Promise<void> {
         await this.loadSettings();
+        this.isBratUser = await this.detectBratUser();
 
         this.registerView(
             VIEW_TYPE_CALENDAR,
@@ -80,6 +82,7 @@ export default class LinearCalendarPlugin extends Plugin {
 
         // Run migrations
         let migrated = false;
+        migrated = this.migrateBannerSettings() || migrated;
         migrated = this.migrateQuinterExample() || migrated;
 
         // Save if any migration occurred
@@ -119,6 +122,41 @@ export default class LinearCalendarPlugin extends Plugin {
                typeof value === 'object' &&
                !Array.isArray(value) &&
                Object.prototype.toString.call(value) === '[object Object]';
+    }
+
+    private async detectBratUser(): Promise<boolean> {
+        try {
+            const bratPath = `${this.app.vault.configDir}/plugins/obsidian42-brat/data.json`;
+            const raw = await this.app.vault.adapter.read(bratPath);
+            const data = JSON.parse(raw);
+            return Array.isArray(data.pluginList) &&
+                data.pluginList.includes('HomefulHobo/linear-calendar-plugin-obsidian');
+        } catch {
+            return false;
+        }
+    }
+
+    /**
+     * Migrate banner dismissed state from per-feature hasSeenWelcomeBanner flags
+     * to the unified settings.banners object.
+     */
+    private migrateBannerSettings(): boolean {
+        const raw = this.settings as any;
+        let migrated = false;
+
+        if ('hasSeenWelcomeBanner' in (raw.quickNoteCreation ?? {})) {
+            this.settings.banners.quickNotes = raw.quickNoteCreation.hasSeenWelcomeBanner;
+            delete raw.quickNoteCreation.hasSeenWelcomeBanner;
+            migrated = true;
+        }
+
+        if ('hasSeenWelcomeBanner' in (raw.periodicNotes ?? {})) {
+            this.settings.banners.periodicNotes = raw.periodicNotes.hasSeenWelcomeBanner;
+            delete raw.periodicNotes.hasSeenWelcomeBanner;
+            migrated = true;
+        }
+
+        return migrated;
     }
 
     /**

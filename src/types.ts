@@ -111,7 +111,7 @@ export interface QuickNoteCreationConfig {
     defaultFolder: 'default' | 'dailynotes' | 'custom';  // Folder mode
     customFolder: string;                       // Custom folder path
     defaultStartDateProperty: string;           // Default: "date"
-    defaultEndDateProperty: string;             // Default: "endDate"
+    defaultEndDateProperty: string;             // Default: "date_end"
     defaultCategoryProperty: string;            // Default: "category"
     defaultMetadata: MetadataEntry[];           // Default metadata entries
 }

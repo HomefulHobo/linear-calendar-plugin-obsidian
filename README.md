@@ -30,6 +30,14 @@ This plugin is being developed with the help of AI.
 
 ![Settings Daily Notes Screenshot](screenshots/settings-daily-notes.png)
 
+### 🧭 Periodic Notes
+
+- **Show various periods**: Weekly, Monthly, Quarterly, Yearly, Custom Period
+- **Click on periodic notes** to create or open them
+- **Compatible with the Periodic Notes Plugin** – no transfer or copying needed
+- **Customizable appearance**: edit colors, weekly note display mode
+- **Specify automated defaults**: folder, date format, template
+
 ### 🔍 Flexible Date Extraction
 
 Extract dates from multiple sources with customizable priority:

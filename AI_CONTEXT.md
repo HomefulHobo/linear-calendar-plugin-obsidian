@@ -29,6 +29,7 @@ linear-calendar/
 ├── src/                          # TypeScript source files
 │   ├── main.ts                   # Plugin entry point
 │   ├── types.ts                  # Type definitions and defaults
+│   ├── banners.ts                # Banner registry — all banner definitions live here
 │   ├── CalendarView.ts           # Calendar rendering and logic
 │   ├── SettingsTab.ts            # Settings UI (includes CategoryEditModal)
 │   ├── QuickNoteModal.ts         # QuickNote creation modal
@@ -49,6 +50,7 @@ linear-calendar/
 ├── tsconfig.json                 # TypeScript configuration
 ├── esbuild.config.mjs            # Build configuration
 ├── CHANGELOG.md                  # Version history
+├── CHANGELOG_NEXT.md             # Draft changelog for next release (append here, move on release)
 ├── LICENSE                       # MIT License
 └── .gitignore                    # Git ignore patterns
 ```
@@ -206,7 +208,25 @@ Show, open, or create periodic notes directly in the calendar:
 - Regex Conversion: `CalendarView.ts:formatToRegexPattern()` for pattern matching
 - Settings: `SettingsTab.ts` Periodic Notes tab
 
-### 10. Helper Components (DRY/SSOT Architecture) (v0.3.1)
+### 10. Banner System
+
+Welcome/informational banners shown above the calendar. All banner definitions live in `src/banners.ts` — this is the only file that needs to be edited to add, remove, or change a banner.
+
+**Architecture**:
+- `BannerDef` interface: `id`, `cssClass`, `borderColor`, `title`, `contentHtml`, `settingsName`, `settingsDesc`, `shouldShow`, `dismiss`, `reset`, optional `settingsVisible`
+- `BannerContext`: passed to `shouldShow` and `settingsVisible`, currently carries `isBratUser: boolean`
+- `CalendarView.ts` iterates `BANNERS`, calls `shouldShow(settings, ctx)`, renders via generic `renderBanner()`
+- `SettingsTab.ts` iterates `BANNERS` to generate "Show again" controls; skips banners where `settingsVisible(ctx)` returns false
+
+**Banner dismissed-state** is stored in `settings.banners` (a `BannerSettings` object). Each banner key defaults to `false`. Settings migration runs on load to move any legacy `hasSeenWelcomeBanner` flags into this object.
+
+**BRAT detection** (`main.ts:detectBratUser()`): reads `.obsidian/plugins/obsidian42-brat/data.json` on every plugin load. Checks for `HomefulHobo/linear-calendar-plugin-obsidian` in `pluginList`. Result stored as `plugin.isBratUser` (not persisted — re-detected fresh each load so banners auto-hide after migration).
+
+**Current banners**: Quick Notes, Periodic Notes, Community Plugin (BRAT users only).
+
+**Adding a new banner**: Add one entry to the `BANNERS` array in `src/banners.ts`, add a key to `BannerSettings` in `types.ts`, and add a `false` default in `DEFAULT_SETTINGS.banners`. Nothing else needs to change.
+
+### 11. Helper Components (DRY/SSOT Architecture) (v0.3.1)
 
 Reusable UI components to eliminate code duplication:
 
@@ -366,7 +386,7 @@ This plugin is officially listed in the Obsidian community plugins directory (su
    - `manifest.json`: Update `version` field
    - `package.json`: Update `version` field
    - `versions.json`: Add `"x.x.x": "1.5.0"` entry for the new version
-   - `CHANGELOG.md`: Add new version section with changes
+   - `CHANGELOG.md`: Move contents of `CHANGELOG_NEXT.md` here under the new version heading, then clear `CHANGELOG_NEXT.md`
 2. **Build and test locally**: Run `npm run build` and test in Obsidian
 3. **Commit changes and push to GitHub**
 4. **Create release via GitHub website** (no terminal needed):
@@ -396,6 +416,12 @@ This plugin is officially listed in the Obsidian community plugins directory (su
 
 ## Common Patterns
 
+### Adding a New Banner
+1. Add a `BannerDef` entry to `BANNERS` in `src/banners.ts` (content, colors, `shouldShow`, `dismiss`, `reset`)
+2. Add a key to `BannerSettings` interface in `types.ts`
+3. Add a `false` default for that key in `DEFAULT_SETTINGS.banners` in `types.ts`
+4. That's it — rendering and settings controls are generated automatically
+
 ### Adding a New Property to Settings
 1. Update `LinearCalendarSettings` interface in `types.ts`
 2. Update `DEFAULT_SETTINGS` in `types.ts`
@@ -423,6 +449,8 @@ This plugin is officially listed in the Obsidian community plugins directory (su
 4. **Performance**: No caching of metadata - re-reads all files on each render
 
 ## Version History
+
+- **next** (unreleased): Banner registry refactor and BRAT migration notice — see `CHANGELOG_NEXT.md`
 
 - **0.4.4** (2026-05-18): CSS lint fixes and README update
   - Resolved all CSS warnings from Obsidian plugin validator
@@ -579,5 +607,5 @@ When working on this project:
 ---
 
 **Last Updated**: 2026-05-18
-**Plugin Version**: 0.4.4
+**Plugin Version**: 0.4.4 (next in progress — see CHANGELOG_NEXT.md)
 **Maintained for**: Claude Code and other AI assistants

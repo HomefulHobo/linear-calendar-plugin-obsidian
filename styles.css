@@ -874,6 +874,105 @@
     flex-shrink: 0;
 }
 
+.category-chip-eye {
+    display: flex;
+    align-items: center;
+    margin-left: 2px;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.category-chip-eye:hover {
+    opacity: 1;
+}
+
+.category-chip-eye svg {
+    width: 12px;
+    height: 12px;
+}
+
+.category-visibility-btn,
+.category-disable-btn {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    opacity: 0.55;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+}
+
+.category-visibility-btn:hover,
+.category-disable-btn:hover {
+    opacity: 1;
+}
+
+.category-visibility-btn svg,
+.category-disable-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.category-disable-btn.is-disabled {
+    opacity: 1;
+    color: var(--color-red);
+}
+
+/* Instant tooltip via CSS — no browser delay */
+.category-visibility-btn::after,
+.category-disable-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--background-secondary);
+    color: var(--text-normal);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    padding: 3px 8px;
+    white-space: nowrap;
+    font-size: 0.8em;
+    pointer-events: none;
+    display: none;
+    z-index: 1000;
+}
+
+.category-visibility-btn:hover::after,
+.category-disable-btn:hover::after {
+    display: block;
+}
+
+/* Faded category item when disabled in settings */
+.category-list-item.is-disabled {
+    opacity: 0.45;
+}
+
+.category-list-item.is-disabled:hover {
+    opacity: 0.75;
+}
+
+/* Disable button in modal — normal color, larger icon */
+.category-disable-btn.is-modal {
+    opacity: 1;
+    color: var(--text-normal);
+}
+
+.category-disable-btn.is-modal svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Tooltip in modal: show to the right to avoid modal border clipping */
+.category-disable-btn.is-modal::after {
+    bottom: auto;
+    top: 50%;
+    left: calc(100% + 6px);
+    transform: translateY(-50%);
+}
+
 /* Note Icons */
 .note-icon {
     flex-shrink: 0;

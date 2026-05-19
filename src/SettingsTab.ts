@@ -2133,7 +2133,13 @@ export class CalendarSettingTab extends PluginSettingTab {
 
         const categoryDesc = categoriesHeader.createDiv();
         categoryDesc.style.cssText = 'color: var(--text-muted); font-size: 0.95em;';
-        categoryDesc.textContent = 'Create and organize your color categories. Each category can have conditions that determine which notes match.';
+        categoryDesc.innerHTML = `Create and organize your color categories.
+<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7;">
+  <li>Categories <strong>apply to all notes accessible to the plugin</strong> – as configured in "Basic Settings".</li>
+  <li>Create <strong>conditions that determine which notes match</strong>.</li>
+  <li><strong>First-match principle</strong>: categories (with their conditions) are evaluated top to bottom, and the first match wins. Drag more specific categories above more general ones to make sure they take priority.</li>
+  <li><strong>What you see is what you get</strong>: if a note in the calendar has the color/icon of a category, the system has matched it to that category.</li>
+</ul>`;
 
         // Categories list container with visual emphasis
         const categoriesContainer = containerEl.createDiv();
@@ -2209,7 +2215,7 @@ export class CalendarSettingTab extends PluginSettingTab {
         }
     ): void {
         const config = this.plugin.settings.colorCategories;
-        const itemEl = container.createDiv();
+        const itemEl = container.createDiv({ cls: 'category-list-item' + (category.enabled ? '' : ' is-disabled') });
         itemEl.style.cssText = 'margin-bottom: 12px; border: 1px solid var(--background-modifier-border); border-radius: 5px; background: var(--background-secondary);';
 
         // Drag events - only allow dragging via drag handle
@@ -2291,21 +2297,44 @@ export class CalendarSettingTab extends PluginSettingTab {
         });
         countSpan.style.cssText = 'font-size: 0.85em; color: var(--text-muted);';
 
-        // Enabled toggle
-        const enabledCheckbox = header.createEl('input', { type: 'checkbox' });
-        enabledCheckbox.checked = category.enabled;
-        enabledCheckbox.style.cssText = 'cursor: pointer;';
-        enabledCheckbox.onclick = async (e) => {
+        // Disable button — disables category matching without deleting it (ban icon, red when disabled)
+        const disableBtn = header.createEl('button', { cls: 'category-disable-btn' });
+        setIcon(disableBtn, 'ban');
+        if (!category.enabled) disableBtn.addClass('is-disabled');
+        disableBtn.setAttribute('data-tooltip', category.enabled ? 'Disable' : 'Enable');
+        disableBtn.onclick = async (e) => {
             e.stopPropagation();
-            category.enabled = enabledCheckbox.checked;
+            if (category.enabled) {
+                const confirmed = confirm('Disable Category — it acts like deletion but is recoverable here. Proceed?');
+                if (!confirmed) return;
+            }
+            category.enabled = !category.enabled;
+            disableBtn.setAttribute('data-tooltip', category.enabled ? 'Disable' : 'Enable');
+            category.enabled ? disableBtn.removeClass('is-disabled') : disableBtn.addClass('is-disabled');
+            category.enabled ? itemEl.removeClass('is-disabled') : itemEl.addClass('is-disabled');
+            await this.plugin.saveSettings();
+        };
+
+        // Hide/show button — hides notes from the calendar view
+        const eyeBtn = header.createEl('button', { cls: 'category-visibility-btn' });
+        setIcon(eyeBtn, category.hidden ? 'eye-off' : 'eye');
+        eyeBtn.setAttribute('data-tooltip', category.hidden ? 'Show' : 'Hide');
+        eyeBtn.onclick = async (e) => {
+            e.stopPropagation();
+            category.hidden = !category.hidden;
+            setIcon(eyeBtn, category.hidden ? 'eye-off' : 'eye');
+            eyeBtn.setAttribute('data-tooltip', category.hidden ? 'Show' : 'Hide');
             await this.plugin.saveSettings();
         };
 
         // Delete button
-        const deleteBtn = header.createEl('button', { text: '×' });
-        deleteBtn.style.cssText = 'padding: 2px 8px; cursor: pointer; font-size: 1.3em; background: transparent; border: none;';
+        const deleteBtn = header.createEl('button', { cls: 'category-disable-btn' });
+        setIcon(deleteBtn, 'trash');
+        deleteBtn.setAttribute('data-tooltip', 'Delete');
         deleteBtn.onclick = async (e) => {
             e.stopPropagation();
+            const confirmed = confirm(`Delete category "${category.name}"? This cannot be undone.`);
+            if (!confirmed) return;
             config.categories.splice(index, 1);
             await this.plugin.saveSettings();
             this.display();
@@ -3029,18 +3058,6 @@ export class CategoryEditModal extends Modal {
             new IconSuggest(iconInput, iconPreviewEl);
         }
 
-        // Enabled toggle
-        new Setting(contentEl)
-            .setName('Enabled')
-            .setDesc('Toggle this category on/off without deleting it')
-            .addToggle(toggle => toggle
-                .setValue(this.category.enabled)
-                .onChange(async (value) => {
-                    this.category.enabled = value;
-                    await this.plugin.saveSettings();
-                    this.onSave();
-                }));
-
         // Divider
         contentEl.createEl('div', {
             attr: { style: 'border-top: 1px solid var(--background-modifier-border); margin: 20px 0;' }
@@ -3098,32 +3115,50 @@ export class CategoryEditModal extends Modal {
                     this.onOpen(); // Refresh modal
                 }));
 
-        // Footer with delete (left) and close (right) buttons
-        const footerSetting = new Setting(contentEl)
-            .setName('')
-            .setDesc('')
-            .addButton(btn => btn
-                .setIcon('trash')
-                .setTooltip('Delete category')
-                .onClick(async () => {
-                    // Confirmation dialog
-                    const confirmed = confirm(`Are you sure you want to delete the category "${this.category.name}"?`);
-                    if (confirmed) {
-                        const config = this.plugin.settings.colorCategories;
-                        const index = config.categories.indexOf(this.category);
-                        if (index > -1) {
-                            config.categories.splice(index, 1);
-                            await this.plugin.saveSettings();
-                            this.onSave();
-                            this.close();
-                        }
-                    }
-                }))
-            .addButton(btn => btn
-                .setButtonText('Close')
-                .setCta()
-                .onClick(() => this.close()));
-        footerSetting.settingEl.style.cssText = 'border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;';
+        // Footer — delete + disable on the left, close on the right
+        const footer = contentEl.createDiv();
+        footer.style.cssText = 'display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;';
+
+        const leftBtns = footer.createDiv();
+        leftBtns.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+
+        const deleteBtn = leftBtns.createEl('button', { cls: 'category-disable-btn is-modal' });
+        setIcon(deleteBtn, 'trash');
+        deleteBtn.setAttribute('data-tooltip', 'Delete category');
+        deleteBtn.onclick = async () => {
+            const confirmed = confirm(`Are you sure you want to delete the category "${this.category.name}"?`);
+            if (confirmed) {
+                const config = this.plugin.settings.colorCategories;
+                const index = config.categories.indexOf(this.category);
+                if (index > -1) {
+                    config.categories.splice(index, 1);
+                    await this.plugin.saveSettings();
+                    this.onSave();
+                    this.close();
+                }
+            }
+        };
+
+        const disableBtn = leftBtns.createEl('button', { cls: 'category-disable-btn is-modal' });
+        setIcon(disableBtn, 'ban');
+        if (!this.category.enabled) disableBtn.addClass('is-disabled');
+        disableBtn.setAttribute('data-tooltip', this.category.enabled
+            ? 'Disable — acts like deletion but is recoverable in settings'
+            : 'Enable');
+        disableBtn.onclick = async () => {
+            if (this.category.enabled) {
+                const confirmed = confirm('Disable Category — it acts like deletion but is recoverable in settings. Proceed?');
+                if (!confirmed) return;
+            }
+            this.category.enabled = !this.category.enabled;
+            await this.plugin.saveSettings();
+            this.onSave();
+            this.close();
+        };
+
+        const closeBtn = footer.createEl('button', { text: 'Close' });
+        closeBtn.addClass('mod-cta');
+        closeBtn.onclick = () => this.close();
     }
 
     renderCondition(container: HTMLElement, condition: Condition, condIndex: number): void {

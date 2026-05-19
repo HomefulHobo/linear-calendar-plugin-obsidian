@@ -542,6 +542,11 @@ export class LinearCalendarView extends ItemView {
         return null;
     }
 
+    isCategoryHidden(file: TFile): boolean {
+        const category = this.getCategoryForFile(file);
+        return category?.hidden === true;
+    }
+
     /**
      * Get the color to use for a file.
      * Uses category color if file matches a category, otherwise uses default color.
@@ -814,6 +819,8 @@ export class LinearCalendarView extends ItemView {
     }
 
     shouldShowNote(file: TFile): boolean {
+        if (this.isCategoryHidden(file)) return false;
+
         // Check if it's a daily note
         if (this.isDailyNote(file)) {
             return this.plugin.settings.showDailyNotesInCells;
@@ -1575,9 +1582,11 @@ export class LinearCalendarView extends ItemView {
         config.categories.forEach(category => {
             if (!category.enabled) return;
 
-            const chip = chipsContainer.createDiv({ cls: 'category-chip' });
+            const isHidden = category.hidden === true;
+            const chip = chipsContainer.createDiv({ cls: `category-chip${isHidden ? ' is-hidden' : ''}` });
             chip.style.background = category.color;
-            chip.style.color = '#ffffff'; // White text for contrast
+            chip.style.color = '#ffffff';
+            if (isHidden) chip.style.opacity = '0.4';
 
             // Add icon if exists and global setting is on
             if (category.iconType && category.iconValue && config.showIconsInCalendar) {
@@ -1596,23 +1605,33 @@ export class LinearCalendarView extends ItemView {
                 cls: 'category-chip-name'
             });
 
-            // Click to open category edit modal
+            // Eye toggle — click to hide/show notes without opening edit modal
+            const eyeBtn = chip.createEl('span', { cls: 'category-chip-eye' });
+            setIcon(eyeBtn, isHidden ? 'eye-off' : 'eye');
+            eyeBtn.title = isHidden ? 'Show notes' : 'Hide notes';
+            eyeBtn.onclick = async (e) => {
+                e.stopPropagation();
+                category.hidden = !category.hidden;
+                await this.plugin.saveSettings();
+            };
+
+            // Click chip body to open category edit modal
             chip.style.cursor = 'pointer';
             chip.onclick = () => {
                 new CategoryEditModal(
                     this.app,
                     this.plugin,
                     category,
-                    () => this.reload()  // Refresh calendar when category is edited
+                    () => this.reload()
                 ).open();
             };
 
             // Hover effect
             chip.addEventListener('mouseenter', () => {
-                chip.style.opacity = '0.8';
+                chip.style.opacity = isHidden ? '0.55' : '0.8';
             });
             chip.addEventListener('mouseleave', () => {
-                chip.style.opacity = '1';
+                chip.style.opacity = isHidden ? '0.4' : '1';
             });
         });
 

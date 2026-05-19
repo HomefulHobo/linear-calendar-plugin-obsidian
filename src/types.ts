@@ -80,6 +80,7 @@ export interface ColorCategory {
     conditions: Condition[];  // Reuse existing Condition type
     matchMode: 'all' | 'any';  // 'all' = AND (all must match), 'any' = OR (any can match)
     enabled: boolean;
+    hidden?: boolean;  // When true, notes in this category are hidden from the calendar view
 }
 
 export interface ColorPalette {

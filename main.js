@@ -5131,7 +5131,13 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
     categoryTitle.style.cssText = "margin: 0 0 6px 0; font-size: 1.1em; color: var(--text-normal);";
     const categoryDesc = categoriesHeader.createDiv();
     categoryDesc.style.cssText = "color: var(--text-muted); font-size: 0.95em;";
-    categoryDesc.textContent = "Create and organize your color categories. Each category can have conditions that determine which notes match.";
+    categoryDesc.innerHTML = `Create and organize your color categories.
+<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7;">
+  <li>Categories <strong>apply to all notes accessible to the plugin</strong> \u2013 as configured in "Basic Settings".</li>
+  <li>Create <strong>conditions that determine which notes match</strong>.</li>
+  <li><strong>First-match principle</strong>: categories (with their conditions) are evaluated top to bottom, and the first match wins. Drag more specific categories above more general ones to make sure they take priority.</li>
+  <li><strong>What you see is what you get</strong>: if a note in the calendar has the color/icon of a category, the system has matched it to that category.</li>
+</ul>`;
     const categoriesContainer = containerEl.createDiv();
     categoriesContainer.style.cssText = "background: var(--background-primary); border: 2px solid var(--background-modifier-border); border-radius: 8px; padding: 12px; margin-top: 12px;";
     if (config.categories.length > 0) {
@@ -5193,7 +5199,7 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
   }
   renderCategoryItem(container, category, index, dragHandlers) {
     const config = this.plugin.settings.colorCategories;
-    const itemEl = container.createDiv();
+    const itemEl = container.createDiv({ cls: "category-list-item" + (category.enabled ? "" : " is-disabled") });
     itemEl.style.cssText = "margin-bottom: 12px; border: 1px solid var(--background-modifier-border); border-radius: 5px; background: var(--background-secondary);";
     itemEl.addEventListener("dragover", (e) => {
       e.preventDefault();
@@ -5250,18 +5256,39 @@ var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
       text: category.conditions.length === 1 ? "1 condition" : `${category.conditions.length} conditions`
     });
     countSpan.style.cssText = "font-size: 0.85em; color: var(--text-muted);";
-    const enabledCheckbox = header.createEl("input", { type: "checkbox" });
-    enabledCheckbox.checked = category.enabled;
-    enabledCheckbox.style.cssText = "cursor: pointer;";
-    enabledCheckbox.onclick = async (e) => {
+    const disableBtn = header.createEl("button", { cls: "category-disable-btn" });
+    (0, import_obsidian5.setIcon)(disableBtn, "ban");
+    if (!category.enabled) disableBtn.addClass("is-disabled");
+    disableBtn.setAttribute("data-tooltip", category.enabled ? "Disable" : "Enable");
+    disableBtn.onclick = async (e) => {
       e.stopPropagation();
-      category.enabled = enabledCheckbox.checked;
+      if (category.enabled) {
+        const confirmed = confirm("Disable Category \u2014 it acts like deletion but is recoverable here. Proceed?");
+        if (!confirmed) return;
+      }
+      category.enabled = !category.enabled;
+      disableBtn.setAttribute("data-tooltip", category.enabled ? "Disable" : "Enable");
+      category.enabled ? disableBtn.removeClass("is-disabled") : disableBtn.addClass("is-disabled");
+      category.enabled ? itemEl.removeClass("is-disabled") : itemEl.addClass("is-disabled");
       await this.plugin.saveSettings();
     };
-    const deleteBtn = header.createEl("button", { text: "\xD7" });
-    deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.3em; background: transparent; border: none;";
+    const eyeBtn = header.createEl("button", { cls: "category-visibility-btn" });
+    (0, import_obsidian5.setIcon)(eyeBtn, category.hidden ? "eye-off" : "eye");
+    eyeBtn.setAttribute("data-tooltip", category.hidden ? "Show" : "Hide");
+    eyeBtn.onclick = async (e) => {
+      e.stopPropagation();
+      category.hidden = !category.hidden;
+      (0, import_obsidian5.setIcon)(eyeBtn, category.hidden ? "eye-off" : "eye");
+      eyeBtn.setAttribute("data-tooltip", category.hidden ? "Show" : "Hide");
+      await this.plugin.saveSettings();
+    };
+    const deleteBtn = header.createEl("button", { cls: "category-disable-btn" });
+    (0, import_obsidian5.setIcon)(deleteBtn, "trash");
+    deleteBtn.setAttribute("data-tooltip", "Delete");
     deleteBtn.onclick = async (e) => {
       e.stopPropagation();
+      const confirmed = confirm(`Delete category "${category.name}"? This cannot be undone.`);
+      if (!confirmed) return;
       config.categories.splice(index, 1);
       await this.plugin.saveSettings();
       this.display();
@@ -5793,11 +5820,6 @@ var CategoryEditModal = class extends import_obsidian5.Modal {
       }
       new IconSuggest(iconInput, iconPreviewEl);
     }
-    new import_obsidian5.Setting(contentEl).setName("Enabled").setDesc("Toggle this category on/off without deleting it").addToggle((toggle) => toggle.setValue(this.category.enabled).onChange(async (value) => {
-      this.category.enabled = value;
-      await this.plugin.saveSettings();
-      this.onSave();
-    }));
     contentEl.createEl("div", {
       attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 20px 0;" }
     });
@@ -5832,7 +5854,14 @@ var CategoryEditModal = class extends import_obsidian5.Modal {
       this.onSave();
       this.onOpen();
     }));
-    const footerSetting = new import_obsidian5.Setting(contentEl).setName("").setDesc("").addButton((btn) => btn.setIcon("trash").setTooltip("Delete category").onClick(async () => {
+    const footer = contentEl.createDiv();
+    footer.style.cssText = "display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;";
+    const leftBtns = footer.createDiv();
+    leftBtns.style.cssText = "display: flex; gap: 8px; align-items: center;";
+    const deleteBtn = leftBtns.createEl("button", { cls: "category-disable-btn is-modal" });
+    (0, import_obsidian5.setIcon)(deleteBtn, "trash");
+    deleteBtn.setAttribute("data-tooltip", "Delete category");
+    deleteBtn.onclick = async () => {
       const confirmed = confirm(`Are you sure you want to delete the category "${this.category.name}"?`);
       if (confirmed) {
         const config = this.plugin.settings.colorCategories;
@@ -5844,8 +5873,24 @@ var CategoryEditModal = class extends import_obsidian5.Modal {
           this.close();
         }
       }
-    })).addButton((btn) => btn.setButtonText("Close").setCta().onClick(() => this.close()));
-    footerSetting.settingEl.style.cssText = "border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;";
+    };
+    const disableBtn = leftBtns.createEl("button", { cls: "category-disable-btn is-modal" });
+    (0, import_obsidian5.setIcon)(disableBtn, "ban");
+    if (!this.category.enabled) disableBtn.addClass("is-disabled");
+    disableBtn.setAttribute("data-tooltip", this.category.enabled ? "Disable \u2014 acts like deletion but is recoverable in settings" : "Enable");
+    disableBtn.onclick = async () => {
+      if (this.category.enabled) {
+        const confirmed = confirm("Disable Category \u2014 it acts like deletion but is recoverable in settings. Proceed?");
+        if (!confirmed) return;
+      }
+      this.category.enabled = !this.category.enabled;
+      await this.plugin.saveSettings();
+      this.onSave();
+      this.close();
+    };
+    const closeBtn = footer.createEl("button", { text: "Close" });
+    closeBtn.addClass("mod-cta");
+    closeBtn.onclick = () => this.close();
   }
   renderCondition(container, condition, condIndex) {
     ConditionRenderer.render(container, condition, condIndex, this.category.conditions, this.app, {
@@ -6560,6 +6605,10 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     }
     return null;
   }
+  isCategoryHidden(file) {
+    const category = this.getCategoryForFile(file);
+    return (category == null ? void 0 : category.hidden) === true;
+  }
   /**
    * Get the color to use for a file.
    * Uses category color if file matches a category, otherwise uses default color.
@@ -6756,6 +6805,7 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     return file.basename.replace(startDatePattern, "").trim() || file.basename;
   }
   shouldShowNote(file) {
+    if (this.isCategoryHidden(file)) return false;
     if (this.isDailyNote(file)) {
       return this.plugin.settings.showDailyNotesInCells;
     }
@@ -7311,9 +7361,11 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
     const chipsContainer = categoryIndexDiv.createDiv({ cls: "categories-container" });
     config.categories.forEach((category) => {
       if (!category.enabled) return;
-      const chip = chipsContainer.createDiv({ cls: "category-chip" });
+      const isHidden = category.hidden === true;
+      const chip = chipsContainer.createDiv({ cls: `category-chip${isHidden ? " is-hidden" : ""}` });
       chip.style.background = category.color;
       chip.style.color = "#ffffff";
+      if (isHidden) chip.style.opacity = "0.4";
       if (category.iconType && category.iconValue && config.showIconsInCalendar) {
         const iconEl = chip.createEl("span", { cls: "category-chip-icon" });
         if (category.iconType === "emoji") {
@@ -7327,6 +7379,14 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
         text: category.name,
         cls: "category-chip-name"
       });
+      const eyeBtn = chip.createEl("span", { cls: "category-chip-eye" });
+      (0, import_obsidian7.setIcon)(eyeBtn, isHidden ? "eye-off" : "eye");
+      eyeBtn.title = isHidden ? "Show notes" : "Hide notes";
+      eyeBtn.onclick = async (e) => {
+        e.stopPropagation();
+        category.hidden = !category.hidden;
+        await this.plugin.saveSettings();
+      };
       chip.style.cursor = "pointer";
       chip.onclick = () => {
         new CategoryEditModal(
@@ -7334,14 +7394,13 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
           this.plugin,
           category,
           () => this.reload()
-          // Refresh calendar when category is edited
         ).open();
       };
       chip.addEventListener("mouseenter", () => {
-        chip.style.opacity = "0.8";
+        chip.style.opacity = isHidden ? "0.55" : "0.8";
       });
       chip.addEventListener("mouseleave", () => {
-        chip.style.opacity = "1";
+        chip.style.opacity = isHidden ? "0.4" : "1";
       });
     });
     const addBtn = chipsContainer.createDiv({ cls: "category-chip category-add-btn" });

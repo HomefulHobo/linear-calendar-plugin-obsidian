@@ -33,6 +33,26 @@
     flex: 1;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+}
+
+.open-settings-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: color 0.2s, background 0.2s;
+}
+
+.open-settings-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
 }
 
 .year-title {

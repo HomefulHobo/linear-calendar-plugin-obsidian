@@ -133,6 +133,15 @@ export class LinearCalendarView extends ItemView {
             };
         }
 
+        const settingsBtn = rightSection.createEl('button', { cls: 'open-settings-btn' });
+        settingsBtn.setAttribute('aria-label', 'Open LinearCalendar settings');
+        const settingsIcon = settingsBtn.createSpan();
+        setIcon(settingsIcon, 'settings');
+        settingsBtn.onclick = () => {
+            (this.app as any).setting.open();
+            (this.app as any).setting.openTabById('linear-calendar');
+        };
+
         prevBtn.onclick = async () => {
             this.plugin.settings.currentYear--;
             await this.plugin.saveSettings();

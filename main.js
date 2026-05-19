@@ -6245,6 +6245,14 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
         await this.openQuickNoteModal(null, null);
       };
     }
+    const settingsBtn = rightSection.createEl("button", { cls: "open-settings-btn" });
+    settingsBtn.setAttribute("aria-label", "Open LinearCalendar settings");
+    const settingsIcon = settingsBtn.createSpan();
+    (0, import_obsidian7.setIcon)(settingsIcon, "settings");
+    settingsBtn.onclick = () => {
+      this.app.setting.open();
+      this.app.setting.openTabById("linear-calendar");
+    };
     prevBtn.onclick = async () => {
       this.plugin.settings.currentYear--;
       await this.plugin.saveSettings();

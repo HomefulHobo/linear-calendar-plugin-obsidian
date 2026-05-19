@@ -459,7 +459,13 @@ This plugin is officially listed in the Obsidian community plugins directory (su
 
 ## Version History
 
-- **next** (unreleased): Banner registry refactor, BRAT migration notice, periodic notes sub-folder search — see `CHANGELOG_NEXT.md`
+- **0.4.5** (2026-05-19): Banner registry, BRAT migration notice, periodic notes sub-folder search, hide second date setting
+  - Banner registry (`src/banners.ts`): all banner definitions in one file — content, visibility logic, settings keys
+  - Community Plugin migration banner: shown to BRAT users, auto-hides after migration
+  - Periodic Notes sub-folder recognition: "Include sub-folders" checkbox per note type (default on); Periodic Notes plugin overrides to always search sub-folders
+  - Hide second date portion: child setting under "Hide date portion in titles" — strips second date and connector from multi-day note titles
+  - Banner dismissed-state migrated from per-feature flags to unified `settings.banners` object
+  - Feedback banner settings updated with current questions
 
 - **0.4.4** (2026-05-18): CSS lint fixes and README update
   - Resolved all CSS warnings from Obsidian plugin validator
@@ -616,5 +622,5 @@ When working on this project:
 ---
 
 **Last Updated**: 2026-05-19
-**Plugin Version**: 0.4.4 (next in progress — see CHANGELOG_NEXT.md)
+**Plugin Version**: 0.4.5
 **Maintained for**: Claude Code and other AI assistants

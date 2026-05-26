@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Two supported formats:
   - **Full ISO date** (`1980-03-14`) — recommended for birthdays and anniversaries; the plugin tracks the start year for age counting. Repeat rhythm (yearly / monthly / weekly) is set per rule
   - **RRULE pattern** — for complex schedules like "2nd Tuesday of every month" or "last Sunday". An optional start-date and/or end-date property can be set. _This format is what other calendar apps use._
-- **Display Title** configurable per rule: `note title` only, `title + property name`, or `title + property name + years elapsed` (e.g. "Mom Smith – Birthday (46)")
+- **Display Title** configurable per rule: `note title` only, `title + property name`, or `title + property name + years elapsed` (e.g. "Lila – Birthday (2)")
 - **Custom Separator** between title and property name can be set or left empty for none.
 - **Hover tooltip** on recurring calendar entries shows the full formatted label, not the raw filename
 - **RRULE builder modal** — a UI to generate RRULE strings (Yearly / Monthly / Nth weekday / last weekday / Weekly) with a live plain-language preview.

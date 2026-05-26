@@ -1,7 +1,8 @@
-import { Plugin } from 'obsidian';
+import { Plugin, TFile, MarkdownView, setIcon } from 'obsidian';
 import { LinearCalendarView } from './CalendarView';
 import { CalendarSettingTab } from './SettingsTab';
 import { LinearCalendarSettings, DEFAULT_SETTINGS, VIEW_TYPE_CALENDAR } from './types';
+import { rruleValueToReadable } from './recurringUtils';
 
 export default class LinearCalendarPlugin extends Plugin {
     settings!: LinearCalendarSettings;
@@ -40,6 +41,26 @@ export default class LinearCalendarPlugin extends Plugin {
             }
         });
 
+        this.addCommand({
+            id: 'edit-recurring-rule',
+            name: 'Edit recurring rule for current note',
+            callback: async () => {
+                const file = this.app.workspace.getActiveFile();
+                if (file) this.openRecurringRuleBuilder(file);
+            }
+        });
+
+        const { buildRecurringEditorExtension } = await import('./RecurringEventEditorExtension');
+        this.registerEditorExtension(buildRecurringEditorExtension(this));
+
+        // Inject edit buttons into the live-preview properties pane
+        this.registerEvent(this.app.workspace.on('active-leaf-change', () => {
+            setTimeout(() => this.injectRecurringButtonsToPropertiesPane(), 100);
+        }));
+        this.registerEvent(this.app.metadataCache.on('changed', () => {
+            setTimeout(() => this.injectRecurringButtonsToPropertiesPane(), 100);
+        }));
+
         this.addSettingTab(new CalendarSettingTab(this.app, this));
     }
 
@@ -60,6 +81,8 @@ export default class LinearCalendarPlugin extends Plugin {
     }
 
     onunload(): void {
+        this.cleanupRecurringInjections();
+
         // Clean up mouse handlers
         const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR);
         for (const leaf of leaves) {
@@ -225,6 +248,96 @@ export default class LinearCalendarPlugin extends Plugin {
         return a.length === b.length && a.every((val, index) => val === b[index]);
     }
 
+    private cleanupRecurringInjections(): void {
+        document.querySelectorAll('.lc-rrule-edit-btn-live, .lc-rrule-display').forEach(el => el.remove());
+        document.querySelectorAll('.lc-rrule-value-hidden').forEach(el => {
+            (el as HTMLElement).style.display = '';
+            el.classList.remove('lc-rrule-value-hidden');
+        });
+    }
+
+    injectRecurringButtonsToPropertiesPane(): void {
+        // Always clean up stale injections first so this function is idempotent
+        this.cleanupRecurringInjections();
+
+        const config = this.settings.recurringEvents;
+        if (!config.enabled || config.propertyRules.length === 0) return;
+
+        // Only act on rrule-format rules — iso_date properties are handled natively by Obsidian
+        const rruleRules = config.propertyRules.filter(r => (r.dateFormat ?? 'iso_date') === 'rrule');
+        if (rruleRules.length === 0) return;
+
+        const leaves = this.app.workspace.getLeavesOfType('markdown');
+        for (const leaf of leaves) {
+            const view = leaf.view;
+            if (!(view instanceof MarkdownView)) continue;
+            const file = view.file;
+            if (!file) continue;
+
+            const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
+            if (!fm) continue;
+
+            const propertiesEl = view.containerEl.querySelector('.metadata-properties');
+            if (!propertiesEl) continue;
+
+            for (const rule of rruleRules) {
+                const rawVal = fm[rule.propertyName];
+                if (rawVal === undefined || rawVal === null) continue;
+
+                const propEl = propertiesEl.querySelector(`[data-property-key="${CSS.escape(rule.propertyName)}"]`);
+                if (!propEl) continue;
+
+                const valueStr = String(rawVal).trim();
+                const readable = rruleValueToReadable(valueStr, 'rrule');
+
+                // Replace raw value display with readable text + edit button (once)
+                if (!propEl.querySelector('.lc-rrule-display')) {
+                    // Hide the raw input / contenteditable
+                    const rawInput = propEl.querySelector('.metadata-property-value .metadata-input-longtext, .metadata-property-value input') as HTMLElement | null;
+                    if (rawInput) {
+                        rawInput.style.display = 'none';
+                        rawInput.classList.add('lc-rrule-value-hidden');
+                    }
+
+                    // Inject readable display with inline edit button
+                    const valueWrapper = propEl.querySelector('.metadata-property-value');
+                    if (valueWrapper) {
+                        const display = document.createElement('div');
+                        display.className = 'lc-rrule-display';
+                        display.style.cssText = 'display: flex; align-items: center; gap: 4px;';
+
+                        const text = document.createElement('span');
+                        text.textContent = readable ?? valueStr;
+                        text.style.fontSize = 'var(--metadata-input-font-size)';
+                        display.appendChild(text);
+
+                        const btn = document.createElement('button');
+                        btn.className = 'lc-rrule-edit-btn-live';
+                        btn.setAttribute('aria-label', 'Edit recurring rule');
+                        btn.style.cssText = 'cursor: pointer; opacity: var(--icon-opacity); color: var(--icon-color); background: none; border: none; outline: none; padding: 0; margin: 0; display: inline-flex; align-items: center; flex-shrink: 0; box-shadow: none;';
+                        setIcon(btn, 'square-pen');
+                        const svg = btn.querySelector('svg');
+                        if (svg) svg.style.cssText = 'width: var(--icon-xs); height: var(--icon-xs);';
+                        btn.addEventListener('mouseenter', () => btn.style.opacity = 'var(--icon-opacity-hover)');
+                        btn.addEventListener('mouseleave', () => btn.style.opacity = 'var(--icon-opacity)');
+                        btn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.openRecurringRuleBuilder(file);
+                        });
+                        display.appendChild(btn);
+
+                        valueWrapper.appendChild(display);
+                    }
+                }
+            }
+        }
+    }
+
+    async openRecurringRuleBuilder(file: TFile): Promise<void> {
+        const { RecurringRuleBuilderModal } = await import('./SettingsTab');
+        new RecurringRuleBuilderModal(this.app, this, file).open();
+    }
+
     async saveSettings(): Promise<void> {
         await this.saveData(this.settings);
 
@@ -235,5 +348,9 @@ export default class LinearCalendarPlugin extends Plugin {
                 await (leaf.view as LinearCalendarView).reload();
             }
         }
+
+        // Re-inject recurring property displays so pen/readable-text reflects new settings
+        this.cleanupRecurringInjections();
+        setTimeout(() => this.injectRecurringButtonsToPropertiesPane(), 50);
     }
 }

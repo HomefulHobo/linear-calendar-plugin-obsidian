@@ -1,4 +1,4 @@
-import { App, Notice, PluginSettingTab, Setting, setIcon, Modal } from 'obsidian';
+import { App, Notice, PluginSettingTab, Setting, setIcon, Modal, TFile } from 'obsidian';
 import LinearCalendarPlugin from './main';
 import { Condition, ColorCategory, CustomPeriod, CustomPeriodGroup } from './types';
 import { BANNERS } from './banners';
@@ -16,7 +16,7 @@ export class CalendarSettingTab extends PluginSettingTab {
     private expandedCategories: Set<string> = new Set();
     private isPalettesExpanded: boolean = false;
     private paletteEditModes: Map<number, 'visual' | 'source'> = new Map();
-    private activeTab: 'basic' | 'categories' | 'daily-notes' | 'periodic-notes' | 'quicknotes' | 'experimental' = 'basic';
+    private activeTab: 'basic' | 'categories' | 'daily-notes' | 'periodic-notes' | 'quicknotes' | 'recurring-events' | 'experimental' = 'basic';
 
     // Icon displayed in the settings sidebar
     icon = 'calendar-range';
@@ -225,6 +225,8 @@ export class CalendarSettingTab extends PluginSettingTab {
             this.renderPeriodicNotesSection(contentEl);
         } else if (this.activeTab === 'quicknotes') {
             this.renderQuickNoteCreationSettings(contentEl);
+        } else if (this.activeTab === 'recurring-events') {
+            this.renderRecurringEventsSection(contentEl);
         } else if (this.activeTab === 'experimental') {
             this.renderExperimentalSection(contentEl);
         }
@@ -245,6 +247,7 @@ export class CalendarSettingTab extends PluginSettingTab {
             { id: 'daily-notes' as const, label: 'Daily Notes' },
             { id: 'periodic-notes' as const, label: 'Periodic Notes' },
             { id: 'quicknotes' as const, label: 'Quick Notes' },
+            { id: 'recurring-events' as const, label: 'Recurring Events' },
             { id: 'experimental' as const, label: 'Experimental' }
         ];
 
@@ -879,6 +882,26 @@ export class CalendarSettingTab extends PluginSettingTab {
         };
 
         updateEndPriorityVisibility();
+
+        // Hint pointing to Recurring Events tab
+        const recurringHint = containerEl.createDiv();
+        recurringHint.style.cssText = 'margin-top: 20px; padding: 10px 14px; background: var(--background-secondary); border-left: 3px solid var(--interactive-accent); border-radius: 3px;';
+        recurringHint.createEl('span', {
+            text: 'For recurring dates like birthdays and anniversaries, set up recurring date properties in the ',
+            attr: { style: 'font-size: 0.88em; color: var(--text-muted);' }
+        });
+        const recurringHintLink = recurringHint.createEl('span', {
+            text: 'Recurring Events tab',
+            attr: { style: 'font-size: 0.88em; color: var(--interactive-accent); cursor: pointer; text-decoration: underline;' }
+        });
+        recurringHintLink.addEventListener('click', () => {
+            this.activeTab = 'recurring-events';
+            this.display();
+        });
+        recurringHint.createEl('span', {
+            text: '.',
+            attr: { style: 'font-size: 0.88em; color: var(--text-muted);' }
+        });
     }
 
     renderFiltersSection(containerEl: HTMLElement): void {
@@ -2794,6 +2817,211 @@ export class CalendarSettingTab extends PluginSettingTab {
             onColorChange
         });
     }
+
+    renderRecurringEventsSection(containerEl: HTMLElement): void {
+        const config = this.plugin.settings.recurringEvents;
+
+        containerEl.createEl('h3', { text: 'Recurring Events' });
+
+        // Master toggle
+        new Setting(containerEl)
+            .setName('Enable recurring events')
+            .setDesc('Show recurring notes (birthdays, anniversaries, etc.) on every matching date.')
+            .addToggle(toggle => toggle
+                .setValue(config.enabled)
+                .onChange(async (value) => {
+                    config.enabled = value;
+                    await this.plugin.saveSettings();
+                    this.display();
+                }));
+
+        if (!config.enabled) return;
+
+        // Info box
+        const infoBox = containerEl.createDiv();
+        infoBox.style.cssText = 'background: var(--background-secondary); border-left: 4px solid var(--interactive-accent); padding: 14px 18px; margin: 8px 0 20px 0; border-radius: 3px;';
+        infoBox.createEl('div', { text: 'How it works', attr: { style: 'font-weight: 600; margin-bottom: 8px; color: var(--text-normal);' } });
+        const infoText = infoBox.createEl('div', { attr: { style: 'font-size: 0.9em; line-height: 1.6; color: var(--text-muted);' } });
+        infoText.innerHTML = `
+            Register a <strong>property name</strong> below, then add that property to any note with a date value.
+            The plugin shows that note on the matching date every year, month, or week — without creating extra files.<br><br>
+            <strong>Supported formats:</strong><br>
+            &nbsp;&nbsp;<code>1980-03-14</code> — Full ISO date (recommended for birthdays; year is preserved for age counting)<br>
+            &nbsp;&nbsp;<code>FREQ=MONTHLY;BYMONTHDAY=15</code> — RRULE for complex patterns (2nd Tuesday, last Sunday…)
+        `;
+
+        // Property rules list
+        containerEl.createEl('h4', { text: 'Property Rules', attr: { style: 'margin-bottom: 6px;' } });
+
+        const rulesListEl = containerEl.createDiv();
+
+        const renderRulesList = () => {
+            rulesListEl.empty();
+
+            if (config.propertyRules.length === 0) {
+                rulesListEl.createEl('div', {
+                    text: 'No rules yet. Add one below.',
+                    attr: { style: 'font-size: 0.88em; color: var(--text-muted); margin-bottom: 12px; font-style: italic;' }
+                });
+            }
+
+            config.propertyRules.forEach((rule, index) => {
+                const ruleRow = rulesListEl.createDiv();
+                ruleRow.style.cssText = 'border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 14px; margin-bottom: 10px;';
+
+                // Row 1: property name + date format + frequency (conditional) + delete
+                const topRow = ruleRow.createDiv();
+                topRow.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 10px;';
+
+                const propInput = topRow.createEl('input', {
+                    type: 'text',
+                    value: rule.propertyName,
+                    attr: { placeholder: 'Property name (e.g. birthday)' }
+                });
+                propInput.style.cssText = 'flex: 1; padding: 4px 8px;';
+                new PropertySuggest(this.app, propInput);
+                propInput.onchange = async (e) => {
+                    rule.propertyName = (e.target as HTMLInputElement).value.trim();
+                    await this.plugin.saveSettings();
+                };
+
+                const fmtSelect = topRow.createEl('select');
+                fmtSelect.style.cssText = 'padding: 4px 6px;';
+                fmtSelect.setAttribute('aria-label', 'Date format stored in the property');
+                [
+                    ['iso_date', 'Full date (YYYY-MM-DD)'],
+                    ['rrule', 'RRULE pattern']
+                ].forEach(([val, label]) => {
+                    const opt = fmtSelect.createEl('option', { value: val, text: label });
+                    if ((rule.dateFormat ?? 'iso_date') === val) opt.selected = true;
+                });
+                fmtSelect.onchange = async () => {
+                    rule.dateFormat = fmtSelect.value as 'iso_date' | 'rrule';
+                    await this.plugin.saveSettings();
+                    renderRulesList();
+                };
+
+                // Frequency only needed for full ISO dates
+                const currentFmt = rule.dateFormat ?? 'iso_date';
+                if (currentFmt === 'iso_date') {
+                    const freqSelect = topRow.createEl('select');
+                    freqSelect.style.cssText = 'padding: 4px 6px;';
+                    freqSelect.setAttribute('aria-label', 'How often the note recurs');
+                    [['yearly', 'Yearly'], ['monthly', 'Monthly'], ['weekly', 'Weekly']].forEach(([val, label]) => {
+                        const opt = freqSelect.createEl('option', { value: val, text: label });
+                        if (rule.frequency === val) opt.selected = true;
+                    });
+                    freqSelect.onchange = async () => {
+                        rule.frequency = freqSelect.value as 'yearly' | 'monthly' | 'weekly';
+                        await this.plugin.saveSettings();
+                    };
+                }
+
+                const deleteBtn = topRow.createEl('button');
+                setIcon(deleteBtn, 'trash-2');
+                deleteBtn.setAttribute('aria-label', 'Delete rule');
+                deleteBtn.style.cssText = 'padding: 4px 7px; cursor: pointer; color: var(--text-muted); background: transparent; border: 1px solid var(--background-modifier-border); border-radius: 4px;';
+                deleteBtn.onclick = async () => {
+                    config.propertyRules.splice(index, 1);
+                    await this.plugin.saveSettings();
+                    renderRulesList();
+                };
+
+                // Row 2: title display + separator + hide date toggle
+                const displayRow = ruleRow.createDiv();
+                displayRow.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 8px;';
+
+                displayRow.createEl('span', { text: 'Calendar label:', attr: { style: 'font-size: 0.88em; color: var(--text-muted); white-space: nowrap;' } });
+
+                const displaySelect = displayRow.createEl('select');
+                displaySelect.style.cssText = 'flex: 1; padding: 4px 6px;';
+                [
+                    ['title', 'Note title only'],
+                    ['title_property', 'Title – Property name'],
+                    ['title_property_years', 'Title – Property name (years elapsed)']
+                ].forEach(([val, label]) => {
+                    const opt = displaySelect.createEl('option', { value: val, text: label });
+                    if (rule.titleDisplay === val) opt.selected = true;
+                });
+                displaySelect.onchange = async () => {
+                    rule.titleDisplay = displaySelect.value as 'title' | 'title_property' | 'title_property_years';
+                    await this.plugin.saveSettings();
+                    renderRulesList();
+                };
+
+                if (rule.titleDisplay !== 'title') {
+                    displayRow.createEl('span', { text: 'Separator:', attr: { style: 'font-size: 0.88em; color: var(--text-muted); white-space: nowrap;' } });
+                    const sepInput = displayRow.createEl('input', {
+                        type: 'text',
+                        value: rule.titleSeparator ?? '–',
+                        attr: { placeholder: 'leave empty for none', style: 'width: 140px; padding: 4px 6px;' }
+                    });
+                    sepInput.setAttribute('aria-label', 'Separator character between title and property name (leave empty for none)');
+                    sepInput.onchange = async (e) => {
+                        rule.titleSeparator = (e.target as HTMLInputElement).value;
+                        await this.plugin.saveSettings();
+                    };
+                }
+
+                // Start date property row (only for RRULE — sets the dtstart)
+                if (currentFmt === 'rrule') {
+                    const startRow = ruleRow.createDiv();
+                    startRow.style.cssText = 'display: flex; gap: 8px; align-items: center; margin-bottom: 8px;';
+                    startRow.createEl('span', { text: 'Start date property:', attr: { style: 'font-size: 0.88em; color: var(--text-muted); white-space: nowrap;' } });
+                    const startInput = startRow.createEl('input', {
+                        type: 'text',
+                        value: rule.startPropertyName ?? '',
+                        attr: { placeholder: 'e.g. start_date (optional)' }
+                    });
+                    startInput.style.cssText = 'flex: 1; padding: 4px 8px;';
+                    new PropertySuggest(this.app, startInput);
+                    startInput.onchange = async (e) => {
+                        rule.startPropertyName = (e.target as HTMLInputElement).value.trim();
+                        await this.plugin.saveSettings();
+                    };
+                    startRow.createEl('span', { text: 'If set, the rule starts from that date (YYYY-MM-DD).', attr: { style: 'font-size: 0.82em; color: var(--text-muted);' } });
+                }
+
+                // Row 3: optional end property
+                const endRow = ruleRow.createDiv();
+                endRow.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+                endRow.createEl('span', { text: 'Stop after:', attr: { style: 'font-size: 0.88em; color: var(--text-muted); white-space: nowrap;' } });
+                const endInput = endRow.createEl('input', {
+                    type: 'text',
+                    value: rule.endPropertyName,
+                    attr: { placeholder: 'End date property (optional)' }
+                });
+                endInput.style.cssText = 'flex: 1; padding: 4px 8px;';
+                new PropertySuggest(this.app, endInput);
+                endInput.onchange = async (e) => {
+                    rule.endPropertyName = (e.target as HTMLInputElement).value.trim();
+                    await this.plugin.saveSettings();
+                };
+                endRow.createEl('span', { text: 'If set, the note stops appearing after that date.', attr: { style: 'font-size: 0.82em; color: var(--text-muted);' } });
+            });
+        };
+
+        renderRulesList();
+
+        // Add rule button
+        const addBtn = containerEl.createEl('button', { text: '+ Add property rule' });
+        addBtn.style.cssText = 'margin-top: 4px; margin-bottom: 20px; padding: 7px 14px; cursor: pointer; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 4px; font-weight: 500;';
+        addBtn.onclick = async () => {
+            config.propertyRules.push({
+                id: Date.now().toString(),
+                propertyName: '',
+                dateFormat: 'iso_date',
+                frequency: 'yearly',
+                startPropertyName: '',
+                endPropertyName: '',
+                titleDisplay: 'title_property',
+                titleSeparator: '–'
+            });
+            await this.plugin.saveSettings();
+            renderRulesList();
+        };
+
+    }
 }
 
 /**
@@ -3588,5 +3816,252 @@ export class CustomPeriodEditModal extends Modal {
     onClose() {
         const { contentEl } = this;
         contentEl.empty();
+    }
+}
+
+export class RecurringRuleBuilderModal extends Modal {
+    private plugin: LinearCalendarPlugin;
+    private file: TFile;
+    private frequency: 'yearly' | 'monthly' | 'weekly' = 'yearly';
+    private yearlyMonth: number = 1;
+    private yearlyDay: number = 1;
+    private monthlyMode: 'day' | 'nth' = 'day';
+    private monthlyDay: number = 1;
+    private monthlyNth: number = 1;
+    private monthlyWeekday: number = 0;
+    private weeklyDays: boolean[] = [false, true, false, false, false, false, false];
+    private targetPropertyName: string = '';
+
+    constructor(app: App, plugin: LinearCalendarPlugin, file: TFile) {
+        super(app);
+        this.plugin = plugin;
+        this.file = file;
+        this.detectCurrentRule();
+    }
+
+    private detectCurrentRule(): void {
+        const rules = this.plugin.settings.recurringEvents.propertyRules.filter(r => (r.dateFormat ?? 'iso_date') === 'rrule');
+        if (rules.length === 0) return;
+
+        const fm = this.app.metadataCache.getFileCache(this.file)?.frontmatter;
+        if (!fm) {
+            this.targetPropertyName = rules[0]?.propertyName ?? '';
+            return;
+        }
+
+        for (const rule of rules) {
+            const val = fm[rule.propertyName];
+            if (val) {
+                this.targetPropertyName = rule.propertyName;
+                this.parseExistingValue(String(val).trim(), rule.frequency);
+                return;
+            }
+        }
+        this.targetPropertyName = rules[0]?.propertyName ?? '';
+    }
+
+    private parseExistingValue(val: string, frequency: 'yearly' | 'monthly' | 'weekly'): void {
+        this.frequency = frequency;
+
+        if (val.startsWith('FREQ=')) {
+            const freqMatch = val.match(/FREQ=(\w+)/);
+            if (freqMatch?.[1] === 'YEARLY') this.frequency = 'yearly';
+            else if (freqMatch?.[1] === 'MONTHLY') this.frequency = 'monthly';
+            else if (freqMatch?.[1] === 'WEEKLY') this.frequency = 'weekly';
+
+            const byMonth = val.match(/BYMONTH=(\d+)/);
+            if (byMonth) this.yearlyMonth = parseInt(byMonth[1], 10);
+            const byMonthDay = val.match(/BYMONTHDAY=(\d+)/);
+            if (byMonthDay) {
+                this.yearlyDay = parseInt(byMonthDay[1], 10);
+                this.monthlyDay = parseInt(byMonthDay[1], 10);
+            }
+            const byDayMatch = val.match(/BYDAY=(-?\d+)?([A-Z]{2})/);
+            if (byDayMatch) {
+                const dayMap: Record<string, number> = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+                if (this.frequency === 'weekly') {
+                    const days = val.match(/BYDAY=([\w,]+)/)?.[1] ?? '';
+                    days.split(',').forEach(d => {
+                        const idx = dayMap[d.toUpperCase()];
+                        if (idx !== undefined) this.weeklyDays[idx] = true;
+                    });
+                } else if (byDayMatch[1]) {
+                    this.monthlyMode = 'nth';
+                    this.monthlyNth = parseInt(byDayMatch[1], 10);
+                    this.monthlyWeekday = dayMap[byDayMatch[2]] ?? 0;
+                }
+            }
+        }
+    }
+
+    private buildRRuleValue(): string {
+        if (this.frequency === 'yearly') {
+            return `FREQ=YEARLY;BYMONTH=${this.yearlyMonth};BYMONTHDAY=${this.yearlyDay}`;
+        }
+        if (this.frequency === 'monthly') {
+            if (this.monthlyMode === 'day') {
+                return `FREQ=MONTHLY;BYMONTHDAY=${this.monthlyDay}`;
+            }
+            const days = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+            const nth = this.monthlyNth === -1 ? '-1' : String(this.monthlyNth);
+            return `FREQ=MONTHLY;BYDAY=${nth}${days[this.monthlyWeekday]}`;
+        }
+        const days = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+        const selected = days.filter((_, i) => this.weeklyDays[i]);
+        return `FREQ=WEEKLY;BYDAY=${selected.length ? selected.join(',') : 'MO'}`;
+    }
+
+    private buildPreview(): string {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const ordinals = ['', '1st', '2nd', '3rd', '4th'];
+
+        if (this.frequency === 'yearly') {
+            const mon = months[this.yearlyMonth - 1] ?? '?';
+            const suffix = ['st','nd','rd'][this.yearlyDay - 1] ?? 'th';
+            return `Every year on ${mon} ${this.yearlyDay}${suffix}`;
+        }
+        if (this.frequency === 'monthly') {
+            if (this.monthlyMode === 'day') {
+                const suffix = ['st','nd','rd'][this.monthlyDay - 1] ?? 'th';
+                return `Every month on the ${this.monthlyDay}${suffix}`;
+            }
+            const nth = this.monthlyNth === -1 ? 'last' : (ordinals[this.monthlyNth] ?? `${this.monthlyNth}th`);
+            return `Every month on the ${nth} ${weekdays[this.monthlyWeekday]}`;
+        }
+        const selected = weekdays.filter((_, i) => this.weeklyDays[i]);
+        return selected.length ? `Every ${selected.join(', ')}` : 'Every week (select a day above)';
+    }
+
+    onOpen(): void {
+        const { contentEl } = this;
+        contentEl.empty();
+        contentEl.createEl('h2', { text: 'Edit Recurring Rule' });
+
+        const rules = this.plugin.settings.recurringEvents.propertyRules.filter(r => (r.dateFormat ?? 'iso_date') === 'rrule');
+
+        if (rules.length === 0) {
+            contentEl.createEl('p', { text: 'No RRULE property rules configured. Add one (with "RRULE pattern" format) in the Recurring Events settings tab first.' });
+            contentEl.createEl('button', { text: 'Close', cls: 'mod-cta' }).onclick = () => this.close();
+            return;
+        }
+
+        // Property selector (if multiple rules)
+        if (rules.length > 1) {
+            const propRow = contentEl.createDiv({ attr: { style: 'margin-bottom: 14px;' } });
+            propRow.createEl('label', { text: 'Property: ', attr: { style: 'font-weight: 600; margin-right: 8px;' } });
+            const propSelect = propRow.createEl('select', { attr: { style: 'padding: 4px 8px;' } });
+            rules.forEach(r => {
+                const opt = propSelect.createEl('option', { value: r.propertyName, text: r.propertyName });
+                if (r.propertyName === this.targetPropertyName) opt.selected = true;
+            });
+            propSelect.onchange = () => {
+                this.targetPropertyName = propSelect.value;
+                const rule = rules.find(r => r.propertyName === propSelect.value);
+                if (rule) this.frequency = rule.frequency;
+                this.onOpen();
+            };
+        }
+
+        // Frequency tabs
+        const freqRow = contentEl.createDiv({ attr: { style: 'display: flex; gap: 8px; margin-bottom: 18px;' } });
+        (['yearly', 'monthly', 'weekly'] as const).forEach(f => {
+            const btn = freqRow.createEl('button', { text: f.charAt(0).toUpperCase() + f.slice(1) });
+            const active = this.frequency === f;
+            btn.style.cssText = `padding: 7px 16px; border-radius: 4px; cursor: pointer; border: none; font-weight: ${active ? '600' : '400'}; background: ${active ? 'var(--interactive-accent)' : 'var(--background-secondary)'}; color: ${active ? 'var(--text-on-accent)' : 'var(--text-normal)'};`;
+            btn.onclick = () => { this.frequency = f; this.onOpen(); };
+        });
+
+        // Options area
+        const optionsEl = contentEl.createDiv({ attr: { style: 'margin-bottom: 14px;' } });
+
+        if (this.frequency === 'yearly') {
+            const row = optionsEl.createDiv({ attr: { style: 'display: flex; gap: 10px; align-items: center;' } });
+            row.createEl('span', { text: 'Every year on' });
+            const monthSelect = row.createEl('select', { attr: { style: 'padding: 4px 8px;' } });
+            ['January','February','March','April','May','June','July','August','September','October','November','December'].forEach((m, i) => {
+                const opt = monthSelect.createEl('option', { value: String(i + 1), text: m });
+                if (this.yearlyMonth === i + 1) opt.selected = true;
+            });
+            monthSelect.onchange = () => { this.yearlyMonth = parseInt(monthSelect.value); this.updatePreview(previewEl, valueText); };
+            const dayInput = row.createEl('input', { type: 'number', value: String(this.yearlyDay), attr: { min: '1', max: '31', style: 'width: 60px; padding: 4px 6px;' } });
+            dayInput.oninput = () => { this.yearlyDay = parseInt(dayInput.value) || 1; this.updatePreview(previewEl, valueText); };
+
+        } else if (this.frequency === 'monthly') {
+            const modeRow = optionsEl.createDiv({ attr: { style: 'display: flex; gap: 16px; margin-bottom: 12px;' } });
+            ['day', 'nth'].forEach(mode => {
+                const label = modeRow.createEl('label', { attr: { style: 'display: flex; align-items: center; gap: 5px; cursor: pointer;' } });
+                const radio = label.createEl('input', { type: 'radio', attr: { name: 'monthly-mode' } });
+                radio.checked = this.monthlyMode === mode;
+                label.createEl('span', { text: mode === 'day' ? 'On day of month' : 'On Nth weekday' });
+                radio.onchange = () => { this.monthlyMode = mode as 'day' | 'nth'; this.onOpen(); };
+            });
+
+            if (this.monthlyMode === 'day') {
+                const row = optionsEl.createDiv({ attr: { style: 'display: flex; gap: 10px; align-items: center;' } });
+                row.createEl('span', { text: 'Every month on day' });
+                const dayInput = row.createEl('input', { type: 'number', value: String(this.monthlyDay), attr: { min: '1', max: '31', style: 'width: 60px; padding: 4px 6px;' } });
+                dayInput.oninput = () => { this.monthlyDay = parseInt(dayInput.value) || 1; this.updatePreview(previewEl, valueText); };
+            } else {
+                const row = optionsEl.createDiv({ attr: { style: 'display: flex; gap: 10px; align-items: center; flex-wrap: wrap;' } });
+                row.createEl('span', { text: 'Every month on the' });
+                const nthSelect = row.createEl('select', { attr: { style: 'padding: 4px 8px;' } });
+                [['1','1st'],['2','2nd'],['3','3rd'],['4','4th'],['-1','last']].forEach(([val, label]) => {
+                    const opt = nthSelect.createEl('option', { value: val, text: label });
+                    if (String(this.monthlyNth) === val) opt.selected = true;
+                });
+                nthSelect.onchange = () => { this.monthlyNth = parseInt(nthSelect.value); this.updatePreview(previewEl, valueText); };
+                const wdSelect = row.createEl('select', { attr: { style: 'padding: 4px 8px;' } });
+                ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].forEach((d, i) => {
+                    const opt = wdSelect.createEl('option', { value: String(i), text: d });
+                    if (this.monthlyWeekday === i) opt.selected = true;
+                });
+                wdSelect.onchange = () => { this.monthlyWeekday = parseInt(wdSelect.value); this.updatePreview(previewEl, valueText); };
+            }
+
+        } else {
+            const row = optionsEl.createDiv({ attr: { style: 'display: flex; gap: 8px; flex-wrap: wrap;' } });
+            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((d, i) => {
+                const btn = row.createEl('button', { text: d });
+                const on = this.weeklyDays[i];
+                btn.style.cssText = `padding: 6px 10px; border-radius: 4px; cursor: pointer; border: 1px solid var(--background-modifier-border); background: ${on ? 'var(--interactive-accent)' : 'var(--background-secondary)'}; color: ${on ? 'var(--text-on-accent)' : 'var(--text-normal)'};`;
+                btn.onclick = () => { this.weeklyDays[i] = !this.weeklyDays[i]; this.onOpen(); };
+            });
+        }
+
+        // Preview label
+        const previewEl = contentEl.createEl('div', { attr: { style: 'font-size: 0.9em; color: var(--text-muted); font-style: italic; margin-bottom: 10px;' } });
+        previewEl.textContent = this.buildPreview();
+
+        // Generated RRULE value
+        const valueBox = contentEl.createDiv({ attr: { style: 'background: var(--background-secondary); border-radius: 4px; padding: 8px 12px; font-family: monospace; font-size: 0.88em; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;' } });
+        const valueText = valueBox.createEl('span', { text: this.buildRRuleValue() });
+        const copyBtn = valueBox.createEl('button', { text: 'Copy', attr: { style: 'padding: 3px 10px; cursor: pointer; font-size: 0.85em; white-space: nowrap;' } });
+        copyBtn.onclick = () => {
+            navigator.clipboard.writeText(valueText.textContent ?? '');
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => copyBtn.textContent = 'Copy', 1500);
+        };
+
+        // Footer
+        const footer = contentEl.createDiv({ attr: { style: 'display: flex; justify-content: flex-end; gap: 8px; padding-top: 14px; border-top: 1px solid var(--background-modifier-border);' } });
+        footer.createEl('button', { text: 'Cancel', attr: { style: 'padding: 8px 16px; cursor: pointer;' } }).onclick = () => this.close();
+        const saveBtn = footer.createEl('button', { text: 'Write to note', cls: 'mod-cta', attr: { style: 'padding: 8px 16px; cursor: pointer;' } });
+        saveBtn.onclick = async () => {
+            if (!this.targetPropertyName) { new Notice('No property name configured.'); return; }
+            await this.app.fileManager.processFrontMatter(this.file, (fm) => {
+                fm[this.targetPropertyName] = this.buildRRuleValue();
+            });
+            this.close();
+        };
+    }
+
+    private updatePreview(previewEl: HTMLElement, valueText: HTMLElement): void {
+        previewEl.textContent = this.buildPreview();
+        valueText.textContent = this.buildRRuleValue();
+    }
+
+    onClose(): void {
+        this.contentEl.empty();
     }
 }

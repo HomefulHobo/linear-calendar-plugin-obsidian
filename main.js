@@ -25,6 +25,3389 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
+// src/types.ts
+var DEFAULT_PERIODIC_NOTES, DEFAULT_SETTINGS, VIEW_TYPE_CALENDAR;
+var init_types = __esm({
+  "src/types.ts"() {
+    "use strict";
+    DEFAULT_PERIODIC_NOTES = {
+      usePeriodicNotesPlugin: true,
+      templateFolderSource: "obsidian",
+      // Use Obsidian's template folder by default
+      templateCustomFolder: "",
+      weekStart: 1,
+      // Monday
+      weekNumberDisplay: "header-row",
+      // Default to row above month with week spans
+      weekBorderColor: {
+        mode: "neutral"
+        // Neutral border color by default
+      },
+      showWeekNumbers: true,
+      showQuarters: false,
+      weekly: {
+        enabled: false,
+        folder: "",
+        includeSubfolders: true,
+        format: "gggg-[W]ww",
+        template: ""
+      },
+      monthly: {
+        enabled: false,
+        folder: "",
+        includeSubfolders: true,
+        format: "YYYY-MM",
+        template: ""
+      },
+      quarterly: {
+        enabled: false,
+        folder: "",
+        includeSubfolders: true,
+        format: "YYYY-[Q]Q",
+        template: ""
+      },
+      yearly: {
+        enabled: false,
+        folder: "",
+        includeSubfolders: true,
+        format: "YYYY",
+        template: ""
+      },
+      customPeriodGroups: [
+        {
+          id: "quinter-example",
+          name: "Quinter",
+          enabled: false,
+          folder: "",
+          template: "",
+          periods: [
+            {
+              id: "a",
+              name: "A",
+              format: "YYYY-[A]",
+              months: [1, 2],
+              yearBasis: "start",
+              useGroupSettings: true,
+              folder: "",
+              template: ""
+            },
+            {
+              id: "b",
+              name: "B",
+              format: "YYYY-[B]",
+              months: [3, 4, 5],
+              yearBasis: "start",
+              useGroupSettings: true,
+              folder: "",
+              template: ""
+            },
+            {
+              id: "c",
+              name: "C",
+              format: "YYYY-[C]",
+              months: [6, 7, 8],
+              yearBasis: "start",
+              useGroupSettings: true,
+              folder: "",
+              template: ""
+            },
+            {
+              id: "d",
+              name: "D",
+              format: "YYYY-[D]",
+              months: [9, 10, 11],
+              yearBasis: "start",
+              useGroupSettings: true,
+              folder: "",
+              template: ""
+            },
+            {
+              id: "e",
+              name: "E",
+              format: "YYYY-[E]",
+              months: [12],
+              yearBasis: "start",
+              useGroupSettings: true,
+              folder: "",
+              template: ""
+            }
+          ]
+        }
+      ]
+    };
+    DEFAULT_SETTINGS = {
+      currentYear: (/* @__PURE__ */ new Date()).getFullYear(),
+      dailyNoteFormat: "YYYY-MM-DD",
+      dailyNoteFolderMode: "obsidian",
+      dailyNoteCustomFolder: "",
+      showDailyNotesInCells: false,
+      // Don't show daily notes as cells by default
+      showNotesWithDateAndText: true,
+      // Show notes with date + text by default
+      hideDateInTitle: false,
+      // Show full title by default
+      hideSecondDateInTitle: false,
+      calendarWidth: "fit-screen",
+      // Fit to screen width by default
+      cellMinWidth: 30,
+      // Minimum 30px per cell when scrollable
+      columnAlignment: "weekday",
+      // Align by weekday by default
+      weekStartDay: 0,
+      // Sunday by default
+      highlightedWeekdays: [0, 6],
+      // Saturday and Sunday by default
+      showCellBorders: true,
+      // Show cell borders by default
+      showWeekSpanBorders: false,
+      // No week span borders by default
+      dateExtraction: {
+        startFromProperties: ["date"],
+        startFromFilename: false,
+        startPriority: "property",
+        endFromProperties: [],
+        endFromFilename: false,
+        endPriority: "property"
+      },
+      filterMode: "none",
+      filterConditions: [],
+      colorCategories: {
+        enabled: true,
+        // Enable colors by default
+        categories: [],
+        defaultCategoryColor: null,
+        showCategoryIndex: true,
+        showIconsInCalendar: true,
+        colorPalettes: [
+          {
+            name: "Default",
+            colors: [
+              { name: "Purple", hex: "#876c9d" },
+              { name: "Blue", hex: "#6c849d" },
+              { name: "Red", hex: "#9d6c6c" },
+              { name: "Yellow", hex: "#9d906c" },
+              { name: "Green", hex: "#779d6c" }
+            ]
+          }
+        ]
+      },
+      quickNoteCreation: {
+        enabled: true,
+        showAddNoteButton: true,
+        defaultFolder: "dailynotes",
+        customFolder: "",
+        defaultStartDateProperty: "date",
+        defaultEndDateProperty: "date_end",
+        defaultCategoryProperty: "category",
+        defaultMetadata: [
+          { key: "category", value: "" }
+        ]
+      },
+      periodicNotes: { ...DEFAULT_PERIODIC_NOTES },
+      banners: {
+        quickNotes: false,
+        periodicNotes: false,
+        communityPlugin: false
+      },
+      recurringEvents: {
+        enabled: false,
+        propertyRules: [
+          {
+            id: "default-birthday",
+            propertyName: "birthday",
+            dateFormat: "iso_date",
+            frequency: "yearly",
+            startPropertyName: "",
+            endPropertyName: "",
+            titleDisplay: "title_property_years",
+            titleSeparator: "\u2013"
+          }
+        ]
+      },
+      experimental: {
+        multilineNotes: false,
+        verticalText: false,
+        compactFontSize: false,
+        condensedLetters: false
+      }
+    };
+    VIEW_TYPE_CALENDAR = "linear-calendar-view";
+  }
+});
+
+// node_modules/rrule/dist/esm/weekday.js
+var ALL_WEEKDAYS, Weekday;
+var init_weekday = __esm({
+  "node_modules/rrule/dist/esm/weekday.js"() {
+    ALL_WEEKDAYS = [
+      "MO",
+      "TU",
+      "WE",
+      "TH",
+      "FR",
+      "SA",
+      "SU"
+    ];
+    Weekday = /** @class */
+    (function() {
+      function Weekday2(weekday, n) {
+        if (n === 0)
+          throw new Error("Can't create weekday with n == 0");
+        this.weekday = weekday;
+        this.n = n;
+      }
+      Weekday2.fromStr = function(str) {
+        return new Weekday2(ALL_WEEKDAYS.indexOf(str));
+      };
+      Weekday2.prototype.nth = function(n) {
+        return this.n === n ? this : new Weekday2(this.weekday, n);
+      };
+      Weekday2.prototype.equals = function(other) {
+        return this.weekday === other.weekday && this.n === other.n;
+      };
+      Weekday2.prototype.toString = function() {
+        var s = ALL_WEEKDAYS[this.weekday];
+        if (this.n)
+          s = (this.n > 0 ? "+" : "") + String(this.n) + s;
+        return s;
+      };
+      Weekday2.prototype.getJsWeekday = function() {
+        return this.weekday === 6 ? 0 : this.weekday + 1;
+      };
+      return Weekday2;
+    })();
+  }
+});
+
+// node_modules/rrule/dist/esm/helpers.js
+function padStart(item, targetLength, padString) {
+  if (padString === void 0) {
+    padString = " ";
+  }
+  var str = String(item);
+  targetLength = targetLength >> 0;
+  if (str.length > targetLength) {
+    return String(str);
+  }
+  targetLength = targetLength - str.length;
+  if (targetLength > padString.length) {
+    padString += repeat(padString, targetLength / padString.length);
+  }
+  return padString.slice(0, targetLength) + String(str);
+}
+var isPresent, isNumber, isWeekdayStr, isArray, range, repeat, toArray, split, pymod, divmod, empty, notEmpty, includes;
+var init_helpers = __esm({
+  "node_modules/rrule/dist/esm/helpers.js"() {
+    init_weekday();
+    isPresent = function(value) {
+      return value !== null && value !== void 0;
+    };
+    isNumber = function(value) {
+      return typeof value === "number";
+    };
+    isWeekdayStr = function(value) {
+      return typeof value === "string" && ALL_WEEKDAYS.includes(value);
+    };
+    isArray = Array.isArray;
+    range = function(start, end) {
+      if (end === void 0) {
+        end = start;
+      }
+      if (arguments.length === 1) {
+        end = start;
+        start = 0;
+      }
+      var rang = [];
+      for (var i = start; i < end; i++)
+        rang.push(i);
+      return rang;
+    };
+    repeat = function(value, times) {
+      var i = 0;
+      var array = [];
+      if (isArray(value)) {
+        for (; i < times; i++)
+          array[i] = [].concat(value);
+      } else {
+        for (; i < times; i++)
+          array[i] = value;
+      }
+      return array;
+    };
+    toArray = function(item) {
+      if (isArray(item)) {
+        return item;
+      }
+      return [item];
+    };
+    split = function(str, sep, num) {
+      var splits = str.split(sep);
+      return num ? splits.slice(0, num).concat([splits.slice(num).join(sep)]) : splits;
+    };
+    pymod = function(a, b) {
+      var r = a % b;
+      return r * b < 0 ? r + b : r;
+    };
+    divmod = function(a, b) {
+      return { div: Math.floor(a / b), mod: pymod(a, b) };
+    };
+    empty = function(obj) {
+      return !isPresent(obj) || obj.length === 0;
+    };
+    notEmpty = function(obj) {
+      return !empty(obj);
+    };
+    includes = function(arr, val) {
+      return notEmpty(arr) && arr.indexOf(val) !== -1;
+    };
+  }
+});
+
+// node_modules/rrule/dist/esm/dateutil.js
+var datetime, MONTH_DAYS, ONE_DAY, MAXYEAR, ORDINAL_BASE, PY_WEEKDAYS, isLeapYear, isDate, isValidDate, daysBetween, toOrdinal, fromOrdinal, getMonthDays, getWeekday, monthRange, combine, clone, cloneDates, sort, timeToUntilString, untilStringToDate, dateTZtoISO8601, dateInTimeZone;
+var init_dateutil = __esm({
+  "node_modules/rrule/dist/esm/dateutil.js"() {
+    init_helpers();
+    datetime = function(y, m, d, h, i, s) {
+      if (h === void 0) {
+        h = 0;
+      }
+      if (i === void 0) {
+        i = 0;
+      }
+      if (s === void 0) {
+        s = 0;
+      }
+      return new Date(Date.UTC(y, m - 1, d, h, i, s));
+    };
+    MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    ONE_DAY = 1e3 * 60 * 60 * 24;
+    MAXYEAR = 9999;
+    ORDINAL_BASE = datetime(1970, 1, 1);
+    PY_WEEKDAYS = [6, 0, 1, 2, 3, 4, 5];
+    isLeapYear = function(year) {
+      return year % 4 === 0 && year % 100 !== 0 || year % 400 === 0;
+    };
+    isDate = function(value) {
+      return value instanceof Date;
+    };
+    isValidDate = function(value) {
+      return isDate(value) && !isNaN(value.getTime());
+    };
+    daysBetween = function(date1, date2) {
+      var date1ms = date1.getTime();
+      var date2ms = date2.getTime();
+      var differencems = date1ms - date2ms;
+      return Math.round(differencems / ONE_DAY);
+    };
+    toOrdinal = function(date) {
+      return daysBetween(date, ORDINAL_BASE);
+    };
+    fromOrdinal = function(ordinal) {
+      return new Date(ORDINAL_BASE.getTime() + ordinal * ONE_DAY);
+    };
+    getMonthDays = function(date) {
+      var month = date.getUTCMonth();
+      return month === 1 && isLeapYear(date.getUTCFullYear()) ? 29 : MONTH_DAYS[month];
+    };
+    getWeekday = function(date) {
+      return PY_WEEKDAYS[date.getUTCDay()];
+    };
+    monthRange = function(year, month) {
+      var date = datetime(year, month + 1, 1);
+      return [getWeekday(date), getMonthDays(date)];
+    };
+    combine = function(date, time) {
+      time = time || date;
+      return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), time.getHours(), time.getMinutes(), time.getSeconds(), time.getMilliseconds()));
+    };
+    clone = function(date) {
+      var dolly = new Date(date.getTime());
+      return dolly;
+    };
+    cloneDates = function(dates) {
+      var clones = [];
+      for (var i = 0; i < dates.length; i++) {
+        clones.push(clone(dates[i]));
+      }
+      return clones;
+    };
+    sort = function(dates) {
+      dates.sort(function(a, b) {
+        return a.getTime() - b.getTime();
+      });
+    };
+    timeToUntilString = function(time, utc) {
+      if (utc === void 0) {
+        utc = true;
+      }
+      var date = new Date(time);
+      return [
+        padStart(date.getUTCFullYear().toString(), 4, "0"),
+        padStart(date.getUTCMonth() + 1, 2, "0"),
+        padStart(date.getUTCDate(), 2, "0"),
+        "T",
+        padStart(date.getUTCHours(), 2, "0"),
+        padStart(date.getUTCMinutes(), 2, "0"),
+        padStart(date.getUTCSeconds(), 2, "0"),
+        utc ? "Z" : ""
+      ].join("");
+    };
+    untilStringToDate = function(until) {
+      var re = /^(\d{4})(\d{2})(\d{2})(T(\d{2})(\d{2})(\d{2})Z?)?$/;
+      var bits = re.exec(until);
+      if (!bits)
+        throw new Error("Invalid UNTIL value: ".concat(until));
+      return new Date(Date.UTC(parseInt(bits[1], 10), parseInt(bits[2], 10) - 1, parseInt(bits[3], 10), parseInt(bits[5], 10) || 0, parseInt(bits[6], 10) || 0, parseInt(bits[7], 10) || 0));
+    };
+    dateTZtoISO8601 = function(date, timeZone) {
+      var dateStr = date.toLocaleString("sv-SE", { timeZone });
+      return dateStr.replace(" ", "T") + "Z";
+    };
+    dateInTimeZone = function(date, timeZone) {
+      var localTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      var dateInLocalTZ = new Date(dateTZtoISO8601(date, localTimeZone));
+      var dateInTargetTZ = new Date(dateTZtoISO8601(date, timeZone !== null && timeZone !== void 0 ? timeZone : "UTC"));
+      var tzOffset = dateInTargetTZ.getTime() - dateInLocalTZ.getTime();
+      return new Date(date.getTime() - tzOffset);
+    };
+  }
+});
+
+// node_modules/rrule/dist/esm/iterresult.js
+var IterResult, iterresult_default;
+var init_iterresult = __esm({
+  "node_modules/rrule/dist/esm/iterresult.js"() {
+    IterResult = /** @class */
+    (function() {
+      function IterResult2(method, args) {
+        this.minDate = null;
+        this.maxDate = null;
+        this._result = [];
+        this.total = 0;
+        this.method = method;
+        this.args = args;
+        if (method === "between") {
+          this.maxDate = args.inc ? args.before : new Date(args.before.getTime() - 1);
+          this.minDate = args.inc ? args.after : new Date(args.after.getTime() + 1);
+        } else if (method === "before") {
+          this.maxDate = args.inc ? args.dt : new Date(args.dt.getTime() - 1);
+        } else if (method === "after") {
+          this.minDate = args.inc ? args.dt : new Date(args.dt.getTime() + 1);
+        }
+      }
+      IterResult2.prototype.accept = function(date) {
+        ++this.total;
+        var tooEarly = this.minDate && date < this.minDate;
+        var tooLate = this.maxDate && date > this.maxDate;
+        if (this.method === "between") {
+          if (tooEarly)
+            return true;
+          if (tooLate)
+            return false;
+        } else if (this.method === "before") {
+          if (tooLate)
+            return false;
+        } else if (this.method === "after") {
+          if (tooEarly)
+            return true;
+          this.add(date);
+          return false;
+        }
+        return this.add(date);
+      };
+      IterResult2.prototype.add = function(date) {
+        this._result.push(date);
+        return true;
+      };
+      IterResult2.prototype.getValue = function() {
+        var res = this._result;
+        switch (this.method) {
+          case "all":
+          case "between":
+            return res;
+          case "before":
+          case "after":
+          default:
+            return res.length ? res[res.length - 1] : null;
+        }
+      };
+      IterResult2.prototype.clone = function() {
+        return new IterResult2(this.method, this.args);
+      };
+      return IterResult2;
+    })();
+    iterresult_default = IterResult;
+  }
+});
+
+// node_modules/tslib/tslib.es6.mjs
+function __extends(d, b) {
+  if (typeof b !== "function" && b !== null)
+    throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+  extendStatics(d, b);
+  function __() {
+    this.constructor = d;
+  }
+  d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+function __spreadArray(to, from, pack) {
+  if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+    if (ar || !(i in from)) {
+      if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+      ar[i] = from[i];
+    }
+  }
+  return to.concat(ar || Array.prototype.slice.call(from));
+}
+var extendStatics, __assign;
+var init_tslib_es6 = __esm({
+  "node_modules/tslib/tslib.es6.mjs"() {
+    extendStatics = function(d, b) {
+      extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
+        d2.__proto__ = b2;
+      } || function(d2, b2) {
+        for (var p in b2) if (Object.prototype.hasOwnProperty.call(b2, p)) d2[p] = b2[p];
+      };
+      return extendStatics(d, b);
+    };
+    __assign = function() {
+      __assign = Object.assign || function __assign2(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+          s = arguments[i];
+          for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+      };
+      return __assign.apply(this, arguments);
+    };
+  }
+});
+
+// node_modules/rrule/dist/esm/callbackiterresult.js
+var CallbackIterResult, callbackiterresult_default;
+var init_callbackiterresult = __esm({
+  "node_modules/rrule/dist/esm/callbackiterresult.js"() {
+    init_tslib_es6();
+    init_iterresult();
+    CallbackIterResult = /** @class */
+    (function(_super) {
+      __extends(CallbackIterResult2, _super);
+      function CallbackIterResult2(method, args, iterator) {
+        var _this = _super.call(this, method, args) || this;
+        _this.iterator = iterator;
+        return _this;
+      }
+      CallbackIterResult2.prototype.add = function(date) {
+        if (this.iterator(date, this._result.length)) {
+          this._result.push(date);
+          return true;
+        }
+        return false;
+      };
+      return CallbackIterResult2;
+    })(iterresult_default);
+    callbackiterresult_default = CallbackIterResult;
+  }
+});
+
+// node_modules/rrule/dist/esm/nlp/i18n.js
+var ENGLISH, i18n_default;
+var init_i18n = __esm({
+  "node_modules/rrule/dist/esm/nlp/i18n.js"() {
+    ENGLISH = {
+      dayNames: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+      ],
+      monthNames: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+      ],
+      tokens: {
+        SKIP: /^[ \r\n\t]+|^\.$/,
+        number: /^[1-9][0-9]*/,
+        numberAsText: /^(one|two|three)/i,
+        every: /^every/i,
+        "day(s)": /^days?/i,
+        "weekday(s)": /^weekdays?/i,
+        "week(s)": /^weeks?/i,
+        "hour(s)": /^hours?/i,
+        "minute(s)": /^minutes?/i,
+        "month(s)": /^months?/i,
+        "year(s)": /^years?/i,
+        on: /^(on|in)/i,
+        at: /^(at)/i,
+        the: /^the/i,
+        first: /^first/i,
+        second: /^second/i,
+        third: /^third/i,
+        nth: /^([1-9][0-9]*)(\.|th|nd|rd|st)/i,
+        last: /^last/i,
+        for: /^for/i,
+        "time(s)": /^times?/i,
+        until: /^(un)?til/i,
+        monday: /^mo(n(day)?)?/i,
+        tuesday: /^tu(e(s(day)?)?)?/i,
+        wednesday: /^we(d(n(esday)?)?)?/i,
+        thursday: /^th(u(r(sday)?)?)?/i,
+        friday: /^fr(i(day)?)?/i,
+        saturday: /^sa(t(urday)?)?/i,
+        sunday: /^su(n(day)?)?/i,
+        january: /^jan(uary)?/i,
+        february: /^feb(ruary)?/i,
+        march: /^mar(ch)?/i,
+        april: /^apr(il)?/i,
+        may: /^may/i,
+        june: /^june?/i,
+        july: /^july?/i,
+        august: /^aug(ust)?/i,
+        september: /^sep(t(ember)?)?/i,
+        october: /^oct(ober)?/i,
+        november: /^nov(ember)?/i,
+        december: /^dec(ember)?/i,
+        comma: /^(,\s*|(and|or)\s*)+/i
+      }
+    };
+    i18n_default = ENGLISH;
+  }
+});
+
+// node_modules/rrule/dist/esm/nlp/totext.js
+var contains, defaultGetText, defaultDateFormatter, ToText, totext_default;
+var init_totext = __esm({
+  "node_modules/rrule/dist/esm/nlp/totext.js"() {
+    init_i18n();
+    init_rrule();
+    init_helpers();
+    contains = function(arr, val) {
+      return arr.indexOf(val) !== -1;
+    };
+    defaultGetText = function(id) {
+      return id.toString();
+    };
+    defaultDateFormatter = function(year, month, day) {
+      return "".concat(month, " ").concat(day, ", ").concat(year);
+    };
+    ToText = /** @class */
+    (function() {
+      function ToText2(rrule, gettext, language, dateFormatter) {
+        if (gettext === void 0) {
+          gettext = defaultGetText;
+        }
+        if (language === void 0) {
+          language = i18n_default;
+        }
+        if (dateFormatter === void 0) {
+          dateFormatter = defaultDateFormatter;
+        }
+        this.text = [];
+        this.language = language || i18n_default;
+        this.gettext = gettext;
+        this.dateFormatter = dateFormatter;
+        this.rrule = rrule;
+        this.options = rrule.options;
+        this.origOptions = rrule.origOptions;
+        if (this.origOptions.bymonthday) {
+          var bymonthday = [].concat(this.options.bymonthday);
+          var bynmonthday = [].concat(this.options.bynmonthday);
+          bymonthday.sort(function(a, b) {
+            return a - b;
+          });
+          bynmonthday.sort(function(a, b) {
+            return b - a;
+          });
+          this.bymonthday = bymonthday.concat(bynmonthday);
+          if (!this.bymonthday.length)
+            this.bymonthday = null;
+        }
+        if (isPresent(this.origOptions.byweekday)) {
+          var byweekday = !isArray(this.origOptions.byweekday) ? [this.origOptions.byweekday] : this.origOptions.byweekday;
+          var days = String(byweekday);
+          this.byweekday = {
+            allWeeks: byweekday.filter(function(weekday) {
+              return !weekday.n;
+            }),
+            someWeeks: byweekday.filter(function(weekday) {
+              return Boolean(weekday.n);
+            }),
+            isWeekdays: days.indexOf("MO") !== -1 && days.indexOf("TU") !== -1 && days.indexOf("WE") !== -1 && days.indexOf("TH") !== -1 && days.indexOf("FR") !== -1 && days.indexOf("SA") === -1 && days.indexOf("SU") === -1,
+            isEveryDay: days.indexOf("MO") !== -1 && days.indexOf("TU") !== -1 && days.indexOf("WE") !== -1 && days.indexOf("TH") !== -1 && days.indexOf("FR") !== -1 && days.indexOf("SA") !== -1 && days.indexOf("SU") !== -1
+          };
+          var sortWeekDays = function(a, b) {
+            return a.weekday - b.weekday;
+          };
+          this.byweekday.allWeeks.sort(sortWeekDays);
+          this.byweekday.someWeeks.sort(sortWeekDays);
+          if (!this.byweekday.allWeeks.length)
+            this.byweekday.allWeeks = null;
+          if (!this.byweekday.someWeeks.length)
+            this.byweekday.someWeeks = null;
+        } else {
+          this.byweekday = null;
+        }
+      }
+      ToText2.isFullyConvertible = function(rrule) {
+        var canConvert = true;
+        if (!(rrule.options.freq in ToText2.IMPLEMENTED))
+          return false;
+        if (rrule.origOptions.until && rrule.origOptions.count)
+          return false;
+        for (var key in rrule.origOptions) {
+          if (contains(["dtstart", "tzid", "wkst", "freq"], key))
+            return true;
+          if (!contains(ToText2.IMPLEMENTED[rrule.options.freq], key))
+            return false;
+        }
+        return canConvert;
+      };
+      ToText2.prototype.isFullyConvertible = function() {
+        return ToText2.isFullyConvertible(this.rrule);
+      };
+      ToText2.prototype.toString = function() {
+        var gettext = this.gettext;
+        if (!(this.options.freq in ToText2.IMPLEMENTED)) {
+          return gettext("RRule error: Unable to fully convert this rrule to text");
+        }
+        this.text = [gettext("every")];
+        this[RRule.FREQUENCIES[this.options.freq]]();
+        if (this.options.until) {
+          this.add(gettext("until"));
+          var until = this.options.until;
+          this.add(this.dateFormatter(until.getUTCFullYear(), this.language.monthNames[until.getUTCMonth()], until.getUTCDate()));
+        } else if (this.options.count) {
+          this.add(gettext("for")).add(this.options.count.toString()).add(this.plural(this.options.count) ? gettext("times") : gettext("time"));
+        }
+        if (!this.isFullyConvertible())
+          this.add(gettext("(~ approximate)"));
+        return this.text.join("");
+      };
+      ToText2.prototype.HOURLY = function() {
+        var gettext = this.gettext;
+        if (this.options.interval !== 1)
+          this.add(this.options.interval.toString());
+        this.add(this.plural(this.options.interval) ? gettext("hours") : gettext("hour"));
+      };
+      ToText2.prototype.MINUTELY = function() {
+        var gettext = this.gettext;
+        if (this.options.interval !== 1)
+          this.add(this.options.interval.toString());
+        this.add(this.plural(this.options.interval) ? gettext("minutes") : gettext("minute"));
+      };
+      ToText2.prototype.DAILY = function() {
+        var gettext = this.gettext;
+        if (this.options.interval !== 1)
+          this.add(this.options.interval.toString());
+        if (this.byweekday && this.byweekday.isWeekdays) {
+          this.add(this.plural(this.options.interval) ? gettext("weekdays") : gettext("weekday"));
+        } else {
+          this.add(this.plural(this.options.interval) ? gettext("days") : gettext("day"));
+        }
+        if (this.origOptions.bymonth) {
+          this.add(gettext("in"));
+          this._bymonth();
+        }
+        if (this.bymonthday) {
+          this._bymonthday();
+        } else if (this.byweekday) {
+          this._byweekday();
+        } else if (this.origOptions.byhour) {
+          this._byhour();
+        }
+      };
+      ToText2.prototype.WEEKLY = function() {
+        var gettext = this.gettext;
+        if (this.options.interval !== 1) {
+          this.add(this.options.interval.toString()).add(this.plural(this.options.interval) ? gettext("weeks") : gettext("week"));
+        }
+        if (this.byweekday && this.byweekday.isWeekdays) {
+          if (this.options.interval === 1) {
+            this.add(this.plural(this.options.interval) ? gettext("weekdays") : gettext("weekday"));
+          } else {
+            this.add(gettext("on")).add(gettext("weekdays"));
+          }
+        } else if (this.byweekday && this.byweekday.isEveryDay) {
+          this.add(this.plural(this.options.interval) ? gettext("days") : gettext("day"));
+        } else {
+          if (this.options.interval === 1)
+            this.add(gettext("week"));
+          if (this.origOptions.bymonth) {
+            this.add(gettext("in"));
+            this._bymonth();
+          }
+          if (this.bymonthday) {
+            this._bymonthday();
+          } else if (this.byweekday) {
+            this._byweekday();
+          }
+          if (this.origOptions.byhour) {
+            this._byhour();
+          }
+        }
+      };
+      ToText2.prototype.MONTHLY = function() {
+        var gettext = this.gettext;
+        if (this.origOptions.bymonth) {
+          if (this.options.interval !== 1) {
+            this.add(this.options.interval.toString()).add(gettext("months"));
+            if (this.plural(this.options.interval))
+              this.add(gettext("in"));
+          } else {
+          }
+          this._bymonth();
+        } else {
+          if (this.options.interval !== 1) {
+            this.add(this.options.interval.toString());
+          }
+          this.add(this.plural(this.options.interval) ? gettext("months") : gettext("month"));
+        }
+        if (this.bymonthday) {
+          this._bymonthday();
+        } else if (this.byweekday && this.byweekday.isWeekdays) {
+          this.add(gettext("on")).add(gettext("weekdays"));
+        } else if (this.byweekday) {
+          this._byweekday();
+        }
+      };
+      ToText2.prototype.YEARLY = function() {
+        var gettext = this.gettext;
+        if (this.origOptions.bymonth) {
+          if (this.options.interval !== 1) {
+            this.add(this.options.interval.toString());
+            this.add(gettext("years"));
+          } else {
+          }
+          this._bymonth();
+        } else {
+          if (this.options.interval !== 1) {
+            this.add(this.options.interval.toString());
+          }
+          this.add(this.plural(this.options.interval) ? gettext("years") : gettext("year"));
+        }
+        if (this.bymonthday) {
+          this._bymonthday();
+        } else if (this.byweekday) {
+          this._byweekday();
+        }
+        if (this.options.byyearday) {
+          this.add(gettext("on the")).add(this.list(this.options.byyearday, this.nth, gettext("and"))).add(gettext("day"));
+        }
+        if (this.options.byweekno) {
+          this.add(gettext("in")).add(this.plural(this.options.byweekno.length) ? gettext("weeks") : gettext("week")).add(this.list(this.options.byweekno, void 0, gettext("and")));
+        }
+      };
+      ToText2.prototype._bymonthday = function() {
+        var gettext = this.gettext;
+        if (this.byweekday && this.byweekday.allWeeks) {
+          this.add(gettext("on")).add(this.list(this.byweekday.allWeeks, this.weekdaytext, gettext("or"))).add(gettext("the")).add(this.list(this.bymonthday, this.nth, gettext("or")));
+        } else {
+          this.add(gettext("on the")).add(this.list(this.bymonthday, this.nth, gettext("and")));
+        }
+      };
+      ToText2.prototype._byweekday = function() {
+        var gettext = this.gettext;
+        if (this.byweekday.allWeeks && !this.byweekday.isWeekdays) {
+          this.add(gettext("on")).add(this.list(this.byweekday.allWeeks, this.weekdaytext));
+        }
+        if (this.byweekday.someWeeks) {
+          if (this.byweekday.allWeeks)
+            this.add(gettext("and"));
+          this.add(gettext("on the")).add(this.list(this.byweekday.someWeeks, this.weekdaytext, gettext("and")));
+        }
+      };
+      ToText2.prototype._byhour = function() {
+        var gettext = this.gettext;
+        this.add(gettext("at")).add(this.list(this.origOptions.byhour, void 0, gettext("and")));
+      };
+      ToText2.prototype._bymonth = function() {
+        this.add(this.list(this.options.bymonth, this.monthtext, this.gettext("and")));
+      };
+      ToText2.prototype.nth = function(n) {
+        n = parseInt(n.toString(), 10);
+        var nth;
+        var gettext = this.gettext;
+        if (n === -1)
+          return gettext("last");
+        var npos = Math.abs(n);
+        switch (npos) {
+          case 1:
+          case 21:
+          case 31:
+            nth = npos + gettext("st");
+            break;
+          case 2:
+          case 22:
+            nth = npos + gettext("nd");
+            break;
+          case 3:
+          case 23:
+            nth = npos + gettext("rd");
+            break;
+          default:
+            nth = npos + gettext("th");
+        }
+        return n < 0 ? nth + " " + gettext("last") : nth;
+      };
+      ToText2.prototype.monthtext = function(m) {
+        return this.language.monthNames[m - 1];
+      };
+      ToText2.prototype.weekdaytext = function(wday) {
+        var weekday = isNumber(wday) ? (wday + 1) % 7 : wday.getJsWeekday();
+        return (wday.n ? this.nth(wday.n) + " " : "") + this.language.dayNames[weekday];
+      };
+      ToText2.prototype.plural = function(n) {
+        return n % 100 !== 1;
+      };
+      ToText2.prototype.add = function(s) {
+        this.text.push(" ");
+        this.text.push(s);
+        return this;
+      };
+      ToText2.prototype.list = function(arr, callback, finalDelim, delim) {
+        var _this = this;
+        if (delim === void 0) {
+          delim = ",";
+        }
+        if (!isArray(arr)) {
+          arr = [arr];
+        }
+        var delimJoin = function(array, delimiter, finalDelimiter) {
+          var list = "";
+          for (var i = 0; i < array.length; i++) {
+            if (i !== 0) {
+              if (i === array.length - 1) {
+                list += " " + finalDelimiter + " ";
+              } else {
+                list += delimiter + " ";
+              }
+            }
+            list += array[i];
+          }
+          return list;
+        };
+        callback = callback || function(o) {
+          return o.toString();
+        };
+        var realCallback = function(arg) {
+          return callback && callback.call(_this, arg);
+        };
+        if (finalDelim) {
+          return delimJoin(arr.map(realCallback), delim, finalDelim);
+        } else {
+          return arr.map(realCallback).join(delim + " ");
+        }
+      };
+      return ToText2;
+    })();
+    totext_default = ToText;
+  }
+});
+
+// node_modules/rrule/dist/esm/nlp/parsetext.js
+function parseText(text, language) {
+  if (language === void 0) {
+    language = i18n_default;
+  }
+  var options = {};
+  var ttr = new Parser(language.tokens);
+  if (!ttr.start(text))
+    return null;
+  S();
+  return options;
+  function S() {
+    ttr.expect("every");
+    var n = ttr.acceptNumber();
+    if (n)
+      options.interval = parseInt(n[0], 10);
+    if (ttr.isDone())
+      throw new Error("Unexpected end");
+    switch (ttr.symbol) {
+      case "day(s)":
+        options.freq = RRule.DAILY;
+        if (ttr.nextSymbol()) {
+          AT();
+          F();
+        }
+        break;
+      // FIXME Note: every 2 weekdays != every two weeks on weekdays.
+      // DAILY on weekdays is not a valid rule
+      case "weekday(s)":
+        options.freq = RRule.WEEKLY;
+        options.byweekday = [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR];
+        ttr.nextSymbol();
+        AT();
+        F();
+        break;
+      case "week(s)":
+        options.freq = RRule.WEEKLY;
+        if (ttr.nextSymbol()) {
+          ON();
+          AT();
+          F();
+        }
+        break;
+      case "hour(s)":
+        options.freq = RRule.HOURLY;
+        if (ttr.nextSymbol()) {
+          ON();
+          F();
+        }
+        break;
+      case "minute(s)":
+        options.freq = RRule.MINUTELY;
+        if (ttr.nextSymbol()) {
+          ON();
+          F();
+        }
+        break;
+      case "month(s)":
+        options.freq = RRule.MONTHLY;
+        if (ttr.nextSymbol()) {
+          ON();
+          F();
+        }
+        break;
+      case "year(s)":
+        options.freq = RRule.YEARLY;
+        if (ttr.nextSymbol()) {
+          ON();
+          F();
+        }
+        break;
+      case "monday":
+      case "tuesday":
+      case "wednesday":
+      case "thursday":
+      case "friday":
+      case "saturday":
+      case "sunday":
+        options.freq = RRule.WEEKLY;
+        var key = ttr.symbol.substr(0, 2).toUpperCase();
+        options.byweekday = [RRule[key]];
+        if (!ttr.nextSymbol())
+          return;
+        while (ttr.accept("comma")) {
+          if (ttr.isDone())
+            throw new Error("Unexpected end");
+          var wkd = decodeWKD();
+          if (!wkd) {
+            throw new Error("Unexpected symbol " + ttr.symbol + ", expected weekday");
+          }
+          options.byweekday.push(RRule[wkd]);
+          ttr.nextSymbol();
+        }
+        AT();
+        MDAYs();
+        F();
+        break;
+      case "january":
+      case "february":
+      case "march":
+      case "april":
+      case "may":
+      case "june":
+      case "july":
+      case "august":
+      case "september":
+      case "october":
+      case "november":
+      case "december":
+        options.freq = RRule.YEARLY;
+        options.bymonth = [decodeM()];
+        if (!ttr.nextSymbol())
+          return;
+        while (ttr.accept("comma")) {
+          if (ttr.isDone())
+            throw new Error("Unexpected end");
+          var m = decodeM();
+          if (!m) {
+            throw new Error("Unexpected symbol " + ttr.symbol + ", expected month");
+          }
+          options.bymonth.push(m);
+          ttr.nextSymbol();
+        }
+        ON();
+        F();
+        break;
+      default:
+        throw new Error("Unknown symbol");
+    }
+  }
+  function ON() {
+    var on = ttr.accept("on");
+    var the = ttr.accept("the");
+    if (!(on || the))
+      return;
+    do {
+      var nth = decodeNTH();
+      var wkd = decodeWKD();
+      var m = decodeM();
+      if (nth) {
+        if (wkd) {
+          ttr.nextSymbol();
+          if (!options.byweekday)
+            options.byweekday = [];
+          options.byweekday.push(RRule[wkd].nth(nth));
+        } else {
+          if (!options.bymonthday)
+            options.bymonthday = [];
+          options.bymonthday.push(nth);
+          ttr.accept("day(s)");
+        }
+      } else if (wkd) {
+        ttr.nextSymbol();
+        if (!options.byweekday)
+          options.byweekday = [];
+        options.byweekday.push(RRule[wkd]);
+      } else if (ttr.symbol === "weekday(s)") {
+        ttr.nextSymbol();
+        if (!options.byweekday) {
+          options.byweekday = [RRule.MO, RRule.TU, RRule.WE, RRule.TH, RRule.FR];
+        }
+      } else if (ttr.symbol === "week(s)") {
+        ttr.nextSymbol();
+        var n = ttr.acceptNumber();
+        if (!n) {
+          throw new Error("Unexpected symbol " + ttr.symbol + ", expected week number");
+        }
+        options.byweekno = [parseInt(n[0], 10)];
+        while (ttr.accept("comma")) {
+          n = ttr.acceptNumber();
+          if (!n) {
+            throw new Error("Unexpected symbol " + ttr.symbol + "; expected monthday");
+          }
+          options.byweekno.push(parseInt(n[0], 10));
+        }
+      } else if (m) {
+        ttr.nextSymbol();
+        if (!options.bymonth)
+          options.bymonth = [];
+        options.bymonth.push(m);
+      } else {
+        return;
+      }
+    } while (ttr.accept("comma") || ttr.accept("the") || ttr.accept("on"));
+  }
+  function AT() {
+    var at = ttr.accept("at");
+    if (!at)
+      return;
+    do {
+      var n = ttr.acceptNumber();
+      if (!n) {
+        throw new Error("Unexpected symbol " + ttr.symbol + ", expected hour");
+      }
+      options.byhour = [parseInt(n[0], 10)];
+      while (ttr.accept("comma")) {
+        n = ttr.acceptNumber();
+        if (!n) {
+          throw new Error("Unexpected symbol " + ttr.symbol + "; expected hour");
+        }
+        options.byhour.push(parseInt(n[0], 10));
+      }
+    } while (ttr.accept("comma") || ttr.accept("at"));
+  }
+  function decodeM() {
+    switch (ttr.symbol) {
+      case "january":
+        return 1;
+      case "february":
+        return 2;
+      case "march":
+        return 3;
+      case "april":
+        return 4;
+      case "may":
+        return 5;
+      case "june":
+        return 6;
+      case "july":
+        return 7;
+      case "august":
+        return 8;
+      case "september":
+        return 9;
+      case "october":
+        return 10;
+      case "november":
+        return 11;
+      case "december":
+        return 12;
+      default:
+        return false;
+    }
+  }
+  function decodeWKD() {
+    switch (ttr.symbol) {
+      case "monday":
+      case "tuesday":
+      case "wednesday":
+      case "thursday":
+      case "friday":
+      case "saturday":
+      case "sunday":
+        return ttr.symbol.substr(0, 2).toUpperCase();
+      default:
+        return false;
+    }
+  }
+  function decodeNTH() {
+    switch (ttr.symbol) {
+      case "last":
+        ttr.nextSymbol();
+        return -1;
+      case "first":
+        ttr.nextSymbol();
+        return 1;
+      case "second":
+        ttr.nextSymbol();
+        return ttr.accept("last") ? -2 : 2;
+      case "third":
+        ttr.nextSymbol();
+        return ttr.accept("last") ? -3 : 3;
+      case "nth":
+        var v = parseInt(ttr.value[1], 10);
+        if (v < -366 || v > 366)
+          throw new Error("Nth out of range: " + v);
+        ttr.nextSymbol();
+        return ttr.accept("last") ? -v : v;
+      default:
+        return false;
+    }
+  }
+  function MDAYs() {
+    ttr.accept("on");
+    ttr.accept("the");
+    var nth = decodeNTH();
+    if (!nth)
+      return;
+    options.bymonthday = [nth];
+    ttr.nextSymbol();
+    while (ttr.accept("comma")) {
+      nth = decodeNTH();
+      if (!nth) {
+        throw new Error("Unexpected symbol " + ttr.symbol + "; expected monthday");
+      }
+      options.bymonthday.push(nth);
+      ttr.nextSymbol();
+    }
+  }
+  function F() {
+    if (ttr.symbol === "until") {
+      var date = Date.parse(ttr.text);
+      if (!date)
+        throw new Error("Cannot parse until date:" + ttr.text);
+      options.until = new Date(date);
+    } else if (ttr.accept("for")) {
+      options.count = parseInt(ttr.value[0], 10);
+      ttr.expect("number");
+    }
+  }
+}
+var Parser;
+var init_parsetext = __esm({
+  "node_modules/rrule/dist/esm/nlp/parsetext.js"() {
+    init_i18n();
+    init_rrule();
+    Parser = /** @class */
+    (function() {
+      function Parser2(rules) {
+        this.done = true;
+        this.rules = rules;
+      }
+      Parser2.prototype.start = function(text) {
+        this.text = text;
+        this.done = false;
+        return this.nextSymbol();
+      };
+      Parser2.prototype.isDone = function() {
+        return this.done && this.symbol === null;
+      };
+      Parser2.prototype.nextSymbol = function() {
+        var best;
+        var bestSymbol;
+        this.symbol = null;
+        this.value = null;
+        do {
+          if (this.done)
+            return false;
+          var rule = void 0;
+          best = null;
+          for (var name_1 in this.rules) {
+            rule = this.rules[name_1];
+            var match = rule.exec(this.text);
+            if (match) {
+              if (best === null || match[0].length > best[0].length) {
+                best = match;
+                bestSymbol = name_1;
+              }
+            }
+          }
+          if (best != null) {
+            this.text = this.text.substr(best[0].length);
+            if (this.text === "")
+              this.done = true;
+          }
+          if (best == null) {
+            this.done = true;
+            this.symbol = null;
+            this.value = null;
+            return;
+          }
+        } while (bestSymbol === "SKIP");
+        this.symbol = bestSymbol;
+        this.value = best;
+        return true;
+      };
+      Parser2.prototype.accept = function(name) {
+        if (this.symbol === name) {
+          if (this.value) {
+            var v = this.value;
+            this.nextSymbol();
+            return v;
+          }
+          this.nextSymbol();
+          return true;
+        }
+        return false;
+      };
+      Parser2.prototype.acceptNumber = function() {
+        return this.accept("number");
+      };
+      Parser2.prototype.expect = function(name) {
+        if (this.accept(name))
+          return true;
+        throw new Error("expected " + name + " but found " + this.symbol);
+      };
+      return Parser2;
+    })();
+  }
+});
+
+// node_modules/rrule/dist/esm/types.js
+function freqIsDailyOrGreater(freq) {
+  return freq < Frequency.HOURLY;
+}
+var Frequency;
+var init_types2 = __esm({
+  "node_modules/rrule/dist/esm/types.js"() {
+    (function(Frequency2) {
+      Frequency2[Frequency2["YEARLY"] = 0] = "YEARLY";
+      Frequency2[Frequency2["MONTHLY"] = 1] = "MONTHLY";
+      Frequency2[Frequency2["WEEKLY"] = 2] = "WEEKLY";
+      Frequency2[Frequency2["DAILY"] = 3] = "DAILY";
+      Frequency2[Frequency2["HOURLY"] = 4] = "HOURLY";
+      Frequency2[Frequency2["MINUTELY"] = 5] = "MINUTELY";
+      Frequency2[Frequency2["SECONDLY"] = 6] = "SECONDLY";
+    })(Frequency || (Frequency = {}));
+  }
+});
+
+// node_modules/rrule/dist/esm/nlp/index.js
+var fromText, common, toText, isFullyConvertible;
+var init_nlp = __esm({
+  "node_modules/rrule/dist/esm/nlp/index.js"() {
+    init_totext();
+    init_parsetext();
+    init_rrule();
+    init_types2();
+    init_i18n();
+    fromText = function(text, language) {
+      if (language === void 0) {
+        language = i18n_default;
+      }
+      return new RRule(parseText(text, language) || void 0);
+    };
+    common = [
+      "count",
+      "until",
+      "interval",
+      "byweekday",
+      "bymonthday",
+      "bymonth"
+    ];
+    totext_default.IMPLEMENTED = [];
+    totext_default.IMPLEMENTED[Frequency.HOURLY] = common;
+    totext_default.IMPLEMENTED[Frequency.MINUTELY] = common;
+    totext_default.IMPLEMENTED[Frequency.DAILY] = ["byhour"].concat(common);
+    totext_default.IMPLEMENTED[Frequency.WEEKLY] = common;
+    totext_default.IMPLEMENTED[Frequency.MONTHLY] = common;
+    totext_default.IMPLEMENTED[Frequency.YEARLY] = ["byweekno", "byyearday"].concat(common);
+    toText = function(rrule, gettext, language, dateFormatter) {
+      return new totext_default(rrule, gettext, language, dateFormatter).toString();
+    };
+    isFullyConvertible = totext_default.isFullyConvertible;
+  }
+});
+
+// node_modules/rrule/dist/esm/datetime.js
+var Time, DateTime;
+var init_datetime = __esm({
+  "node_modules/rrule/dist/esm/datetime.js"() {
+    init_tslib_es6();
+    init_types2();
+    init_helpers();
+    init_dateutil();
+    Time = /** @class */
+    (function() {
+      function Time2(hour, minute, second, millisecond) {
+        this.hour = hour;
+        this.minute = minute;
+        this.second = second;
+        this.millisecond = millisecond || 0;
+      }
+      Time2.prototype.getHours = function() {
+        return this.hour;
+      };
+      Time2.prototype.getMinutes = function() {
+        return this.minute;
+      };
+      Time2.prototype.getSeconds = function() {
+        return this.second;
+      };
+      Time2.prototype.getMilliseconds = function() {
+        return this.millisecond;
+      };
+      Time2.prototype.getTime = function() {
+        return (this.hour * 60 * 60 + this.minute * 60 + this.second) * 1e3 + this.millisecond;
+      };
+      return Time2;
+    })();
+    DateTime = /** @class */
+    (function(_super) {
+      __extends(DateTime2, _super);
+      function DateTime2(year, month, day, hour, minute, second, millisecond) {
+        var _this = _super.call(this, hour, minute, second, millisecond) || this;
+        _this.year = year;
+        _this.month = month;
+        _this.day = day;
+        return _this;
+      }
+      DateTime2.fromDate = function(date) {
+        return new this(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.valueOf() % 1e3);
+      };
+      DateTime2.prototype.getWeekday = function() {
+        return getWeekday(new Date(this.getTime()));
+      };
+      DateTime2.prototype.getTime = function() {
+        return new Date(Date.UTC(this.year, this.month - 1, this.day, this.hour, this.minute, this.second, this.millisecond)).getTime();
+      };
+      DateTime2.prototype.getDay = function() {
+        return this.day;
+      };
+      DateTime2.prototype.getMonth = function() {
+        return this.month;
+      };
+      DateTime2.prototype.getYear = function() {
+        return this.year;
+      };
+      DateTime2.prototype.addYears = function(years) {
+        this.year += years;
+      };
+      DateTime2.prototype.addMonths = function(months) {
+        this.month += months;
+        if (this.month > 12) {
+          var yearDiv = Math.floor(this.month / 12);
+          var monthMod = pymod(this.month, 12);
+          this.month = monthMod;
+          this.year += yearDiv;
+          if (this.month === 0) {
+            this.month = 12;
+            --this.year;
+          }
+        }
+      };
+      DateTime2.prototype.addWeekly = function(days, wkst) {
+        if (wkst > this.getWeekday()) {
+          this.day += -(this.getWeekday() + 1 + (6 - wkst)) + days * 7;
+        } else {
+          this.day += -(this.getWeekday() - wkst) + days * 7;
+        }
+        this.fixDay();
+      };
+      DateTime2.prototype.addDaily = function(days) {
+        this.day += days;
+        this.fixDay();
+      };
+      DateTime2.prototype.addHours = function(hours, filtered, byhour) {
+        if (filtered) {
+          this.hour += Math.floor((23 - this.hour) / hours) * hours;
+        }
+        for (; ; ) {
+          this.hour += hours;
+          var _a = divmod(this.hour, 24), dayDiv = _a.div, hourMod = _a.mod;
+          if (dayDiv) {
+            this.hour = hourMod;
+            this.addDaily(dayDiv);
+          }
+          if (empty(byhour) || includes(byhour, this.hour))
+            break;
+        }
+      };
+      DateTime2.prototype.addMinutes = function(minutes, filtered, byhour, byminute) {
+        if (filtered) {
+          this.minute += Math.floor((1439 - (this.hour * 60 + this.minute)) / minutes) * minutes;
+        }
+        for (; ; ) {
+          this.minute += minutes;
+          var _a = divmod(this.minute, 60), hourDiv = _a.div, minuteMod = _a.mod;
+          if (hourDiv) {
+            this.minute = minuteMod;
+            this.addHours(hourDiv, false, byhour);
+          }
+          if ((empty(byhour) || includes(byhour, this.hour)) && (empty(byminute) || includes(byminute, this.minute))) {
+            break;
+          }
+        }
+      };
+      DateTime2.prototype.addSeconds = function(seconds, filtered, byhour, byminute, bysecond) {
+        if (filtered) {
+          this.second += Math.floor((86399 - (this.hour * 3600 + this.minute * 60 + this.second)) / seconds) * seconds;
+        }
+        for (; ; ) {
+          this.second += seconds;
+          var _a = divmod(this.second, 60), minuteDiv = _a.div, secondMod = _a.mod;
+          if (minuteDiv) {
+            this.second = secondMod;
+            this.addMinutes(minuteDiv, false, byhour, byminute);
+          }
+          if ((empty(byhour) || includes(byhour, this.hour)) && (empty(byminute) || includes(byminute, this.minute)) && (empty(bysecond) || includes(bysecond, this.second))) {
+            break;
+          }
+        }
+      };
+      DateTime2.prototype.fixDay = function() {
+        if (this.day <= 28) {
+          return;
+        }
+        var daysinmonth = monthRange(this.year, this.month - 1)[1];
+        if (this.day <= daysinmonth) {
+          return;
+        }
+        while (this.day > daysinmonth) {
+          this.day -= daysinmonth;
+          ++this.month;
+          if (this.month === 13) {
+            this.month = 1;
+            ++this.year;
+            if (this.year > MAXYEAR) {
+              return;
+            }
+          }
+          daysinmonth = monthRange(this.year, this.month - 1)[1];
+        }
+      };
+      DateTime2.prototype.add = function(options, filtered) {
+        var freq = options.freq, interval = options.interval, wkst = options.wkst, byhour = options.byhour, byminute = options.byminute, bysecond = options.bysecond;
+        switch (freq) {
+          case Frequency.YEARLY:
+            return this.addYears(interval);
+          case Frequency.MONTHLY:
+            return this.addMonths(interval);
+          case Frequency.WEEKLY:
+            return this.addWeekly(interval, wkst);
+          case Frequency.DAILY:
+            return this.addDaily(interval);
+          case Frequency.HOURLY:
+            return this.addHours(interval, filtered, byhour);
+          case Frequency.MINUTELY:
+            return this.addMinutes(interval, filtered, byhour, byminute);
+          case Frequency.SECONDLY:
+            return this.addSeconds(interval, filtered, byhour, byminute, bysecond);
+        }
+      };
+      return DateTime2;
+    })(Time);
+  }
+});
+
+// node_modules/rrule/dist/esm/parseoptions.js
+function initializeOptions(options) {
+  var invalid = [];
+  var keys = Object.keys(options);
+  for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+    var key = keys_1[_i];
+    if (!includes(defaultKeys, key))
+      invalid.push(key);
+    if (isDate(options[key]) && !isValidDate(options[key])) {
+      invalid.push(key);
+    }
+  }
+  if (invalid.length) {
+    throw new Error("Invalid options: " + invalid.join(", "));
+  }
+  return __assign({}, options);
+}
+function parseOptions(options) {
+  var opts = __assign(__assign({}, DEFAULT_OPTIONS), initializeOptions(options));
+  if (isPresent(opts.byeaster))
+    opts.freq = RRule.YEARLY;
+  if (!(isPresent(opts.freq) && RRule.FREQUENCIES[opts.freq])) {
+    throw new Error("Invalid frequency: ".concat(opts.freq, " ").concat(options.freq));
+  }
+  if (!opts.dtstart)
+    opts.dtstart = new Date((/* @__PURE__ */ new Date()).setMilliseconds(0));
+  if (!isPresent(opts.wkst)) {
+    opts.wkst = RRule.MO.weekday;
+  } else if (isNumber(opts.wkst)) {
+  } else {
+    opts.wkst = opts.wkst.weekday;
+  }
+  if (isPresent(opts.bysetpos)) {
+    if (isNumber(opts.bysetpos))
+      opts.bysetpos = [opts.bysetpos];
+    for (var i = 0; i < opts.bysetpos.length; i++) {
+      var v = opts.bysetpos[i];
+      if (v === 0 || !(v >= -366 && v <= 366)) {
+        throw new Error("bysetpos must be between 1 and 366, or between -366 and -1");
+      }
+    }
+  }
+  if (!(Boolean(opts.byweekno) || notEmpty(opts.byweekno) || notEmpty(opts.byyearday) || Boolean(opts.bymonthday) || notEmpty(opts.bymonthday) || isPresent(opts.byweekday) || isPresent(opts.byeaster))) {
+    switch (opts.freq) {
+      case RRule.YEARLY:
+        if (!opts.bymonth)
+          opts.bymonth = opts.dtstart.getUTCMonth() + 1;
+        opts.bymonthday = opts.dtstart.getUTCDate();
+        break;
+      case RRule.MONTHLY:
+        opts.bymonthday = opts.dtstart.getUTCDate();
+        break;
+      case RRule.WEEKLY:
+        opts.byweekday = [getWeekday(opts.dtstart)];
+        break;
+    }
+  }
+  if (isPresent(opts.bymonth) && !isArray(opts.bymonth)) {
+    opts.bymonth = [opts.bymonth];
+  }
+  if (isPresent(opts.byyearday) && !isArray(opts.byyearday) && isNumber(opts.byyearday)) {
+    opts.byyearday = [opts.byyearday];
+  }
+  if (!isPresent(opts.bymonthday)) {
+    opts.bymonthday = [];
+    opts.bynmonthday = [];
+  } else if (isArray(opts.bymonthday)) {
+    var bymonthday = [];
+    var bynmonthday = [];
+    for (var i = 0; i < opts.bymonthday.length; i++) {
+      var v = opts.bymonthday[i];
+      if (v > 0) {
+        bymonthday.push(v);
+      } else if (v < 0) {
+        bynmonthday.push(v);
+      }
+    }
+    opts.bymonthday = bymonthday;
+    opts.bynmonthday = bynmonthday;
+  } else if (opts.bymonthday < 0) {
+    opts.bynmonthday = [opts.bymonthday];
+    opts.bymonthday = [];
+  } else {
+    opts.bynmonthday = [];
+    opts.bymonthday = [opts.bymonthday];
+  }
+  if (isPresent(opts.byweekno) && !isArray(opts.byweekno)) {
+    opts.byweekno = [opts.byweekno];
+  }
+  if (!isPresent(opts.byweekday)) {
+    opts.bynweekday = null;
+  } else if (isNumber(opts.byweekday)) {
+    opts.byweekday = [opts.byweekday];
+    opts.bynweekday = null;
+  } else if (isWeekdayStr(opts.byweekday)) {
+    opts.byweekday = [Weekday.fromStr(opts.byweekday).weekday];
+    opts.bynweekday = null;
+  } else if (opts.byweekday instanceof Weekday) {
+    if (!opts.byweekday.n || opts.freq > RRule.MONTHLY) {
+      opts.byweekday = [opts.byweekday.weekday];
+      opts.bynweekday = null;
+    } else {
+      opts.bynweekday = [[opts.byweekday.weekday, opts.byweekday.n]];
+      opts.byweekday = null;
+    }
+  } else {
+    var byweekday = [];
+    var bynweekday = [];
+    for (var i = 0; i < opts.byweekday.length; i++) {
+      var wday = opts.byweekday[i];
+      if (isNumber(wday)) {
+        byweekday.push(wday);
+        continue;
+      } else if (isWeekdayStr(wday)) {
+        byweekday.push(Weekday.fromStr(wday).weekday);
+        continue;
+      }
+      if (!wday.n || opts.freq > RRule.MONTHLY) {
+        byweekday.push(wday.weekday);
+      } else {
+        bynweekday.push([wday.weekday, wday.n]);
+      }
+    }
+    opts.byweekday = notEmpty(byweekday) ? byweekday : null;
+    opts.bynweekday = notEmpty(bynweekday) ? bynweekday : null;
+  }
+  if (!isPresent(opts.byhour)) {
+    opts.byhour = opts.freq < RRule.HOURLY ? [opts.dtstart.getUTCHours()] : null;
+  } else if (isNumber(opts.byhour)) {
+    opts.byhour = [opts.byhour];
+  }
+  if (!isPresent(opts.byminute)) {
+    opts.byminute = opts.freq < RRule.MINUTELY ? [opts.dtstart.getUTCMinutes()] : null;
+  } else if (isNumber(opts.byminute)) {
+    opts.byminute = [opts.byminute];
+  }
+  if (!isPresent(opts.bysecond)) {
+    opts.bysecond = opts.freq < RRule.SECONDLY ? [opts.dtstart.getUTCSeconds()] : null;
+  } else if (isNumber(opts.bysecond)) {
+    opts.bysecond = [opts.bysecond];
+  }
+  return { parsedOptions: opts };
+}
+function buildTimeset(opts) {
+  var millisecondModulo = opts.dtstart.getTime() % 1e3;
+  if (!freqIsDailyOrGreater(opts.freq)) {
+    return [];
+  }
+  var timeset = [];
+  opts.byhour.forEach(function(hour) {
+    opts.byminute.forEach(function(minute) {
+      opts.bysecond.forEach(function(second) {
+        timeset.push(new Time(hour, minute, second, millisecondModulo));
+      });
+    });
+  });
+  return timeset;
+}
+var init_parseoptions = __esm({
+  "node_modules/rrule/dist/esm/parseoptions.js"() {
+    init_tslib_es6();
+    init_types2();
+    init_helpers();
+    init_rrule();
+    init_dateutil();
+    init_weekday();
+    init_datetime();
+  }
+});
+
+// node_modules/rrule/dist/esm/parsestring.js
+function parseString(rfcString) {
+  var options = rfcString.split("\n").map(parseLine).filter(function(x) {
+    return x !== null;
+  });
+  return __assign(__assign({}, options[0]), options[1]);
+}
+function parseDtstart(line) {
+  var options = {};
+  var dtstartWithZone = /DTSTART(?:;TZID=([^:=]+?))?(?::|=)([^;\s]+)/i.exec(line);
+  if (!dtstartWithZone) {
+    return options;
+  }
+  var tzid = dtstartWithZone[1], dtstart = dtstartWithZone[2];
+  if (tzid) {
+    options.tzid = tzid;
+  }
+  options.dtstart = untilStringToDate(dtstart);
+  return options;
+}
+function parseLine(rfcString) {
+  rfcString = rfcString.replace(/^\s+|\s+$/, "");
+  if (!rfcString.length)
+    return null;
+  var header = /^([A-Z]+?)[:;]/.exec(rfcString.toUpperCase());
+  if (!header) {
+    return parseRrule(rfcString);
+  }
+  var key = header[1];
+  switch (key.toUpperCase()) {
+    case "RRULE":
+    case "EXRULE":
+      return parseRrule(rfcString);
+    case "DTSTART":
+      return parseDtstart(rfcString);
+    default:
+      throw new Error("Unsupported RFC prop ".concat(key, " in ").concat(rfcString));
+  }
+}
+function parseRrule(line) {
+  var strippedLine = line.replace(/^RRULE:/i, "");
+  var options = parseDtstart(strippedLine);
+  var attrs = line.replace(/^(?:RRULE|EXRULE):/i, "").split(";");
+  attrs.forEach(function(attr) {
+    var _a = attr.split("="), key = _a[0], value = _a[1];
+    switch (key.toUpperCase()) {
+      case "FREQ":
+        options.freq = Frequency[value.toUpperCase()];
+        break;
+      case "WKST":
+        options.wkst = Days[value.toUpperCase()];
+        break;
+      case "COUNT":
+      case "INTERVAL":
+      case "BYSETPOS":
+      case "BYMONTH":
+      case "BYMONTHDAY":
+      case "BYYEARDAY":
+      case "BYWEEKNO":
+      case "BYHOUR":
+      case "BYMINUTE":
+      case "BYSECOND":
+        var num = parseNumber(value);
+        var optionKey = key.toLowerCase();
+        options[optionKey] = num;
+        break;
+      case "BYWEEKDAY":
+      case "BYDAY":
+        options.byweekday = parseWeekday(value);
+        break;
+      case "DTSTART":
+      case "TZID":
+        var dtstart = parseDtstart(line);
+        options.tzid = dtstart.tzid;
+        options.dtstart = dtstart.dtstart;
+        break;
+      case "UNTIL":
+        options.until = untilStringToDate(value);
+        break;
+      case "BYEASTER":
+        options.byeaster = Number(value);
+        break;
+      default:
+        throw new Error("Unknown RRULE property '" + key + "'");
+    }
+  });
+  return options;
+}
+function parseNumber(value) {
+  if (value.indexOf(",") !== -1) {
+    var values = value.split(",");
+    return values.map(parseIndividualNumber);
+  }
+  return parseIndividualNumber(value);
+}
+function parseIndividualNumber(value) {
+  if (/^[+-]?\d+$/.test(value)) {
+    return Number(value);
+  }
+  return value;
+}
+function parseWeekday(value) {
+  var days = value.split(",");
+  return days.map(function(day) {
+    if (day.length === 2) {
+      return Days[day];
+    }
+    var parts = day.match(/^([+-]?\d{1,2})([A-Z]{2})$/);
+    if (!parts || parts.length < 3) {
+      throw new SyntaxError("Invalid weekday string: ".concat(day));
+    }
+    var n = Number(parts[1]);
+    var wdaypart = parts[2];
+    var wday = Days[wdaypart].weekday;
+    return new Weekday(wday, n);
+  });
+}
+var init_parsestring = __esm({
+  "node_modules/rrule/dist/esm/parsestring.js"() {
+    init_tslib_es6();
+    init_types2();
+    init_weekday();
+    init_dateutil();
+    init_rrule();
+  }
+});
+
+// node_modules/rrule/dist/esm/datewithzone.js
+var DateWithZone;
+var init_datewithzone = __esm({
+  "node_modules/rrule/dist/esm/datewithzone.js"() {
+    init_dateutil();
+    DateWithZone = /** @class */
+    (function() {
+      function DateWithZone2(date, tzid) {
+        if (isNaN(date.getTime())) {
+          throw new RangeError("Invalid date passed to DateWithZone");
+        }
+        this.date = date;
+        this.tzid = tzid;
+      }
+      Object.defineProperty(DateWithZone2.prototype, "isUTC", {
+        get: function() {
+          return !this.tzid || this.tzid.toUpperCase() === "UTC";
+        },
+        enumerable: false,
+        configurable: true
+      });
+      DateWithZone2.prototype.toString = function() {
+        var datestr = timeToUntilString(this.date.getTime(), this.isUTC);
+        if (!this.isUTC) {
+          return ";TZID=".concat(this.tzid, ":").concat(datestr);
+        }
+        return ":".concat(datestr);
+      };
+      DateWithZone2.prototype.getTime = function() {
+        return this.date.getTime();
+      };
+      DateWithZone2.prototype.rezonedDate = function() {
+        if (this.isUTC) {
+          return this.date;
+        }
+        return dateInTimeZone(this.date, this.tzid);
+      };
+      return DateWithZone2;
+    })();
+  }
+});
+
+// node_modules/rrule/dist/esm/optionstostring.js
+function optionsToString(options) {
+  var rrule = [];
+  var dtstart = "";
+  var keys = Object.keys(options);
+  var defaultKeys2 = Object.keys(DEFAULT_OPTIONS);
+  for (var i = 0; i < keys.length; i++) {
+    if (keys[i] === "tzid")
+      continue;
+    if (!includes(defaultKeys2, keys[i]))
+      continue;
+    var key = keys[i].toUpperCase();
+    var value = options[keys[i]];
+    var outValue = "";
+    if (!isPresent(value) || isArray(value) && !value.length)
+      continue;
+    switch (key) {
+      case "FREQ":
+        outValue = RRule.FREQUENCIES[options.freq];
+        break;
+      case "WKST":
+        if (isNumber(value)) {
+          outValue = new Weekday(value).toString();
+        } else {
+          outValue = value.toString();
+        }
+        break;
+      case "BYWEEKDAY":
+        key = "BYDAY";
+        outValue = toArray(value).map(function(wday) {
+          if (wday instanceof Weekday) {
+            return wday;
+          }
+          if (isArray(wday)) {
+            return new Weekday(wday[0], wday[1]);
+          }
+          return new Weekday(wday);
+        }).toString();
+        break;
+      case "DTSTART":
+        dtstart = buildDtstart(value, options.tzid);
+        break;
+      case "UNTIL":
+        outValue = timeToUntilString(value, !options.tzid);
+        break;
+      default:
+        if (isArray(value)) {
+          var strValues = [];
+          for (var j = 0; j < value.length; j++) {
+            strValues[j] = String(value[j]);
+          }
+          outValue = strValues.toString();
+        } else {
+          outValue = String(value);
+        }
+    }
+    if (outValue) {
+      rrule.push([key, outValue]);
+    }
+  }
+  var rules = rrule.map(function(_a) {
+    var key2 = _a[0], value2 = _a[1];
+    return "".concat(key2, "=").concat(value2.toString());
+  }).join(";");
+  var ruleString = "";
+  if (rules !== "") {
+    ruleString = "RRULE:".concat(rules);
+  }
+  return [dtstart, ruleString].filter(function(x) {
+    return !!x;
+  }).join("\n");
+}
+function buildDtstart(dtstart, tzid) {
+  if (!dtstart) {
+    return "";
+  }
+  return "DTSTART" + new DateWithZone(new Date(dtstart), tzid).toString();
+}
+var init_optionstostring = __esm({
+  "node_modules/rrule/dist/esm/optionstostring.js"() {
+    init_rrule();
+    init_helpers();
+    init_weekday();
+    init_dateutil();
+    init_datewithzone();
+  }
+});
+
+// node_modules/rrule/dist/esm/cache.js
+function argsMatch(left, right) {
+  if (Array.isArray(left)) {
+    if (!Array.isArray(right))
+      return false;
+    if (left.length !== right.length)
+      return false;
+    return left.every(function(date, i) {
+      return date.getTime() === right[i].getTime();
+    });
+  }
+  if (left instanceof Date) {
+    return right instanceof Date && left.getTime() === right.getTime();
+  }
+  return left === right;
+}
+var Cache;
+var init_cache = __esm({
+  "node_modules/rrule/dist/esm/cache.js"() {
+    init_iterresult();
+    init_dateutil();
+    init_helpers();
+    Cache = /** @class */
+    (function() {
+      function Cache2() {
+        this.all = false;
+        this.before = [];
+        this.after = [];
+        this.between = [];
+      }
+      Cache2.prototype._cacheAdd = function(what, value, args) {
+        if (value) {
+          value = value instanceof Date ? clone(value) : cloneDates(value);
+        }
+        if (what === "all") {
+          this.all = value;
+        } else {
+          args._value = value;
+          this[what].push(args);
+        }
+      };
+      Cache2.prototype._cacheGet = function(what, args) {
+        var cached = false;
+        var argsKeys = args ? Object.keys(args) : [];
+        var findCacheDiff = function(item2) {
+          for (var i2 = 0; i2 < argsKeys.length; i2++) {
+            var key = argsKeys[i2];
+            if (!argsMatch(args[key], item2[key])) {
+              return true;
+            }
+          }
+          return false;
+        };
+        var cachedObject = this[what];
+        if (what === "all") {
+          cached = this.all;
+        } else if (isArray(cachedObject)) {
+          for (var i = 0; i < cachedObject.length; i++) {
+            var item = cachedObject[i];
+            if (argsKeys.length && findCacheDiff(item))
+              continue;
+            cached = item._value;
+            break;
+          }
+        }
+        if (!cached && this.all) {
+          var iterResult = new iterresult_default(what, args);
+          for (var i = 0; i < this.all.length; i++) {
+            if (!iterResult.accept(this.all[i]))
+              break;
+          }
+          cached = iterResult.getValue();
+          this._cacheAdd(what, cached, args);
+        }
+        return isArray(cached) ? cloneDates(cached) : cached instanceof Date ? clone(cached) : cached;
+      };
+      return Cache2;
+    })();
+  }
+});
+
+// node_modules/rrule/dist/esm/masks.js
+var M365MASK, M366MASK, M28, M29, M30, M31, MDAY366MASK, MDAY365MASK, NM28, NM29, NM30, NM31, NMDAY366MASK, NMDAY365MASK, M366RANGE, M365RANGE, WDAYMASK;
+var init_masks = __esm({
+  "node_modules/rrule/dist/esm/masks.js"() {
+    init_tslib_es6();
+    init_helpers();
+    M365MASK = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], repeat(1, 31), true), repeat(2, 28), true), repeat(3, 31), true), repeat(4, 30), true), repeat(5, 31), true), repeat(6, 30), true), repeat(7, 31), true), repeat(8, 31), true), repeat(9, 30), true), repeat(10, 31), true), repeat(11, 30), true), repeat(12, 31), true), repeat(1, 7), true);
+    M366MASK = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], repeat(1, 31), true), repeat(2, 29), true), repeat(3, 31), true), repeat(4, 30), true), repeat(5, 31), true), repeat(6, 30), true), repeat(7, 31), true), repeat(8, 31), true), repeat(9, 30), true), repeat(10, 31), true), repeat(11, 30), true), repeat(12, 31), true), repeat(1, 7), true);
+    M28 = range(1, 29);
+    M29 = range(1, 30);
+    M30 = range(1, 31);
+    M31 = range(1, 32);
+    MDAY366MASK = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], M31, true), M29, true), M31, true), M30, true), M31, true), M30, true), M31, true), M31, true), M30, true), M31, true), M30, true), M31, true), M31.slice(0, 7), true);
+    MDAY365MASK = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], M31, true), M28, true), M31, true), M30, true), M31, true), M30, true), M31, true), M31, true), M30, true), M31, true), M30, true), M31, true), M31.slice(0, 7), true);
+    NM28 = range(-28, 0);
+    NM29 = range(-29, 0);
+    NM30 = range(-30, 0);
+    NM31 = range(-31, 0);
+    NMDAY366MASK = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], NM31, true), NM29, true), NM31, true), NM30, true), NM31, true), NM30, true), NM31, true), NM31, true), NM30, true), NM31, true), NM30, true), NM31, true), NM31.slice(0, 7), true);
+    NMDAY365MASK = __spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray(__spreadArray([], NM31, true), NM28, true), NM31, true), NM30, true), NM31, true), NM30, true), NM31, true), NM31, true), NM30, true), NM31, true), NM30, true), NM31, true), NM31.slice(0, 7), true);
+    M366RANGE = [0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    M365RANGE = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365];
+    WDAYMASK = (function() {
+      var wdaymask = [];
+      for (var i = 0; i < 55; i++)
+        wdaymask = wdaymask.concat(range(7));
+      return wdaymask;
+    })();
+  }
+});
+
+// node_modules/rrule/dist/esm/iterinfo/yearinfo.js
+function rebuildYear(year, options) {
+  var firstyday = datetime(year, 1, 1);
+  var yearlen = isLeapYear(year) ? 366 : 365;
+  var nextyearlen = isLeapYear(year + 1) ? 366 : 365;
+  var yearordinal = toOrdinal(firstyday);
+  var yearweekday = getWeekday(firstyday);
+  var result = __assign(__assign({ yearlen, nextyearlen, yearordinal, yearweekday }, baseYearMasks(year)), { wnomask: null });
+  if (empty(options.byweekno)) {
+    return result;
+  }
+  result.wnomask = repeat(0, yearlen + 7);
+  var firstwkst;
+  var wyearlen;
+  var no1wkst = firstwkst = pymod(7 - yearweekday + options.wkst, 7);
+  if (no1wkst >= 4) {
+    no1wkst = 0;
+    wyearlen = result.yearlen + pymod(yearweekday - options.wkst, 7);
+  } else {
+    wyearlen = yearlen - no1wkst;
+  }
+  var div = Math.floor(wyearlen / 7);
+  var mod = pymod(wyearlen, 7);
+  var numweeks = Math.floor(div + mod / 4);
+  for (var j = 0; j < options.byweekno.length; j++) {
+    var n = options.byweekno[j];
+    if (n < 0) {
+      n += numweeks + 1;
+    }
+    if (!(n > 0 && n <= numweeks)) {
+      continue;
+    }
+    var i = void 0;
+    if (n > 1) {
+      i = no1wkst + (n - 1) * 7;
+      if (no1wkst !== firstwkst) {
+        i -= 7 - firstwkst;
+      }
+    } else {
+      i = no1wkst;
+    }
+    for (var k = 0; k < 7; k++) {
+      result.wnomask[i] = 1;
+      i++;
+      if (result.wdaymask[i] === options.wkst)
+        break;
+    }
+  }
+  if (includes(options.byweekno, 1)) {
+    var i = no1wkst + numweeks * 7;
+    if (no1wkst !== firstwkst)
+      i -= 7 - firstwkst;
+    if (i < yearlen) {
+      for (var j = 0; j < 7; j++) {
+        result.wnomask[i] = 1;
+        i += 1;
+        if (result.wdaymask[i] === options.wkst)
+          break;
+      }
+    }
+  }
+  if (no1wkst) {
+    var lnumweeks = void 0;
+    if (!includes(options.byweekno, -1)) {
+      var lyearweekday = getWeekday(datetime(year - 1, 1, 1));
+      var lno1wkst = pymod(7 - lyearweekday.valueOf() + options.wkst, 7);
+      var lyearlen = isLeapYear(year - 1) ? 366 : 365;
+      var weekst = void 0;
+      if (lno1wkst >= 4) {
+        lno1wkst = 0;
+        weekst = lyearlen + pymod(lyearweekday - options.wkst, 7);
+      } else {
+        weekst = yearlen - no1wkst;
+      }
+      lnumweeks = Math.floor(52 + pymod(weekst, 7) / 4);
+    } else {
+      lnumweeks = -1;
+    }
+    if (includes(options.byweekno, lnumweeks)) {
+      for (var i = 0; i < no1wkst; i++)
+        result.wnomask[i] = 1;
+    }
+  }
+  return result;
+}
+function baseYearMasks(year) {
+  var yearlen = isLeapYear(year) ? 366 : 365;
+  var firstyday = datetime(year, 1, 1);
+  var wday = getWeekday(firstyday);
+  if (yearlen === 365) {
+    return {
+      mmask: M365MASK,
+      mdaymask: MDAY365MASK,
+      nmdaymask: NMDAY365MASK,
+      wdaymask: WDAYMASK.slice(wday),
+      mrange: M365RANGE
+    };
+  }
+  return {
+    mmask: M366MASK,
+    mdaymask: MDAY366MASK,
+    nmdaymask: NMDAY366MASK,
+    wdaymask: WDAYMASK.slice(wday),
+    mrange: M366RANGE
+  };
+}
+var init_yearinfo = __esm({
+  "node_modules/rrule/dist/esm/iterinfo/yearinfo.js"() {
+    init_tslib_es6();
+    init_dateutil();
+    init_helpers();
+    init_masks();
+  }
+});
+
+// node_modules/rrule/dist/esm/iterinfo/monthinfo.js
+function rebuildMonth(year, month, yearlen, mrange, wdaymask, options) {
+  var result = {
+    lastyear: year,
+    lastmonth: month,
+    nwdaymask: []
+  };
+  var ranges = [];
+  if (options.freq === RRule.YEARLY) {
+    if (empty(options.bymonth)) {
+      ranges = [[0, yearlen]];
+    } else {
+      for (var j = 0; j < options.bymonth.length; j++) {
+        month = options.bymonth[j];
+        ranges.push(mrange.slice(month - 1, month + 1));
+      }
+    }
+  } else if (options.freq === RRule.MONTHLY) {
+    ranges = [mrange.slice(month - 1, month + 1)];
+  }
+  if (empty(ranges)) {
+    return result;
+  }
+  result.nwdaymask = repeat(0, yearlen);
+  for (var j = 0; j < ranges.length; j++) {
+    var rang = ranges[j];
+    var first = rang[0];
+    var last = rang[1] - 1;
+    for (var k = 0; k < options.bynweekday.length; k++) {
+      var i = void 0;
+      var _a = options.bynweekday[k], wday = _a[0], n = _a[1];
+      if (n < 0) {
+        i = last + (n + 1) * 7;
+        i -= pymod(wdaymask[i] - wday, 7);
+      } else {
+        i = first + (n - 1) * 7;
+        i += pymod(7 - wdaymask[i] + wday, 7);
+      }
+      if (first <= i && i <= last)
+        result.nwdaymask[i] = 1;
+    }
+  }
+  return result;
+}
+var init_monthinfo = __esm({
+  "node_modules/rrule/dist/esm/iterinfo/monthinfo.js"() {
+    init_rrule();
+    init_helpers();
+  }
+});
+
+// node_modules/rrule/dist/esm/iterinfo/easter.js
+function easter(y, offset) {
+  if (offset === void 0) {
+    offset = 0;
+  }
+  var a = y % 19;
+  var b = Math.floor(y / 100);
+  var c = y % 100;
+  var d = Math.floor(b / 4);
+  var e = b % 4;
+  var f = Math.floor((b + 8) / 25);
+  var g = Math.floor((b - f + 1) / 3);
+  var h = Math.floor(19 * a + b - d - g + 15) % 30;
+  var i = Math.floor(c / 4);
+  var k = c % 4;
+  var l = Math.floor(32 + 2 * e + 2 * i - h - k) % 7;
+  var m = Math.floor((a + 11 * h + 22 * l) / 451);
+  var month = Math.floor((h + l - 7 * m + 114) / 31);
+  var day = (h + l - 7 * m + 114) % 31 + 1;
+  var date = Date.UTC(y, month - 1, day + offset);
+  var yearStart = Date.UTC(y, 0, 1);
+  return [Math.ceil((date - yearStart) / (1e3 * 60 * 60 * 24))];
+}
+var init_easter = __esm({
+  "node_modules/rrule/dist/esm/iterinfo/easter.js"() {
+  }
+});
+
+// node_modules/rrule/dist/esm/iterinfo/index.js
+var Iterinfo, iterinfo_default;
+var init_iterinfo = __esm({
+  "node_modules/rrule/dist/esm/iterinfo/index.js"() {
+    init_helpers();
+    init_types2();
+    init_yearinfo();
+    init_monthinfo();
+    init_easter();
+    init_datetime();
+    init_dateutil();
+    Iterinfo = /** @class */
+    (function() {
+      function Iterinfo2(options) {
+        this.options = options;
+      }
+      Iterinfo2.prototype.rebuild = function(year, month) {
+        var options = this.options;
+        if (year !== this.lastyear) {
+          this.yearinfo = rebuildYear(year, options);
+        }
+        if (notEmpty(options.bynweekday) && (month !== this.lastmonth || year !== this.lastyear)) {
+          var _a = this.yearinfo, yearlen = _a.yearlen, mrange = _a.mrange, wdaymask = _a.wdaymask;
+          this.monthinfo = rebuildMonth(year, month, yearlen, mrange, wdaymask, options);
+        }
+        if (isPresent(options.byeaster)) {
+          this.eastermask = easter(year, options.byeaster);
+        }
+      };
+      Object.defineProperty(Iterinfo2.prototype, "lastyear", {
+        get: function() {
+          return this.monthinfo ? this.monthinfo.lastyear : null;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "lastmonth", {
+        get: function() {
+          return this.monthinfo ? this.monthinfo.lastmonth : null;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "yearlen", {
+        get: function() {
+          return this.yearinfo.yearlen;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "yearordinal", {
+        get: function() {
+          return this.yearinfo.yearordinal;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "mrange", {
+        get: function() {
+          return this.yearinfo.mrange;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "wdaymask", {
+        get: function() {
+          return this.yearinfo.wdaymask;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "mmask", {
+        get: function() {
+          return this.yearinfo.mmask;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "wnomask", {
+        get: function() {
+          return this.yearinfo.wnomask;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "nwdaymask", {
+        get: function() {
+          return this.monthinfo ? this.monthinfo.nwdaymask : [];
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "nextyearlen", {
+        get: function() {
+          return this.yearinfo.nextyearlen;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "mdaymask", {
+        get: function() {
+          return this.yearinfo.mdaymask;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Object.defineProperty(Iterinfo2.prototype, "nmdaymask", {
+        get: function() {
+          return this.yearinfo.nmdaymask;
+        },
+        enumerable: false,
+        configurable: true
+      });
+      Iterinfo2.prototype.ydayset = function() {
+        return [range(this.yearlen), 0, this.yearlen];
+      };
+      Iterinfo2.prototype.mdayset = function(_, month) {
+        var start = this.mrange[month - 1];
+        var end = this.mrange[month];
+        var set = repeat(null, this.yearlen);
+        for (var i = start; i < end; i++)
+          set[i] = i;
+        return [set, start, end];
+      };
+      Iterinfo2.prototype.wdayset = function(year, month, day) {
+        var set = repeat(null, this.yearlen + 7);
+        var i = toOrdinal(datetime(year, month, day)) - this.yearordinal;
+        var start = i;
+        for (var j = 0; j < 7; j++) {
+          set[i] = i;
+          ++i;
+          if (this.wdaymask[i] === this.options.wkst)
+            break;
+        }
+        return [set, start, i];
+      };
+      Iterinfo2.prototype.ddayset = function(year, month, day) {
+        var set = repeat(null, this.yearlen);
+        var i = toOrdinal(datetime(year, month, day)) - this.yearordinal;
+        set[i] = i;
+        return [set, i, i + 1];
+      };
+      Iterinfo2.prototype.htimeset = function(hour, _, second, millisecond) {
+        var _this = this;
+        var set = [];
+        this.options.byminute.forEach(function(minute) {
+          set = set.concat(_this.mtimeset(hour, minute, second, millisecond));
+        });
+        sort(set);
+        return set;
+      };
+      Iterinfo2.prototype.mtimeset = function(hour, minute, _, millisecond) {
+        var set = this.options.bysecond.map(function(second) {
+          return new Time(hour, minute, second, millisecond);
+        });
+        sort(set);
+        return set;
+      };
+      Iterinfo2.prototype.stimeset = function(hour, minute, second, millisecond) {
+        return [new Time(hour, minute, second, millisecond)];
+      };
+      Iterinfo2.prototype.getdayset = function(freq) {
+        switch (freq) {
+          case Frequency.YEARLY:
+            return this.ydayset.bind(this);
+          case Frequency.MONTHLY:
+            return this.mdayset.bind(this);
+          case Frequency.WEEKLY:
+            return this.wdayset.bind(this);
+          case Frequency.DAILY:
+            return this.ddayset.bind(this);
+          default:
+            return this.ddayset.bind(this);
+        }
+      };
+      Iterinfo2.prototype.gettimeset = function(freq) {
+        switch (freq) {
+          case Frequency.HOURLY:
+            return this.htimeset.bind(this);
+          case Frequency.MINUTELY:
+            return this.mtimeset.bind(this);
+          case Frequency.SECONDLY:
+            return this.stimeset.bind(this);
+        }
+      };
+      return Iterinfo2;
+    })();
+    iterinfo_default = Iterinfo;
+  }
+});
+
+// node_modules/rrule/dist/esm/iter/poslist.js
+function buildPoslist(bysetpos, timeset, start, end, ii, dayset) {
+  var poslist = [];
+  for (var j = 0; j < bysetpos.length; j++) {
+    var daypos = void 0;
+    var timepos = void 0;
+    var pos = bysetpos[j];
+    if (pos < 0) {
+      daypos = Math.floor(pos / timeset.length);
+      timepos = pymod(pos, timeset.length);
+    } else {
+      daypos = Math.floor((pos - 1) / timeset.length);
+      timepos = pymod(pos - 1, timeset.length);
+    }
+    var tmp = [];
+    for (var k = start; k < end; k++) {
+      var val = dayset[k];
+      if (!isPresent(val))
+        continue;
+      tmp.push(val);
+    }
+    var i = void 0;
+    if (daypos < 0) {
+      i = tmp.slice(daypos)[0];
+    } else {
+      i = tmp[daypos];
+    }
+    var time = timeset[timepos];
+    var date = fromOrdinal(ii.yearordinal + i);
+    var res = combine(date, time);
+    if (!includes(poslist, res))
+      poslist.push(res);
+  }
+  sort(poslist);
+  return poslist;
+}
+var init_poslist = __esm({
+  "node_modules/rrule/dist/esm/iter/poslist.js"() {
+    init_dateutil();
+    init_helpers();
+  }
+});
+
+// node_modules/rrule/dist/esm/iter/index.js
+function iter(iterResult, options) {
+  var dtstart = options.dtstart, freq = options.freq, interval = options.interval, until = options.until, bysetpos = options.bysetpos;
+  var count = options.count;
+  if (count === 0 || interval === 0) {
+    return emitResult(iterResult);
+  }
+  var counterDate = DateTime.fromDate(dtstart);
+  var ii = new iterinfo_default(options);
+  ii.rebuild(counterDate.year, counterDate.month);
+  var timeset = makeTimeset(ii, counterDate, options);
+  for (; ; ) {
+    var _a = ii.getdayset(freq)(counterDate.year, counterDate.month, counterDate.day), dayset = _a[0], start = _a[1], end = _a[2];
+    var filtered = removeFilteredDays(dayset, start, end, ii, options);
+    if (notEmpty(bysetpos)) {
+      var poslist = buildPoslist(bysetpos, timeset, start, end, ii, dayset);
+      for (var j = 0; j < poslist.length; j++) {
+        var res = poslist[j];
+        if (until && res > until) {
+          return emitResult(iterResult);
+        }
+        if (res >= dtstart) {
+          var rezonedDate = rezoneIfNeeded(res, options);
+          if (!iterResult.accept(rezonedDate)) {
+            return emitResult(iterResult);
+          }
+          if (count) {
+            --count;
+            if (!count) {
+              return emitResult(iterResult);
+            }
+          }
+        }
+      }
+    } else {
+      for (var j = start; j < end; j++) {
+        var currentDay = dayset[j];
+        if (!isPresent(currentDay)) {
+          continue;
+        }
+        var date = fromOrdinal(ii.yearordinal + currentDay);
+        for (var k = 0; k < timeset.length; k++) {
+          var time = timeset[k];
+          var res = combine(date, time);
+          if (until && res > until) {
+            return emitResult(iterResult);
+          }
+          if (res >= dtstart) {
+            var rezonedDate = rezoneIfNeeded(res, options);
+            if (!iterResult.accept(rezonedDate)) {
+              return emitResult(iterResult);
+            }
+            if (count) {
+              --count;
+              if (!count) {
+                return emitResult(iterResult);
+              }
+            }
+          }
+        }
+      }
+    }
+    if (options.interval === 0) {
+      return emitResult(iterResult);
+    }
+    counterDate.add(options, filtered);
+    if (counterDate.year > MAXYEAR) {
+      return emitResult(iterResult);
+    }
+    if (!freqIsDailyOrGreater(freq)) {
+      timeset = ii.gettimeset(freq)(counterDate.hour, counterDate.minute, counterDate.second, 0);
+    }
+    ii.rebuild(counterDate.year, counterDate.month);
+  }
+}
+function isFiltered(ii, currentDay, options) {
+  var bymonth = options.bymonth, byweekno = options.byweekno, byweekday = options.byweekday, byeaster = options.byeaster, bymonthday = options.bymonthday, bynmonthday = options.bynmonthday, byyearday = options.byyearday;
+  return notEmpty(bymonth) && !includes(bymonth, ii.mmask[currentDay]) || notEmpty(byweekno) && !ii.wnomask[currentDay] || notEmpty(byweekday) && !includes(byweekday, ii.wdaymask[currentDay]) || notEmpty(ii.nwdaymask) && !ii.nwdaymask[currentDay] || byeaster !== null && !includes(ii.eastermask, currentDay) || (notEmpty(bymonthday) || notEmpty(bynmonthday)) && !includes(bymonthday, ii.mdaymask[currentDay]) && !includes(bynmonthday, ii.nmdaymask[currentDay]) || notEmpty(byyearday) && (currentDay < ii.yearlen && !includes(byyearday, currentDay + 1) && !includes(byyearday, -ii.yearlen + currentDay) || currentDay >= ii.yearlen && !includes(byyearday, currentDay + 1 - ii.yearlen) && !includes(byyearday, -ii.nextyearlen + currentDay - ii.yearlen));
+}
+function rezoneIfNeeded(date, options) {
+  return new DateWithZone(date, options.tzid).rezonedDate();
+}
+function emitResult(iterResult) {
+  return iterResult.getValue();
+}
+function removeFilteredDays(dayset, start, end, ii, options) {
+  var filtered = false;
+  for (var dayCounter = start; dayCounter < end; dayCounter++) {
+    var currentDay = dayset[dayCounter];
+    filtered = isFiltered(ii, currentDay, options);
+    if (filtered)
+      dayset[currentDay] = null;
+  }
+  return filtered;
+}
+function makeTimeset(ii, counterDate, options) {
+  var freq = options.freq, byhour = options.byhour, byminute = options.byminute, bysecond = options.bysecond;
+  if (freqIsDailyOrGreater(freq)) {
+    return buildTimeset(options);
+  }
+  if (freq >= RRule.HOURLY && notEmpty(byhour) && !includes(byhour, counterDate.hour) || freq >= RRule.MINUTELY && notEmpty(byminute) && !includes(byminute, counterDate.minute) || freq >= RRule.SECONDLY && notEmpty(bysecond) && !includes(bysecond, counterDate.second)) {
+    return [];
+  }
+  return ii.gettimeset(freq)(counterDate.hour, counterDate.minute, counterDate.second, counterDate.millisecond);
+}
+var init_iter = __esm({
+  "node_modules/rrule/dist/esm/iter/index.js"() {
+    init_types2();
+    init_dateutil();
+    init_iterinfo();
+    init_rrule();
+    init_parseoptions();
+    init_helpers();
+    init_datewithzone();
+    init_poslist();
+    init_datetime();
+  }
+});
+
+// node_modules/rrule/dist/esm/rrule.js
+var Days, DEFAULT_OPTIONS, defaultKeys, RRule;
+var init_rrule = __esm({
+  "node_modules/rrule/dist/esm/rrule.js"() {
+    init_dateutil();
+    init_iterresult();
+    init_callbackiterresult();
+    init_nlp();
+    init_types2();
+    init_parseoptions();
+    init_parsestring();
+    init_optionstostring();
+    init_cache();
+    init_weekday();
+    init_iter();
+    Days = {
+      MO: new Weekday(0),
+      TU: new Weekday(1),
+      WE: new Weekday(2),
+      TH: new Weekday(3),
+      FR: new Weekday(4),
+      SA: new Weekday(5),
+      SU: new Weekday(6)
+    };
+    DEFAULT_OPTIONS = {
+      freq: Frequency.YEARLY,
+      dtstart: null,
+      interval: 1,
+      wkst: Days.MO,
+      count: null,
+      until: null,
+      tzid: null,
+      bysetpos: null,
+      bymonth: null,
+      bymonthday: null,
+      bynmonthday: null,
+      byyearday: null,
+      byweekno: null,
+      byweekday: null,
+      bynweekday: null,
+      byhour: null,
+      byminute: null,
+      bysecond: null,
+      byeaster: null
+    };
+    defaultKeys = Object.keys(DEFAULT_OPTIONS);
+    RRule = /** @class */
+    (function() {
+      function RRule2(options, noCache) {
+        if (options === void 0) {
+          options = {};
+        }
+        if (noCache === void 0) {
+          noCache = false;
+        }
+        this._cache = noCache ? null : new Cache();
+        this.origOptions = initializeOptions(options);
+        var parsedOptions = parseOptions(options).parsedOptions;
+        this.options = parsedOptions;
+      }
+      RRule2.parseText = function(text, language) {
+        return parseText(text, language);
+      };
+      RRule2.fromText = function(text, language) {
+        return fromText(text, language);
+      };
+      RRule2.fromString = function(str) {
+        return new RRule2(RRule2.parseString(str) || void 0);
+      };
+      RRule2.prototype._iter = function(iterResult) {
+        return iter(iterResult, this.options);
+      };
+      RRule2.prototype._cacheGet = function(what, args) {
+        if (!this._cache)
+          return false;
+        return this._cache._cacheGet(what, args);
+      };
+      RRule2.prototype._cacheAdd = function(what, value, args) {
+        if (!this._cache)
+          return;
+        return this._cache._cacheAdd(what, value, args);
+      };
+      RRule2.prototype.all = function(iterator) {
+        if (iterator) {
+          return this._iter(new callbackiterresult_default("all", {}, iterator));
+        }
+        var result = this._cacheGet("all");
+        if (result === false) {
+          result = this._iter(new iterresult_default("all", {}));
+          this._cacheAdd("all", result);
+        }
+        return result;
+      };
+      RRule2.prototype.between = function(after, before, inc, iterator) {
+        if (inc === void 0) {
+          inc = false;
+        }
+        if (!isValidDate(after) || !isValidDate(before)) {
+          throw new Error("Invalid date passed in to RRule.between");
+        }
+        var args = {
+          before,
+          after,
+          inc
+        };
+        if (iterator) {
+          return this._iter(new callbackiterresult_default("between", args, iterator));
+        }
+        var result = this._cacheGet("between", args);
+        if (result === false) {
+          result = this._iter(new iterresult_default("between", args));
+          this._cacheAdd("between", result, args);
+        }
+        return result;
+      };
+      RRule2.prototype.before = function(dt, inc) {
+        if (inc === void 0) {
+          inc = false;
+        }
+        if (!isValidDate(dt)) {
+          throw new Error("Invalid date passed in to RRule.before");
+        }
+        var args = { dt, inc };
+        var result = this._cacheGet("before", args);
+        if (result === false) {
+          result = this._iter(new iterresult_default("before", args));
+          this._cacheAdd("before", result, args);
+        }
+        return result;
+      };
+      RRule2.prototype.after = function(dt, inc) {
+        if (inc === void 0) {
+          inc = false;
+        }
+        if (!isValidDate(dt)) {
+          throw new Error("Invalid date passed in to RRule.after");
+        }
+        var args = { dt, inc };
+        var result = this._cacheGet("after", args);
+        if (result === false) {
+          result = this._iter(new iterresult_default("after", args));
+          this._cacheAdd("after", result, args);
+        }
+        return result;
+      };
+      RRule2.prototype.count = function() {
+        return this.all().length;
+      };
+      RRule2.prototype.toString = function() {
+        return optionsToString(this.origOptions);
+      };
+      RRule2.prototype.toText = function(gettext, language, dateFormatter) {
+        return toText(this, gettext, language, dateFormatter);
+      };
+      RRule2.prototype.isFullyConvertibleToText = function() {
+        return isFullyConvertible(this);
+      };
+      RRule2.prototype.clone = function() {
+        return new RRule2(this.origOptions);
+      };
+      RRule2.FREQUENCIES = [
+        "YEARLY",
+        "MONTHLY",
+        "WEEKLY",
+        "DAILY",
+        "HOURLY",
+        "MINUTELY",
+        "SECONDLY"
+      ];
+      RRule2.YEARLY = Frequency.YEARLY;
+      RRule2.MONTHLY = Frequency.MONTHLY;
+      RRule2.WEEKLY = Frequency.WEEKLY;
+      RRule2.DAILY = Frequency.DAILY;
+      RRule2.HOURLY = Frequency.HOURLY;
+      RRule2.MINUTELY = Frequency.MINUTELY;
+      RRule2.SECONDLY = Frequency.SECONDLY;
+      RRule2.MO = Days.MO;
+      RRule2.TU = Days.TU;
+      RRule2.WE = Days.WE;
+      RRule2.TH = Days.TH;
+      RRule2.FR = Days.FR;
+      RRule2.SA = Days.SA;
+      RRule2.SU = Days.SU;
+      RRule2.parseString = parseString;
+      RRule2.optionsToString = optionsToString;
+      return RRule2;
+    })();
+  }
+});
+
+// node_modules/rrule/dist/esm/iterset.js
+function iterSet(iterResult, _rrule, _exrule, _rdate, _exdate, tzid) {
+  var _exdateHash = {};
+  var _accept = iterResult.accept;
+  function evalExdate(after, before) {
+    _exrule.forEach(function(rrule) {
+      rrule.between(after, before, true).forEach(function(date) {
+        _exdateHash[Number(date)] = true;
+      });
+    });
+  }
+  _exdate.forEach(function(date) {
+    var zonedDate2 = new DateWithZone(date, tzid).rezonedDate();
+    _exdateHash[Number(zonedDate2)] = true;
+  });
+  iterResult.accept = function(date) {
+    var dt = Number(date);
+    if (isNaN(dt))
+      return _accept.call(this, date);
+    if (!_exdateHash[dt]) {
+      evalExdate(new Date(dt - 1), new Date(dt + 1));
+      if (!_exdateHash[dt]) {
+        _exdateHash[dt] = true;
+        return _accept.call(this, date);
+      }
+    }
+    return true;
+  };
+  if (iterResult.method === "between") {
+    evalExdate(iterResult.args.after, iterResult.args.before);
+    iterResult.accept = function(date) {
+      var dt = Number(date);
+      if (!_exdateHash[dt]) {
+        _exdateHash[dt] = true;
+        return _accept.call(this, date);
+      }
+      return true;
+    };
+  }
+  for (var i = 0; i < _rdate.length; i++) {
+    var zonedDate = new DateWithZone(_rdate[i], tzid).rezonedDate();
+    if (!iterResult.accept(new Date(zonedDate.getTime())))
+      break;
+  }
+  _rrule.forEach(function(rrule) {
+    iter(iterResult, rrule.options);
+  });
+  var res = iterResult._result;
+  sort(res);
+  switch (iterResult.method) {
+    case "all":
+    case "between":
+      return res;
+    case "before":
+      return res.length && res[res.length - 1] || null;
+    case "after":
+    default:
+      return res.length && res[0] || null;
+  }
+}
+var init_iterset = __esm({
+  "node_modules/rrule/dist/esm/iterset.js"() {
+    init_datewithzone();
+    init_iter();
+    init_dateutil();
+  }
+});
+
+// node_modules/rrule/dist/esm/rrulestr.js
+function parseInput(s, options) {
+  var rrulevals = [];
+  var rdatevals = [];
+  var exrulevals = [];
+  var exdatevals = [];
+  var parsedDtstart = parseDtstart(s);
+  var dtstart = parsedDtstart.dtstart;
+  var tzid = parsedDtstart.tzid;
+  var lines = splitIntoLines(s, options.unfold);
+  lines.forEach(function(line) {
+    var _a;
+    if (!line)
+      return;
+    var _b = breakDownLine(line), name = _b.name, parms = _b.parms, value = _b.value;
+    switch (name.toUpperCase()) {
+      case "RRULE":
+        if (parms.length) {
+          throw new Error("unsupported RRULE parm: ".concat(parms.join(",")));
+        }
+        rrulevals.push(parseString(line));
+        break;
+      case "RDATE":
+        var _c = (_a = /RDATE(?:;TZID=([^:=]+))?/i.exec(line)) !== null && _a !== void 0 ? _a : [], rdateTzid = _c[1];
+        if (rdateTzid && !tzid) {
+          tzid = rdateTzid;
+        }
+        rdatevals = rdatevals.concat(parseRDate(value, parms));
+        break;
+      case "EXRULE":
+        if (parms.length) {
+          throw new Error("unsupported EXRULE parm: ".concat(parms.join(",")));
+        }
+        exrulevals.push(parseString(value));
+        break;
+      case "EXDATE":
+        exdatevals = exdatevals.concat(parseRDate(value, parms));
+        break;
+      case "DTSTART":
+        break;
+      default:
+        throw new Error("unsupported property: " + name);
+    }
+  });
+  return {
+    dtstart,
+    tzid,
+    rrulevals,
+    rdatevals,
+    exrulevals,
+    exdatevals
+  };
+}
+function buildRule(s, options) {
+  var _a = parseInput(s, options), rrulevals = _a.rrulevals, rdatevals = _a.rdatevals, exrulevals = _a.exrulevals, exdatevals = _a.exdatevals, dtstart = _a.dtstart, tzid = _a.tzid;
+  var noCache = options.cache === false;
+  if (options.compatible) {
+    options.forceset = true;
+    options.unfold = true;
+  }
+  if (options.forceset || rrulevals.length > 1 || rdatevals.length || exrulevals.length || exdatevals.length) {
+    var rset_1 = new RRuleSet(noCache);
+    rset_1.dtstart(dtstart);
+    rset_1.tzid(tzid || void 0);
+    rrulevals.forEach(function(val2) {
+      rset_1.rrule(new RRule(groomRruleOptions(val2, dtstart, tzid), noCache));
+    });
+    rdatevals.forEach(function(date) {
+      rset_1.rdate(date);
+    });
+    exrulevals.forEach(function(val2) {
+      rset_1.exrule(new RRule(groomRruleOptions(val2, dtstart, tzid), noCache));
+    });
+    exdatevals.forEach(function(date) {
+      rset_1.exdate(date);
+    });
+    if (options.compatible && options.dtstart)
+      rset_1.rdate(dtstart);
+    return rset_1;
+  }
+  var val = rrulevals[0] || {};
+  return new RRule(groomRruleOptions(val, val.dtstart || options.dtstart || dtstart, val.tzid || options.tzid || tzid), noCache);
+}
+function rrulestr(s, options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return buildRule(s, initializeOptions2(options));
+}
+function groomRruleOptions(val, dtstart, tzid) {
+  return __assign(__assign({}, val), { dtstart, tzid });
+}
+function initializeOptions2(options) {
+  var invalid = [];
+  var keys = Object.keys(options);
+  var defaultKeys2 = Object.keys(DEFAULT_OPTIONS2);
+  keys.forEach(function(key) {
+    if (!includes(defaultKeys2, key))
+      invalid.push(key);
+  });
+  if (invalid.length) {
+    throw new Error("Invalid options: " + invalid.join(", "));
+  }
+  return __assign(__assign({}, DEFAULT_OPTIONS2), options);
+}
+function extractName(line) {
+  if (line.indexOf(":") === -1) {
+    return {
+      name: "RRULE",
+      value: line
+    };
+  }
+  var _a = split(line, ":", 1), name = _a[0], value = _a[1];
+  return {
+    name,
+    value
+  };
+}
+function breakDownLine(line) {
+  var _a = extractName(line), name = _a.name, value = _a.value;
+  var parms = name.split(";");
+  if (!parms)
+    throw new Error("empty property name");
+  return {
+    name: parms[0].toUpperCase(),
+    parms: parms.slice(1),
+    value
+  };
+}
+function splitIntoLines(s, unfold) {
+  if (unfold === void 0) {
+    unfold = false;
+  }
+  s = s && s.trim();
+  if (!s)
+    throw new Error("Invalid empty string");
+  if (!unfold) {
+    return s.split(/\s/);
+  }
+  var lines = s.split("\n");
+  var i = 0;
+  while (i < lines.length) {
+    var line = lines[i] = lines[i].replace(/\s+$/g, "");
+    if (!line) {
+      lines.splice(i, 1);
+    } else if (i > 0 && line[0] === " ") {
+      lines[i - 1] += line.slice(1);
+      lines.splice(i, 1);
+    } else {
+      i += 1;
+    }
+  }
+  return lines;
+}
+function validateDateParm(parms) {
+  parms.forEach(function(parm) {
+    if (!/(VALUE=DATE(-TIME)?)|(TZID=)/.test(parm)) {
+      throw new Error("unsupported RDATE/EXDATE parm: " + parm);
+    }
+  });
+}
+function parseRDate(rdateval, parms) {
+  validateDateParm(parms);
+  return rdateval.split(",").map(function(datestr) {
+    return untilStringToDate(datestr);
+  });
+}
+var DEFAULT_OPTIONS2;
+var init_rrulestr = __esm({
+  "node_modules/rrule/dist/esm/rrulestr.js"() {
+    init_tslib_es6();
+    init_rrule();
+    init_rruleset();
+    init_dateutil();
+    init_helpers();
+    init_parsestring();
+    DEFAULT_OPTIONS2 = {
+      dtstart: null,
+      cache: false,
+      unfold: false,
+      forceset: false,
+      compatible: false,
+      tzid: null
+    };
+  }
+});
+
+// node_modules/rrule/dist/esm/rruleset.js
+function createGetterSetter(fieldName) {
+  var _this = this;
+  return function(field) {
+    if (field !== void 0) {
+      _this["_".concat(fieldName)] = field;
+    }
+    if (_this["_".concat(fieldName)] !== void 0) {
+      return _this["_".concat(fieldName)];
+    }
+    for (var i = 0; i < _this._rrule.length; i++) {
+      var field_1 = _this._rrule[i].origOptions[fieldName];
+      if (field_1) {
+        return field_1;
+      }
+    }
+  };
+}
+function _addRule(rrule, collection) {
+  if (!(rrule instanceof RRule)) {
+    throw new TypeError(String(rrule) + " is not RRule instance");
+  }
+  if (!includes(collection.map(String), String(rrule))) {
+    collection.push(rrule);
+  }
+}
+function _addDate(date, collection) {
+  if (!(date instanceof Date)) {
+    throw new TypeError(String(date) + " is not Date instance");
+  }
+  if (!includes(collection.map(Number), Number(date))) {
+    collection.push(date);
+    sort(collection);
+  }
+}
+function rdatesToString(param, rdates, tzid) {
+  var isUTC = !tzid || tzid.toUpperCase() === "UTC";
+  var header = isUTC ? "".concat(param, ":") : "".concat(param, ";TZID=").concat(tzid, ":");
+  var dateString = rdates.map(function(rdate) {
+    return timeToUntilString(rdate.valueOf(), isUTC);
+  }).join(",");
+  return "".concat(header).concat(dateString);
+}
+var RRuleSet;
+var init_rruleset = __esm({
+  "node_modules/rrule/dist/esm/rruleset.js"() {
+    init_tslib_es6();
+    init_rrule();
+    init_dateutil();
+    init_helpers();
+    init_iterset();
+    init_rrulestr();
+    init_optionstostring();
+    RRuleSet = /** @class */
+    (function(_super) {
+      __extends(RRuleSet2, _super);
+      function RRuleSet2(noCache) {
+        if (noCache === void 0) {
+          noCache = false;
+        }
+        var _this = _super.call(this, {}, noCache) || this;
+        _this.dtstart = createGetterSetter.apply(_this, ["dtstart"]);
+        _this.tzid = createGetterSetter.apply(_this, ["tzid"]);
+        _this._rrule = [];
+        _this._rdate = [];
+        _this._exrule = [];
+        _this._exdate = [];
+        return _this;
+      }
+      RRuleSet2.prototype._iter = function(iterResult) {
+        return iterSet(iterResult, this._rrule, this._exrule, this._rdate, this._exdate, this.tzid());
+      };
+      RRuleSet2.prototype.rrule = function(rrule) {
+        _addRule(rrule, this._rrule);
+      };
+      RRuleSet2.prototype.exrule = function(rrule) {
+        _addRule(rrule, this._exrule);
+      };
+      RRuleSet2.prototype.rdate = function(date) {
+        _addDate(date, this._rdate);
+      };
+      RRuleSet2.prototype.exdate = function(date) {
+        _addDate(date, this._exdate);
+      };
+      RRuleSet2.prototype.rrules = function() {
+        return this._rrule.map(function(e) {
+          return rrulestr(e.toString());
+        });
+      };
+      RRuleSet2.prototype.exrules = function() {
+        return this._exrule.map(function(e) {
+          return rrulestr(e.toString());
+        });
+      };
+      RRuleSet2.prototype.rdates = function() {
+        return this._rdate.map(function(e) {
+          return new Date(e.getTime());
+        });
+      };
+      RRuleSet2.prototype.exdates = function() {
+        return this._exdate.map(function(e) {
+          return new Date(e.getTime());
+        });
+      };
+      RRuleSet2.prototype.valueOf = function() {
+        var result = [];
+        if (!this._rrule.length && this._dtstart) {
+          result = result.concat(optionsToString({ dtstart: this._dtstart }));
+        }
+        this._rrule.forEach(function(rrule) {
+          result = result.concat(rrule.toString().split("\n"));
+        });
+        this._exrule.forEach(function(exrule) {
+          result = result.concat(exrule.toString().split("\n").map(function(line) {
+            return line.replace(/^RRULE:/, "EXRULE:");
+          }).filter(function(line) {
+            return !/^DTSTART/.test(line);
+          }));
+        });
+        if (this._rdate.length) {
+          result.push(rdatesToString("RDATE", this._rdate, this.tzid()));
+        }
+        if (this._exdate.length) {
+          result.push(rdatesToString("EXDATE", this._exdate, this.tzid()));
+        }
+        return result;
+      };
+      RRuleSet2.prototype.toString = function() {
+        return this.valueOf().join("\n");
+      };
+      RRuleSet2.prototype.clone = function() {
+        var rrs = new RRuleSet2(!!this._cache);
+        this._rrule.forEach(function(rule) {
+          return rrs.rrule(rule.clone());
+        });
+        this._exrule.forEach(function(rule) {
+          return rrs.exrule(rule.clone());
+        });
+        this._rdate.forEach(function(date) {
+          return rrs.rdate(new Date(date.getTime()));
+        });
+        this._exdate.forEach(function(date) {
+          return rrs.exdate(new Date(date.getTime()));
+        });
+        return rrs;
+      };
+      return RRuleSet2;
+    })(RRule);
+  }
+});
+
+// node_modules/rrule/dist/esm/index.js
+var init_esm = __esm({
+  "node_modules/rrule/dist/esm/index.js"() {
+    init_rrule();
+    init_rruleset();
+    init_rrulestr();
+    init_types2();
+    init_weekday();
+    init_dateutil();
+  }
+});
+
+// src/banners.ts
+var BANNERS;
+var init_banners = __esm({
+  "src/banners.ts"() {
+    "use strict";
+    BANNERS = [
+      {
+        id: "quick-notes",
+        cssClass: "quick-note-welcome-banner",
+        borderColor: "var(--interactive-accent)",
+        title: "\u{1F988}\u2728 Get Faster",
+        contentHtml: `
+            <strong>Click "Add Note"</strong> above to create a new note, or<br>
+            <strong>Cmd/Ctrl+Click on any day</strong> number to create a dated note instantly<br>
+            <strong>Cmd/Ctrl+Click and drag</strong> across days to create a multi-day note<br>
+            \u2699\uFE0F <strong>Configure</strong> your preferred default behavior in this plugin's settings
+        `,
+        settingsName: "Show Quick Notes banner",
+        settingsDesc: "Display the Quick Notes welcome banner with tips about creating notes quickly",
+        shouldShow: (s) => s.quickNoteCreation.enabled && !s.banners.quickNotes,
+        dismiss: (s) => {
+          s.banners.quickNotes = true;
+        },
+        reset: (s) => {
+          s.banners.quickNotes = false;
+        }
+      },
+      {
+        id: "periodic-notes",
+        cssClass: "periodic-notes-welcome-banner",
+        borderColor: "var(--text-accent)",
+        title: "\u{1F4C5} Periodic Notes",
+        contentHtml: `
+            <strong>Show periodic notes</strong> in the calendar<br>
+            <strong>Click on periodic notes</strong> to create or open them<br>
+            <strong>Compatible with the Periodic Notes Plugin</strong> so you don't have to transfer anything<br>
+            <strong>Show various periods:</strong> Weekly, Monthly, Quarterly, Yearly, Custom Period<br>
+            \u2699\uFE0F <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
+        `,
+        settingsName: "Show Periodic Notes banner",
+        settingsDesc: "Display the Periodic Notes welcome banner with tips about weekly, monthly, and quarterly notes",
+        shouldShow: (s) => !s.banners.periodicNotes,
+        dismiss: (s) => {
+          s.banners.periodicNotes = true;
+        },
+        reset: (s) => {
+          s.banners.periodicNotes = false;
+        }
+      },
+      {
+        id: "community-plugin",
+        cssClass: "community-plugin-banner",
+        borderColor: "var(--text-accent)",
+        title: "\u{1F389} Now on Community Plugins",
+        contentHtml: `
+            <strong>Linear Calendar is now available in Obsidian's Community Plugins</strong> \u2014 for more transparency and ease of use!<br><br>
+            <strong>Migration is seamless</strong> \u2014 your plugin folder and settings stay exactly the same, only the update method changes.<br>
+            Your settings are stored in your vault at <code>.obsidian/plugins/linear-calendar/data.json</code> and are not affected.<br><br>
+            <strong>How to migrate:</strong><br>
+            1. Remove this plugin in BRAT settings (this will <em>not</em> uninstall the plugin)<br>
+            2. Go to <strong>Linear Calendar</strong> through Settings \u2192 Community Plugins \u2013 it should already be installed<br>
+            \u26A0\uFE0F Always back up your vault before migrating, just to be safe.
+        `,
+        settingsName: "Show Community Plugin banner",
+        settingsDesc: "Display the migration banner for users who installed via BRAT",
+        shouldShow: (s, ctx) => ctx.isBratUser && !s.banners.communityPlugin,
+        dismiss: (s) => {
+          s.banners.communityPlugin = true;
+        },
+        reset: (s) => {
+          s.banners.communityPlugin = false;
+        },
+        settingsVisible: (ctx) => ctx.isBratUser
+      }
+    ];
+  }
+});
+
 // src/helpers/BaseSuggest.ts
 var BaseSuggest;
 var init_BaseSuggest = __esm({
@@ -81,6 +3464,2333 @@ var init_BaseSuggest = __esm({
         this.inputEl.dispatchEvent(new Event("change"));
         this.closeSuggestions();
         this.inputEl.focus();
+      }
+      closeSuggestions() {
+        if (this.suggestions) {
+          this.suggestions.remove();
+          this.suggestions = null;
+        }
+      }
+    };
+  }
+});
+
+// src/FolderSuggest.ts
+var import_obsidian, FolderSuggest;
+var init_FolderSuggest = __esm({
+  "src/FolderSuggest.ts"() {
+    "use strict";
+    import_obsidian = require("obsidian");
+    init_BaseSuggest();
+    FolderSuggest = class extends BaseSuggest {
+      getSuggestions(query) {
+        const folders = this.getAllFolders();
+        return folders.filter((folder) => folder.toLowerCase().includes(query)).slice(0, 10).map((folder) => ({ value: folder }));
+      }
+      getAllFolders() {
+        const folders = [];
+        const recurse = (folder) => {
+          if (folder.path) folders.push(folder.path);
+          if (folder.children) {
+            for (const child of folder.children) {
+              if (child instanceof import_obsidian.TFolder) {
+                recurse(child);
+              }
+            }
+          }
+        };
+        recurse(this.app.vault.getRoot());
+        return folders;
+      }
+    };
+  }
+});
+
+// src/FileSuggest.ts
+var import_obsidian2, FileSuggest;
+var init_FileSuggest = __esm({
+  "src/FileSuggest.ts"() {
+    "use strict";
+    import_obsidian2 = require("obsidian");
+    init_BaseSuggest();
+    FileSuggest = class extends BaseSuggest {
+      constructor(app, inputEl, baseFolderPath, extension = "md") {
+        super(app, inputEl);
+        this.baseFolderPath = baseFolderPath || null;
+        this.extension = extension;
+      }
+      getSuggestions(query) {
+        const files = this.getFiles();
+        return files.filter((file) => file.toLowerCase().includes(query)).slice(0, 15).map((file) => ({ value: file }));
+      }
+      getFiles() {
+        const files = [];
+        let startFolder = null;
+        if (this.baseFolderPath) {
+          const folder = this.app.vault.getAbstractFileByPath(this.baseFolderPath);
+          if (folder instanceof import_obsidian2.TFolder) {
+            startFolder = folder;
+          }
+        }
+        if (!startFolder) {
+          startFolder = this.app.vault.getRoot();
+        }
+        const recurse = (folder) => {
+          if (folder.children) {
+            for (const child of folder.children) {
+              if (child instanceof import_obsidian2.TFile && child.extension === this.extension) {
+                files.push(child.path.replace(new RegExp(`\\.${this.extension}$`), ""));
+              } else if (child instanceof import_obsidian2.TFolder) {
+                recurse(child);
+              }
+            }
+          }
+        };
+        recurse(startFolder);
+        return files.sort();
+      }
+      /**
+       * Update the base folder path (useful if the folder setting changes)
+       */
+      setBaseFolderPath(path) {
+        this.baseFolderPath = path;
+      }
+    };
+  }
+});
+
+// src/IconSuggest.ts
+var import_obsidian3, IconSuggest;
+var init_IconSuggest = __esm({
+  "src/IconSuggest.ts"() {
+    "use strict";
+    import_obsidian3 = require("obsidian");
+    IconSuggest = class {
+      constructor(inputEl, previewEl) {
+        this.previewEl = null;
+        this.suggestions = null;
+        this.allIcons = [];
+        this.inputEl = inputEl;
+        this.previewEl = previewEl || null;
+        this.allIcons = this.buildIconLibrary();
+        this.inputEl.addEventListener("input", () => {
+          this.updateSuggestions();
+          this.updatePreview();
+        });
+        this.inputEl.addEventListener("focus", () => this.updateSuggestions());
+        this.inputEl.addEventListener("blur", () => {
+          setTimeout(() => this.closeSuggestions(), 200);
+        });
+        if (this.previewEl && this.inputEl.value) {
+          this.updatePreview();
+        }
+      }
+      /**
+       * Build comprehensive library of emojis and Lucide icons
+       */
+      buildIconLibrary() {
+        const items = [];
+        const emojis = [
+          // Smileys & Emotion
+          { emoji: "\u{1F600}", keywords: ["smile", "happy", "grin", "face"], category: "smileys" },
+          { emoji: "\u{1F603}", keywords: ["smile", "happy", "joy", "face"], category: "smileys" },
+          { emoji: "\u{1F604}", keywords: ["smile", "happy", "laugh", "face"], category: "smileys" },
+          { emoji: "\u{1F601}", keywords: ["grin", "smile", "happy", "face"], category: "smileys" },
+          { emoji: "\u{1F60A}", keywords: ["smile", "blush", "happy", "face"], category: "smileys" },
+          { emoji: "\u{1F642}", keywords: ["smile", "happy", "face"], category: "smileys" },
+          { emoji: "\u{1F609}", keywords: ["wink", "flirt", "face"], category: "smileys" },
+          { emoji: "\u{1F60D}", keywords: ["love", "heart", "eyes", "face"], category: "smileys" },
+          { emoji: "\u{1F970}", keywords: ["love", "hearts", "smile", "face"], category: "smileys" },
+          { emoji: "\u{1F618}", keywords: ["kiss", "love", "face"], category: "smileys" },
+          { emoji: "\u{1F617}", keywords: ["kiss", "face"], category: "smileys" },
+          { emoji: "\u{1F619}", keywords: ["kiss", "smile", "face"], category: "smileys" },
+          { emoji: "\u{1F61A}", keywords: ["kiss", "closed", "eyes", "face"], category: "smileys" },
+          { emoji: "\u263A\uFE0F", keywords: ["smile", "happy", "face"], category: "smileys" },
+          { emoji: "\u{1F917}", keywords: ["hug", "smile", "face"], category: "smileys" },
+          { emoji: "\u{1F929}", keywords: ["star", "eyes", "excited", "face"], category: "smileys" },
+          { emoji: "\u{1F914}", keywords: ["think", "hmm", "face"], category: "smileys" },
+          { emoji: "\u{1F610}", keywords: ["neutral", "meh", "face"], category: "smileys" },
+          { emoji: "\u{1F611}", keywords: ["expressionless", "meh", "face"], category: "smileys" },
+          { emoji: "\u{1F636}", keywords: ["silence", "quiet", "face"], category: "smileys" },
+          { emoji: "\u{1F60F}", keywords: ["smirk", "smug", "face"], category: "smileys" },
+          { emoji: "\u{1F612}", keywords: ["unamused", "meh", "face"], category: "smileys" },
+          { emoji: "\u{1F644}", keywords: ["eye", "roll", "annoyed", "face"], category: "smileys" },
+          { emoji: "\u{1F62C}", keywords: ["grimace", "awkward", "face"], category: "smileys" },
+          { emoji: "\u{1F614}", keywords: ["sad", "pensive", "face"], category: "smileys" },
+          { emoji: "\u{1F62A}", keywords: ["sleepy", "tired", "face"], category: "smileys" },
+          { emoji: "\u{1F924}", keywords: ["drool", "sleep", "face"], category: "smileys" },
+          { emoji: "\u{1F634}", keywords: ["sleep", "zzz", "face"], category: "smileys" },
+          { emoji: "\u{1F637}", keywords: ["mask", "sick", "face"], category: "smileys" },
+          { emoji: "\u{1F912}", keywords: ["sick", "thermometer", "face"], category: "smileys" },
+          { emoji: "\u{1F915}", keywords: ["hurt", "bandage", "face"], category: "smileys" },
+          { emoji: "\u{1F922}", keywords: ["nausea", "sick", "face"], category: "smileys" },
+          { emoji: "\u{1F92E}", keywords: ["vomit", "sick", "face"], category: "smileys" },
+          { emoji: "\u{1F927}", keywords: ["sneeze", "sick", "face"], category: "smileys" },
+          { emoji: "\u{1F975}", keywords: ["hot", "heat", "face"], category: "smileys" },
+          { emoji: "\u{1F976}", keywords: ["cold", "freeze", "face"], category: "smileys" },
+          { emoji: "\u{1F60E}", keywords: ["cool", "sunglasses", "face"], category: "smileys" },
+          { emoji: "\u{1F913}", keywords: ["nerd", "geek", "glasses", "face"], category: "smileys" },
+          { emoji: "\u{1F9D0}", keywords: ["monocle", "inspect", "face"], category: "smileys" },
+          { emoji: "\u{1F615}", keywords: ["confused", "unsure", "face"], category: "smileys" },
+          { emoji: "\u{1F61F}", keywords: ["worried", "sad", "face"], category: "smileys" },
+          { emoji: "\u{1F641}", keywords: ["frown", "sad", "face"], category: "smileys" },
+          { emoji: "\u2639\uFE0F", keywords: ["frown", "sad", "face"], category: "smileys" },
+          { emoji: "\u{1F62E}", keywords: ["wow", "surprised", "face"], category: "smileys" },
+          { emoji: "\u{1F62F}", keywords: ["hushed", "surprised", "face"], category: "smileys" },
+          { emoji: "\u{1F632}", keywords: ["shocked", "surprised", "face"], category: "smileys" },
+          { emoji: "\u{1F633}", keywords: ["flushed", "embarrassed", "face"], category: "smileys" },
+          { emoji: "\u{1F97A}", keywords: ["pleading", "puppy", "eyes", "face"], category: "smileys" },
+          { emoji: "\u{1F626}", keywords: ["frown", "open", "mouth", "face"], category: "smileys" },
+          { emoji: "\u{1F627}", keywords: ["anguish", "face"], category: "smileys" },
+          { emoji: "\u{1F628}", keywords: ["fear", "scared", "face"], category: "smileys" },
+          { emoji: "\u{1F630}", keywords: ["anxious", "sweat", "face"], category: "smileys" },
+          { emoji: "\u{1F625}", keywords: ["sad", "relieved", "face"], category: "smileys" },
+          { emoji: "\u{1F622}", keywords: ["cry", "sad", "tear", "face"], category: "smileys" },
+          { emoji: "\u{1F62D}", keywords: ["sob", "cry", "sad", "face"], category: "smileys" },
+          { emoji: "\u{1F631}", keywords: ["scream", "fear", "face"], category: "smileys" },
+          { emoji: "\u{1F616}", keywords: ["confound", "face"], category: "smileys" },
+          { emoji: "\u{1F623}", keywords: ["persevere", "face"], category: "smileys" },
+          { emoji: "\u{1F61E}", keywords: ["disappointed", "sad", "face"], category: "smileys" },
+          { emoji: "\u{1F613}", keywords: ["sweat", "face"], category: "smileys" },
+          { emoji: "\u{1F629}", keywords: ["weary", "tired", "face"], category: "smileys" },
+          { emoji: "\u{1F62B}", keywords: ["tired", "face"], category: "smileys" },
+          { emoji: "\u{1F971}", keywords: ["yawn", "tired", "face"], category: "smileys" },
+          { emoji: "\u{1F624}", keywords: ["triumph", "face"], category: "smileys" },
+          { emoji: "\u{1F621}", keywords: ["angry", "mad", "face"], category: "smileys" },
+          { emoji: "\u{1F620}", keywords: ["angry", "face"], category: "smileys" },
+          { emoji: "\u{1F92C}", keywords: ["swear", "curse", "face"], category: "smileys" },
+          { emoji: "\u{1F608}", keywords: ["devil", "smile", "face"], category: "smileys" },
+          { emoji: "\u{1F47F}", keywords: ["devil", "angry", "face"], category: "smileys" },
+          { emoji: "\u{1F480}", keywords: ["skull", "death", "dead"], category: "smileys" },
+          { emoji: "\u2620\uFE0F", keywords: ["skull", "crossbones", "death"], category: "smileys" },
+          // Hearts & Love
+          { emoji: "\u2764\uFE0F", keywords: ["heart", "love", "red"], category: "hearts" },
+          { emoji: "\u{1F9E1}", keywords: ["heart", "orange", "love"], category: "hearts" },
+          { emoji: "\u{1F49B}", keywords: ["heart", "yellow", "love"], category: "hearts" },
+          { emoji: "\u{1F49A}", keywords: ["heart", "green", "love"], category: "hearts" },
+          { emoji: "\u{1F499}", keywords: ["heart", "blue", "love"], category: "hearts" },
+          { emoji: "\u{1F49C}", keywords: ["heart", "purple", "love"], category: "hearts" },
+          { emoji: "\u{1F5A4}", keywords: ["heart", "black", "love"], category: "hearts" },
+          { emoji: "\u{1F90D}", keywords: ["heart", "white", "love"], category: "hearts" },
+          { emoji: "\u{1F90E}", keywords: ["heart", "brown", "love"], category: "hearts" },
+          { emoji: "\u{1F494}", keywords: ["broken", "heart", "sad"], category: "hearts" },
+          { emoji: "\u2763\uFE0F", keywords: ["heart", "exclamation", "love"], category: "hearts" },
+          { emoji: "\u{1F495}", keywords: ["two", "hearts", "love"], category: "hearts" },
+          { emoji: "\u{1F49E}", keywords: ["revolving", "hearts", "love"], category: "hearts" },
+          { emoji: "\u{1F493}", keywords: ["beating", "heart", "love"], category: "hearts" },
+          { emoji: "\u{1F497}", keywords: ["growing", "heart", "love"], category: "hearts" },
+          { emoji: "\u{1F496}", keywords: ["sparkling", "heart", "love"], category: "hearts" },
+          { emoji: "\u{1F498}", keywords: ["arrow", "heart", "cupid", "love"], category: "hearts" },
+          { emoji: "\u{1F49D}", keywords: ["gift", "heart", "love"], category: "hearts" },
+          // Hands & Body
+          { emoji: "\u{1F44D}", keywords: ["thumbs", "up", "yes", "like", "good"], category: "hands" },
+          { emoji: "\u{1F44E}", keywords: ["thumbs", "down", "no", "bad"], category: "hands" },
+          { emoji: "\u{1F44A}", keywords: ["fist", "punch", "bump"], category: "hands" },
+          { emoji: "\u270A", keywords: ["fist", "raised", "power"], category: "hands" },
+          { emoji: "\u{1F91B}", keywords: ["fist", "left", "bump"], category: "hands" },
+          { emoji: "\u{1F91C}", keywords: ["fist", "right", "bump"], category: "hands" },
+          { emoji: "\u{1F44F}", keywords: ["clap", "applause", "hands"], category: "hands" },
+          { emoji: "\u{1F64C}", keywords: ["raised", "hands", "celebrate"], category: "hands" },
+          { emoji: "\u{1F450}", keywords: ["open", "hands"], category: "hands" },
+          { emoji: "\u{1F932}", keywords: ["palms", "together", "pray"], category: "hands" },
+          { emoji: "\u{1F91D}", keywords: ["handshake", "deal", "agreement"], category: "hands" },
+          { emoji: "\u{1F64F}", keywords: ["pray", "thanks", "please", "hands"], category: "hands" },
+          { emoji: "\u270D\uFE0F", keywords: ["write", "hand", "pen"], category: "hands" },
+          { emoji: "\u270B", keywords: ["hand", "stop", "raised"], category: "hands" },
+          { emoji: "\u{1F91A}", keywords: ["raised", "back", "hand"], category: "hands" },
+          { emoji: "\u{1F590}\uFE0F", keywords: ["hand", "fingers", "splayed"], category: "hands" },
+          { emoji: "\u270C\uFE0F", keywords: ["victory", "peace", "hand"], category: "hands" },
+          { emoji: "\u{1F91E}", keywords: ["fingers", "crossed", "luck"], category: "hands" },
+          { emoji: "\u{1F91F}", keywords: ["love", "you", "hand"], category: "hands" },
+          { emoji: "\u{1F918}", keywords: ["rock", "on", "horns", "hand"], category: "hands" },
+          { emoji: "\u{1F44C}", keywords: ["ok", "hand", "perfect"], category: "hands" },
+          { emoji: "\u{1F90C}", keywords: ["pinched", "fingers", "hand"], category: "hands" },
+          { emoji: "\u{1F448}", keywords: ["point", "left", "hand"], category: "hands" },
+          { emoji: "\u{1F449}", keywords: ["point", "right", "hand"], category: "hands" },
+          { emoji: "\u{1F446}", keywords: ["point", "up", "hand"], category: "hands" },
+          { emoji: "\u{1F447}", keywords: ["point", "down", "hand"], category: "hands" },
+          { emoji: "\u261D\uFE0F", keywords: ["point", "up", "index", "hand"], category: "hands" },
+          { emoji: "\u{1F595}", keywords: ["middle", "finger", "hand"], category: "hands" },
+          { emoji: "\u{1F4AA}", keywords: ["muscle", "strong", "flex", "bicep"], category: "hands" },
+          // Nature & Weather
+          { emoji: "\u{1F31E}", keywords: ["sun", "face", "bright", "weather"], category: "nature" },
+          { emoji: "\u{1F31D}", keywords: ["moon", "face", "full", "night"], category: "nature" },
+          { emoji: "\u{1F31B}", keywords: ["moon", "face", "quarter", "night"], category: "nature" },
+          { emoji: "\u{1F31C}", keywords: ["moon", "face", "quarter", "night"], category: "nature" },
+          { emoji: "\u{1F31A}", keywords: ["moon", "face", "new", "dark"], category: "nature" },
+          { emoji: "\u{1F315}", keywords: ["moon", "full", "night"], category: "nature" },
+          { emoji: "\u{1F316}", keywords: ["moon", "waning", "night"], category: "nature" },
+          { emoji: "\u{1F317}", keywords: ["moon", "quarter", "night"], category: "nature" },
+          { emoji: "\u{1F318}", keywords: ["moon", "crescent", "night"], category: "nature" },
+          { emoji: "\u{1F311}", keywords: ["moon", "new", "dark"], category: "nature" },
+          { emoji: "\u{1F312}", keywords: ["moon", "waxing", "night"], category: "nature" },
+          { emoji: "\u{1F313}", keywords: ["moon", "quarter", "night"], category: "nature" },
+          { emoji: "\u{1F314}", keywords: ["moon", "waxing", "night"], category: "nature" },
+          { emoji: "\u2B50", keywords: ["star", "night", "favorite"], category: "nature" },
+          { emoji: "\u{1F31F}", keywords: ["star", "glowing", "sparkle"], category: "nature" },
+          { emoji: "\u2728", keywords: ["sparkles", "shine", "magic"], category: "nature" },
+          { emoji: "\u26A1", keywords: ["lightning", "bolt", "zap", "electric"], category: "nature" },
+          { emoji: "\u2604\uFE0F", keywords: ["comet", "space"], category: "nature" },
+          { emoji: "\u{1F4AB}", keywords: ["dizzy", "star"], category: "nature" },
+          { emoji: "\u{1F525}", keywords: ["fire", "flame", "hot", "burn"], category: "nature" },
+          { emoji: "\u{1F4A7}", keywords: ["droplet", "water", "drop"], category: "nature" },
+          { emoji: "\u{1F30A}", keywords: ["wave", "water", "ocean", "sea"], category: "nature" },
+          { emoji: "\u{1F308}", keywords: ["rainbow", "colors", "weather"], category: "nature" },
+          { emoji: "\u2600\uFE0F", keywords: ["sun", "sunny", "weather"], category: "nature" },
+          { emoji: "\u26C5", keywords: ["cloud", "sun", "weather"], category: "nature" },
+          { emoji: "\u2601\uFE0F", keywords: ["cloud", "weather"], category: "nature" },
+          { emoji: "\u{1F324}\uFE0F", keywords: ["sun", "cloud", "weather"], category: "nature" },
+          { emoji: "\u26C8\uFE0F", keywords: ["storm", "cloud", "lightning", "weather"], category: "nature" },
+          { emoji: "\u{1F327}\uFE0F", keywords: ["rain", "cloud", "weather"], category: "nature" },
+          { emoji: "\u26C4", keywords: ["snowman", "snow", "winter"], category: "nature" },
+          { emoji: "\u2744\uFE0F", keywords: ["snowflake", "snow", "cold", "winter"], category: "nature" },
+          { emoji: "\u{1F32C}\uFE0F", keywords: ["wind", "blow", "weather"], category: "nature" },
+          { emoji: "\u{1F4A8}", keywords: ["dash", "wind", "fast"], category: "nature" },
+          { emoji: "\u{1F32A}\uFE0F", keywords: ["tornado", "cyclone", "weather"], category: "nature" },
+          { emoji: "\u{1F32B}\uFE0F", keywords: ["fog", "weather"], category: "nature" },
+          { emoji: "\u{1F332}", keywords: ["tree", "evergreen", "pine", "nature"], category: "nature" },
+          { emoji: "\u{1F333}", keywords: ["tree", "deciduous", "nature"], category: "nature" },
+          { emoji: "\u{1F334}", keywords: ["palm", "tree", "tropical"], category: "nature" },
+          { emoji: "\u{1F331}", keywords: ["seedling", "plant", "grow"], category: "nature" },
+          { emoji: "\u{1F33F}", keywords: ["herb", "leaf", "plant"], category: "nature" },
+          { emoji: "\u2618\uFE0F", keywords: ["shamrock", "clover", "luck"], category: "nature" },
+          { emoji: "\u{1F340}", keywords: ["clover", "four", "leaf", "luck"], category: "nature" },
+          { emoji: "\u{1F339}", keywords: ["rose", "flower", "red"], category: "nature" },
+          { emoji: "\u{1F33A}", keywords: ["hibiscus", "flower"], category: "nature" },
+          { emoji: "\u{1F33B}", keywords: ["sunflower", "flower"], category: "nature" },
+          { emoji: "\u{1F33C}", keywords: ["blossom", "flower"], category: "nature" },
+          { emoji: "\u{1F337}", keywords: ["tulip", "flower"], category: "nature" },
+          // Food & Drink
+          { emoji: "\u{1F355}", keywords: ["pizza", "food"], category: "food" },
+          { emoji: "\u{1F354}", keywords: ["burger", "hamburger", "food"], category: "food" },
+          { emoji: "\u{1F35F}", keywords: ["fries", "french", "food"], category: "food" },
+          { emoji: "\u{1F32D}", keywords: ["hotdog", "food"], category: "food" },
+          { emoji: "\u{1F37F}", keywords: ["popcorn", "food", "snack"], category: "food" },
+          { emoji: "\u{1F953}", keywords: ["bacon", "food"], category: "food" },
+          { emoji: "\u{1F95A}", keywords: ["egg", "food"], category: "food" },
+          { emoji: "\u{1F373}", keywords: ["cooking", "egg", "food"], category: "food" },
+          { emoji: "\u{1F95E}", keywords: ["pancakes", "food"], category: "food" },
+          { emoji: "\u{1F9C7}", keywords: ["waffle", "food"], category: "food" },
+          { emoji: "\u{1F35E}", keywords: ["bread", "food"], category: "food" },
+          { emoji: "\u{1F950}", keywords: ["croissant", "food"], category: "food" },
+          { emoji: "\u{1F956}", keywords: ["baguette", "bread", "food"], category: "food" },
+          { emoji: "\u{1F9C0}", keywords: ["cheese", "food"], category: "food" },
+          { emoji: "\u{1F957}", keywords: ["salad", "food", "healthy"], category: "food" },
+          { emoji: "\u{1F35D}", keywords: ["spaghetti", "pasta", "food"], category: "food" },
+          { emoji: "\u{1F35C}", keywords: ["ramen", "noodles", "food"], category: "food" },
+          { emoji: "\u{1F372}", keywords: ["stew", "food"], category: "food" },
+          { emoji: "\u{1F35B}", keywords: ["curry", "rice", "food"], category: "food" },
+          { emoji: "\u{1F363}", keywords: ["sushi", "food"], category: "food" },
+          { emoji: "\u{1F371}", keywords: ["bento", "box", "food"], category: "food" },
+          { emoji: "\u{1F364}", keywords: ["shrimp", "food"], category: "food" },
+          { emoji: "\u{1F359}", keywords: ["rice", "ball", "food"], category: "food" },
+          { emoji: "\u{1F35A}", keywords: ["rice", "food"], category: "food" },
+          { emoji: "\u{1F358}", keywords: ["cracker", "rice", "food"], category: "food" },
+          { emoji: "\u{1F95F}", keywords: ["dumpling", "food"], category: "food" },
+          { emoji: "\u{1F362}", keywords: ["oden", "food"], category: "food" },
+          { emoji: "\u{1F361}", keywords: ["dango", "food"], category: "food" },
+          { emoji: "\u{1F367}", keywords: ["shaved", "ice", "dessert"], category: "food" },
+          { emoji: "\u{1F368}", keywords: ["ice", "cream", "dessert"], category: "food" },
+          { emoji: "\u{1F366}", keywords: ["soft", "ice", "cream", "dessert"], category: "food" },
+          { emoji: "\u{1F967}", keywords: ["pie", "dessert"], category: "food" },
+          { emoji: "\u{1F370}", keywords: ["cake", "dessert"], category: "food" },
+          { emoji: "\u{1F382}", keywords: ["birthday", "cake", "dessert"], category: "food" },
+          { emoji: "\u{1F9C1}", keywords: ["cupcake", "dessert"], category: "food" },
+          { emoji: "\u{1F36E}", keywords: ["custard", "pudding", "dessert"], category: "food" },
+          { emoji: "\u{1F36D}", keywords: ["lollipop", "candy"], category: "food" },
+          { emoji: "\u{1F36C}", keywords: ["candy", "sweet"], category: "food" },
+          { emoji: "\u{1F36B}", keywords: ["chocolate", "bar", "candy"], category: "food" },
+          { emoji: "\u{1F369}", keywords: ["doughnut", "donut", "dessert"], category: "food" },
+          { emoji: "\u{1F36A}", keywords: ["cookie", "dessert"], category: "food" },
+          { emoji: "\u{1F36F}", keywords: ["honey", "pot"], category: "food" },
+          { emoji: "\u{1F34E}", keywords: ["apple", "red", "fruit"], category: "food" },
+          { emoji: "\u{1F34F}", keywords: ["apple", "green", "fruit"], category: "food" },
+          { emoji: "\u{1F34A}", keywords: ["orange", "tangerine", "fruit"], category: "food" },
+          { emoji: "\u{1F34B}", keywords: ["lemon", "fruit"], category: "food" },
+          { emoji: "\u{1F34C}", keywords: ["banana", "fruit"], category: "food" },
+          { emoji: "\u{1F349}", keywords: ["watermelon", "fruit"], category: "food" },
+          { emoji: "\u{1F347}", keywords: ["grapes", "fruit"], category: "food" },
+          { emoji: "\u{1F353}", keywords: ["strawberry", "fruit"], category: "food" },
+          { emoji: "\u{1F348}", keywords: ["melon", "fruit"], category: "food" },
+          { emoji: "\u{1F352}", keywords: ["cherries", "fruit"], category: "food" },
+          { emoji: "\u{1F351}", keywords: ["peach", "fruit"], category: "food" },
+          { emoji: "\u{1F96D}", keywords: ["mango", "fruit"], category: "food" },
+          { emoji: "\u{1F34D}", keywords: ["pineapple", "fruit"], category: "food" },
+          { emoji: "\u{1F965}", keywords: ["coconut", "fruit"], category: "food" },
+          { emoji: "\u{1F95D}", keywords: ["kiwi", "fruit"], category: "food" },
+          { emoji: "\u2615", keywords: ["coffee", "drink", "hot"], category: "food" },
+          { emoji: "\u{1F375}", keywords: ["tea", "drink", "hot"], category: "food" },
+          { emoji: "\u{1F9C3}", keywords: ["juice", "box", "drink"], category: "food" },
+          { emoji: "\u{1F964}", keywords: ["cup", "straw", "drink"], category: "food" },
+          { emoji: "\u{1F376}", keywords: ["sake", "drink"], category: "food" },
+          { emoji: "\u{1F37A}", keywords: ["beer", "drink"], category: "food" },
+          { emoji: "\u{1F37B}", keywords: ["beers", "cheers", "drink"], category: "food" },
+          { emoji: "\u{1F377}", keywords: ["wine", "glass", "drink"], category: "food" },
+          { emoji: "\u{1F942}", keywords: ["champagne", "glasses", "cheers", "drink"], category: "food" },
+          { emoji: "\u{1F378}", keywords: ["cocktail", "drink"], category: "food" },
+          { emoji: "\u{1F379}", keywords: ["tropical", "drink"], category: "food" },
+          // Activities & Sports
+          { emoji: "\u26BD", keywords: ["soccer", "ball", "sport"], category: "activities" },
+          { emoji: "\u{1F3C0}", keywords: ["basketball", "ball", "sport"], category: "activities" },
+          { emoji: "\u{1F3C8}", keywords: ["football", "american", "ball", "sport"], category: "activities" },
+          { emoji: "\u26BE", keywords: ["baseball", "ball", "sport"], category: "activities" },
+          { emoji: "\u{1F94E}", keywords: ["softball", "ball", "sport"], category: "activities" },
+          { emoji: "\u{1F3BE}", keywords: ["tennis", "ball", "sport"], category: "activities" },
+          { emoji: "\u{1F3D0}", keywords: ["volleyball", "ball", "sport"], category: "activities" },
+          { emoji: "\u{1F3C9}", keywords: ["rugby", "ball", "sport"], category: "activities" },
+          { emoji: "\u{1F3B1}", keywords: ["pool", "8", "ball", "sport"], category: "activities" },
+          { emoji: "\u{1F3D3}", keywords: ["ping", "pong", "table", "tennis", "sport"], category: "activities" },
+          { emoji: "\u{1F3F8}", keywords: ["badminton", "sport"], category: "activities" },
+          { emoji: "\u{1F945}", keywords: ["goal", "net", "sport"], category: "activities" },
+          { emoji: "\u{1F3D2}", keywords: ["hockey", "ice", "sport"], category: "activities" },
+          { emoji: "\u{1F3D1}", keywords: ["hockey", "field", "sport"], category: "activities" },
+          { emoji: "\u{1F94D}", keywords: ["lacrosse", "sport"], category: "activities" },
+          { emoji: "\u{1F3CF}", keywords: ["cricket", "sport"], category: "activities" },
+          { emoji: "\u{1F3AF}", keywords: ["dart", "target", "bullseye"], category: "activities" },
+          { emoji: "\u{1F3AE}", keywords: ["game", "controller", "video"], category: "activities" },
+          { emoji: "\u{1F3B2}", keywords: ["dice", "game"], category: "activities" },
+          { emoji: "\u{1F3AD}", keywords: ["theater", "masks", "drama"], category: "activities" },
+          { emoji: "\u{1F3A8}", keywords: ["art", "palette", "paint"], category: "activities" },
+          { emoji: "\u{1F3AC}", keywords: ["movie", "clapper", "film"], category: "activities" },
+          { emoji: "\u{1F3A4}", keywords: ["microphone", "sing", "music"], category: "activities" },
+          { emoji: "\u{1F3A7}", keywords: ["headphones", "music"], category: "activities" },
+          { emoji: "\u{1F3BC}", keywords: ["music", "score"], category: "activities" },
+          { emoji: "\u{1F3B9}", keywords: ["keyboard", "piano", "music"], category: "activities" },
+          { emoji: "\u{1F941}", keywords: ["drum", "music"], category: "activities" },
+          { emoji: "\u{1F3B7}", keywords: ["saxophone", "music"], category: "activities" },
+          { emoji: "\u{1F3BA}", keywords: ["trumpet", "music"], category: "activities" },
+          { emoji: "\u{1F3B8}", keywords: ["guitar", "music"], category: "activities" },
+          { emoji: "\u{1F3BB}", keywords: ["violin", "music"], category: "activities" },
+          // Objects & Symbols
+          { emoji: "\u{1F4F1}", keywords: ["phone", "mobile", "cell"], category: "objects" },
+          { emoji: "\u{1F4BB}", keywords: ["laptop", "computer"], category: "objects" },
+          { emoji: "\u2328\uFE0F", keywords: ["keyboard", "computer"], category: "objects" },
+          { emoji: "\u{1F5A5}\uFE0F", keywords: ["desktop", "computer"], category: "objects" },
+          { emoji: "\u{1F5A8}\uFE0F", keywords: ["printer"], category: "objects" },
+          { emoji: "\u{1F5B1}\uFE0F", keywords: ["mouse", "computer"], category: "objects" },
+          { emoji: "\u{1F4F7}", keywords: ["camera", "photo"], category: "objects" },
+          { emoji: "\u{1F4F8}", keywords: ["camera", "flash", "photo"], category: "objects" },
+          { emoji: "\u{1F4F9}", keywords: ["video", "camera"], category: "objects" },
+          { emoji: "\u{1F3A5}", keywords: ["movie", "camera", "film"], category: "objects" },
+          { emoji: "\u{1F4DE}", keywords: ["phone", "telephone"], category: "objects" },
+          { emoji: "\u260E\uFE0F", keywords: ["telephone", "phone"], category: "objects" },
+          { emoji: "\u{1F4FA}", keywords: ["tv", "television"], category: "objects" },
+          { emoji: "\u{1F4FB}", keywords: ["radio"], category: "objects" },
+          { emoji: "\u23F0", keywords: ["alarm", "clock", "time"], category: "objects" },
+          { emoji: "\u23F1\uFE0F", keywords: ["stopwatch", "timer"], category: "objects" },
+          { emoji: "\u23F2\uFE0F", keywords: ["timer", "clock"], category: "objects" },
+          { emoji: "\u231A", keywords: ["watch", "time"], category: "objects" },
+          { emoji: "\u{1F4C5}", keywords: ["calendar", "date"], category: "objects" },
+          { emoji: "\u{1F4C6}", keywords: ["calendar", "tear-off", "date"], category: "objects" },
+          { emoji: "\u{1F4DD}", keywords: ["memo", "note", "pencil", "write"], category: "objects" },
+          { emoji: "\u270F\uFE0F", keywords: ["pencil", "write"], category: "objects" },
+          { emoji: "\u2712\uFE0F", keywords: ["pen", "black", "write"], category: "objects" },
+          { emoji: "\u{1F58A}\uFE0F", keywords: ["pen", "write"], category: "objects" },
+          { emoji: "\u{1F58B}\uFE0F", keywords: ["pen", "fountain", "write"], category: "objects" },
+          { emoji: "\u{1F4D4}", keywords: ["notebook", "decorative", "write"], category: "objects" },
+          { emoji: "\u{1F4D5}", keywords: ["book", "closed", "red"], category: "objects" },
+          { emoji: "\u{1F4D6}", keywords: ["book", "open", "read"], category: "objects" },
+          { emoji: "\u{1F4D7}", keywords: ["book", "green"], category: "objects" },
+          { emoji: "\u{1F4D8}", keywords: ["book", "blue"], category: "objects" },
+          { emoji: "\u{1F4D9}", keywords: ["book", "orange"], category: "objects" },
+          { emoji: "\u{1F4DA}", keywords: ["books", "stack", "library"], category: "objects" },
+          { emoji: "\u{1F4D3}", keywords: ["notebook"], category: "objects" },
+          { emoji: "\u{1F4D2}", keywords: ["ledger", "notebook"], category: "objects" },
+          { emoji: "\u{1F4C3}", keywords: ["page", "curl"], category: "objects" },
+          { emoji: "\u{1F4C4}", keywords: ["page", "document"], category: "objects" },
+          { emoji: "\u{1F4F0}", keywords: ["newspaper", "news"], category: "objects" },
+          { emoji: "\u{1F5DE}\uFE0F", keywords: ["newspaper", "rolled"], category: "objects" },
+          { emoji: "\u{1F4D1}", keywords: ["bookmark", "tabs"], category: "objects" },
+          { emoji: "\u{1F516}", keywords: ["bookmark"], category: "objects" },
+          { emoji: "\u{1F4B0}", keywords: ["money", "bag", "dollar"], category: "objects" },
+          { emoji: "\u{1F4B5}", keywords: ["dollar", "bill", "money"], category: "objects" },
+          { emoji: "\u{1F4B4}", keywords: ["yen", "bill", "money"], category: "objects" },
+          { emoji: "\u{1F4B6}", keywords: ["euro", "bill", "money"], category: "objects" },
+          { emoji: "\u{1F4B7}", keywords: ["pound", "bill", "money"], category: "objects" },
+          { emoji: "\u{1F4B3}", keywords: ["credit", "card"], category: "objects" },
+          { emoji: "\u{1F48E}", keywords: ["gem", "diamond", "jewel"], category: "objects" },
+          { emoji: "\u2699\uFE0F", keywords: ["gear", "settings", "cog"], category: "objects" },
+          { emoji: "\u{1F527}", keywords: ["wrench", "tool"], category: "objects" },
+          { emoji: "\u{1F528}", keywords: ["hammer", "tool"], category: "objects" },
+          { emoji: "\u2692\uFE0F", keywords: ["hammer", "pick", "tool"], category: "objects" },
+          { emoji: "\u{1F6E0}\uFE0F", keywords: ["tools", "hammer", "wrench"], category: "objects" },
+          { emoji: "\u{1F529}", keywords: ["nut", "bolt"], category: "objects" },
+          { emoji: "\u26A1", keywords: ["lightning", "zap", "electric", "fast"], category: "objects" },
+          { emoji: "\u{1F525}", keywords: ["fire", "flame", "hot"], category: "objects" },
+          { emoji: "\u{1F4A1}", keywords: ["bulb", "light", "idea"], category: "objects" },
+          { emoji: "\u{1F526}", keywords: ["flashlight", "torch"], category: "objects" },
+          { emoji: "\u{1F514}", keywords: ["bell", "notification"], category: "objects" },
+          { emoji: "\u{1F515}", keywords: ["bell", "slash", "mute"], category: "objects" },
+          { emoji: "\u{1F4E2}", keywords: ["loudspeaker", "announcement"], category: "objects" },
+          { emoji: "\u{1F4E3}", keywords: ["megaphone", "cheering"], category: "objects" },
+          { emoji: "\u{1F4EF}", keywords: ["horn", "postal"], category: "objects" },
+          { emoji: "\u{1F3BA}", keywords: ["trumpet", "horn"], category: "objects" },
+          { emoji: "\u{1F511}", keywords: ["key", "lock"], category: "objects" },
+          { emoji: "\u{1F5DD}\uFE0F", keywords: ["key", "old"], category: "objects" },
+          { emoji: "\u{1F510}", keywords: ["locked", "key"], category: "objects" },
+          { emoji: "\u{1F512}", keywords: ["locked", "lock"], category: "objects" },
+          { emoji: "\u{1F513}", keywords: ["unlocked", "open"], category: "objects" },
+          // Symbols & Arrows
+          { emoji: "\u2705", keywords: ["check", "mark", "green", "done", "yes"], category: "symbols" },
+          { emoji: "\u2714\uFE0F", keywords: ["check", "mark", "done", "yes"], category: "symbols" },
+          { emoji: "\u274C", keywords: ["x", "cross", "mark", "no", "wrong"], category: "symbols" },
+          { emoji: "\u274E", keywords: ["x", "cross", "mark", "button", "no"], category: "symbols" },
+          { emoji: "\u2B55", keywords: ["circle", "o", "hollow"], category: "symbols" },
+          { emoji: "\u2795", keywords: ["plus", "add", "heavy"], category: "symbols" },
+          { emoji: "\u2796", keywords: ["minus", "subtract", "heavy"], category: "symbols" },
+          { emoji: "\u2797", keywords: ["divide", "division", "heavy"], category: "symbols" },
+          { emoji: "\u2716\uFE0F", keywords: ["multiply", "multiplication", "heavy", "x"], category: "symbols" },
+          { emoji: "\u{1F7F0}", keywords: ["equals", "heavy"], category: "symbols" },
+          { emoji: "\u203C\uFE0F", keywords: ["exclamation", "double", "mark"], category: "symbols" },
+          { emoji: "\u2049\uFE0F", keywords: ["question", "exclamation", "mark"], category: "symbols" },
+          { emoji: "\u2753", keywords: ["question", "mark", "red"], category: "symbols" },
+          { emoji: "\u2754", keywords: ["question", "mark", "white"], category: "symbols" },
+          { emoji: "\u2755", keywords: ["exclamation", "mark", "white"], category: "symbols" },
+          { emoji: "\u2757", keywords: ["exclamation", "mark", "red"], category: "symbols" },
+          { emoji: "\u26A0\uFE0F", keywords: ["warning", "caution"], category: "symbols" },
+          { emoji: "\u{1F6AB}", keywords: ["prohibited", "forbidden", "no"], category: "symbols" },
+          { emoji: "\u{1F51E}", keywords: ["no", "under", "18", "adult"], category: "symbols" },
+          { emoji: "\u2622\uFE0F", keywords: ["radioactive", "radiation"], category: "symbols" },
+          { emoji: "\u2623\uFE0F", keywords: ["biohazard", "danger"], category: "symbols" },
+          { emoji: "\u2B06\uFE0F", keywords: ["arrow", "up", "north"], category: "symbols" },
+          { emoji: "\u2197\uFE0F", keywords: ["arrow", "up", "right", "northeast"], category: "symbols" },
+          { emoji: "\u27A1\uFE0F", keywords: ["arrow", "right", "east"], category: "symbols" },
+          { emoji: "\u2198\uFE0F", keywords: ["arrow", "down", "right", "southeast"], category: "symbols" },
+          { emoji: "\u2B07\uFE0F", keywords: ["arrow", "down", "south"], category: "symbols" },
+          { emoji: "\u2199\uFE0F", keywords: ["arrow", "down", "left", "southwest"], category: "symbols" },
+          { emoji: "\u2B05\uFE0F", keywords: ["arrow", "left", "west"], category: "symbols" },
+          { emoji: "\u2196\uFE0F", keywords: ["arrow", "up", "left", "northwest"], category: "symbols" },
+          { emoji: "\u2195\uFE0F", keywords: ["arrow", "up", "down"], category: "symbols" },
+          { emoji: "\u2194\uFE0F", keywords: ["arrow", "left", "right"], category: "symbols" },
+          { emoji: "\u21A9\uFE0F", keywords: ["arrow", "left", "curve"], category: "symbols" },
+          { emoji: "\u21AA\uFE0F", keywords: ["arrow", "right", "curve"], category: "symbols" },
+          { emoji: "\u2934\uFE0F", keywords: ["arrow", "up", "curve"], category: "symbols" },
+          { emoji: "\u2935\uFE0F", keywords: ["arrow", "down", "curve"], category: "symbols" },
+          { emoji: "\u{1F503}", keywords: ["arrows", "clockwise", "vertical"], category: "symbols" },
+          { emoji: "\u{1F504}", keywords: ["arrows", "counterclockwise", "button"], category: "symbols" },
+          { emoji: "\u{1F519}", keywords: ["back", "arrow"], category: "symbols" },
+          { emoji: "\u{1F51A}", keywords: ["end", "arrow"], category: "symbols" },
+          { emoji: "\u{1F51B}", keywords: ["on", "arrow"], category: "symbols" },
+          { emoji: "\u{1F51C}", keywords: ["soon", "arrow"], category: "symbols" },
+          { emoji: "\u{1F51D}", keywords: ["top", "arrow", "up"], category: "symbols" },
+          { emoji: "\u267B\uFE0F", keywords: ["recycle", "symbol"], category: "symbols" },
+          { emoji: "\u269C\uFE0F", keywords: ["fleur-de-lis"], category: "symbols" },
+          { emoji: "\u{1F531}", keywords: ["trident", "emblem"], category: "symbols" },
+          { emoji: "\u{1F4DB}", keywords: ["name", "badge"], category: "symbols" },
+          { emoji: "\u2B50", keywords: ["star", "white", "medium"], category: "symbols" },
+          { emoji: "\u{1F31F}", keywords: ["star", "glowing"], category: "symbols" },
+          { emoji: "\u{1F4AB}", keywords: ["dizzy", "star"], category: "symbols" },
+          { emoji: "\u2728", keywords: ["sparkles", "shine"], category: "symbols" },
+          { emoji: "\u26A1", keywords: ["lightning", "bolt", "zap"], category: "symbols" },
+          { emoji: "\u2604\uFE0F", keywords: ["comet"], category: "symbols" },
+          { emoji: "\u{1F4A5}", keywords: ["collision", "boom", "bang"], category: "symbols" },
+          { emoji: "\u{1F506}", keywords: ["bright", "button"], category: "symbols" },
+          { emoji: "\u{1F505}", keywords: ["dim", "button"], category: "symbols" },
+          { emoji: "\u{1F4A4}", keywords: ["zzz", "sleep"], category: "symbols" },
+          { emoji: "\u{1F4A2}", keywords: ["anger", "symbol"], category: "symbols" },
+          { emoji: "\u{1F4AC}", keywords: ["speech", "balloon", "chat"], category: "symbols" },
+          { emoji: "\u{1F4AD}", keywords: ["thought", "balloon"], category: "symbols" },
+          { emoji: "\u{1F5EF}\uFE0F", keywords: ["anger", "balloon"], category: "symbols" },
+          // Travel & Places
+          { emoji: "\u{1F697}", keywords: ["car", "automobile", "vehicle"], category: "travel" },
+          { emoji: "\u{1F695}", keywords: ["taxi", "car", "vehicle"], category: "travel" },
+          { emoji: "\u{1F699}", keywords: ["suv", "car", "vehicle"], category: "travel" },
+          { emoji: "\u{1F68C}", keywords: ["bus", "vehicle"], category: "travel" },
+          { emoji: "\u{1F68E}", keywords: ["trolleybus", "vehicle"], category: "travel" },
+          { emoji: "\u{1F3CE}\uFE0F", keywords: ["race", "car", "vehicle"], category: "travel" },
+          { emoji: "\u{1F693}", keywords: ["police", "car", "vehicle"], category: "travel" },
+          { emoji: "\u{1F691}", keywords: ["ambulance", "vehicle"], category: "travel" },
+          { emoji: "\u{1F692}", keywords: ["fire", "engine", "truck"], category: "travel" },
+          { emoji: "\u{1F690}", keywords: ["minibus", "vehicle"], category: "travel" },
+          { emoji: "\u{1F69A}", keywords: ["truck", "delivery", "vehicle"], category: "travel" },
+          { emoji: "\u{1F69B}", keywords: ["truck", "articulated", "vehicle"], category: "travel" },
+          { emoji: "\u{1F69C}", keywords: ["tractor", "vehicle"], category: "travel" },
+          { emoji: "\u{1F3CD}\uFE0F", keywords: ["motorcycle", "vehicle"], category: "travel" },
+          { emoji: "\u{1F6F5}", keywords: ["scooter", "motor", "vehicle"], category: "travel" },
+          { emoji: "\u{1F6B2}", keywords: ["bike", "bicycle", "vehicle"], category: "travel" },
+          { emoji: "\u{1F6F4}", keywords: ["scooter", "kick", "vehicle"], category: "travel" },
+          { emoji: "\u2708\uFE0F", keywords: ["airplane", "plane", "flight"], category: "travel" },
+          { emoji: "\u{1F6EB}", keywords: ["airplane", "departure", "takeoff"], category: "travel" },
+          { emoji: "\u{1F6EC}", keywords: ["airplane", "arrival", "landing"], category: "travel" },
+          { emoji: "\u{1F681}", keywords: ["helicopter", "vehicle"], category: "travel" },
+          { emoji: "\u{1F682}", keywords: ["train", "locomotive", "vehicle"], category: "travel" },
+          { emoji: "\u{1F686}", keywords: ["train", "vehicle"], category: "travel" },
+          { emoji: "\u{1F687}", keywords: ["metro", "subway", "train"], category: "travel" },
+          { emoji: "\u{1F68A}", keywords: ["tram", "vehicle"], category: "travel" },
+          { emoji: "\u{1F69D}", keywords: ["monorail", "vehicle"], category: "travel" },
+          { emoji: "\u{1F684}", keywords: ["train", "bullet", "high-speed"], category: "travel" },
+          { emoji: "\u{1F685}", keywords: ["train", "bullet", "high-speed"], category: "travel" },
+          { emoji: "\u{1F688}", keywords: ["train", "light", "rail"], category: "travel" },
+          { emoji: "\u{1F69E}", keywords: ["train", "mountain", "railway"], category: "travel" },
+          { emoji: "\u{1F68B}", keywords: ["tram", "car"], category: "travel" },
+          { emoji: "\u{1F683}", keywords: ["train", "railway", "car"], category: "travel" },
+          { emoji: "\u{1F69F}", keywords: ["railway", "suspension"], category: "travel" },
+          { emoji: "\u{1F6A0}", keywords: ["cable", "car", "mountain"], category: "travel" },
+          { emoji: "\u{1F6A1}", keywords: ["aerial", "tramway"], category: "travel" },
+          { emoji: "\u{1F6A2}", keywords: ["ship", "boat"], category: "travel" },
+          { emoji: "\u26F5", keywords: ["sailboat", "boat"], category: "travel" },
+          { emoji: "\u{1F6F6}", keywords: ["canoe", "boat"], category: "travel" },
+          { emoji: "\u{1F6A4}", keywords: ["speedboat", "boat"], category: "travel" },
+          { emoji: "\u{1F6F3}\uFE0F", keywords: ["ship", "passenger"], category: "travel" },
+          { emoji: "\u26F4\uFE0F", keywords: ["ferry", "boat"], category: "travel" },
+          { emoji: "\u{1F6E5}\uFE0F", keywords: ["boat", "motor"], category: "travel" },
+          { emoji: "\u{1F680}", keywords: ["rocket", "space", "launch"], category: "travel" },
+          { emoji: "\u{1F6F8}", keywords: ["ufo", "flying", "saucer"], category: "travel" },
+          { emoji: "\u23F1\uFE0F", keywords: ["stopwatch", "timer"], category: "travel" },
+          { emoji: "\u23F0", keywords: ["alarm", "clock"], category: "travel" },
+          { emoji: "\u23F2\uFE0F", keywords: ["timer", "clock"], category: "travel" },
+          { emoji: "\u{1F550}", keywords: ["clock", "one", "time"], category: "travel" },
+          { emoji: "\u{1F3E0}", keywords: ["house", "home"], category: "travel" },
+          { emoji: "\u{1F3E1}", keywords: ["house", "garden", "home"], category: "travel" },
+          { emoji: "\u{1F3E2}", keywords: ["building", "office"], category: "travel" },
+          { emoji: "\u{1F3E3}", keywords: ["post", "office"], category: "travel" },
+          { emoji: "\u{1F3E4}", keywords: ["post", "office", "european"], category: "travel" },
+          { emoji: "\u{1F3E5}", keywords: ["hospital", "medical"], category: "travel" },
+          { emoji: "\u{1F3E6}", keywords: ["bank", "building"], category: "travel" },
+          { emoji: "\u{1F3E8}", keywords: ["hotel", "building"], category: "travel" },
+          { emoji: "\u{1F3E9}", keywords: ["hotel", "love"], category: "travel" },
+          { emoji: "\u{1F3EA}", keywords: ["store", "convenience"], category: "travel" },
+          { emoji: "\u{1F3EB}", keywords: ["school", "building"], category: "travel" },
+          { emoji: "\u{1F3EC}", keywords: ["store", "department"], category: "travel" },
+          { emoji: "\u{1F3ED}", keywords: ["factory", "building"], category: "travel" },
+          { emoji: "\u{1F3EF}", keywords: ["castle", "japanese"], category: "travel" },
+          { emoji: "\u{1F3F0}", keywords: ["castle", "european"], category: "travel" },
+          { emoji: "\u{1F492}", keywords: ["wedding", "chapel"], category: "travel" },
+          { emoji: "\u{1F5FC}", keywords: ["tower", "tokyo"], category: "travel" },
+          { emoji: "\u{1F5FD}", keywords: ["statue", "liberty"], category: "travel" },
+          { emoji: "\u26EA", keywords: ["church", "christian"], category: "travel" },
+          { emoji: "\u{1F54C}", keywords: ["mosque", "islam"], category: "travel" },
+          { emoji: "\u{1F6D5}", keywords: ["temple", "hindu"], category: "travel" },
+          { emoji: "\u{1F54D}", keywords: ["synagogue", "jewish"], category: "travel" }
+        ];
+        emojis.forEach(({ emoji, keywords, category }) => {
+          items.push({
+            value: emoji,
+            type: "emoji",
+            keywords,
+            category
+          });
+        });
+        const lucideIcons = this.getLucideIcons();
+        lucideIcons.forEach((iconName) => {
+          if (!(0, import_obsidian3.getIcon)(iconName)) return;
+          const keywords = iconName.split("-");
+          items.push({
+            value: iconName,
+            type: "lucide",
+            keywords,
+            category: "lucide"
+          });
+        });
+        return items;
+      }
+      /**
+       * Get comprehensive list of Lucide icon names
+       * Full library from https://lucide.dev/icons/
+       */
+      getLucideIcons() {
+        return [
+          "a-arrow-down",
+          "a-arrow-up",
+          "a-large-small",
+          "accessibility",
+          "activity",
+          "air-vent",
+          "airplay",
+          "alarm-check",
+          "alarm-clock",
+          "alarm-clock-check",
+          "alarm-clock-minus",
+          "alarm-clock-off",
+          "alarm-clock-plus",
+          "alarm-minus",
+          "alarm-plus",
+          "alarm-smoke",
+          "album",
+          "alert-circle",
+          "alert-octagon",
+          "alert-triangle",
+          "align-center",
+          "align-center-horizontal",
+          "align-center-vertical",
+          "align-end-horizontal",
+          "align-end-vertical",
+          "align-horizontal-distribute-center",
+          "align-horizontal-distribute-end",
+          "align-horizontal-distribute-start",
+          "align-horizontal-justify-center",
+          "align-horizontal-justify-end",
+          "align-horizontal-justify-start",
+          "align-horizontal-space-around",
+          "align-horizontal-space-between",
+          "align-justify",
+          "align-left",
+          "align-right",
+          "align-start-horizontal",
+          "align-start-vertical",
+          "align-vertical-distribute-center",
+          "align-vertical-distribute-end",
+          "align-vertical-distribute-start",
+          "align-vertical-justify-center",
+          "align-vertical-justify-end",
+          "align-vertical-justify-start",
+          "align-vertical-space-around",
+          "align-vertical-space-between",
+          "ambulance",
+          "ampersand",
+          "ampersands",
+          "anchor",
+          "angry",
+          "annoyed",
+          "antenna",
+          "anvil",
+          "aperture",
+          "app-window",
+          "app-window-mac",
+          "apple",
+          "archive",
+          "archive-restore",
+          "archive-x",
+          "area-chart",
+          "armchair",
+          "arrow-big-down",
+          "arrow-big-down-dash",
+          "arrow-big-left",
+          "arrow-big-left-dash",
+          "arrow-big-right",
+          "arrow-big-right-dash",
+          "arrow-big-up",
+          "arrow-big-up-dash",
+          "arrow-down",
+          "arrow-down-0-1",
+          "arrow-down-1-0",
+          "arrow-down-a-z",
+          "arrow-down-circle",
+          "arrow-down-from-line",
+          "arrow-down-left",
+          "arrow-down-left-from-circle",
+          "arrow-down-left-from-square",
+          "arrow-down-narrow-wide",
+          "arrow-down-right",
+          "arrow-down-right-from-circle",
+          "arrow-down-right-from-square",
+          "arrow-down-square",
+          "arrow-down-to-dot",
+          "arrow-down-to-line",
+          "arrow-down-up",
+          "arrow-down-wide-narrow",
+          "arrow-down-z-a",
+          "arrow-left",
+          "arrow-left-circle",
+          "arrow-left-from-line",
+          "arrow-left-right",
+          "arrow-left-square",
+          "arrow-left-to-line",
+          "arrow-right",
+          "arrow-right-circle",
+          "arrow-right-from-line",
+          "arrow-right-left",
+          "arrow-right-square",
+          "arrow-right-to-line",
+          "arrow-up",
+          "arrow-up-0-1",
+          "arrow-up-1-0",
+          "arrow-up-a-z",
+          "arrow-up-circle",
+          "arrow-up-down",
+          "arrow-up-from-dot",
+          "arrow-up-from-line",
+          "arrow-up-left",
+          "arrow-up-left-from-circle",
+          "arrow-up-left-from-square",
+          "arrow-up-narrow-wide",
+          "arrow-up-right",
+          "arrow-up-right-from-circle",
+          "arrow-up-right-from-square",
+          "arrow-up-square",
+          "arrow-up-to-line",
+          "arrow-up-wide-narrow",
+          "arrow-up-z-a",
+          "arrows-up-from-line",
+          "asterisk",
+          "at-sign",
+          "atom",
+          "audio-lines",
+          "audio-waveform",
+          "award",
+          "axe",
+          "axis-3d",
+          "baby",
+          "backpack",
+          "badge",
+          "badge-alert",
+          "badge-cent",
+          "badge-check",
+          "badge-dollar-sign",
+          "badge-euro",
+          "badge-help",
+          "badge-indian-rupee",
+          "badge-info",
+          "badge-japanese-yen",
+          "badge-minus",
+          "badge-percent",
+          "badge-plus",
+          "badge-pound-sterling",
+          "badge-russian-ruble",
+          "badge-swiss-franc",
+          "badge-x",
+          "baggage-claim",
+          "ban",
+          "banana",
+          "banknote",
+          "bar-chart",
+          "bar-chart-2",
+          "bar-chart-3",
+          "bar-chart-4",
+          "bar-chart-big",
+          "bar-chart-horizontal",
+          "bar-chart-horizontal-big",
+          "barcode",
+          "baseline",
+          "bath",
+          "battery",
+          "battery-charging",
+          "battery-full",
+          "battery-low",
+          "battery-medium",
+          "battery-warning",
+          "beaker",
+          "bean",
+          "bean-off",
+          "bed",
+          "bed-double",
+          "bed-single",
+          "beef",
+          "beer",
+          "beer-off",
+          "bell",
+          "bell-dot",
+          "bell-electric",
+          "bell-minus",
+          "bell-off",
+          "bell-plus",
+          "bell-ring",
+          "between-horizontal-end",
+          "between-horizontal-start",
+          "between-vertical-end",
+          "between-vertical-start",
+          "bicycle",
+          "bike",
+          "binary",
+          "binoculars",
+          "biohazard",
+          "bird",
+          "bitcoin",
+          "blend",
+          "blinds",
+          "blocks",
+          "bluetooth",
+          "bluetooth-connected",
+          "bluetooth-off",
+          "bluetooth-searching",
+          "bold",
+          "bolt",
+          "bomb",
+          "bone",
+          "book",
+          "book-a",
+          "book-audio",
+          "book-check",
+          "book-copy",
+          "book-dashed",
+          "book-down",
+          "book-headphones",
+          "book-heart",
+          "book-image",
+          "book-key",
+          "book-lock",
+          "book-marked",
+          "book-minus",
+          "book-open",
+          "book-open-check",
+          "book-open-text",
+          "book-plus",
+          "book-text",
+          "book-type",
+          "book-up",
+          "book-up-2",
+          "book-user",
+          "book-x",
+          "bookmark",
+          "bookmark-check",
+          "bookmark-minus",
+          "bookmark-plus",
+          "bookmark-x",
+          "boom-box",
+          "bot",
+          "bot-message-square",
+          "box",
+          "box-select",
+          "boxes",
+          "braces",
+          "brackets",
+          "brain",
+          "brain-circuit",
+          "brain-cog",
+          "brick-wall",
+          "briefcase",
+          "briefcase-business",
+          "briefcase-conveyor-belt",
+          "briefcase-medical",
+          "bring-to-front",
+          "brush",
+          "bug",
+          "bug-off",
+          "bug-play",
+          "building",
+          "building-2",
+          "bus",
+          "bus-front",
+          "cable",
+          "cable-car",
+          "cake",
+          "cake-slice",
+          "calculator",
+          "calendar",
+          "calendar-arrow-down",
+          "calendar-arrow-up",
+          "calendar-check",
+          "calendar-check-2",
+          "calendar-clock",
+          "calendar-cog",
+          "calendar-days",
+          "calendar-fold",
+          "calendar-heart",
+          "calendar-minus",
+          "calendar-minus-2",
+          "calendar-off",
+          "calendar-plus",
+          "calendar-plus-2",
+          "calendar-range",
+          "calendar-search",
+          "calendar-sync",
+          "calendar-x",
+          "calendar-x-2",
+          "camera",
+          "camera-off",
+          "camping-tent",
+          "candy",
+          "candy-cane",
+          "candy-off",
+          "cannabis",
+          "captions",
+          "captions-off",
+          "car",
+          "car-front",
+          "car-taxi-front",
+          "caravan",
+          "carrot",
+          "case-lower",
+          "case-sensitive",
+          "case-upper",
+          "cassette-tape",
+          "cast",
+          "castle",
+          "cat",
+          "cctv",
+          "check",
+          "check-check",
+          "check-circle",
+          "check-circle-2",
+          "check-square",
+          "check-square-2",
+          "chef-hat",
+          "cherry",
+          "chevron-down",
+          "chevron-down-circle",
+          "chevron-down-square",
+          "chevron-first",
+          "chevron-last",
+          "chevron-left",
+          "chevron-left-circle",
+          "chevron-left-square",
+          "chevron-right",
+          "chevron-right-circle",
+          "chevron-right-square",
+          "chevron-up",
+          "chevron-up-circle",
+          "chevron-up-square",
+          "chevrons-down",
+          "chevrons-down-up",
+          "chevrons-left",
+          "chevrons-left-right",
+          "chevrons-left-right-ellipsis",
+          "chevrons-right",
+          "chevrons-right-left",
+          "chevrons-up",
+          "chevrons-up-down",
+          "chrome",
+          "church",
+          "cigarette",
+          "cigarette-off",
+          "circle",
+          "circle-alert",
+          "circle-arrow-down",
+          "circle-arrow-left",
+          "circle-arrow-out-down-left",
+          "circle-arrow-out-down-right",
+          "circle-arrow-out-up-left",
+          "circle-arrow-out-up-right",
+          "circle-arrow-right",
+          "circle-arrow-up",
+          "circle-check",
+          "circle-check-big",
+          "circle-chevron-down",
+          "circle-chevron-left",
+          "circle-chevron-right",
+          "circle-chevron-up",
+          "circle-dashed",
+          "circle-divide",
+          "circle-dollar-sign",
+          "circle-dot",
+          "circle-dot-dashed",
+          "circle-ellipsis",
+          "circle-equal",
+          "circle-fading-arrow-up",
+          "circle-fading-plus",
+          "circle-gauge",
+          "circle-help",
+          "circle-minus",
+          "circle-off",
+          "circle-parking",
+          "circle-parking-off",
+          "circle-pause",
+          "circle-percent",
+          "circle-play",
+          "circle-plus",
+          "circle-power",
+          "circle-slash",
+          "circle-slash-2",
+          "circle-stop",
+          "circle-user",
+          "circle-user-round",
+          "circle-x",
+          "circuit-board",
+          "citrus",
+          "clapperboard",
+          "clipboard",
+          "clipboard-check",
+          "clipboard-copy",
+          "clipboard-edit",
+          "clipboard-list",
+          "clipboard-minus",
+          "clipboard-paste",
+          "clipboard-pen",
+          "clipboard-pen-line",
+          "clipboard-plus",
+          "clipboard-signature",
+          "clipboard-type",
+          "clipboard-x",
+          "clock",
+          "clock-1",
+          "clock-10",
+          "clock-11",
+          "clock-12",
+          "clock-2",
+          "clock-3",
+          "clock-4",
+          "clock-5",
+          "clock-6",
+          "clock-7",
+          "clock-8",
+          "clock-9",
+          "clock-alert",
+          "clock-arrow-down",
+          "clock-arrow-up",
+          "cloud",
+          "cloud-cog",
+          "cloud-download",
+          "cloud-drizzle",
+          "cloud-fog",
+          "cloud-hail",
+          "cloud-lightning",
+          "cloud-moon",
+          "cloud-moon-rain",
+          "cloud-off",
+          "cloud-rain",
+          "cloud-rain-wind",
+          "cloud-snow",
+          "cloud-sun",
+          "cloud-sun-rain",
+          "cloud-upload",
+          "cloudy",
+          "clover",
+          "club",
+          "code",
+          "code-2",
+          "code-xml",
+          "codepen",
+          "codesandbox",
+          "coffee",
+          "cog",
+          "coins",
+          "columns-2",
+          "columns-3",
+          "columns-4",
+          "combine",
+          "command",
+          "compass",
+          "component",
+          "computer",
+          "concierge-bell",
+          "cone",
+          "construction",
+          "contact",
+          "contact-round",
+          "container",
+          "contrast",
+          "cookie",
+          "cooking-pot",
+          "copy",
+          "copy-check",
+          "copy-minus",
+          "copy-plus",
+          "copy-slash",
+          "copy-x",
+          "copyleft",
+          "copyright",
+          "corner-down-left",
+          "corner-down-right",
+          "corner-left-down",
+          "corner-left-up",
+          "corner-right-down",
+          "corner-right-up",
+          "corner-up-left",
+          "corner-up-right",
+          "cpu",
+          "creative-commons",
+          "credit-card",
+          "croissant",
+          "crop",
+          "cross",
+          "crosshair",
+          "crown",
+          "cuboid",
+          "cup-soda",
+          "currency",
+          "cylinder",
+          "database",
+          "database-backup",
+          "database-zap",
+          "delete",
+          "dessert",
+          "diameter",
+          "diamond",
+          "diamond-minus",
+          "diamond-percent",
+          "diamond-plus",
+          "dice-1",
+          "dice-2",
+          "dice-3",
+          "dice-4",
+          "dice-5",
+          "dice-6",
+          "dices",
+          "diff",
+          "disc",
+          "disc-2",
+          "disc-3",
+          "disc-album",
+          "divide",
+          "divide-circle",
+          "divide-square",
+          "dna",
+          "dna-off",
+          "dock",
+          "dog",
+          "dollar-sign",
+          "donut",
+          "door-closed",
+          "door-open",
+          "dot",
+          "download",
+          "download-cloud",
+          "drafting-compass",
+          "drama",
+          "dribbble",
+          "drill",
+          "droplet",
+          "droplets",
+          "drumstick",
+          "dumbbell",
+          "ear",
+          "ear-off",
+          "earth",
+          "earth-lock",
+          "eclipse",
+          "egg",
+          "egg-fried",
+          "egg-off",
+          "ellipsis",
+          "ellipsis-vertical",
+          "equal",
+          "equal-not",
+          "eraser",
+          "euro",
+          "expand",
+          "external-link",
+          "eye",
+          "eye-closed",
+          "eye-off",
+          "facebook",
+          "factory",
+          "fan",
+          "fast-forward",
+          "feather",
+          "fence",
+          "ferris-wheel",
+          "figma",
+          "file",
+          "file-archive",
+          "file-audio",
+          "file-audio-2",
+          "file-axis-3d",
+          "file-badge",
+          "file-badge-2",
+          "file-bar-chart",
+          "file-bar-chart-2",
+          "file-box",
+          "file-check",
+          "file-check-2",
+          "file-clock",
+          "file-code",
+          "file-code-2",
+          "file-cog",
+          "file-diff",
+          "file-digit",
+          "file-down",
+          "file-edit",
+          "file-heart",
+          "file-image",
+          "file-input",
+          "file-json",
+          "file-json-2",
+          "file-key",
+          "file-key-2",
+          "file-line-chart",
+          "file-lock",
+          "file-lock-2",
+          "file-minus",
+          "file-minus-2",
+          "file-music",
+          "file-output",
+          "file-pen",
+          "file-pen-line",
+          "file-pie-chart",
+          "file-plus",
+          "file-plus-2",
+          "file-question",
+          "file-scan",
+          "file-search",
+          "file-search-2",
+          "file-signature",
+          "file-sliders",
+          "file-spreadsheet",
+          "file-stack",
+          "file-symlink",
+          "file-terminal",
+          "file-text",
+          "file-type",
+          "file-type-2",
+          "file-up",
+          "file-user",
+          "file-video",
+          "file-video-2",
+          "file-volume",
+          "file-volume-2",
+          "file-warning",
+          "file-x",
+          "file-x-2",
+          "files",
+          "film",
+          "filter",
+          "filter-x",
+          "fingerprint",
+          "fire-extinguisher",
+          "fish",
+          "fish-off",
+          "fish-symbol",
+          "flag",
+          "flag-off",
+          "flag-triangle-left",
+          "flag-triangle-right",
+          "flame",
+          "flame-kindling",
+          "flashlight",
+          "flashlight-off",
+          "flask-conical",
+          "flask-conical-off",
+          "flask-round",
+          "flip-horizontal",
+          "flip-horizontal-2",
+          "flip-vertical",
+          "flip-vertical-2",
+          "flower",
+          "flower-2",
+          "focus",
+          "fold-horizontal",
+          "fold-vertical",
+          "folder",
+          "folder-archive",
+          "folder-check",
+          "folder-clock",
+          "folder-closed",
+          "folder-cog",
+          "folder-dot",
+          "folder-down",
+          "folder-edit",
+          "folder-git",
+          "folder-git-2",
+          "folder-heart",
+          "folder-input",
+          "folder-kanban",
+          "folder-key",
+          "folder-lock",
+          "folder-minus",
+          "folder-open",
+          "folder-open-dot",
+          "folder-output",
+          "folder-pen",
+          "folder-plus",
+          "folder-root",
+          "folder-search",
+          "folder-search-2",
+          "folder-symlink",
+          "folder-sync",
+          "folder-tree",
+          "folder-up",
+          "folder-x",
+          "folders",
+          "footprints",
+          "forklift",
+          "form-input",
+          "forward",
+          "frame",
+          "framer",
+          "frown",
+          "fuel",
+          "fullscreen",
+          "function-square",
+          "gallery-horizontal",
+          "gallery-horizontal-end",
+          "gallery-thumbnails",
+          "gallery-vertical",
+          "gallery-vertical-end",
+          "gamepad",
+          "gamepad-2",
+          "gauge",
+          "gauge-circle",
+          "gavel",
+          "gem",
+          "ghost",
+          "gift",
+          "git-branch",
+          "git-branch-plus",
+          "git-commit-horizontal",
+          "git-commit-vertical",
+          "git-compare",
+          "git-compare-arrows",
+          "git-fork",
+          "git-graph",
+          "git-merge",
+          "git-pull-request",
+          "git-pull-request-arrow",
+          "git-pull-request-closed",
+          "git-pull-request-create",
+          "git-pull-request-create-arrow",
+          "git-pull-request-draft",
+          "github",
+          "gitlab",
+          "glass-water",
+          "glasses",
+          "globe",
+          "globe-2",
+          "globe-lock",
+          "goal",
+          "grab",
+          "graduation-cap",
+          "grape",
+          "grid-2x2",
+          "grid-2x2-check",
+          "grid-2x2-plus",
+          "grid-2x2-x",
+          "grid-3x3",
+          "grip",
+          "grip-horizontal",
+          "grip-vertical",
+          "group",
+          "guitar",
+          "ham",
+          "hammer",
+          "hand",
+          "hand-coins",
+          "hand-heart",
+          "hand-helping",
+          "hand-metal",
+          "hand-platter",
+          "handshake",
+          "hard-drive",
+          "hard-drive-download",
+          "hard-drive-upload",
+          "hard-hat",
+          "hash",
+          "haze",
+          "hdmi-port",
+          "heading",
+          "heading-1",
+          "heading-2",
+          "heading-3",
+          "heading-4",
+          "heading-5",
+          "heading-6",
+          "headphone-off",
+          "headphones",
+          "headset",
+          "heart",
+          "heart-crack",
+          "heart-handshake",
+          "heart-off",
+          "heart-pulse",
+          "heater",
+          "help-circle",
+          "hexagon",
+          "highlighter",
+          "history",
+          "hop",
+          "hop-off",
+          "hospital",
+          "hotel",
+          "hourglass",
+          "house",
+          "house-plus",
+          "ice-cream",
+          "ice-cream-bowl",
+          "ice-cream-cone",
+          "image",
+          "image-down",
+          "image-minus",
+          "image-off",
+          "image-play",
+          "image-plus",
+          "image-up",
+          "images",
+          "import",
+          "inbox",
+          "indent-decrease",
+          "indent-increase",
+          "indian-rupee",
+          "infinity",
+          "info",
+          "inspection-panel",
+          "instagram",
+          "italic",
+          "iteration-ccw",
+          "iteration-cw",
+          "japanese-yen",
+          "joystick",
+          "kanban",
+          "key",
+          "key-round",
+          "key-square",
+          "keyboard",
+          "keyboard-music",
+          "keyboard-off",
+          "lamp",
+          "lamp-ceiling",
+          "lamp-desk",
+          "lamp-floor",
+          "lamp-wall-down",
+          "lamp-wall-up",
+          "land-plot",
+          "landmark",
+          "languages",
+          "laptop",
+          "laptop-2",
+          "laptop-minimal",
+          "lasso",
+          "lasso-select",
+          "laugh",
+          "layers",
+          "layers-2",
+          "layers-3",
+          "layout",
+          "layout-dashboard",
+          "layout-grid",
+          "layout-list",
+          "layout-panel-left",
+          "layout-panel-top",
+          "layout-template",
+          "leaf",
+          "leafy-green",
+          "lectern",
+          "library",
+          "library-big",
+          "library-square",
+          "life-buoy",
+          "ligature",
+          "lightbulb",
+          "lightbulb-off",
+          "line-chart",
+          "link",
+          "link-2",
+          "link-2-off",
+          "linkedin",
+          "list",
+          "list-check",
+          "list-checks",
+          "list-collapse",
+          "list-end",
+          "list-filter",
+          "list-minus",
+          "list-music",
+          "list-ordered",
+          "list-plus",
+          "list-restart",
+          "list-start",
+          "list-todo",
+          "list-tree",
+          "list-video",
+          "list-x",
+          "loader",
+          "loader-circle",
+          "loader-pinwheel",
+          "locate",
+          "locate-fixed",
+          "locate-off",
+          "lock",
+          "lock-keyhole",
+          "lock-keyhole-open",
+          "lock-open",
+          "log-in",
+          "log-out",
+          "logs",
+          "lollipop",
+          "luggage",
+          "magnet",
+          "mail",
+          "mail-check",
+          "mail-minus",
+          "mail-open",
+          "mail-plus",
+          "mail-question",
+          "mail-search",
+          "mail-warning",
+          "mail-x",
+          "mailbox",
+          "mails",
+          "map",
+          "map-pin",
+          "map-pin-off",
+          "map-pinned",
+          "martini",
+          "maximize",
+          "maximize-2",
+          "medal",
+          "megaphone",
+          "megaphone-off",
+          "meh",
+          "memory-stick",
+          "menu",
+          "merge",
+          "message-circle",
+          "message-circle-code",
+          "message-circle-dashed",
+          "message-circle-heart",
+          "message-circle-more",
+          "message-circle-off",
+          "message-circle-plus",
+          "message-circle-question",
+          "message-circle-reply",
+          "message-circle-warning",
+          "message-circle-x",
+          "message-square",
+          "message-square-code",
+          "message-square-dashed",
+          "message-square-diff",
+          "message-square-dot",
+          "message-square-heart",
+          "message-square-more",
+          "message-square-off",
+          "message-square-plus",
+          "message-square-quote",
+          "message-square-reply",
+          "message-square-share",
+          "message-square-text",
+          "message-square-warning",
+          "message-square-x",
+          "messages-square",
+          "mic",
+          "mic-off",
+          "mic-vocal",
+          "microchip",
+          "microscope",
+          "microwave",
+          "milestone",
+          "milk",
+          "milk-off",
+          "minimize",
+          "minimize-2",
+          "minus",
+          "minus-circle",
+          "minus-square",
+          "monitor",
+          "monitor-check",
+          "monitor-dot",
+          "monitor-down",
+          "monitor-off",
+          "monitor-pause",
+          "monitor-play",
+          "monitor-smartphone",
+          "monitor-speaker",
+          "monitor-stop",
+          "monitor-up",
+          "monitor-x",
+          "moon",
+          "moon-star",
+          "more-horizontal",
+          "more-vertical",
+          "mountain",
+          "mountain-snow",
+          "mouse",
+          "mouse-off",
+          "mouse-pointer",
+          "mouse-pointer-2",
+          "mouse-pointer-click",
+          "mouse-pointer-square",
+          "mouse-pointer-square-dashed",
+          "move",
+          "move-3d",
+          "move-diagonal",
+          "move-diagonal-2",
+          "move-down",
+          "move-down-left",
+          "move-down-right",
+          "move-horizontal",
+          "move-left",
+          "move-right",
+          "move-up",
+          "move-up-left",
+          "move-up-right",
+          "move-vertical",
+          "music",
+          "music-2",
+          "music-3",
+          "music-4",
+          "navigation",
+          "navigation-2",
+          "navigation-2-off",
+          "navigation-off",
+          "network",
+          "newspaper",
+          "nfc",
+          "notebook",
+          "notebook-pen",
+          "notebook-tabs",
+          "notebook-text",
+          "notepad-text",
+          "notepad-text-dashed",
+          "npm",
+          "nut",
+          "nut-off",
+          "octagon",
+          "octagon-alert",
+          "octagon-pause",
+          "octagon-x",
+          "omega",
+          "option",
+          "orbit",
+          "origami",
+          "package",
+          "package-2",
+          "package-check",
+          "package-minus",
+          "package-open",
+          "package-plus",
+          "package-search",
+          "package-x",
+          "paint-bucket",
+          "paint-roller",
+          "paintbrush",
+          "paintbrush-2",
+          "paintbrush-vertical",
+          "palette",
+          "palmtree",
+          "panel-bottom",
+          "panel-bottom-close",
+          "panel-bottom-dashed",
+          "panel-bottom-open",
+          "panel-left",
+          "panel-left-close",
+          "panel-left-dashed",
+          "panel-left-open",
+          "panel-right",
+          "panel-right-close",
+          "panel-right-dashed",
+          "panel-right-open",
+          "panel-top",
+          "panel-top-close",
+          "panel-top-dashed",
+          "panel-top-open",
+          "panels-left-bottom",
+          "panels-right-bottom",
+          "panels-top-left",
+          "paperclip",
+          "parentheses",
+          "parking-circle",
+          "parking-circle-off",
+          "parking-meter",
+          "parking-square",
+          "parking-square-off",
+          "party-popper",
+          "pause",
+          "pause-circle",
+          "pause-octagon",
+          "paw-print",
+          "pc-case",
+          "pen",
+          "pen-line",
+          "pen-off",
+          "pen-tool",
+          "pencil",
+          "pencil-line",
+          "pencil-off",
+          "pencil-ruler",
+          "pentagon",
+          "percent",
+          "percent-circle",
+          "percent-diamond",
+          "percent-square",
+          "person-standing",
+          "phone",
+          "phone-call",
+          "phone-forwarded",
+          "phone-incoming",
+          "phone-missed",
+          "phone-off",
+          "phone-outgoing",
+          "pi",
+          "pi-square",
+          "piano",
+          "pickaxe",
+          "picture-in-picture",
+          "picture-in-picture-2",
+          "pie-chart",
+          "pig",
+          "piggy-bank",
+          "pilcrow",
+          "pilcrow-left",
+          "pilcrow-right",
+          "pilcrow-square",
+          "pill",
+          "pin",
+          "pin-off",
+          "pipette",
+          "pizza",
+          "plane",
+          "plane-landing",
+          "plane-takeoff",
+          "play",
+          "play-circle",
+          "play-square",
+          "plug",
+          "plug-2",
+          "plug-zap",
+          "plug-zap-2",
+          "plus",
+          "plus-circle",
+          "plus-square",
+          "pocket",
+          "pocket-knife",
+          "podcast",
+          "pointer",
+          "pointer-off",
+          "popcorn",
+          "popsicle",
+          "pound-sterling",
+          "power",
+          "power-circle",
+          "power-off",
+          "power-square",
+          "presentation",
+          "printer",
+          "printer-check",
+          "projector",
+          "proportions",
+          "puzzle",
+          "pyramid",
+          "qr-code",
+          "quote",
+          "rabbit",
+          "radar",
+          "radiation",
+          "radical",
+          "radio",
+          "radio-receiver",
+          "radio-tower",
+          "radius",
+          "rail-symbol",
+          "rainbow",
+          "rat",
+          "ratio",
+          "receipt",
+          "receipt-cent",
+          "receipt-euro",
+          "receipt-indian-rupee",
+          "receipt-japanese-yen",
+          "receipt-pound-sterling",
+          "receipt-russian-ruble",
+          "receipt-swiss-franc",
+          "receipt-text",
+          "rectangle-ellipsis",
+          "rectangle-horizontal",
+          "rectangle-vertical",
+          "recycle",
+          "redo",
+          "redo-2",
+          "redo-dot",
+          "refresh-ccw",
+          "refresh-ccw-dot",
+          "refresh-cw",
+          "refresh-cw-off",
+          "refrigerator",
+          "regex",
+          "remove-formatting",
+          "repeat",
+          "repeat-1",
+          "repeat-2",
+          "replace",
+          "replace-all",
+          "reply",
+          "reply-all",
+          "rewind",
+          "ribbon",
+          "rocket",
+          "rocking-chair",
+          "roller-coaster",
+          "rotate-3d",
+          "rotate-ccw",
+          "rotate-ccw-square",
+          "rotate-cw",
+          "rotate-cw-square",
+          "route",
+          "route-off",
+          "router",
+          "rows-2",
+          "rows-3",
+          "rows-4",
+          "rss",
+          "ruler",
+          "russian-ruble",
+          "sailboat",
+          "salad",
+          "sandwich",
+          "satellite",
+          "satellite-dish",
+          "save",
+          "save-all",
+          "save-off",
+          "scale",
+          "scale-3d",
+          "scaling",
+          "scan",
+          "scan-barcode",
+          "scan-eye",
+          "scan-face",
+          "scan-line",
+          "scan-qr-code",
+          "scan-search",
+          "scan-text",
+          "scatter-chart",
+          "school",
+          "scissors",
+          "scissors-line-dashed",
+          "screen-share",
+          "screen-share-off",
+          "scroll",
+          "scroll-text",
+          "search",
+          "search-check",
+          "search-code",
+          "search-slash",
+          "search-x",
+          "section",
+          "send",
+          "send-horizontal",
+          "send-to-back",
+          "separator-horizontal",
+          "separator-vertical",
+          "server",
+          "server-cog",
+          "server-crash",
+          "server-off",
+          "settings",
+          "settings-2",
+          "shapes",
+          "share",
+          "share-2",
+          "sheet",
+          "shell",
+          "shield",
+          "shield-alert",
+          "shield-ban",
+          "shield-check",
+          "shield-ellipsis",
+          "shield-half",
+          "shield-minus",
+          "shield-off",
+          "shield-plus",
+          "shield-question",
+          "shield-x",
+          "ship",
+          "ship-wheel",
+          "shirt",
+          "shopping-bag",
+          "shopping-basket",
+          "shopping-cart",
+          "shovel",
+          "shower-head",
+          "shrink",
+          "shrub",
+          "shuffle",
+          "sigma",
+          "sigma-square",
+          "signal",
+          "signal-high",
+          "signal-low",
+          "signal-medium",
+          "signal-zero",
+          "signature",
+          "signpost",
+          "signpost-big",
+          "siren",
+          "skip-back",
+          "skip-forward",
+          "skull",
+          "slack",
+          "slash",
+          "slice",
+          "sliders",
+          "sliders-horizontal",
+          "sliders-vertical",
+          "smartphone",
+          "smartphone-charging",
+          "smartphone-nfc",
+          "smile",
+          "smile-plus",
+          "snail",
+          "snowflake",
+          "sofa",
+          "sort-asc",
+          "sort-desc",
+          "soup",
+          "space",
+          "spade",
+          "sparkle",
+          "sparkles",
+          "speaker",
+          "speech",
+          "spell-check",
+          "spell-check-2",
+          "spline",
+          "split",
+          "split-square-horizontal",
+          "split-square-vertical",
+          "spray-can",
+          "sprout",
+          "square",
+          "square-activity",
+          "square-alert",
+          "square-arrow-down",
+          "square-arrow-down-left",
+          "square-arrow-down-right",
+          "square-arrow-left",
+          "square-arrow-out-down-left",
+          "square-arrow-out-down-right",
+          "square-arrow-out-up-left",
+          "square-arrow-out-up-right",
+          "square-arrow-right",
+          "square-arrow-up",
+          "square-arrow-up-left",
+          "square-arrow-up-right",
+          "square-asterisk",
+          "square-bottom-dashed-scissors",
+          "square-chart-gantt",
+          "square-check",
+          "square-check-big",
+          "square-chevron-down",
+          "square-chevron-left",
+          "square-chevron-right",
+          "square-chevron-up",
+          "square-code",
+          "square-dashed",
+          "square-dashed-bottom",
+          "square-dashed-bottom-code",
+          "square-dashed-kanban",
+          "square-dashed-mouse-pointer",
+          "square-divide",
+          "square-dot",
+          "square-equal",
+          "square-function",
+          "square-kanban",
+          "square-library",
+          "square-m",
+          "square-menu",
+          "square-minus",
+          "square-mouse-pointer",
+          "square-parking",
+          "square-parking-off",
+          "square-pen",
+          "square-percent",
+          "square-pi",
+          "square-pilcrow",
+          "square-play",
+          "square-plus",
+          "square-power",
+          "square-radical",
+          "square-scissors",
+          "square-sigma",
+          "square-slash",
+          "square-split-horizontal",
+          "square-split-vertical",
+          "square-square",
+          "square-stack",
+          "square-terminal",
+          "square-user",
+          "square-user-round",
+          "square-x",
+          "squircle",
+          "squirrel",
+          "stamp",
+          "star",
+          "star-half",
+          "star-off",
+          "stars",
+          "step-back",
+          "step-forward",
+          "stethoscope",
+          "sticker",
+          "sticky-note",
+          "store",
+          "stretch-horizontal",
+          "stretch-vertical",
+          "strikethrough",
+          "subscript",
+          "subtitles",
+          "sun",
+          "sun-dim",
+          "sun-medium",
+          "sun-moon",
+          "sun-snow",
+          "sunrise",
+          "sunset",
+          "superscript",
+          "swatch-book",
+          "swiss-franc",
+          "switch-camera",
+          "sword",
+          "swords",
+          "syringe",
+          "table",
+          "table-2",
+          "table-cells-merge",
+          "table-cells-split",
+          "table-columns-split",
+          "table-of-contents",
+          "table-properties",
+          "table-rows-split",
+          "tablet",
+          "tablet-smartphone",
+          "tablets",
+          "tag",
+          "tags",
+          "tally-1",
+          "tally-2",
+          "tally-3",
+          "tally-4",
+          "tally-5",
+          "tangent",
+          "target",
+          "telescope",
+          "tent",
+          "tent-tree",
+          "terminal",
+          "test-tube",
+          "test-tube-diagonal",
+          "test-tubes",
+          "text",
+          "text-cursor",
+          "text-cursor-input",
+          "text-quote",
+          "text-search",
+          "text-select",
+          "theater",
+          "thermometer",
+          "thermometer-snowflake",
+          "thermometer-sun",
+          "thumbs-down",
+          "thumbs-up",
+          "ticket",
+          "ticket-check",
+          "ticket-minus",
+          "ticket-percent",
+          "ticket-plus",
+          "ticket-slash",
+          "ticket-x",
+          "tickets",
+          "tickets-plane",
+          "timer",
+          "timer-off",
+          "timer-reset",
+          "toggle-left",
+          "toggle-right",
+          "toilet",
+          "tornado",
+          "torus",
+          "touchpad",
+          "touchpad-off",
+          "tower-control",
+          "toy-brick",
+          "tractor",
+          "traffic-cone",
+          "train-front",
+          "train-front-tunnel",
+          "train-track",
+          "tram-front",
+          "trash",
+          "trash-2",
+          "tree-deciduous",
+          "tree-palm",
+          "tree-pine",
+          "trees",
+          "trello",
+          "trending-down",
+          "trending-up",
+          "trending-up-down",
+          "triangle",
+          "triangle-alert",
+          "triangle-right",
+          "trophy",
+          "truck",
+          "turtle",
+          "tv",
+          "tv-2",
+          "tv-minimal",
+          "tv-minimal-play",
+          "twitch",
+          "twitter",
+          "type",
+          "type-outline",
+          "umbrella",
+          "umbrella-off",
+          "underline",
+          "undo",
+          "undo-2",
+          "undo-dot",
+          "unfold-horizontal",
+          "unfold-vertical",
+          "ungroup",
+          "university",
+          "unlink",
+          "unlink-2",
+          "unplug",
+          "upload",
+          "upload-cloud",
+          "usb",
+          "user",
+          "user-check",
+          "user-circle",
+          "user-cog",
+          "user-minus",
+          "user-pen",
+          "user-plus",
+          "user-round",
+          "user-round-check",
+          "user-round-cog",
+          "user-round-minus",
+          "user-round-pen",
+          "user-round-plus",
+          "user-round-search",
+          "user-round-x",
+          "user-search",
+          "user-x",
+          "users",
+          "users-round",
+          "utensils",
+          "utensils-crossed",
+          "utility-pole",
+          "variable",
+          "vegan",
+          "venetian-mask",
+          "vibrate",
+          "vibrate-off",
+          "video",
+          "video-off",
+          "videotape",
+          "view",
+          "voicemail",
+          "volume",
+          "volume-1",
+          "volume-2",
+          "volume-off",
+          "volume-x",
+          "vote",
+          "wallet",
+          "wallet-cards",
+          "wallet-minimal",
+          "wallpaper",
+          "wand",
+          "wand-sparkles",
+          "warehouse",
+          "washing-machine",
+          "watch",
+          "waves",
+          "waves-ladder",
+          "waypoints",
+          "webcam",
+          "webhook",
+          "webhook-off",
+          "weight",
+          "wheat",
+          "wheat-off",
+          "whole-word",
+          "wifi",
+          "wifi-high",
+          "wifi-low",
+          "wifi-off",
+          "wifi-zero",
+          "wind",
+          "wind-arrow-down",
+          "wine",
+          "wine-off",
+          "workflow",
+          "worm",
+          "wrap-text",
+          "wrench",
+          "x",
+          "x-circle",
+          "x-octagon",
+          "x-square",
+          "youtube",
+          "zap",
+          "zap-off",
+          "zoom-in",
+          "zoom-out"
+        ];
+      }
+      updateSuggestions() {
+        const query = this.inputEl.value.toLowerCase().trim();
+        if (!query) {
+          this.closeSuggestions();
+          return;
+        }
+        const matches = this.allIcons.filter((icon) => {
+          return icon.keywords.some(
+            (keyword) => keyword.toLowerCase().includes(query)
+          );
+        }).slice(0, 20);
+        this.showSuggestions(matches);
+      }
+      showSuggestions(icons) {
+        var _a;
+        this.closeSuggestions();
+        if (icons.length === 0) return;
+        this.suggestions = document.createElement("div");
+        this.suggestions.className = "suggestion-container";
+        this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 350px; overflow-y: auto;";
+        icons.forEach((iconItem) => {
+          var _a2;
+          const item = document.createElement("div");
+          item.className = "suggestion-item";
+          item.style.cssText = "padding: 6px 10px; cursor: pointer; border-radius: 3px; display: flex; align-items: center; gap: 10px;";
+          const preview = document.createElement("span");
+          preview.style.cssText = "width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px;";
+          if (iconItem.type === "emoji") {
+            preview.textContent = iconItem.value;
+          } else {
+            (0, import_obsidian3.setIcon)(preview, iconItem.value);
+          }
+          item.appendChild(preview);
+          const textSpan = document.createElement("span");
+          if (iconItem.type === "emoji") {
+            textSpan.textContent = iconItem.keywords.join(", ");
+            textSpan.style.cssText = "font-size: 0.9em; color: var(--text-muted);";
+          } else {
+            textSpan.textContent = iconItem.value;
+            textSpan.style.cssText = "font-family: var(--font-monospace); font-size: 0.85em;";
+          }
+          item.appendChild(textSpan);
+          const badge = document.createElement("span");
+          badge.textContent = iconItem.type;
+          badge.style.cssText = `
+                margin-left: auto;
+                font-size: 0.7em;
+                padding: 2px 6px;
+                border-radius: 3px;
+                background: ${iconItem.type === "emoji" ? "var(--color-green)" : "var(--color-blue)"};
+                color: white;
+                opacity: 0.7;
+            `;
+          item.appendChild(badge);
+          item.addEventListener("mouseenter", () => {
+            item.style.background = "var(--background-modifier-hover)";
+          });
+          item.addEventListener("mouseleave", () => {
+            item.style.background = "";
+          });
+          item.addEventListener("click", () => {
+            this.inputEl.value = iconItem.value;
+            this.inputEl.dataset.iconType = iconItem.type;
+            this.inputEl.dispatchEvent(new Event("input"));
+            this.updatePreview();
+            this.closeSuggestions();
+          });
+          (_a2 = this.suggestions) == null ? void 0 : _a2.appendChild(item);
+        });
+        const footer = document.createElement("div");
+        footer.style.cssText = `
+            padding: 8px 10px;
+            margin-top: 4px;
+            border-top: 1px solid var(--background-modifier-border);
+            font-size: 0.75em;
+            color: var(--text-muted);
+            text-align: center;
+        `;
+        footer.innerHTML = '\u{1F4A1} Browse all Lucide icons at <a href="https://lucide.dev/icons/" target="_blank" style="color: var(--text-accent); text-decoration: underline;">lucide.dev/icons</a>';
+        (_a = this.suggestions) == null ? void 0 : _a.appendChild(footer);
+        const rect = this.inputEl.getBoundingClientRect();
+        this.suggestions.style.top = rect.bottom + 2 + "px";
+        this.suggestions.style.left = rect.left + "px";
+        this.suggestions.style.width = Math.max(rect.width, 300) + "px";
+        document.body.appendChild(this.suggestions);
+      }
+      updatePreview() {
+        if (!this.previewEl) return;
+        this.previewEl.empty();
+        const value = this.inputEl.value.trim();
+        if (!value) return;
+        const iconType = this.inputEl.dataset.iconType;
+        if (iconType === "emoji" || value.length <= 2) {
+          this.previewEl.textContent = value;
+          this.previewEl.style.fontSize = "20px";
+        } else {
+          try {
+            (0, import_obsidian3.setIcon)(this.previewEl, value);
+            this.previewEl.style.fontSize = "";
+          } catch (e) {
+            this.previewEl.textContent = "?";
+            this.previewEl.style.fontSize = "16px";
+          }
+        }
       }
       closeSuggestions() {
         if (this.suggestions) {
@@ -272,6 +5982,226 @@ var init_ValueSuggest = __esm({
   }
 });
 
+// src/helpers/ConditionRenderer.ts
+function getValidOperators(property) {
+  if (property === "file.tags") {
+    return [
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" },
+      { value: "exists", label: "exists" },
+      { value: "doesNotExist", label: "does not exist" }
+    ];
+  } else if (property === "file.folder") {
+    return [
+      { value: "is", label: "is" },
+      { value: "isNot", label: "is not" },
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" }
+    ];
+  } else if (property === "file.name" || property === "file.basename") {
+    return [
+      { value: "is", label: "is" },
+      { value: "isNot", label: "is not" },
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" },
+      { value: "exists", label: "exists" },
+      { value: "doesNotExist", label: "does not exist" },
+      { value: "matchesDatePattern", label: "matches date pattern" }
+    ];
+  } else {
+    return [
+      { value: "is", label: "is" },
+      { value: "isNot", label: "is not" },
+      { value: "contains", label: "contains" },
+      { value: "doesNotContain", label: "does not contain" },
+      { value: "exists", label: "exists" },
+      { value: "doesNotExist", label: "does not exist" }
+    ];
+  }
+}
+var ConditionRenderer;
+var init_ConditionRenderer = __esm({
+  "src/helpers/ConditionRenderer.ts"() {
+    "use strict";
+    init_TagPillRenderer();
+    init_PropertySuggest();
+    init_ValueSuggest();
+    init_FolderSuggest();
+    ConditionRenderer = class {
+      static render(container, condition, condIndex, conditions, app, callbacks) {
+        const condEl = container.createDiv();
+        condEl.style.cssText = "display: flex; gap: 5px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; padding: 10px; background: var(--background-primary); border-radius: 3px; border: 1px solid var(--background-modifier-border);";
+        const fieldsContainer = condEl.createDiv();
+        fieldsContainer.style.cssText = "display: flex; gap: 5px; flex-wrap: wrap; flex: 1; align-items: center;";
+        this.renderPropertySelector(fieldsContainer, condition, callbacks);
+        this.renderCustomPropertyInput(fieldsContainer, condition, app, callbacks);
+        this.renderOperatorSelector(fieldsContainer, condition, callbacks);
+        this.renderValueInput(fieldsContainer, condition, app, callbacks);
+        this.renderConditionalCheckboxes(fieldsContainer, condition, callbacks);
+        this.renderDeleteButton(condEl, conditions, condIndex, callbacks);
+      }
+      static renderPropertySelector(container, condition, callbacks) {
+        const properties = [
+          { value: "file.folder", label: "Folder" },
+          { value: "file.tags", label: "Tags" },
+          { value: "file.name", label: "File Name" },
+          { value: "file.basename", label: "File Basename" },
+          { value: "file.ext", label: "Extension" },
+          { value: "file.path", label: "Path" },
+          { value: "custom", label: "Custom property" }
+        ];
+        const propertySelect = container.createEl("select");
+        propertySelect.style.cssText = "padding: 4px 8px;";
+        properties.forEach((prop) => {
+          const option = propertySelect.createEl("option", {
+            text: prop.label,
+            value: prop.value
+          });
+          if (condition.property === prop.value || prop.value === "custom" && !properties.find((p) => p.value === condition.property)) {
+            option.selected = true;
+          }
+        });
+        propertySelect.onchange = async (e) => {
+          var _a;
+          if (e.target.value === "custom") {
+            condition.property = "category";
+          } else {
+            condition.property = e.target.value;
+          }
+          await callbacks.onSave();
+          (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
+        };
+      }
+      static renderCustomPropertyInput(container, condition, app, callbacks) {
+        const properties = [
+          { value: "file.folder", label: "Folder" },
+          { value: "file.tags", label: "Tags" },
+          { value: "file.name", label: "File Name" },
+          { value: "file.basename", label: "File Basename" },
+          { value: "file.ext", label: "Extension" },
+          { value: "file.path", label: "Path" },
+          { value: "custom", label: "Custom property" }
+        ];
+        const needsCustomInput = !properties.find((p) => p.value === condition.property);
+        if (needsCustomInput) {
+          const customInput = container.createEl("input", {
+            type: "text",
+            attr: { placeholder: "property name" },
+            value: condition.property
+          });
+          customInput.style.cssText = "padding: 4px 8px; width: 120px;";
+          customInput.onchange = async (e) => {
+            condition.property = e.target.value;
+            await callbacks.onSave();
+          };
+          new PropertySuggest(app, customInput);
+        }
+      }
+      static renderOperatorSelector(container, condition, callbacks) {
+        const operatorSelect = container.createEl("select");
+        operatorSelect.style.cssText = "padding: 4px 8px;";
+        const operators = getValidOperators(condition.property);
+        operators.forEach((op) => {
+          const option = operatorSelect.createEl("option", {
+            text: op.label,
+            value: op.value
+          });
+          if (condition.operator === op.value) {
+            option.selected = true;
+          }
+        });
+        operatorSelect.onchange = async (e) => {
+          var _a;
+          condition.operator = e.target.value;
+          await callbacks.onSave();
+          (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
+        };
+      }
+      static renderValueInput(container, condition, app, callbacks) {
+        if (["exists", "doesNotExist"].includes(condition.operator)) {
+          return;
+        }
+        if (condition.operator === "matchesDatePattern") {
+          const formatInput = container.createEl("input", {
+            type: "text",
+            attr: { placeholder: "YYYY-MM-DD" },
+            value: condition.value || "YYYY-MM-DD"
+          });
+          formatInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 150px;";
+          formatInput.onchange = async (e) => {
+            condition.value = e.target.value;
+            await callbacks.onSave();
+          };
+          return;
+        }
+        if (condition.property === "file.tags") {
+          const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
+          const tagContainer = container.createDiv();
+          TagPillRenderer.render({
+            tags,
+            onTagsChange: async (updatedTags) => {
+              condition.value = updatedTags.join(", ");
+              await callbacks.onSave();
+            },
+            container: tagContainer,
+            app
+          });
+        } else {
+          const valueInput = container.createEl("input", {
+            type: "text",
+            attr: { placeholder: "value" },
+            value: condition.value || ""
+          });
+          valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
+          valueInput.onchange = async (e) => {
+            condition.value = e.target.value;
+            await callbacks.onSave();
+          };
+          if (condition.property === "file.folder") {
+            new FolderSuggest(app, valueInput);
+          } else {
+            new ValueSuggest(app, valueInput, () => condition.property);
+          }
+        }
+      }
+      static renderConditionalCheckboxes(container, condition, callbacks) {
+        if (condition.property === "file.folder" && condition.operator === "is") {
+          const subfolderLabel = container.createEl("label");
+          subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+          const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
+          subfolderCheckbox.checked = condition.includeSubfolders || false;
+          subfolderCheckbox.onchange = async (e) => {
+            condition.includeSubfolders = e.target.checked;
+            await callbacks.onSave();
+          };
+          subfolderLabel.createEl("span", { text: "Include subfolders" });
+        }
+        if (condition.operator === "matchesDatePattern") {
+          const additionalTextLabel = container.createEl("label");
+          additionalTextLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+          const additionalTextCheckbox = additionalTextLabel.createEl("input", { type: "checkbox" });
+          additionalTextCheckbox.checked = condition.requireAdditionalText || false;
+          additionalTextCheckbox.onchange = async (e) => {
+            condition.requireAdditionalText = e.target.checked;
+            await callbacks.onSave();
+          };
+          additionalTextLabel.createEl("span", { text: "And contains additional text" });
+        }
+      }
+      static renderDeleteButton(container, conditions, condIndex, callbacks) {
+        const deleteBtn = container.createEl("button", { text: "\xD7" });
+        deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: none;";
+        deleteBtn.onclick = async () => {
+          var _a;
+          conditions.splice(condIndex, 1);
+          await callbacks.onSave();
+          (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
+        };
+      }
+    };
+  }
+});
+
 // src/helpers/MetadataRowRenderer.ts
 var MetadataRowRenderer;
 var init_MetadataRowRenderer = __esm({
@@ -325,6 +6255,3121 @@ var init_MetadataRowRenderer = __esm({
         deleteBtn.onclick = async () => {
           await onDelete();
         };
+      }
+    };
+  }
+});
+
+// src/helpers/ColorPickerRenderer.ts
+var import_obsidian4, ColorPickerRenderer;
+var init_ColorPickerRenderer = __esm({
+  "src/helpers/ColorPickerRenderer.ts"() {
+    "use strict";
+    import_obsidian4 = require("obsidian");
+    ColorPickerRenderer = class {
+      static render(config) {
+        const { container, currentColor, palettes, onColorChange } = config;
+        container.empty();
+        const colorPickerContainer = container.createDiv();
+        colorPickerContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
+        const colorInput = colorPickerContainer.createEl("input", { type: "color", value: currentColor });
+        colorInput.style.cssText = "width: 60px; height: 32px; cursor: pointer; border-radius: 4px;";
+        const hexDisplay = colorPickerContainer.createEl("code");
+        hexDisplay.textContent = currentColor.toUpperCase();
+        hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.9em;";
+        colorInput.oninput = () => {
+          hexDisplay.textContent = colorInput.value.toUpperCase();
+        };
+        colorInput.onchange = async (e) => {
+          const newColor = e.target.value;
+          hexDisplay.textContent = newColor.toUpperCase();
+          await onColorChange(newColor);
+        };
+        if (palettes && palettes.length > 0) {
+          const paletteBtn = colorPickerContainer.createEl("button");
+          paletteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;";
+          (0, import_obsidian4.setIcon)(paletteBtn, "palette");
+          paletteBtn.title = "Open Color Palettes";
+          let popover = null;
+          const closePopover = () => {
+            if (popover) {
+              popover.remove();
+              popover = null;
+            }
+          };
+          paletteBtn.onclick = (e) => {
+            e.preventDefault();
+            if (popover) {
+              closePopover();
+              return;
+            }
+            popover = document.body.createDiv();
+            popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;";
+            const closeBtn = popover.createEl("button");
+            closeBtn.textContent = "\xD7";
+            closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
+            closeBtn.title = "Close";
+            closeBtn.onmouseenter = () => {
+              closeBtn.style.background = "var(--background-modifier-hover)";
+            };
+            closeBtn.onmouseleave = () => {
+              closeBtn.style.background = "transparent";
+            };
+            closeBtn.onclick = (e2) => {
+              e2.preventDefault();
+              closePopover();
+            };
+            const btnRect = paletteBtn.getBoundingClientRect();
+            popover.style.top = btnRect.bottom + 6 + "px";
+            popover.style.left = btnRect.left + "px";
+            setTimeout(() => {
+              if (popover) {
+                const popoverRect = popover.getBoundingClientRect();
+                if (popoverRect.right > window.innerWidth) {
+                  popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+                }
+                if (popoverRect.bottom > window.innerHeight) {
+                  popover.style.top = btnRect.top - popoverRect.height - 6 + "px";
+                }
+              }
+            }, 0);
+            palettes.forEach((palette, idx) => {
+              const paletteSection = popover.createDiv();
+              paletteSection.style.cssText = idx > 0 ? "margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);" : "margin-top: 4px;";
+              const paletteName = paletteSection.createEl("div", { text: palette.name });
+              paletteName.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;";
+              const swatchesGrid = paletteSection.createDiv();
+              swatchesGrid.style.cssText = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;";
+              palette.colors.forEach((colorEntry) => {
+                const swatch = swatchesGrid.createEl("button");
+                const isSelected = colorInput.value.toLowerCase() === colorEntry.hex.toLowerCase();
+                swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
+                swatch.title = `${colorEntry.name}
+${colorEntry.hex}`;
+                swatch.onclick = async (e2) => {
+                  e2.preventDefault();
+                  colorInput.value = colorEntry.hex;
+                  hexDisplay.textContent = colorEntry.hex.toUpperCase();
+                  await onColorChange(colorEntry.hex);
+                  closePopover();
+                };
+                swatch.onmouseenter = () => {
+                  swatch.style.transform = "scale(1.08)";
+                  swatch.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+                };
+                swatch.onmouseleave = () => {
+                  swatch.style.transform = "scale(1)";
+                  swatch.style.boxShadow = "none";
+                };
+              });
+            });
+            const clickHandler = (e2) => {
+              if (popover && !popover.contains(e2.target) && !paletteBtn.contains(e2.target)) {
+                closePopover();
+                document.removeEventListener("click", clickHandler);
+              }
+            };
+            setTimeout(() => {
+              document.addEventListener("click", clickHandler);
+            }, 0);
+            const keyHandler = (e2) => {
+              if (e2.key === "Escape" && popover) {
+                closePopover();
+                document.removeEventListener("keydown", keyHandler);
+              }
+            };
+            document.addEventListener("keydown", keyHandler);
+          };
+        }
+      }
+    };
+  }
+});
+
+// src/SettingsTab.ts
+var SettingsTab_exports = {};
+__export(SettingsTab_exports, {
+  CalendarSettingTab: () => CalendarSettingTab,
+  CategoryEditModal: () => CategoryEditModal,
+  CustomPeriodEditModal: () => CustomPeriodEditModal,
+  RecurringRuleBuilderModal: () => RecurringRuleBuilderModal
+});
+var import_obsidian5, CalendarSettingTab, CategoryEditModal, CustomPeriodEditModal, RecurringRuleBuilderModal;
+var init_SettingsTab = __esm({
+  "src/SettingsTab.ts"() {
+    "use strict";
+    import_obsidian5 = require("obsidian");
+    init_banners();
+    init_FolderSuggest();
+    init_FileSuggest();
+    init_IconSuggest();
+    init_PropertySuggest();
+    init_ConditionRenderer();
+    init_MetadataRowRenderer();
+    init_ColorPickerRenderer();
+    init_CalendarView();
+    CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
+      constructor(app, plugin) {
+        super(app, plugin);
+        this.expandedCategories = /* @__PURE__ */ new Set();
+        this.isPalettesExpanded = false;
+        this.paletteEditModes = /* @__PURE__ */ new Map();
+        this.activeTab = "basic";
+        // Icon displayed in the settings sidebar
+        this.icon = "calendar-range";
+        this.plugin = plugin;
+      }
+      /**
+       * Create a checkbox with label that only toggles when the checkbox itself is clicked.
+       * This prevents accidental toggling when clicking the label text.
+       */
+      createCheckboxWithLabel(container, text, checked, onChange) {
+        const wrapper = container.createDiv();
+        wrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
+        const checkbox = wrapper.createEl("input", { type: "checkbox" });
+        checkbox.checked = checked;
+        checkbox.onchange = async (e) => {
+          await onChange(e.target.checked);
+        };
+        const label = wrapper.createEl("span", { text });
+        label.style.cssText = "font-weight: 500; cursor: default;";
+        return checkbox;
+      }
+      /**
+       * Get the template folder path based on settings.
+       * Returns the Obsidian templates folder or the custom folder.
+       */
+      getTemplateFolderPath() {
+        var _a, _b, _c, _d, _e, _f, _g;
+        const settings = this.plugin.settings.periodicNotes;
+        if (settings.templateFolderSource === "custom") {
+          return settings.templateCustomFolder || void 0;
+        }
+        const templatesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["templates"];
+        if ((templatesPlugin == null ? void 0 : templatesPlugin.enabled) && ((_d = (_c = templatesPlugin == null ? void 0 : templatesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder)) {
+          return templatesPlugin.instance.options.folder;
+        }
+        const templaterPlugin = (_f = (_e = this.app.plugins) == null ? void 0 : _e.plugins) == null ? void 0 : _f["templater-obsidian"];
+        if ((_g = templaterPlugin == null ? void 0 : templaterPlugin.settings) == null ? void 0 : _g.templates_folder) {
+          return templaterPlugin.settings.templates_folder;
+        }
+        return void 0;
+      }
+      /**
+       * IMPORTANT: This helper method is used in multiple places (Categories settings AND CategoryEditModal).
+       * When making changes to this method, always evaluate if the change should apply to both locations.
+       * Current usage locations:
+       * 1. Categories section - within each category's collapsible content (line ~1618)
+       * 2. CategoryEditModal conditions section (line ~2461)
+       */
+      renderConditionsInfoIcon(container) {
+        const infoIcon = container.createEl("span");
+        (0, import_obsidian5.setIcon)(infoIcon, "info");
+        infoIcon.style.cssText = "cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;";
+        infoIcon.title = "Click to see examples";
+        let popover = null;
+        const closePopover = () => {
+          if (popover) {
+            popover.remove();
+            popover = null;
+          }
+        };
+        infoIcon.onclick = (e) => {
+          e.preventDefault();
+          if (popover) {
+            closePopover();
+            return;
+          }
+          popover = document.body.createDiv();
+          popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px;";
+          const closeBtn = popover.createEl("button");
+          closeBtn.textContent = "\xD7";
+          closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
+          closeBtn.title = "Close";
+          closeBtn.onmouseenter = () => {
+            closeBtn.style.background = "var(--background-modifier-hover)";
+          };
+          closeBtn.onmouseleave = () => {
+            closeBtn.style.background = "transparent";
+          };
+          closeBtn.onclick = (e2) => {
+            e2.preventDefault();
+            closePopover();
+          };
+          popover.createEl("div", {
+            text: "Examples:",
+            attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--text-normal); padding-right: 20px;" }
+          });
+          popover.createEl("div", {
+            text: '\u2022 Property "category" is "school"',
+            attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
+          });
+          popover.createEl("div", {
+            text: '\u2022 File tags has tag "holidays"',
+            attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
+          });
+          popover.createEl("div", {
+            text: '\u2022 File name contains "meeting"',
+            attr: { style: "margin-left: 8px; color: var(--text-muted); font-size: 0.9em;" }
+          });
+          const iconRect = infoIcon.getBoundingClientRect();
+          popover.style.top = iconRect.bottom + 6 + "px";
+          popover.style.left = iconRect.left + "px";
+          setTimeout(() => {
+            if (popover) {
+              const popoverRect = popover.getBoundingClientRect();
+              if (popoverRect.right > window.innerWidth) {
+                popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+              }
+              if (popoverRect.bottom > window.innerHeight) {
+                popover.style.top = iconRect.top - popoverRect.height - 6 + "px";
+              }
+            }
+          }, 0);
+          const closeHandler = (e2) => {
+            if (popover && !popover.contains(e2.target) && !infoIcon.contains(e2.target)) {
+              closePopover();
+              document.removeEventListener("click", closeHandler);
+            }
+          };
+          setTimeout(() => {
+            document.addEventListener("click", closeHandler);
+          }, 0);
+          const escHandler = (e2) => {
+            if (e2.key === "Escape") {
+              closePopover();
+              document.removeEventListener("keydown", escHandler);
+            }
+          };
+          document.addEventListener("keydown", escHandler);
+        };
+      }
+      display() {
+        const { containerEl } = this;
+        const scrollTop = containerEl.scrollTop;
+        containerEl.empty();
+        containerEl.createEl("h2", { text: "Linear Calendar Settings" });
+        this.renderDevelopmentNotice(containerEl);
+        this.renderTabs(containerEl);
+        const contentEl = containerEl.createDiv();
+        contentEl.style.cssText = "margin-top: 20px;";
+        if (this.activeTab === "basic") {
+          this.renderCalendarAppearanceSection(contentEl);
+          this.renderDivider(contentEl);
+          this.renderDateExtractionSection(contentEl);
+          this.renderDivider(contentEl);
+          this.renderFiltersSection(contentEl);
+        } else if (this.activeTab === "categories") {
+          this.renderColorCategoriesSection(contentEl);
+        } else if (this.activeTab === "daily-notes") {
+          this.renderDailyNotesSection(contentEl);
+        } else if (this.activeTab === "periodic-notes") {
+          this.renderPeriodicNotesSection(contentEl);
+        } else if (this.activeTab === "quicknotes") {
+          this.renderQuickNoteCreationSettings(contentEl);
+        } else if (this.activeTab === "recurring-events") {
+          this.renderRecurringEventsSection(contentEl);
+        } else if (this.activeTab === "experimental") {
+          this.renderExperimentalSection(contentEl);
+        }
+        setTimeout(() => {
+          containerEl.scrollTop = scrollTop;
+        }, 0);
+      }
+      renderTabs(containerEl) {
+        const tabsContainer = containerEl.createDiv();
+        tabsContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid var(--background-modifier-border); margin-top: 20px; padding-bottom: 8px;";
+        const tabs = [
+          { id: "basic", label: "Basic Settings" },
+          { id: "categories", label: "Categories (Colors & Icons)" },
+          { id: "daily-notes", label: "Daily Notes" },
+          { id: "periodic-notes", label: "Periodic Notes" },
+          { id: "quicknotes", label: "Quick Notes" },
+          { id: "recurring-events", label: "Recurring Events" },
+          { id: "experimental", label: "Experimental" }
+        ];
+        tabs.forEach((tab) => {
+          const tabBtn = tabsContainer.createEl("button");
+          const isActive = this.activeTab === tab.id;
+          tabBtn.textContent = tab.label;
+          tabBtn.style.cssText = `
+                padding: 10px 16px;
+                background: ${isActive ? "var(--background-primary)" : "var(--background-secondary)"};
+                border: none;
+                border-bottom: 2px solid ${isActive ? "var(--interactive-accent)" : "transparent"};
+                cursor: pointer;
+                font-size: 0.95em;
+                font-weight: ${isActive ? "600" : "400"};
+                color: ${isActive ? "var(--text-normal)" : "var(--text-muted)"};
+                transition: all 0.2s;
+                margin-bottom: -2px;
+            `;
+          tabBtn.addEventListener("click", () => {
+            this.activeTab = tab.id;
+            this.display();
+          });
+          tabBtn.addEventListener("mouseenter", () => {
+            if (!isActive) {
+              tabBtn.style.background = "var(--background-modifier-hover)";
+              tabBtn.style.color = "var(--text-normal)";
+            }
+          });
+          tabBtn.addEventListener("mouseleave", () => {
+            if (!isActive) {
+              tabBtn.style.background = "var(--background-secondary)";
+              tabBtn.style.color = "var(--text-muted)";
+            }
+          });
+        });
+      }
+      renderDevelopmentNotice(containerEl) {
+        const noticeEl = containerEl.createDiv();
+        noticeEl.style.cssText = "background: var(--background-secondary); border-left: 4px solid var(--interactive-accent); padding: 15px 20px; margin: 15px 0 12px 0; border-radius: 3px;";
+        const titleEl = noticeEl.createEl("div");
+        titleEl.style.cssText = "font-weight: 600; margin-bottom: 8px; color: var(--text-normal);";
+        titleEl.textContent = "\u26A0\uFE0F Early Development";
+        const textEl = noticeEl.createEl("div");
+        textEl.style.cssText = "font-size: 0.95em; line-height: 1.5; color: var(--text-muted);";
+        textEl.innerHTML = `
+            This plugin is still in development and may undergo significant changes. The core functionality\u2014how notes are recognized and dates are extracted\u2014will remain stable. If you use properties or dates in filenames, these will continue to work.<br><br>
+            New features are actively being developed. If you encounter any issues or have feedback, please reach out via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or via <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
+        `;
+        const feedbackBox = containerEl.createDiv();
+        feedbackBox.style.cssText = "background: var(--background-primary); border: 2px solid var(--interactive-accent); padding: 15px 20px; margin: 0 0 20px 0; border-radius: 6px;";
+        const feedbackTitle = feedbackBox.createEl("div");
+        feedbackTitle.style.cssText = "font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;";
+        feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.4.0+";
+        const feedbackList = feedbackBox.createEl("ul");
+        feedbackList.style.cssText = "margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
+        feedbackList.innerHTML = `
+            <li>Do the periodic notes work and behave as expected?</li>
+            <li>Is it clear how to edit the calendar's look?</li>
+            <li>Did switching from an older version to the new one go smoothly?</li>
+            <li>Is there anything weird, annoying, unexpected happening?</li>
+            <li>Is anything hard to understand or unclear how to configure?</li>
+        `;
+        const olderVersionsPara = feedbackBox.createEl("p");
+        olderVersionsPara.style.cssText = "margin: 12px 0 4px 0; color: var(--text-normal); font-size: 0.95em; font-weight: 500;";
+        olderVersionsPara.textContent = "Older versions:";
+        const olderVersionsList = feedbackBox.createEl("ul");
+        olderVersionsList.style.cssText = "margin: 4px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
+        olderVersionsList.innerHTML = `
+            <li>Does the QuickAdd feature work as you would like?</li>
+            <li>Are the color categories working as you would like?</li>
+        `;
+        const feedbackFooter = feedbackBox.createEl("div");
+        feedbackFooter.style.cssText = "font-size: 0.95em; color: var(--text-muted); margin-top: 8px;";
+        const footerText = feedbackFooter.createEl("div");
+        footerText.style.cssText = "font-style: italic; margin-bottom: 6px;";
+        footerText.textContent = "Help me improve the plugin! It means a lot to me \u2728\u{1F988}";
+        const footerLinks = feedbackFooter.createEl("div");
+        footerLinks.style.cssText = "font-size: 0.9em;";
+        footerLinks.innerHTML = `
+            Share feedback via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
+        `;
+      }
+      renderDivider(containerEl) {
+        const divider = containerEl.createEl("hr");
+        divider.style.cssText = "margin: 30px 0; border: none; border-top: 1px solid var(--background-modifier-border);";
+      }
+      renderCalendarAppearanceSection(containerEl) {
+        containerEl.createEl("h3", { text: "Calendar Appearance" });
+        new import_obsidian5.Setting(containerEl).setName("Calendar width").setDesc("Choose whether the calendar fits the screen width or becomes scrollable with wider cells").addDropdown((dropdown) => {
+          dropdown.addOption("fit-screen", "Fit to screen width").addOption("scrollable", "Scrollable (wider cells)").setValue(this.plugin.settings.calendarWidth).onChange(async (value) => {
+            this.plugin.settings.calendarWidth = value;
+            await this.plugin.saveSettings();
+            this.display();
+          });
+        });
+        if (this.plugin.settings.calendarWidth === "scrollable") {
+          new import_obsidian5.Setting(containerEl).setName("Minimum cell width").setDesc("Minimum width for each day cell in pixels (default: 30)").addText((text) => text.setPlaceholder("30").setValue(String(this.plugin.settings.cellMinWidth)).onChange(async (value) => {
+            const numValue = parseInt(value);
+            if (!isNaN(numValue) && numValue >= 20 && numValue <= 200) {
+              this.plugin.settings.cellMinWidth = numValue;
+              await this.plugin.saveSettings();
+            }
+          }));
+        }
+        new import_obsidian5.Setting(containerEl).setName("Column alignment").setDesc("Choose how to align the calendar columns: by weekday or by date (all 1st days align, all 2nd days align, etc.)").addDropdown((dropdown) => {
+          dropdown.addOption("weekday", "Align by weekday").addOption("date", "Align by date").setValue(this.plugin.settings.columnAlignment).onChange(async (value) => {
+            this.plugin.settings.columnAlignment = value;
+            await this.plugin.saveSettings();
+            this.display();
+          });
+        });
+        if (this.plugin.settings.columnAlignment === "weekday") {
+          new import_obsidian5.Setting(containerEl).setName("Week starts on").setDesc("Choose which day the week starts on").addDropdown((dropdown) => {
+            dropdown.addOption("0", "Sunday").addOption("1", "Monday").addOption("2", "Tuesday").addOption("3", "Wednesday").addOption("4", "Thursday").addOption("5", "Friday").addOption("6", "Saturday").setValue(String(this.plugin.settings.weekStartDay)).onChange(async (value) => {
+              this.plugin.settings.weekStartDay = parseInt(value);
+              await this.plugin.saveSettings();
+            });
+          });
+        }
+        const weekdayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const highlightedSetting = new import_obsidian5.Setting(containerEl).setName("Highlighted weekdays").setDesc("Choose which weekdays to visually highlight (typically weekends)");
+        const checkboxContainer = highlightedSetting.controlEl.createDiv();
+        checkboxContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 8px;";
+        weekdayNames.forEach((name, index) => {
+          const label = checkboxContainer.createEl("label");
+          label.style.cssText = "display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.9em;";
+          const checkbox = label.createEl("input", { type: "checkbox" });
+          checkbox.checked = this.plugin.settings.highlightedWeekdays.includes(index);
+          checkbox.onchange = async () => {
+            const current = this.plugin.settings.highlightedWeekdays;
+            if (checkbox.checked) {
+              if (!current.includes(index)) {
+                current.push(index);
+                current.sort((a, b) => a - b);
+              }
+            } else {
+              const idx = current.indexOf(index);
+              if (idx > -1) current.splice(idx, 1);
+            }
+            await this.plugin.saveSettings();
+          };
+          label.createEl("span", { text: name.slice(0, 3) });
+        });
+        new import_obsidian5.Setting(containerEl).setName("Show cell borders").setDesc("Display thin borders around day cells and week span cells").addToggle((toggle) => toggle.setValue(this.plugin.settings.showCellBorders).onChange(async (value) => {
+          this.plugin.settings.showCellBorders = value;
+          await this.plugin.saveSettings();
+        }));
+      }
+      renderDateExtractionSection(containerEl) {
+        containerEl.createEl("h3", { text: "Date Extraction" });
+        const desc = containerEl.createEl("p", {
+          cls: "setting-item-description",
+          text: "Configure how dates are extracted from your notes to display them in the calendar."
+        });
+        desc.style.marginTop = "-10px";
+        desc.style.marginBottom = "15px";
+        const examplesBox = containerEl.createDiv();
+        examplesBox.style.cssText = "background: var(--background-primary); border-left: 3px solid var(--interactive-accent); padding: 12px 15px; margin-bottom: 20px; border-radius: 3px;";
+        examplesBox.createEl("div", {
+          text: "\u{1F4A1} Example Configurations",
+          attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--interactive-accent);" }
+        });
+        const examplesList = examplesBox.createEl("ul");
+        examplesList.style.cssText = "margin: 0; padding-left: 20px; font-size: 0.9em; line-height: 1.6;";
+        const examples = [
+          "Use <code>date</code> and <code>date_end</code> properties",
+          "Use filename like <code>2024-01-15 \u2013 2024-01-20 Event.md</code> for date ranges",
+          "Mix sources: filename for start date + <code>date_end</code> property for end date",
+          "Add multiple property names to check (e.g., <code>date</code>, <code>lincal_date</code>, <code>scheduled</code>)"
+        ];
+        examples.forEach((example) => {
+          const li = examplesList.createEl("li");
+          li.innerHTML = example;
+          li.style.marginBottom = "4px";
+        });
+        const config = this.plugin.settings.dateExtraction;
+        const startSection = containerEl.createDiv();
+        startSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 20px;";
+        startSection.createEl("h4", { text: "Start Date", attr: { style: "margin-top: 0;" } });
+        const startPropsContainer = startSection.createDiv();
+        startPropsContainer.style.cssText = "margin-bottom: 15px;";
+        const startPropsListContainer = document.createElement("div");
+        startPropsListContainer.style.cssText = "margin-left: 28px;";
+        if (config.startFromProperties.length === 0) {
+          startPropsListContainer.style.display = "none";
+        }
+        this.createCheckboxWithLabel(
+          startPropsContainer,
+          "From properties",
+          config.startFromProperties.length > 0,
+          async (checked) => {
+            if (checked) {
+              if (config.startFromProperties.length === 0) {
+                config.startFromProperties.push("date");
+              }
+              startPropsListContainer.style.display = "block";
+            } else {
+              config.startFromProperties = [];
+              startPropsListContainer.style.display = "none";
+            }
+            await this.plugin.saveSettings();
+            renderStartPropsList();
+          }
+        );
+        startPropsContainer.appendChild(startPropsListContainer);
+        const renderStartPropsList = () => {
+          startPropsListContainer.empty();
+          if (config.startFromProperties.length > 0) {
+            startPropsListContainer.createEl("div", {
+              text: "Properties are checked in order from top to bottom. Drag to reorder.",
+              attr: { style: "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-style: italic;" }
+            });
+          }
+          let draggedIndex = null;
+          config.startFromProperties.forEach((prop, index) => {
+            const propRow = startPropsListContainer.createDiv();
+            propRow.style.cssText = "display: flex; gap: 5px; margin-bottom: 5px; align-items: center; cursor: grab;";
+            propRow.draggable = true;
+            propRow.setAttribute("data-index", index.toString());
+            const dragHandle = propRow.createEl("span", { text: "\u22EE\u22EE" });
+            dragHandle.style.cssText = "cursor: grab; color: var(--text-muted); user-select: none; padding: 0 4px;";
+            const propInput = propRow.createEl("input", {
+              type: "text",
+              value: prop,
+              attr: { placeholder: "Property name" }
+            });
+            propInput.style.cssText = "flex: 1; padding: 4px 8px;";
+            propInput.onchange = async (e) => {
+              config.startFromProperties[index] = e.target.value;
+              await this.plugin.saveSettings();
+            };
+            new PropertySuggest(this.app, propInput);
+            const removeBtn = propRow.createEl("button", { text: "\xD7" });
+            removeBtn.style.cssText = "padding: 2px 8px; cursor: pointer;";
+            removeBtn.onclick = async () => {
+              config.startFromProperties.splice(index, 1);
+              await this.plugin.saveSettings();
+              renderStartPropsList();
+            };
+            propRow.addEventListener("dragstart", () => {
+              draggedIndex = index;
+              propRow.style.opacity = "0.4";
+              propRow.style.cursor = "grabbing";
+            });
+            propRow.addEventListener("dragend", () => {
+              propRow.style.opacity = "1";
+              propRow.style.cursor = "grab";
+            });
+            propRow.addEventListener("dragover", (e) => {
+              e.preventDefault();
+              if (draggedIndex !== null && draggedIndex !== index) {
+                propRow.style.borderTop = "2px solid var(--interactive-accent)";
+              }
+            });
+            propRow.addEventListener("dragleave", () => {
+              propRow.style.borderTop = "";
+            });
+            propRow.addEventListener("drop", async (e) => {
+              e.preventDefault();
+              propRow.style.borderTop = "";
+              if (draggedIndex !== null && draggedIndex !== index) {
+                const draggedItem = config.startFromProperties[draggedIndex];
+                config.startFromProperties.splice(draggedIndex, 1);
+                const newIndex = draggedIndex < index ? index - 1 : index;
+                config.startFromProperties.splice(newIndex, 0, draggedItem);
+                await this.plugin.saveSettings();
+                renderStartPropsList();
+              }
+              draggedIndex = null;
+            });
+          });
+          const addBtn = startPropsListContainer.createEl("button", { text: "+ Add property" });
+          addBtn.style.cssText = "padding: 4px 8px; margin-top: 5px;";
+          addBtn.onclick = async () => {
+            config.startFromProperties.push("");
+            await this.plugin.saveSettings();
+            renderStartPropsList();
+          };
+        };
+        renderStartPropsList();
+        this.createCheckboxWithLabel(
+          startSection,
+          "From filename (first YYYY-MM-DD pattern)",
+          config.startFromFilename,
+          async (checked) => {
+            config.startFromFilename = checked;
+            await this.plugin.saveSettings();
+            updatePriorityVisibility();
+          }
+        );
+        const startPriorityContainer = startSection.createDiv();
+        startPriorityContainer.style.cssText = "margin-top: 10px; padding: 10px; background: var(--background-primary); border-radius: 3px;";
+        const updatePriorityVisibility = () => {
+          const bothEnabled = config.startFromProperties.length > 0 && config.startFromFilename;
+          startPriorityContainer.style.display = bothEnabled ? "block" : "none";
+        };
+        startPriorityContainer.createEl("div", {
+          text: "When both are available, prioritize:",
+          attr: { style: "margin-bottom: 8px; font-size: 0.9em; color: var(--text-muted);" }
+        });
+        const priorityOptions = startPriorityContainer.createDiv();
+        priorityOptions.style.cssText = "display: flex; gap: 15px;";
+        const propRadioLabel = priorityOptions.createEl("label");
+        propRadioLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+        const propRadio = propRadioLabel.createEl("input", { type: "radio", attr: { name: "start-priority" } });
+        propRadio.checked = config.startPriority === "property";
+        propRadioLabel.createEl("span", { text: "Property" });
+        propRadio.onchange = async () => {
+          config.startPriority = "property";
+          await this.plugin.saveSettings();
+        };
+        const filenameRadioLabel = priorityOptions.createEl("label");
+        filenameRadioLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+        const filenameRadio = filenameRadioLabel.createEl("input", { type: "radio", attr: { name: "start-priority" } });
+        filenameRadio.checked = config.startPriority === "filename";
+        filenameRadioLabel.createEl("span", { text: "Filename" });
+        filenameRadio.onchange = async () => {
+          config.startPriority = "filename";
+          await this.plugin.saveSettings();
+        };
+        updatePriorityVisibility();
+        const endSection = containerEl.createDiv();
+        endSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
+        endSection.createEl("h4", { text: "End Date (for multi-day events)", attr: { style: "margin-top: 0;" } });
+        const endPropsContainer = endSection.createDiv();
+        endPropsContainer.style.cssText = "margin-bottom: 15px;";
+        const endPropsListContainer = document.createElement("div");
+        endPropsListContainer.style.cssText = "margin-left: 28px;";
+        if (config.endFromProperties.length === 0) {
+          endPropsListContainer.style.display = "none";
+        }
+        const renderEndPropsList = () => {
+          endPropsListContainer.empty();
+          if (config.endFromProperties.length > 0) {
+            endPropsListContainer.createEl("div", {
+              text: "Properties are checked in order from top to bottom. Drag to reorder.",
+              attr: { style: "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-style: italic;" }
+            });
+          }
+          let draggedIndex = null;
+          config.endFromProperties.forEach((prop, index) => {
+            const propRow = endPropsListContainer.createDiv();
+            propRow.style.cssText = "display: flex; gap: 5px; margin-bottom: 5px; align-items: center; cursor: grab;";
+            propRow.draggable = true;
+            propRow.setAttribute("data-index", index.toString());
+            const dragHandle = propRow.createEl("span", { text: "\u22EE\u22EE" });
+            dragHandle.style.cssText = "cursor: grab; color: var(--text-muted); user-select: none; padding: 0 4px;";
+            const propInput = propRow.createEl("input", {
+              type: "text",
+              value: prop,
+              attr: { placeholder: "Property name" }
+            });
+            propInput.style.cssText = "flex: 1; padding: 4px 8px;";
+            propInput.onchange = async (e) => {
+              config.endFromProperties[index] = e.target.value;
+              await this.plugin.saveSettings();
+            };
+            new PropertySuggest(this.app, propInput);
+            const removeBtn = propRow.createEl("button", { text: "\xD7" });
+            removeBtn.style.cssText = "padding: 2px 8px; cursor: pointer;";
+            removeBtn.onclick = async () => {
+              config.endFromProperties.splice(index, 1);
+              await this.plugin.saveSettings();
+              renderEndPropsList();
+            };
+            propRow.addEventListener("dragstart", () => {
+              draggedIndex = index;
+              propRow.style.opacity = "0.4";
+              propRow.style.cursor = "grabbing";
+            });
+            propRow.addEventListener("dragend", () => {
+              propRow.style.opacity = "1";
+              propRow.style.cursor = "grab";
+            });
+            propRow.addEventListener("dragover", (e) => {
+              e.preventDefault();
+              if (draggedIndex !== null && draggedIndex !== index) {
+                propRow.style.borderTop = "2px solid var(--interactive-accent)";
+              }
+            });
+            propRow.addEventListener("dragleave", () => {
+              propRow.style.borderTop = "";
+            });
+            propRow.addEventListener("drop", async (e) => {
+              e.preventDefault();
+              propRow.style.borderTop = "";
+              if (draggedIndex !== null && draggedIndex !== index) {
+                const draggedItem = config.endFromProperties[draggedIndex];
+                config.endFromProperties.splice(draggedIndex, 1);
+                const newIndex = draggedIndex < index ? index - 1 : index;
+                config.endFromProperties.splice(newIndex, 0, draggedItem);
+                await this.plugin.saveSettings();
+                renderEndPropsList();
+              }
+              draggedIndex = null;
+            });
+          });
+          const addBtn = endPropsListContainer.createEl("button", { text: "+ Add property" });
+          addBtn.style.cssText = "padding: 4px 8px; margin-top: 5px;";
+          addBtn.onclick = async () => {
+            config.endFromProperties.push("");
+            await this.plugin.saveSettings();
+            renderEndPropsList();
+          };
+        };
+        this.createCheckboxWithLabel(
+          endPropsContainer,
+          "From properties",
+          config.endFromProperties.length > 0,
+          async (checked) => {
+            if (checked) {
+              if (config.endFromProperties.length === 0) {
+                config.endFromProperties.push("date_end");
+              }
+              endPropsListContainer.style.display = "block";
+            } else {
+              config.endFromProperties = [];
+              endPropsListContainer.style.display = "none";
+            }
+            await this.plugin.saveSettings();
+            renderEndPropsList();
+            updateEndPriorityVisibility();
+          }
+        );
+        endPropsContainer.appendChild(endPropsListContainer);
+        renderEndPropsList();
+        this.createCheckboxWithLabel(
+          endSection,
+          "From filename (second YYYY-MM-DD pattern)",
+          config.endFromFilename,
+          async (checked) => {
+            config.endFromFilename = checked;
+            await this.plugin.saveSettings();
+            updateEndPriorityVisibility();
+          }
+        );
+        const endPriorityContainer = endSection.createDiv();
+        endPriorityContainer.style.cssText = "margin-top: 10px; padding: 10px; background: var(--background-primary); border-radius: 3px;";
+        const updateEndPriorityVisibility = () => {
+          const bothEnabled = config.endFromProperties.length > 0 && config.endFromFilename;
+          endPriorityContainer.style.display = bothEnabled ? "block" : "none";
+        };
+        endPriorityContainer.createEl("div", {
+          text: "When both are available, prioritize:",
+          attr: { style: "margin-bottom: 8px; font-size: 0.9em; color: var(--text-muted);" }
+        });
+        const endPriorityOptions = endPriorityContainer.createDiv();
+        endPriorityOptions.style.cssText = "display: flex; gap: 15px;";
+        const endPropRadioLabel = endPriorityOptions.createEl("label");
+        endPropRadioLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+        const endPropRadio = endPropRadioLabel.createEl("input", { type: "radio", attr: { name: "end-priority" } });
+        endPropRadio.checked = config.endPriority === "property";
+        endPropRadioLabel.createEl("span", { text: "Property" });
+        endPropRadio.onchange = async () => {
+          config.endPriority = "property";
+          await this.plugin.saveSettings();
+        };
+        const endFilenameRadioLabel = endPriorityOptions.createEl("label");
+        endFilenameRadioLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
+        const endFilenameRadio = endFilenameRadioLabel.createEl("input", { type: "radio", attr: { name: "end-priority" } });
+        endFilenameRadio.checked = config.endPriority === "filename";
+        endFilenameRadioLabel.createEl("span", { text: "Filename" });
+        endFilenameRadio.onchange = async () => {
+          config.endPriority = "filename";
+          await this.plugin.saveSettings();
+        };
+        updateEndPriorityVisibility();
+        const recurringHint = containerEl.createDiv();
+        recurringHint.style.cssText = "margin-top: 20px; padding: 10px 14px; background: var(--background-secondary); border-left: 3px solid var(--interactive-accent); border-radius: 3px;";
+        recurringHint.createEl("span", {
+          text: "For recurring dates like birthdays and anniversaries, set up recurring date properties in the ",
+          attr: { style: "font-size: 0.88em; color: var(--text-muted);" }
+        });
+        const recurringHintLink = recurringHint.createEl("span", {
+          text: "Recurring Events tab",
+          attr: { style: "font-size: 0.88em; color: var(--interactive-accent); cursor: pointer; text-decoration: underline;" }
+        });
+        recurringHintLink.addEventListener("click", () => {
+          this.activeTab = "recurring-events";
+          this.display();
+        });
+        recurringHint.createEl("span", {
+          text: ".",
+          attr: { style: "font-size: 0.88em; color: var(--text-muted);" }
+        });
+      }
+      renderFiltersSection(containerEl) {
+        containerEl.createEl("h3", { text: "Filters (Optional)" });
+        const desc = containerEl.createEl("p", {
+          cls: "setting-item-description",
+          text: "By default, all notes with valid dates are shown. Add filters to include or exclude specific notes."
+        });
+        desc.style.marginTop = "-10px";
+        desc.style.marginBottom = "15px";
+        const filterModeContainer = containerEl.createDiv();
+        filterModeContainer.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
+        filterModeContainer.createEl("div", {
+          text: "Filter mode:",
+          attr: { style: "margin-bottom: 10px; font-weight: 500;" }
+        });
+        const modeOptions = filterModeContainer.createDiv();
+        modeOptions.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
+        const createModeOption = (value, label, description) => {
+          const optionLabel = modeOptions.createEl("label");
+          optionLabel.style.cssText = "display: flex; align-items: flex-start; gap: 8px; cursor: pointer;";
+          const radio = optionLabel.createEl("input", {
+            type: "radio",
+            attr: { name: "filter-mode" }
+          });
+          radio.checked = this.plugin.settings.filterMode === value;
+          radio.style.cssText = "margin-top: 3px;";
+          const textContainer = optionLabel.createDiv();
+          textContainer.createEl("div", { text: label, attr: { style: "font-weight: 500;" } });
+          textContainer.createEl("div", {
+            text: description,
+            attr: { style: "font-size: 0.9em; color: var(--text-muted);" }
+          });
+          radio.onchange = async () => {
+            this.plugin.settings.filterMode = value;
+            await this.plugin.saveSettings();
+            this.display();
+          };
+        };
+        createModeOption("none", "Show all notes", "Display every note that has a valid date");
+        createModeOption("include", "Only include notes that match", "Only show notes that meet all the conditions below");
+        createModeOption("exclude", "Exclude notes that match", "Hide notes that meet all the conditions below");
+        if (this.plugin.settings.filterMode !== "none") {
+          const conditionsContainer = containerEl.createDiv();
+          conditionsContainer.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
+          conditionsContainer.createEl("h4", {
+            text: "Conditions",
+            attr: { style: "margin-top: 0; margin-bottom: 10px;" }
+          });
+          if (this.plugin.settings.filterConditions.length === 0) {
+            conditionsContainer.createEl("p", {
+              text: 'No conditions added yet. Click "+ Add condition" to get started.',
+              attr: { style: "color: var(--text-muted); font-style: italic;" }
+            });
+          } else {
+            this.plugin.settings.filterConditions.forEach((condition, index) => {
+              this.renderCondition(conditionsContainer, condition, index);
+            });
+          }
+          const addCondBtn = conditionsContainer.createEl("button", { text: "+ Add condition" });
+          addCondBtn.style.cssText = "padding: 6px 12px; margin-top: 10px;";
+          addCondBtn.onclick = async () => {
+            this.plugin.settings.filterConditions.push({
+              property: "file.folder",
+              operator: "is",
+              value: ""
+            });
+            await this.plugin.saveSettings();
+            this.display();
+          };
+        }
+      }
+      renderCondition(container, condition, condIndex) {
+        ConditionRenderer.render(container, condition, condIndex, this.plugin.settings.filterConditions, this.app, {
+          onSave: async () => {
+            await this.plugin.saveSettings();
+          },
+          onRefresh: () => {
+            this.display();
+          }
+        });
+      }
+      renderDailyNotesSection(containerEl) {
+        containerEl.createEl("h3", { text: "Daily Notes" });
+        const desc = containerEl.createEl("p", {
+          cls: "setting-item-description",
+          text: "Daily notes are always accessible via the day numbers in the calendar. You can click any day number to open or create a daily note."
+        });
+        desc.style.marginTop = "-10px";
+        desc.style.marginBottom = "15px";
+        const formatSetting = new import_obsidian5.Setting(containerEl).setName("Daily note format").addText((text) => text.setPlaceholder("YYYY-MM-DD").setValue(this.plugin.settings.dailyNoteFormat).onChange(async (value) => {
+          this.plugin.settings.dailyNoteFormat = value;
+          await this.plugin.saveSettings();
+          this.updateFormatPreview(previewEl, value || "YYYY-MM-DD");
+        }));
+        const formatDescEl = formatSetting.descEl;
+        formatDescEl.innerHTML = `Filename format for daily notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+        const previewEl = formatDescEl.createDiv();
+        previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
+        this.updateFormatPreview(previewEl, this.plugin.settings.dailyNoteFormat);
+        new import_obsidian5.Setting(containerEl).setName("Daily notes folder mode").setDesc("Choose where to look for and create daily notes").addDropdown((dropdown) => {
+          dropdown.addOption("obsidian", `Use native Daily Notes plugin's "New file location"`).addOption("custom", "Use custom folder").setValue(this.plugin.settings.dailyNoteFolderMode).onChange(async (value) => {
+            this.plugin.settings.dailyNoteFolderMode = value;
+            await this.plugin.saveSettings();
+            this.display();
+          });
+        });
+        if (this.plugin.settings.dailyNoteFolderMode === "custom") {
+          new import_obsidian5.Setting(containerEl).setName("Custom daily notes folder").setDesc("Folder path for daily notes. Searches subfolders too.").addText((text) => {
+            text.setPlaceholder("Daily Notes").setValue(this.plugin.settings.dailyNoteCustomFolder).onChange(async (value) => {
+              const cleaned = value.replace(/^\/+|\/+$/g, "");
+              this.plugin.settings.dailyNoteCustomFolder = cleaned;
+              await this.plugin.saveSettings();
+            });
+            new FolderSuggest(this.app, text.inputEl);
+          });
+        }
+        const displaySection = containerEl.createDiv();
+        displaySection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-top: 15px;";
+        displaySection.createEl("h4", { text: "Display Options", attr: { style: "margin-top: 0;" } });
+        new import_obsidian5.Setting(displaySection).setName("Show daily notes in calendar cells").setDesc("Display daily notes as separate note cells in addition to the day number links").addToggle((toggle) => toggle.setValue(this.plugin.settings.showDailyNotesInCells).onChange(async (value) => {
+          this.plugin.settings.showDailyNotesInCells = value;
+          await this.plugin.saveSettings();
+        }));
+        const dateTextSection = containerEl.createDiv();
+        dateTextSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-top: 15px;";
+        dateTextSection.createEl("h4", { text: "Notes with Date and Text in Title", attr: { style: "margin-top: 0;" } });
+        new import_obsidian5.Setting(dateTextSection).setName("Show notes with date and text").setDesc('Display notes that have both a date and additional text in their filename (e.g., "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.showNotesWithDateAndText).onChange(async (value) => {
+          this.plugin.settings.showNotesWithDateAndText = value;
+          await this.plugin.saveSettings();
+        }));
+        const hideSecondDateSetting = new import_obsidian5.Setting(dateTextSection).setName("Hide second date portion (for multi-day notes)").setDesc('Also hide the second date in multi-day note titles (e.g., show "Trip" instead of "to 2024-01-17 Trip"). Note: enabling this will also hide whatever appears between the two dates (e.g., "to" or "\u2013").').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideSecondDateInTitle).onChange(async (value) => {
+          this.plugin.settings.hideSecondDateInTitle = value;
+          await this.plugin.saveSettings();
+        }));
+        hideSecondDateSetting.settingEl.style.cssText = `
+            margin-left: 24px;
+            border-left: 2px solid var(--background-modifier-border);
+            padding-left: 12px;
+            display: ${this.plugin.settings.hideDateInTitle ? "flex" : "none"};
+        `;
+        new import_obsidian5.Setting(dateTextSection).setName("Hide date portion in titles").setDesc('When displaying notes in the calendar, hide the date portion of the title and only show the text (e.g., show "Meeting Notes" instead of "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideDateInTitle).onChange(async (value) => {
+          this.plugin.settings.hideDateInTitle = value;
+          hideSecondDateSetting.settingEl.style.display = value ? "flex" : "none";
+          await this.plugin.saveSettings();
+        }));
+        dateTextSection.insertBefore(hideSecondDateSetting.settingEl, null);
+      }
+      renderPeriodicNotesSection(containerEl) {
+        const settings = this.plugin.settings.periodicNotes;
+        containerEl.createEl("h3", { text: "Periodic Notes" });
+        const desc = containerEl.createEl("p", {
+          cls: "setting-item-description",
+          text: "Configure weekly, monthly, quarterly, yearly, and custom period notes. Compatible with the Periodic Notes plugin."
+        });
+        desc.style.marginTop = "-10px";
+        desc.style.marginBottom = "15px";
+        const generalSection = containerEl.createDiv();
+        generalSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
+        generalSection.createEl("h4", { text: "General", attr: { style: "margin-top: 0;" } });
+        const periodicNotesSetting = new import_obsidian5.Setting(generalSection).setName("Use Periodic Notes plugin settings (enable only if you know what you are doing)").addToggle((toggle) => toggle.setValue(settings.usePeriodicNotesPlugin).onChange(async (value) => {
+          settings.usePeriodicNotesPlugin = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }));
+        periodicNotesSetting.descEl.innerHTML = `If the <a href="https://github.com/liamcain/obsidian-periodic-notes" style="color: var(--text-accent);">Periodic Notes plugin</a> is installed and a note type is enabled there, prioritize its settings over the ones below.`;
+        new import_obsidian5.Setting(generalSection).setName("Template folder source").setDesc("Where to look for template files").addDropdown((dropdown) => {
+          dropdown.addOption("obsidian", "Use Obsidian's template folder").addOption("custom", "Custom folder").setValue(settings.templateFolderSource).onChange(async (value) => {
+            settings.templateFolderSource = value;
+            await this.plugin.saveSettings();
+            this.display();
+          });
+        });
+        if (settings.templateFolderSource === "custom") {
+          new import_obsidian5.Setting(generalSection).setName("Custom template folder").setDesc("Folder to search for template files").addText((text) => {
+            text.setPlaceholder("templates").setValue(settings.templateCustomFolder).onChange(async (value) => {
+              const cleaned = value.replace(/^\/+|\/+$/g, "");
+              settings.templateCustomFolder = cleaned;
+              await this.plugin.saveSettings();
+            });
+            new FolderSuggest(this.app, text.inputEl);
+          });
+        }
+        const weekStartNote = generalSection.createEl("p", {
+          cls: "setting-item-description"
+        });
+        weekStartNote.innerHTML = `Week start day is configured in <strong>Basic Settings</strong> \u2192 <strong>Week starts on</strong>.`;
+        weekStartNote.style.cssText = "margin-top: 10px; color: var(--text-muted); font-size: 0.9em;";
+        this.renderPeriodicNoteTypeSection(containerEl, "weekly", "Weekly Notes", settings.weekly, "gggg-[W]ww");
+        this.renderPeriodicNoteTypeSection(containerEl, "monthly", "Monthly Notes", settings.monthly, "YYYY-MM");
+        this.renderPeriodicNoteTypeSection(containerEl, "quarterly", "Quarterly Notes", settings.quarterly, "YYYY-[Q]Q");
+        this.renderPeriodicNoteTypeSection(containerEl, "yearly", "Yearly Notes", settings.yearly, "YYYY");
+        this.renderCustomPeriodsSection(containerEl);
+      }
+      renderPeriodicNoteTypeSection(containerEl, type, title, config, defaultFormat) {
+        var _a, _b, _c, _d;
+        const settings = this.plugin.settings.periodicNotes;
+        const section = containerEl.createDiv();
+        section.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
+        section.createEl("h4", { text: title, attr: { style: "margin-top: 0;" } });
+        const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+        const periodicNotesTypeEnabled = (_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c[type]) == null ? void 0 : _d.enabled;
+        const usePluginSettings = settings.usePeriodicNotesPlugin && periodicNotesTypeEnabled;
+        new import_obsidian5.Setting(section).setName(`Enable ${type} notes`).setDesc(`Create ${type} notes when clicking ${type === "weekly" ? "week numbers" : type === "quarterly" ? "quarter indicators" : type === "monthly" ? "month names" : "year header"}`).addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+          config.enabled = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }));
+        if (type === "weekly" && config.enabled) {
+          new import_obsidian5.Setting(section).setName("Week number display").setDesc("How to show week numbers in the calendar").addDropdown((dropdown) => {
+            dropdown.addOption("none", "Hidden").addOption("above-day", "Badge below day number").addOption("extra-column", "Divider before first day of week").addOption("header-row", "Row above month with week spans").setValue(settings.weekNumberDisplay).onChange(async (value) => {
+              settings.weekNumberDisplay = value;
+              await this.plugin.saveSettings();
+              this.display();
+            });
+          });
+          if (settings.weekNumberDisplay === "header-row") {
+            const headerRowSettings = section.createDiv();
+            headerRowSettings.style.cssText = "margin-left: 20px; padding-left: 15px; border-left: 2px solid var(--background-modifier-border); margin-top: 10px; margin-bottom: 10px;";
+            this.renderWeekBorderColorSetting(headerRowSettings);
+            new import_obsidian5.Setting(headerRowSettings).setName("Show week span borders").setDesc("Display thin borders on the bottom of week span cells").addToggle((toggle) => toggle.setValue(this.plugin.settings.showWeekSpanBorders).onChange(async (value) => {
+              this.plugin.settings.showWeekSpanBorders = value;
+              await this.plugin.saveSettings();
+            }));
+            const tipNote = headerRowSettings.createDiv();
+            tipNote.style.cssText = "background: var(--background-primary); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--text-muted); margin-top: 10px; font-size: 0.85em; color: var(--text-muted);";
+            tipNote.innerHTML = `<strong>Tip:</strong> Try turning off cell borders in <code style="background: var(--background-modifier-border); padding: 2px 5px; border-radius: 3px; font-size: 0.9em;">Basic Settings \u2192 Calendar Appearance \u2192 Show cell borders</code> when using week rows. This calms down the look and improves readability.`;
+          }
+        }
+        if (!config.enabled) return;
+        if (usePluginSettings) {
+          const notice = section.createDiv();
+          notice.style.cssText = "background: var(--background-primary); padding: 12px; border-radius: 4px; border-left: 3px solid var(--text-accent); margin-top: 10px;";
+          notice.innerHTML = `Using settings from the <a href="https://github.com/liamcain/obsidian-periodic-notes" style="color: var(--text-accent);">Periodic Notes plugin</a>. Disable "Use Periodic Notes plugin settings" above to customize here.`;
+          notice.style.fontSize = "0.9em";
+          notice.style.color = "var(--text-muted)";
+          return;
+        }
+        const folderSetting = new import_obsidian5.Setting(section).setName("Folder").addText((text) => {
+          text.setPlaceholder("Leave empty for vault root").setValue(config.folder).onChange(async (value) => {
+            const cleaned = value.replace(/^\/+|\/+$/g, "");
+            config.folder = cleaned;
+            await this.plugin.saveSettings();
+          });
+          new FolderSuggest(this.app, text.inputEl);
+        });
+        folderSetting.controlEl.style.cssText = "display: flex; flex-direction: column; align-items: flex-end; gap: 4px;";
+        const subfolderLabel = folderSetting.controlEl.createEl("label");
+        subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
+        const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
+        subfolderCheckbox.checked = config.includeSubfolders;
+        subfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
+        subfolderLabel.appendText("Include sub-folders");
+        subfolderCheckbox.addEventListener("change", async () => {
+          config.includeSubfolders = subfolderCheckbox.checked;
+          await this.plugin.saveSettings();
+        });
+        const formatSetting = new import_obsidian5.Setting(section).setName("Format").addText((text) => {
+          text.setPlaceholder(defaultFormat).setValue(config.format).onChange(async (value) => {
+            config.format = value || defaultFormat;
+            await this.plugin.saveSettings();
+            this.updateFormatPreview(previewEl, config.format || defaultFormat);
+          });
+        });
+        const formatDescEl = formatSetting.descEl;
+        formatDescEl.innerHTML = `Filename format for ${type} notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+        const previewEl = formatDescEl.createDiv();
+        previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
+        this.updateFormatPreview(previewEl, config.format || defaultFormat);
+        new import_obsidian5.Setting(section).setName("Template").setDesc(`Template file to use when creating ${type} notes`).addText((text) => {
+          text.setPlaceholder("templates/weekly").setValue(config.template).onChange(async (value) => {
+            config.template = value;
+            await this.plugin.saveSettings();
+          });
+          new FileSuggest(this.app, text.inputEl, this.getTemplateFolderPath());
+        });
+        const colorSetting = new import_obsidian5.Setting(section).setName("Color (optional)").setDesc(`Visual indicator color for ${type} notes in the calendar`);
+        const colorContainer = colorSetting.controlEl.createDiv();
+        colorContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
+        const colorCheckbox = colorContainer.createEl("input", { type: "checkbox" });
+        colorCheckbox.checked = !!config.color;
+        const colorPickerWrapper = colorContainer.createDiv();
+        if (config.color) {
+          this.renderColorPicker(colorPickerWrapper, config.color, async (newColor) => {
+            config.color = newColor;
+            await this.plugin.saveSettings();
+          });
+        } else {
+          colorPickerWrapper.createEl("span", { text: "Using theme accent" }).style.cssText = "color: var(--text-muted); font-size: 0.85em;";
+        }
+        colorCheckbox.onchange = async () => {
+          if (colorCheckbox.checked) {
+            config.color = "#6c849d";
+          } else {
+            config.color = void 0;
+          }
+          await this.plugin.saveSettings();
+          this.display();
+        };
+      }
+      /**
+       * Render the week border color setting with mode options and color picker
+       */
+      renderWeekBorderColorSetting(container) {
+        const settings = this.plugin.settings.periodicNotes;
+        const borderConfig = settings.weekBorderColor;
+        let colorWrapper = null;
+        const borderSetting = new import_obsidian5.Setting(container).setName("Week divider color").setDesc("Color for the divider between weeks in the header row and day cells").addDropdown((dropdown) => {
+          dropdown.addOption("neutral", "Neutral (theme border)").addOption("accent", "Theme accent").addOption("custom", "Custom color").setValue(borderConfig.mode).onChange(async (value) => {
+            borderConfig.mode = value;
+            await this.plugin.saveSettings();
+            renderColorControl();
+          });
+        });
+        colorWrapper = borderSetting.controlEl.createDiv();
+        colorWrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-left: 8px;";
+        const renderColorControl = () => {
+          if (!colorWrapper) return;
+          colorWrapper.empty();
+          if (borderConfig.mode === "custom") {
+            const currentColor = borderConfig.customColor || "#6c849d";
+            this.renderColorPicker(colorWrapper, currentColor, async (newColor) => {
+              borderConfig.customColor = newColor;
+              await this.plugin.saveSettings();
+            });
+          }
+        };
+        renderColorControl();
+      }
+      updateFormatPreview(previewEl, format) {
+        const moment = window.moment;
+        try {
+          const preview = moment().format(format);
+          previewEl.textContent = `Preview: ${preview}`;
+        } catch (e) {
+          previewEl.textContent = "Preview: (invalid format)";
+        }
+      }
+      renderCustomPeriodsSection(containerEl) {
+        const settings = this.plugin.settings.periodicNotes;
+        const section = containerEl.createDiv();
+        section.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
+        section.createEl("h4", { text: "Custom Period Groups", attr: { style: "margin-top: 0;" } });
+        const desc = section.createEl("p", {
+          cls: "setting-item-description",
+          text: "Create groups of custom periods (e.g., Semesters, Seasons). Each enabled group gets its own column in the calendar. Periods within a group cannot have overlapping months and must use consecutive months."
+        });
+        desc.style.marginBottom = "15px";
+        const addBtn = section.createEl("button", { text: "+ Add Group" });
+        addBtn.style.cssText = "margin-bottom: 15px; padding: 6px 12px; cursor: pointer;";
+        addBtn.onclick = async () => {
+          const newGroup = {
+            id: Date.now().toString(),
+            name: "New Group",
+            enabled: true,
+            folder: "",
+            template: "",
+            color: void 0,
+            periods: []
+          };
+          settings.customPeriodGroups.push(newGroup);
+          await this.plugin.saveSettings();
+          this.display();
+        };
+        if (settings.customPeriodGroups.length === 0) {
+          const emptyMsg = section.createDiv();
+          emptyMsg.style.cssText = "color: var(--text-muted); font-style: italic;";
+          emptyMsg.textContent = 'No custom period groups defined. Click "Add Group" to create one.';
+        } else {
+          const groupsList = section.createDiv();
+          groupsList.style.cssText = "display: flex; flex-direction: column; gap: 12px;";
+          settings.customPeriodGroups.forEach((group, groupIndex) => {
+            var _a;
+            const groupEl = groupsList.createDiv();
+            groupEl.style.cssText = "padding: 12px; background: var(--background-primary); border-radius: 4px; border: 1px solid var(--background-modifier-border);";
+            const groupHeader = groupEl.createDiv();
+            groupHeader.style.cssText = "display: flex; align-items: center; gap: 10px; margin-bottom: 10px;";
+            const toggleContainer = groupHeader.createDiv();
+            const toggle = toggleContainer.createEl("input", { type: "checkbox" });
+            toggle.checked = group.enabled;
+            toggle.style.cssText = "cursor: pointer;";
+            toggle.onchange = async () => {
+              group.enabled = toggle.checked;
+              await this.plugin.saveSettings();
+            };
+            const nameInput = groupHeader.createEl("input", {
+              type: "text",
+              value: group.name,
+              attr: { placeholder: "Group name" }
+            });
+            nameInput.style.cssText = "flex: 1; padding: 4px 8px; font-weight: 500;";
+            nameInput.onchange = async () => {
+              group.name = nameInput.value;
+              await this.plugin.saveSettings();
+            };
+            const deleteGroupBtn = groupHeader.createEl("button", { text: "\xD7" });
+            deleteGroupBtn.style.cssText = "padding: 4px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: 1px solid var(--background-modifier-border);";
+            deleteGroupBtn.title = "Delete group";
+            deleteGroupBtn.onclick = async () => {
+              settings.customPeriodGroups.splice(groupIndex, 1);
+              await this.plugin.saveSettings();
+              this.display();
+            };
+            const groupDefaultsSection = groupEl.createDiv();
+            groupDefaultsSection.style.cssText = "padding: 10px; margin: 10px 0; background: var(--background-secondary); border-radius: 4px;";
+            const groupDefaultsLabel = groupDefaultsSection.createDiv();
+            groupDefaultsLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px;";
+            groupDefaultsLabel.textContent = "Default settings for all periods in this group:";
+            const folderRow = groupDefaultsSection.createDiv();
+            folderRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
+            folderRow.createEl("span", { text: "Folder:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
+            const folderInput = folderRow.createEl("input", {
+              type: "text",
+              value: group.folder || "",
+              attr: { placeholder: "Leave empty for vault root" }
+            });
+            folderInput.style.cssText = "flex: 1; padding: 4px 8px; font-size: 0.85em;";
+            folderInput.onchange = async () => {
+              group.folder = folderInput.value.replace(/^\/+|\/+$/g, "");
+              await this.plugin.saveSettings();
+            };
+            new FolderSuggest(this.app, folderInput);
+            const groupSubfolderRow = groupDefaultsSection.createDiv();
+            groupSubfolderRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
+            const groupSubfolderPlaceholder = groupSubfolderRow.createEl("span");
+            groupSubfolderPlaceholder.style.cssText = "min-width: 60px; flex-shrink: 0;";
+            const groupSubfolderLabel = groupSubfolderRow.createEl("label");
+            groupSubfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
+            const groupSubfolderCheckbox = groupSubfolderLabel.createEl("input", { type: "checkbox" });
+            groupSubfolderCheckbox.checked = (_a = group.includeSubfolders) != null ? _a : true;
+            groupSubfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
+            groupSubfolderLabel.appendText("Include sub-folders");
+            groupSubfolderCheckbox.addEventListener("change", async () => {
+              group.includeSubfolders = groupSubfolderCheckbox.checked;
+              await this.plugin.saveSettings();
+            });
+            const templateRow = groupDefaultsSection.createDiv();
+            templateRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
+            templateRow.createEl("span", { text: "Template:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
+            const templateInput = templateRow.createEl("input", {
+              type: "text",
+              value: group.template || "",
+              attr: { placeholder: "templates/period" }
+            });
+            templateInput.style.cssText = "flex: 1; padding: 4px 8px; font-size: 0.85em;";
+            templateInput.onchange = async () => {
+              group.template = templateInput.value;
+              await this.plugin.saveSettings();
+            };
+            new FileSuggest(this.app, templateInput, this.getTemplateFolderPath());
+            const colorRow = groupDefaultsSection.createDiv();
+            colorRow.style.cssText = "display: flex; align-items: center; gap: 8px; flex-wrap: wrap;";
+            colorRow.createEl("span", { text: "Color:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
+            const colorCheckbox = colorRow.createEl("input", { type: "checkbox" });
+            colorCheckbox.checked = !!group.color;
+            colorCheckbox.style.cssText = "margin-right: 4px;";
+            const colorPickerWrapper = colorRow.createDiv();
+            colorPickerWrapper.style.cssText = group.color ? "display: flex; align-items: center; gap: 8px;" : "display: none;";
+            if (group.color) {
+              this.renderColorPicker(
+                colorPickerWrapper,
+                group.color,
+                async (newColor) => {
+                  group.color = newColor;
+                  await this.plugin.saveSettings();
+                }
+              );
+            }
+            const colorCheckLabel = colorRow.createEl("span", { text: group.color ? "" : "Enable group color" });
+            colorCheckLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted);";
+            colorCheckbox.onchange = async () => {
+              if (colorCheckbox.checked) {
+                group.color = "#4a90d9";
+              } else {
+                group.color = void 0;
+              }
+              await this.plugin.saveSettings();
+              this.display();
+            };
+            const periodsContainer = groupEl.createDiv();
+            periodsContainer.style.cssText = "margin-left: 20px;";
+            if (group.periods.length === 0) {
+              const emptyPeriodsMsg = periodsContainer.createDiv();
+              emptyPeriodsMsg.style.cssText = "color: var(--text-muted); font-style: italic; font-size: 0.9em; margin-bottom: 8px;";
+              emptyPeriodsMsg.textContent = "No periods in this group.";
+            } else {
+              const periodsList = periodsContainer.createDiv();
+              periodsList.style.cssText = "display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;";
+              group.periods.forEach((period, periodIndex) => {
+                const periodEl = periodsList.createDiv();
+                periodEl.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--background-secondary); border-radius: 3px;";
+                const effectiveColor = period.useGroupSettings ? group.color : period.color;
+                if (effectiveColor) {
+                  const colorDot = periodEl.createDiv();
+                  colorDot.style.cssText = `width: 10px; height: 10px; border-radius: 50%; background: ${effectiveColor}; flex-shrink: 0;`;
+                  if (period.useGroupSettings && group.color) {
+                    colorDot.title = "Using group color";
+                  }
+                }
+                const infoEl = periodEl.createDiv();
+                infoEl.style.cssText = "flex: 1;";
+                const nameRow = infoEl.createDiv();
+                nameRow.style.cssText = "display: flex; align-items: center; gap: 6px;";
+                const nameEl = nameRow.createEl("span");
+                nameEl.style.cssText = "font-weight: 500; font-size: 0.9em;";
+                nameEl.textContent = period.name;
+                if (period.useGroupSettings === false) {
+                  const customBadge = nameRow.createEl("span", { text: "Custom" });
+                  customBadge.style.cssText = "font-size: 0.7em; padding: 1px 5px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 8px;";
+                  customBadge.title = "Using custom folder, template, or color instead of group defaults";
+                }
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const monthsText = period.months.map((m) => monthNames[m - 1]).join("-");
+                const detailsEl = infoEl.createDiv();
+                detailsEl.style.cssText = "font-size: 0.8em; color: var(--text-muted);";
+                detailsEl.innerHTML = `<code style="font-size: 0.95em; background: var(--background-modifier-border); padding: 0 4px; border-radius: 2px;">${period.format}</code> \xB7 ${monthsText}`;
+                const editBtn = periodEl.createEl("button", { text: "Edit" });
+                editBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 0.85em;";
+                editBtn.onclick = () => {
+                  new CustomPeriodEditModal(
+                    this.app,
+                    this.plugin,
+                    period,
+                    group,
+                    async () => {
+                      await this.plugin.saveSettings();
+                      this.display();
+                    },
+                    async () => {
+                      group.periods.splice(periodIndex, 1);
+                      await this.plugin.saveSettings();
+                      this.display();
+                    }
+                  ).open();
+                };
+                const deletePeriodBtn = periodEl.createEl("button", { text: "\xD7" });
+                deletePeriodBtn.style.cssText = "padding: 2px 6px; cursor: pointer; font-size: 1em; background: transparent; border: 1px solid var(--background-modifier-border);";
+                deletePeriodBtn.title = "Delete period";
+                deletePeriodBtn.onclick = async () => {
+                  group.periods.splice(periodIndex, 1);
+                  await this.plugin.saveSettings();
+                  this.display();
+                };
+              });
+            }
+            const addPeriodBtn = periodsContainer.createEl("button", { text: "+ Add Period" });
+            addPeriodBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 0.9em;";
+            addPeriodBtn.onclick = () => {
+              const usedMonths = /* @__PURE__ */ new Set();
+              group.periods.forEach((p) => p.months.forEach((m) => usedMonths.add(m)));
+              const availableMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter((m) => !usedMonths.has(m));
+              const defaultMonths = availableMonths.slice(0, 3);
+              const newPeriod = {
+                id: Date.now().toString(),
+                name: "New Period",
+                format: "YYYY-[P" + (group.periods.length + 1) + "]",
+                months: defaultMonths.length > 0 ? defaultMonths : [1],
+                yearBasis: "majority",
+                useGroupSettings: true,
+                // Use group defaults by default
+                folder: "",
+                template: "",
+                color: void 0
+              };
+              group.periods.push(newPeriod);
+              this.plugin.saveSettings();
+              new CustomPeriodEditModal(
+                this.app,
+                this.plugin,
+                newPeriod,
+                group,
+                async () => {
+                  await this.plugin.saveSettings();
+                  this.display();
+                },
+                async () => {
+                  const idx = group.periods.findIndex((p) => p.id === newPeriod.id);
+                  if (idx !== -1) {
+                    group.periods.splice(idx, 1);
+                    await this.plugin.saveSettings();
+                    this.display();
+                  }
+                }
+              ).open();
+            };
+          });
+        }
+      }
+      renderQuickNoteCreationSettings(containerEl) {
+        const config = this.plugin.settings.quickNoteCreation;
+        containerEl.createEl("h3", { text: "Quick Note Creation" });
+        const desc = containerEl.createEl("p", {
+          cls: "setting-item-description",
+          text: "Create notes directly from the calendar by Cmd/Ctrl+clicking on day numbers. Click and drag to select a date range for multi-day notes."
+        });
+        desc.style.marginTop = "-10px";
+        desc.style.marginBottom = "15px";
+        new import_obsidian5.Setting(containerEl).setName("Enable quick note creation").setDesc("Create notes directly from the calendar with Cmd/Ctrl+Click").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+          config.enabled = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }));
+        if (!config.enabled) return;
+        new import_obsidian5.Setting(containerEl).setName('Show "Add Note" button').setDesc('Display an "Add Note" button in the calendar header for easy access').addToggle((toggle) => toggle.setValue(config.showAddNoteButton).onChange(async (value) => {
+          config.showAddNoteButton = value;
+          await this.plugin.saveSettings();
+          const leaves = this.plugin.app.workspace.getLeavesOfType("linear-calendar");
+          for (const leaf of leaves) {
+            if (leaf.view instanceof LinearCalendarView) {
+              await leaf.view.reload();
+            }
+          }
+        }));
+        this.renderDivider(containerEl);
+        new import_obsidian5.Setting(containerEl).setName("Default save location").setDesc("Where new notes should be saved by default").addDropdown((dropdown) => dropdown.addOption("default", "Same as new notes").addOption("dailynotes", "Same as daily notes").addOption("custom", "Custom folder").setValue(config.defaultFolder).onChange(async (value) => {
+          config.defaultFolder = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }));
+        if (config.defaultFolder === "custom") {
+          new import_obsidian5.Setting(containerEl).setName("Custom folder path").setDesc("Path where quick notes should be saved").addText((text) => {
+            text.setPlaceholder("folder/subfolder").setValue(config.customFolder).onChange(async (value) => {
+              const cleaned = value.replace(/^\/+|\/+$/g, "");
+              config.customFolder = cleaned;
+              await this.plugin.saveSettings();
+            });
+            new FolderSuggest(this.app, text.inputEl);
+          });
+        }
+        this.renderDivider(containerEl);
+        containerEl.createEl("h4", { text: "Default Properties" });
+        new import_obsidian5.Setting(containerEl).setName("Start date property").setDesc("Default property name for start date").addText((text) => {
+          text.setValue(config.defaultStartDateProperty).onChange(async (value) => {
+            config.defaultStartDateProperty = value;
+            await this.plugin.saveSettings();
+          });
+          new PropertySuggest(this.app, text.inputEl);
+        });
+        new import_obsidian5.Setting(containerEl).setName("End date property").setDesc("Default property name for end date").addText((text) => {
+          text.setValue(config.defaultEndDateProperty).onChange(async (value) => {
+            config.defaultEndDateProperty = value;
+            await this.plugin.saveSettings();
+          });
+          new PropertySuggest(this.app, text.inputEl);
+        });
+        new import_obsidian5.Setting(containerEl).setName("Category property").setDesc("Default property name for category").addText((text) => {
+          text.setValue(config.defaultCategoryProperty).onChange(async (value) => {
+            config.defaultCategoryProperty = value;
+            await this.plugin.saveSettings();
+          });
+          new PropertySuggest(this.app, text.inputEl);
+        });
+        this.renderDivider(containerEl);
+        containerEl.createEl("h4", { text: "Default Metadata" });
+        const metadataDesc = containerEl.createEl("p", {
+          cls: "setting-item-description",
+          text: "Default metadata that will be pre-filled when creating a new note"
+        });
+        metadataDesc.style.marginBottom = "15px";
+        config.defaultMetadata.forEach((entry, index) => {
+          this.renderDefaultMetadataRow(containerEl, entry, index);
+        });
+        const addBtn = containerEl.createEl("button", { text: "+ Add Default Metadata" });
+        addBtn.style.cssText = "margin-top: 10px; padding: 6px 12px; cursor: pointer;";
+        addBtn.onclick = async () => {
+          config.defaultMetadata.push({ key: "", value: "" });
+          await this.plugin.saveSettings();
+          this.display();
+        };
+      }
+      renderDefaultMetadataRow(container, entry, index) {
+        const config = this.plugin.settings.quickNoteCreation;
+        MetadataRowRenderer.render(container, {
+          entry,
+          onKeyChange: async (key) => {
+            config.defaultMetadata[index].key = key;
+            await this.plugin.saveSettings();
+          },
+          onValueChange: async (value) => {
+            config.defaultMetadata[index].value = value;
+            await this.plugin.saveSettings();
+          },
+          onDelete: async () => {
+            config.defaultMetadata.splice(index, 1);
+            await this.plugin.saveSettings();
+            this.display();
+          },
+          onRefresh: () => {
+            this.display();
+          },
+          app: this.app
+        });
+      }
+      renderExperimentalSection(containerEl) {
+        const headerContainer = containerEl.createDiv();
+        headerContainer.style.cssText = "display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;";
+        headerContainer.createEl("h3", { text: "Note Title Display" });
+        const badge = headerContainer.createEl("span");
+        badge.textContent = "Experimental";
+        badge.style.cssText = "background: var(--interactive-accent); color: var(--text-on-accent); padding: 3px 8px; border-radius: 3px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;";
+        const desc = containerEl.createEl("p", {
+          cls: "setting-item-description",
+          text: "Test different ways to display note titles in calendar cells. These features are experimental and may change."
+        });
+        desc.style.marginTop = "-10px";
+        desc.style.marginBottom = "15px";
+        const exp = this.plugin.settings.experimental;
+        const expSection = containerEl.createDiv();
+        expSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
+        new import_obsidian5.Setting(expSection).setName("Multi-line note names").setDesc("Allow note names to wrap to multiple lines instead of truncating. Best for wider cells.").addToggle((toggle) => toggle.setValue(exp.multilineNotes).onChange(async (value) => {
+          exp.multilineNotes = value;
+          if (value) {
+            exp.verticalText = false;
+          }
+          await this.plugin.saveSettings();
+          this.display();
+        }));
+        new import_obsidian5.Setting(expSection).setName("Vertical text rotation").setDesc("Rotate note names 90 degrees vertically. Creative use of vertical space.").addToggle((toggle) => toggle.setValue(exp.verticalText).onChange(async (value) => {
+          exp.verticalText = value;
+          if (value) {
+            exp.multilineNotes = false;
+          }
+          await this.plugin.saveSettings();
+          this.display();
+        }));
+        new import_obsidian5.Setting(expSection).setName("Compact font size").setDesc("Use smaller font size (0.75em) for note names to fit more text.").addToggle((toggle) => toggle.setValue(exp.compactFontSize).onChange(async (value) => {
+          exp.compactFontSize = value;
+          await this.plugin.saveSettings();
+        }));
+        new import_obsidian5.Setting(expSection).setName("Condensed letter spacing").setDesc("Reduce spacing between letters to fit more text in the same space.").addToggle((toggle) => toggle.setValue(exp.condensedLetters).onChange(async (value) => {
+          exp.condensedLetters = value;
+          await this.plugin.saveSettings();
+        }));
+        containerEl.createEl("h3", { text: "Welcome Banners", attr: { style: "margin-top: 25px;" } });
+        const bannerDesc = containerEl.createEl("p", {
+          cls: "setting-item-description",
+          text: "Show welcome banners again to see tips and instructions."
+        });
+        bannerDesc.style.marginTop = "-10px";
+        bannerDesc.style.marginBottom = "15px";
+        const bannerSection = containerEl.createDiv();
+        bannerSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
+        const bannerCtx = { isBratUser: this.plugin.isBratUser };
+        for (const banner of BANNERS) {
+          if (banner.settingsVisible && !banner.settingsVisible(bannerCtx)) continue;
+          new import_obsidian5.Setting(bannerSection).setName(banner.settingsName).setDesc(banner.settingsDesc).addButton((button) => button.setButtonText("Show again").onClick(async () => {
+            banner.reset(this.plugin.settings);
+            await this.plugin.saveSettings();
+            new import_obsidian5.Notice(`${banner.settingsName} will show on next calendar view`);
+          }));
+        }
+      }
+      renderColorCategoriesSection(containerEl) {
+        const config = this.plugin.settings.colorCategories;
+        containerEl.createEl("h3", { text: "Color Categories" });
+        const descEl = containerEl.createDiv();
+        descEl.style.cssText = "color: var(--text-muted); margin-bottom: 15px;";
+        descEl.innerHTML = "Visually organize notes with colors and icons based on conditions. Categories are checked in order, first match wins.";
+        new import_obsidian5.Setting(containerEl).setName("Enable color categories").setDesc("Turn the color categories feature on or off.").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+          config.enabled = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }));
+        if (!config.enabled) {
+          const disabledMsg = containerEl.createDiv();
+          disabledMsg.style.cssText = "color: var(--text-muted); font-style: italic; padding: 20px; text-align: center;";
+          disabledMsg.textContent = "Color categories are currently disabled.";
+          return;
+        }
+        const settingsSection = containerEl.createDiv();
+        settingsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 6px; margin-bottom: 20px;";
+        const settingsHeader = settingsSection.createEl("h4", { text: "Category Settings" });
+        settingsHeader.style.cssText = "margin-top: 0; margin-bottom: 12px; font-size: 1em; color: var(--text-normal);";
+        new import_obsidian5.Setting(settingsSection).setName("Show category index").setDesc("Display a row at the top of the calendar showing all categories as clickable chips.").addToggle((toggle) => toggle.setValue(config.showCategoryIndex).onChange(async (value) => {
+          config.showCategoryIndex = value;
+          await this.plugin.saveSettings();
+        }));
+        new import_obsidian5.Setting(settingsSection).setName("Show icons in calendar").setDesc("Display category icons before note titles in the calendar. Turn off to show only colors.").addToggle((toggle) => toggle.setValue(config.showIconsInCalendar).onChange(async (value) => {
+          config.showIconsInCalendar = value;
+          await this.plugin.saveSettings();
+        }));
+        const defaultColorSetting = new import_obsidian5.Setting(settingsSection).setName("Default color").setDesc("Color for notes that don't match any category.");
+        const defaultColorContainer = defaultColorSetting.controlEl.createDiv();
+        defaultColorContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
+        if (config.defaultCategoryColor !== null) {
+          this.renderColorPicker(
+            defaultColorContainer,
+            config.defaultCategoryColor || "#6366f1",
+            async (newColor) => {
+              config.defaultCategoryColor = newColor;
+              await this.plugin.saveSettings();
+            }
+          );
+        } else {
+          const themeAccentNote = defaultColorContainer.createDiv();
+          themeAccentNote.textContent = "Using theme accent color";
+          themeAccentNote.style.cssText = "color: var(--text-muted); font-size: 0.9em; font-style: italic;";
+        }
+        const toggleRow = defaultColorContainer.createDiv();
+        toggleRow.style.cssText = "margin-top: 4px;";
+        const toggleBtn = toggleRow.createEl("button");
+        toggleBtn.textContent = config.defaultCategoryColor === null ? "Use custom color" : "Use theme accent";
+        toggleBtn.style.cssText = "padding: 4px 12px; cursor: pointer; font-size: 0.9em;";
+        toggleBtn.onclick = async () => {
+          if (config.defaultCategoryColor === null) {
+            config.defaultCategoryColor = "#6366f1";
+          } else {
+            config.defaultCategoryColor = null;
+          }
+          await this.plugin.saveSettings();
+          this.display();
+        };
+        this.renderColorPalettes(containerEl);
+        const separator = containerEl.createDiv();
+        separator.style.cssText = "height: 1px; background: var(--background-modifier-border); margin: 30px 0 25px 0;";
+        const categoriesHeader = containerEl.createDiv();
+        categoriesHeader.style.cssText = "margin-bottom: 15px;";
+        const categoryTitle = categoriesHeader.createEl("h4", { text: "Your Categories" });
+        categoryTitle.style.cssText = "margin: 0 0 6px 0; font-size: 1.1em; color: var(--text-normal);";
+        const categoryDesc = categoriesHeader.createDiv();
+        categoryDesc.style.cssText = "color: var(--text-muted); font-size: 0.95em;";
+        categoryDesc.innerHTML = `Create and organize your color categories.
+<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7;">
+  <li>Categories <strong>apply to all notes accessible to the plugin</strong> \u2013 as configured in "Basic Settings".</li>
+  <li>Create <strong>conditions that determine which notes match</strong>.</li>
+  <li><strong>First-match principle</strong>: categories (with their conditions) are evaluated top to bottom, and the first match wins. Drag more specific categories above more general ones to make sure they take priority.</li>
+  <li><strong>What you see is what you get</strong>: if a note in the calendar has the color/icon of a category, the system has matched it to that category.</li>
+</ul>`;
+        const categoriesContainer = containerEl.createDiv();
+        categoriesContainer.style.cssText = "background: var(--background-primary); border: 2px solid var(--background-modifier-border); border-radius: 8px; padding: 12px; margin-top: 12px;";
+        if (config.categories.length > 0) {
+          const hintEl = categoriesContainer.createDiv();
+          hintEl.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-bottom: 12px; padding: 6px 10px; background: var(--background-secondary); border-radius: 4px;";
+          hintEl.textContent = "\u22EE\u22EE Drag to reorder priority \u2014 first match wins";
+        } else {
+          const emptyState = categoriesContainer.createDiv();
+          emptyState.style.cssText = "color: var(--text-muted); font-style: italic; text-align: center; padding: 30px 20px;";
+          emptyState.textContent = 'No categories yet. Click "+ Add category" below to create your first one.';
+        }
+        this.renderCategoriesList(categoriesContainer);
+        const addBtn = containerEl.createEl("button", { text: "+ Add category" });
+        addBtn.style.cssText = "margin-top: 12px; padding: 8px 16px; cursor: pointer; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 4px; font-weight: 500;";
+        addBtn.onmouseenter = () => {
+          addBtn.style.opacity = "0.9";
+        };
+        addBtn.onmouseleave = () => {
+          addBtn.style.opacity = "1";
+        };
+        addBtn.onclick = async () => {
+          const newCategory = {
+            id: Date.now().toString(),
+            name: "New Category",
+            color: "#6366f1",
+            iconType: null,
+            iconValue: "",
+            conditions: [],
+            matchMode: "all",
+            enabled: true
+          };
+          config.categories.push(newCategory);
+          await this.plugin.saveSettings();
+          this.display();
+        };
+      }
+      renderCategoriesList(container) {
+        const config = this.plugin.settings.colorCategories;
+        let draggedIndex = null;
+        config.categories.forEach((category, index) => {
+          this.renderCategoryItem(container, category, index, {
+            onDragStart: () => {
+              draggedIndex = index;
+            },
+            onDragEnd: () => {
+              draggedIndex = null;
+            },
+            onDragOver: (targetIndex) => {
+              if (draggedIndex !== null && draggedIndex !== targetIndex) {
+                const [removed] = config.categories.splice(draggedIndex, 1);
+                config.categories.splice(targetIndex, 0, removed);
+                draggedIndex = targetIndex;
+                this.plugin.saveSettings();
+                this.display();
+              }
+            }
+          });
+        });
+      }
+      renderCategoryItem(container, category, index, dragHandlers) {
+        const config = this.plugin.settings.colorCategories;
+        const itemEl = container.createDiv({ cls: "category-list-item" + (category.enabled ? "" : " is-disabled") });
+        itemEl.style.cssText = "margin-bottom: 12px; border: 1px solid var(--background-modifier-border); border-radius: 5px; background: var(--background-secondary);";
+        itemEl.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          itemEl.style.border = "2px solid var(--interactive-accent)";
+        });
+        itemEl.addEventListener("dragleave", () => {
+          itemEl.style.border = "1px solid var(--background-modifier-border)";
+        });
+        itemEl.addEventListener("drop", (e) => {
+          e.preventDefault();
+          itemEl.style.border = "1px solid var(--background-modifier-border)";
+          dragHandlers.onDragOver(index);
+        });
+        const isExpanded = this.expandedCategories.has(category.id);
+        const header = itemEl.createDiv();
+        header.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer;";
+        const dragHandle = header.createEl("span", { text: "\u22EE\u22EE" });
+        dragHandle.style.cssText = "cursor: grab; opacity: 0.5; user-select: none;";
+        dragHandle.draggable = true;
+        dragHandle.addEventListener("dragstart", (e) => {
+          var _a;
+          dragHandle.style.cursor = "grabbing";
+          itemEl.style.opacity = "0.5";
+          dragHandlers.onDragStart();
+          (_a = e.dataTransfer) == null ? void 0 : _a.setData("text/plain", "");
+        });
+        dragHandle.addEventListener("dragend", () => {
+          dragHandle.style.cursor = "grab";
+          itemEl.style.opacity = "1";
+          itemEl.style.border = "1px solid var(--background-modifier-border)";
+          dragHandlers.onDragEnd();
+        });
+        const chevron = header.createEl("span", { text: "\u203A" });
+        chevron.style.cssText = "transition: transform 0.2s; font-size: 1.2em; user-select: none;";
+        if (isExpanded) {
+          chevron.style.transform = "rotate(90deg)";
+        }
+        const capsule = header.createEl("div");
+        capsule.style.cssText = `display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; background: ${category.color}; color: #ffffff; flex: 1;`;
+        capsule.dataset.categoryId = category.id;
+        const iconPreview = capsule.createEl("span", { cls: "category-header-icon" });
+        iconPreview.style.cssText = "flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;";
+        if (category.iconType && category.iconValue) {
+          if (category.iconType === "emoji") {
+            iconPreview.textContent = category.iconValue;
+          } else {
+            (0, import_obsidian5.setIcon)(iconPreview, category.iconValue);
+            iconPreview.style.color = "#ffffff";
+          }
+        }
+        const nameSpan = capsule.createEl("span", { text: category.name });
+        nameSpan.style.cssText = "font-weight: 500;";
+        const countSpan = header.createEl("span", {
+          text: category.conditions.length === 1 ? "1 condition" : `${category.conditions.length} conditions`
+        });
+        countSpan.style.cssText = "font-size: 0.85em; color: var(--text-muted);";
+        const disableBtn = header.createEl("button", { cls: "category-disable-btn" });
+        (0, import_obsidian5.setIcon)(disableBtn, "ban");
+        if (!category.enabled) disableBtn.addClass("is-disabled");
+        disableBtn.setAttribute("data-tooltip", category.enabled ? "Disable" : "Enable");
+        disableBtn.onclick = async (e) => {
+          e.stopPropagation();
+          if (category.enabled) {
+            const confirmed = confirm("Disable Category \u2014 it acts like deletion but is recoverable here. Proceed?");
+            if (!confirmed) return;
+          }
+          category.enabled = !category.enabled;
+          disableBtn.setAttribute("data-tooltip", category.enabled ? "Disable" : "Enable");
+          category.enabled ? disableBtn.removeClass("is-disabled") : disableBtn.addClass("is-disabled");
+          category.enabled ? itemEl.removeClass("is-disabled") : itemEl.addClass("is-disabled");
+          await this.plugin.saveSettings();
+        };
+        const eyeBtn = header.createEl("button", { cls: "category-visibility-btn" });
+        (0, import_obsidian5.setIcon)(eyeBtn, category.hidden ? "eye-off" : "eye");
+        eyeBtn.setAttribute("data-tooltip", category.hidden ? "Show" : "Hide");
+        eyeBtn.onclick = async (e) => {
+          e.stopPropagation();
+          category.hidden = !category.hidden;
+          (0, import_obsidian5.setIcon)(eyeBtn, category.hidden ? "eye-off" : "eye");
+          eyeBtn.setAttribute("data-tooltip", category.hidden ? "Show" : "Hide");
+          await this.plugin.saveSettings();
+        };
+        const deleteBtn = header.createEl("button", { cls: "category-disable-btn" });
+        (0, import_obsidian5.setIcon)(deleteBtn, "trash");
+        deleteBtn.setAttribute("data-tooltip", "Delete");
+        deleteBtn.onclick = async (e) => {
+          e.stopPropagation();
+          const confirmed = confirm(`Delete category "${category.name}"? This cannot be undone.`);
+          if (!confirmed) return;
+          config.categories.splice(index, 1);
+          await this.plugin.saveSettings();
+          this.display();
+        };
+        header.onclick = (e) => {
+          if (e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
+            if (isExpanded) {
+              this.expandedCategories.delete(category.id);
+            } else {
+              this.expandedCategories.add(category.id);
+            }
+            this.display();
+          }
+        };
+        if (isExpanded) {
+          const content = itemEl.createDiv();
+          content.style.cssText = "padding: 15px; border-top: 1px solid var(--background-modifier-border);";
+          const nameLabel = content.createEl("label");
+          nameLabel.style.cssText = "display: block; margin-bottom: 10px;";
+          nameLabel.createEl("div", { text: "Category name:", cls: "setting-item-name" });
+          const nameInput = nameLabel.createEl("input", { type: "text", value: category.name });
+          nameInput.style.cssText = "width: 100%; padding: 6px; margin-top: 5px;";
+          nameInput.onchange = async () => {
+            category.name = nameInput.value;
+            await this.plugin.saveSettings();
+            this.display();
+          };
+          const colorSection = content.createDiv();
+          colorSection.style.cssText = "margin-bottom: 15px;";
+          colorSection.createEl("div", { text: "Color:", cls: "setting-item-name" });
+          const colorPickerWrapper = colorSection.createDiv();
+          colorPickerWrapper.style.cssText = "margin-top: 8px;";
+          this.renderColorPicker(
+            colorPickerWrapper,
+            category.color,
+            async (newColor) => {
+              category.color = newColor;
+              await this.plugin.saveSettings();
+              this.display();
+            }
+          );
+          this.createCheckboxWithLabel(
+            content,
+            "Use icon",
+            category.iconType !== null,
+            async (checked) => {
+              if (checked) {
+                category.iconType = "emoji";
+                category.iconValue = "\u2B50";
+              } else {
+                category.iconType = null;
+                category.iconValue = "";
+              }
+              await this.plugin.saveSettings();
+              this.display();
+            }
+          );
+          if (category.iconType !== null) {
+            const iconSettings = content.createDiv();
+            iconSettings.style.cssText = "margin-left: 25px; margin-bottom: 15px;";
+            const iconLabel = iconSettings.createEl("div");
+            iconLabel.style.cssText = "margin-bottom: 8px; color: var(--text-muted); font-size: 0.9em;";
+            iconLabel.textContent = "Search for emoji or Lucide icon:";
+            const iconInputContainer = iconSettings.createDiv();
+            iconInputContainer.style.cssText = "display: flex; gap: 10px; align-items: center;";
+            const iconPreviewEl = iconInputContainer.createEl("div");
+            iconPreviewEl.style.cssText = "width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--background-modifier-border); border-radius: 3px; font-size: 1.2em; flex-shrink: 0;";
+            if (category.iconValue) {
+              if (category.iconType === "emoji") {
+                iconPreviewEl.textContent = category.iconValue;
+              } else {
+                (0, import_obsidian5.setIcon)(iconPreviewEl, category.iconValue);
+              }
+            }
+            const iconInput = iconInputContainer.createEl("input", {
+              type: "text",
+              value: category.iconValue,
+              attr: { placeholder: "Type to search icons..." }
+            });
+            iconInput.style.cssText = "flex: 1; padding: 6px;";
+            if (category.iconType) {
+              iconInput.dataset.iconType = category.iconType;
+            }
+            const saveIconValue = async () => {
+              category.iconValue = iconInput.value;
+              if (iconInput.dataset.iconType) {
+                category.iconType = iconInput.dataset.iconType;
+              }
+              await this.plugin.saveSettings();
+              const capsule2 = document.querySelector(`[data-category-id="${category.id}"]`);
+              if (capsule2) {
+                const headerIcon = capsule2.querySelector(".category-header-icon");
+                if (headerIcon) {
+                  headerIcon.empty();
+                  if (category.iconType && category.iconValue) {
+                    if (category.iconType === "emoji") {
+                      headerIcon.textContent = category.iconValue;
+                    } else {
+                      (0, import_obsidian5.setIcon)(headerIcon, category.iconValue);
+                      headerIcon.style.color = "#ffffff";
+                    }
+                  }
+                }
+              }
+            };
+            iconInput.addEventListener("input", saveIconValue);
+            new IconSuggest(iconInput, iconPreviewEl);
+          }
+          const conditionsHeader = content.createDiv();
+          conditionsHeader.style.cssText = "display: flex; align-items: center; gap: 8px; margin-top: 15px; margin-bottom: 10px;";
+          conditionsHeader.createEl("div", {
+            text: "Conditions:",
+            attr: { style: "font-weight: 500; margin: 0;" }
+          });
+          this.renderConditionsInfoIcon(conditionsHeader);
+          if (category.conditions.length > 1) {
+            const matchModeToggle = content.createDiv();
+            matchModeToggle.style.cssText = "display: flex; align-items: center; gap: 8px; font-size: 0.9em; margin-bottom: 10px;";
+            const matchModeLabel = matchModeToggle.createEl("span", { text: "Match:" });
+            matchModeLabel.style.cssText = "color: var(--text-muted);";
+            const matchModeSelect = matchModeToggle.createEl("select");
+            matchModeSelect.style.cssText = "padding: 3px 6px;";
+            matchModeSelect.createEl("option", { text: "All (AND)", value: "all" });
+            matchModeSelect.createEl("option", { text: "Any (OR)", value: "any" });
+            matchModeSelect.value = category.matchMode || "all";
+            matchModeSelect.onchange = async () => {
+              category.matchMode = matchModeSelect.value;
+              await this.plugin.saveSettings();
+            };
+          }
+          const conditionsContainer = content.createDiv();
+          conditionsContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
+          if (category.conditions.length === 0) {
+            const emptyMsg = conditionsContainer.createDiv();
+            emptyMsg.style.cssText = "color: var(--text-muted); font-style: italic; padding: 10px;";
+            emptyMsg.textContent = "No conditions yet. Add at least one condition for this category to match notes.";
+          } else {
+            category.conditions.forEach((condition, condIndex) => {
+              this.renderCategoryCondition(conditionsContainer, category, condition, condIndex);
+            });
+          }
+          const addCondBtn = content.createEl("button", { text: "+ Add condition" });
+          addCondBtn.style.cssText = "margin-top: 8px; padding: 4px 12px; cursor: pointer;";
+          addCondBtn.onclick = async () => {
+            category.conditions.push({
+              property: "file.name",
+              operator: "contains",
+              value: ""
+            });
+            await this.plugin.saveSettings();
+            this.display();
+          };
+        }
+      }
+      renderCategoryCondition(container, category, condition, condIndex) {
+        ConditionRenderer.render(container, condition, condIndex, category.conditions, this.app, {
+          onSave: async () => {
+            await this.plugin.saveSettings();
+          },
+          onRefresh: () => {
+            this.display();
+          }
+        });
+      }
+      renderColorPalettes(containerEl) {
+        const config = this.plugin.settings.colorCategories;
+        const palettesSectionContainer = containerEl.createDiv();
+        palettesSectionContainer.style.cssText = "margin-top: 20px; border: 1px solid var(--background-modifier-border); border-radius: 4px; overflow: hidden;";
+        const palettesHeader = palettesSectionContainer.createDiv();
+        palettesHeader.style.cssText = "padding: 12px; background: var(--background-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;";
+        const chevron = palettesHeader.createEl("span", { text: "\u203A" });
+        chevron.style.cssText = "font-size: 1.2em; transition: transform 0.2s; display: inline-block;";
+        const icon = palettesHeader.createEl("span");
+        icon.style.cssText = "display: flex; align-items: center; margin-right: 4px;";
+        (0, import_obsidian5.setIcon)(icon, "palette");
+        palettesHeader.createEl("strong", { text: "Color Palettes" });
+        const headerDesc = palettesHeader.createEl("span", { text: "(optional - create reusable color sets)" });
+        headerDesc.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-left: 8px;";
+        const palettesContent = palettesSectionContainer.createDiv();
+        palettesContent.style.cssText = "padding: 15px; display: none;";
+        palettesHeader.onclick = () => {
+          this.isPalettesExpanded = !this.isPalettesExpanded;
+          palettesContent.style.display = this.isPalettesExpanded ? "block" : "none";
+          chevron.style.transform = this.isPalettesExpanded ? "rotate(90deg)" : "rotate(0deg)";
+        };
+        if (this.isPalettesExpanded) {
+          palettesContent.style.display = "block";
+          chevron.style.transform = "rotate(90deg)";
+        }
+        const desc = palettesContent.createDiv();
+        desc.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-bottom: 15px;";
+        desc.textContent = "Create custom color palettes to quickly assign colors to categories. Palettes can be shared by copying/pasting the palette text when viewed in source mode.";
+        config.colorPalettes.forEach((palette, index) => {
+          this.renderPalette(palettesContent, palette, index);
+        });
+        const addPaletteBtn = palettesContent.createEl("button", { text: "+ Add Palette" });
+        addPaletteBtn.style.cssText = "padding: 6px 16px; cursor: pointer; margin-top: 10px;";
+        addPaletteBtn.onclick = async () => {
+          const newPalette = {
+            name: "New Palette",
+            colors: [
+              { name: "Red", hex: "#ef4444" },
+              { name: "Blue", hex: "#3b82f6" },
+              { name: "Green", hex: "#10b981" }
+            ]
+          };
+          config.colorPalettes.push(newPalette);
+          await this.plugin.saveSettings();
+          this.display();
+        };
+      }
+      renderPalette(container, palette, paletteIndex) {
+        const config = this.plugin.settings.colorCategories;
+        const paletteEl = container.createDiv();
+        paletteEl.style.cssText = "border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 12px; margin-bottom: 12px; background: var(--background-primary);";
+        const paletteHeader = paletteEl.createDiv();
+        paletteHeader.style.cssText = "display: flex; align-items: center; gap: 10px; margin-bottom: 12px;";
+        const nameInput = paletteHeader.createEl("input", {
+          type: "text",
+          value: palette.name,
+          attr: { placeholder: "Palette name" }
+        });
+        nameInput.style.cssText = "flex: 1; padding: 4px 8px; font-weight: 500;";
+        nameInput.oninput = async () => {
+          palette.name = nameInput.value;
+          await this.plugin.saveSettings();
+        };
+        const currentMode = this.paletteEditModes.get(paletteIndex) || "visual";
+        const modeToggleBtn = paletteHeader.createEl("button");
+        modeToggleBtn.textContent = currentMode === "visual" ? "Source" : "Visual";
+        modeToggleBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 0.85em;";
+        modeToggleBtn.title = currentMode === "visual" ? "Switch to source mode" : "Switch to visual mode";
+        const deleteBtn = paletteHeader.createEl("button", { text: "\xD7" });
+        deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: var(--background-modifier-error); color: var(--text-on-accent);";
+        deleteBtn.onclick = async () => {
+          config.colorPalettes.splice(paletteIndex, 1);
+          this.paletteEditModes.delete(paletteIndex);
+          await this.plugin.saveSettings();
+          this.display();
+        };
+        const editorContainer = paletteEl.createDiv();
+        const renderEditor = () => {
+          editorContainer.empty();
+          const mode = this.paletteEditModes.get(paletteIndex) || "visual";
+          if (mode === "visual") {
+            const colorsContainer = editorContainer.createDiv();
+            colorsContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
+            palette.colors.forEach((color, colorIndex) => {
+              const colorRow = colorsContainer.createDiv();
+              colorRow.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--background-secondary); border-radius: 4px;";
+              const colorPicker = colorRow.createEl("input", { type: "color", value: color.hex });
+              colorPicker.style.cssText = "width: 50px; height: 32px; cursor: pointer; border-radius: 4px;";
+              colorPicker.onchange = async (e) => {
+                color.hex = e.target.value.toLowerCase();
+                await this.plugin.saveSettings();
+              };
+              const hexDisplay = colorRow.createEl("code");
+              hexDisplay.textContent = color.hex.toUpperCase();
+              hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.85em; min-width: 70px;";
+              colorPicker.oninput = () => {
+                hexDisplay.textContent = colorPicker.value.toUpperCase();
+              };
+              const nameInput2 = colorRow.createEl("input", {
+                type: "text",
+                value: color.name,
+                attr: { placeholder: "Color name" }
+              });
+              nameInput2.style.cssText = "flex: 1; padding: 4px 8px;";
+              nameInput2.oninput = async () => {
+                color.name = nameInput2.value;
+                await this.plugin.saveSettings();
+              };
+              const deleteColorBtn = colorRow.createEl("button", { text: "\xD7" });
+              deleteColorBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.1em;";
+              deleteColorBtn.onclick = async () => {
+                palette.colors.splice(colorIndex, 1);
+                await this.plugin.saveSettings();
+                renderEditor();
+              };
+            });
+            const addColorBtn = editorContainer.createEl("button", { text: "+ Add Color" });
+            addColorBtn.style.cssText = "padding: 6px 12px; cursor: pointer; margin-top: 8px; font-size: 0.9em;";
+            addColorBtn.onclick = async () => {
+              palette.colors.push({ name: "New Color", hex: "#3b82f6" });
+              await this.plugin.saveSettings();
+              renderEditor();
+            };
+          } else {
+            const sourceLabel = editorContainer.createDiv();
+            sourceLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 6px;";
+            sourceLabel.textContent = "Text format (ColorName: #hexcode, one per line):";
+            const paletteText = editorContainer.createEl("textarea");
+            paletteText.style.cssText = "width: 100%; min-height: 120px; font-family: monospace; font-size: 0.85em; padding: 8px; resize: vertical;";
+            paletteText.value = this.paletteTOText(palette);
+            let typingTimer;
+            paletteText.oninput = () => {
+              clearTimeout(typingTimer);
+              typingTimer = setTimeout(async () => {
+                const parsed = this.textToPalette(paletteText.value, palette.name);
+                if (parsed) {
+                  palette.colors = parsed.colors;
+                  await this.plugin.saveSettings();
+                }
+              }, 500);
+            };
+          }
+        };
+        modeToggleBtn.onclick = () => {
+          const currentMode2 = this.paletteEditModes.get(paletteIndex) || "visual";
+          const newMode = currentMode2 === "visual" ? "source" : "visual";
+          this.paletteEditModes.set(paletteIndex, newMode);
+          modeToggleBtn.textContent = newMode === "visual" ? "Source" : "Visual";
+          modeToggleBtn.title = newMode === "visual" ? "Switch to source mode" : "Switch to visual mode";
+          renderEditor();
+        };
+        renderEditor();
+      }
+      paletteTOText(palette) {
+        return palette.colors.map((c) => `${c.name}: ${c.hex}`).join("\n");
+      }
+      textToPalette(text, fallbackName) {
+        const lines = text.split("\n").filter((l) => l.trim());
+        const colors = [];
+        for (const line of lines) {
+          const match = line.match(/^(.+?):\s*(#[0-9a-fA-F]{6})$/);
+          if (match) {
+            colors.push({ name: match[1].trim(), hex: match[2].toLowerCase() });
+          } else {
+            return null;
+          }
+        }
+        if (colors.length === 0) return null;
+        return { name: fallbackName, colors };
+      }
+      /**
+       * Render a color picker with optional palette selection popover
+       */
+      renderColorPicker(container, currentColor, onColorChange) {
+        const config = this.plugin.settings.colorCategories;
+        ColorPickerRenderer.render({
+          container,
+          currentColor,
+          palettes: config.colorPalettes || [],
+          onColorChange
+        });
+      }
+      renderRecurringEventsSection(containerEl) {
+        const config = this.plugin.settings.recurringEvents;
+        containerEl.createEl("h3", { text: "Recurring Events" });
+        new import_obsidian5.Setting(containerEl).setName("Enable recurring events").setDesc("Show recurring notes (birthdays, anniversaries, etc.) on every matching date.").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
+          config.enabled = value;
+          await this.plugin.saveSettings();
+          this.display();
+        }));
+        if (!config.enabled) return;
+        const infoBox = containerEl.createDiv();
+        infoBox.style.cssText = "background: var(--background-secondary); border-left: 4px solid var(--interactive-accent); padding: 14px 18px; margin: 8px 0 20px 0; border-radius: 3px;";
+        infoBox.createEl("div", { text: "How it works", attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--text-normal);" } });
+        const infoText = infoBox.createEl("div", { attr: { style: "font-size: 0.9em; line-height: 1.6; color: var(--text-muted);" } });
+        infoText.innerHTML = `
+            Register a <strong>property name</strong> below, then add that property to any note with a date value.
+            The plugin shows that note on the matching date every year, month, or week \u2014 without creating extra files.<br><br>
+            <strong>Supported formats:</strong><br>
+            &nbsp;&nbsp;<code>1980-03-14</code> \u2014 Full ISO date (recommended for birthdays; year is preserved for age counting)<br>
+            &nbsp;&nbsp;<code>FREQ=MONTHLY;BYMONTHDAY=15</code> \u2014 RRULE for complex patterns (2nd Tuesday, last Sunday\u2026)
+        `;
+        containerEl.createEl("h4", { text: "Property Rules", attr: { style: "margin-bottom: 6px;" } });
+        const rulesListEl = containerEl.createDiv();
+        const renderRulesList = () => {
+          rulesListEl.empty();
+          if (config.propertyRules.length === 0) {
+            rulesListEl.createEl("div", {
+              text: "No rules yet. Add one below.",
+              attr: { style: "font-size: 0.88em; color: var(--text-muted); margin-bottom: 12px; font-style: italic;" }
+            });
+          }
+          config.propertyRules.forEach((rule, index) => {
+            var _a, _b, _c;
+            const ruleRow = rulesListEl.createDiv();
+            ruleRow.style.cssText = "border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 14px; margin-bottom: 10px;";
+            const topRow = ruleRow.createDiv();
+            topRow.style.cssText = "display: flex; gap: 8px; align-items: center; margin-bottom: 10px;";
+            const propInput = topRow.createEl("input", {
+              type: "text",
+              value: rule.propertyName,
+              attr: { placeholder: "Property name (e.g. birthday)" }
+            });
+            propInput.style.cssText = "flex: 1; padding: 4px 8px;";
+            new PropertySuggest(this.app, propInput);
+            propInput.onchange = async (e) => {
+              rule.propertyName = e.target.value.trim();
+              await this.plugin.saveSettings();
+            };
+            const fmtSelect = topRow.createEl("select");
+            fmtSelect.style.cssText = "padding: 4px 6px;";
+            fmtSelect.setAttribute("aria-label", "Date format stored in the property");
+            [
+              ["iso_date", "Full date (YYYY-MM-DD)"],
+              ["rrule", "RRULE pattern"]
+            ].forEach(([val, label]) => {
+              var _a2;
+              const opt = fmtSelect.createEl("option", { value: val, text: label });
+              if (((_a2 = rule.dateFormat) != null ? _a2 : "iso_date") === val) opt.selected = true;
+            });
+            fmtSelect.onchange = async () => {
+              rule.dateFormat = fmtSelect.value;
+              await this.plugin.saveSettings();
+              renderRulesList();
+            };
+            const currentFmt = (_a = rule.dateFormat) != null ? _a : "iso_date";
+            if (currentFmt === "iso_date") {
+              const freqSelect = topRow.createEl("select");
+              freqSelect.style.cssText = "padding: 4px 6px;";
+              freqSelect.setAttribute("aria-label", "How often the note recurs");
+              [["yearly", "Yearly"], ["monthly", "Monthly"], ["weekly", "Weekly"]].forEach(([val, label]) => {
+                const opt = freqSelect.createEl("option", { value: val, text: label });
+                if (rule.frequency === val) opt.selected = true;
+              });
+              freqSelect.onchange = async () => {
+                rule.frequency = freqSelect.value;
+                await this.plugin.saveSettings();
+              };
+            }
+            const deleteBtn = topRow.createEl("button");
+            (0, import_obsidian5.setIcon)(deleteBtn, "trash-2");
+            deleteBtn.setAttribute("aria-label", "Delete rule");
+            deleteBtn.style.cssText = "padding: 4px 7px; cursor: pointer; color: var(--text-muted); background: transparent; border: 1px solid var(--background-modifier-border); border-radius: 4px;";
+            deleteBtn.onclick = async () => {
+              config.propertyRules.splice(index, 1);
+              await this.plugin.saveSettings();
+              renderRulesList();
+            };
+            const displayRow = ruleRow.createDiv();
+            displayRow.style.cssText = "display: flex; gap: 8px; align-items: center; margin-bottom: 8px;";
+            displayRow.createEl("span", { text: "Calendar label:", attr: { style: "font-size: 0.88em; color: var(--text-muted); white-space: nowrap;" } });
+            const displaySelect = displayRow.createEl("select");
+            displaySelect.style.cssText = "flex: 1; padding: 4px 6px;";
+            [
+              ["title", "Note title only"],
+              ["title_property", "Title \u2013 Property name"],
+              ["title_property_years", "Title \u2013 Property name (years elapsed)"]
+            ].forEach(([val, label]) => {
+              const opt = displaySelect.createEl("option", { value: val, text: label });
+              if (rule.titleDisplay === val) opt.selected = true;
+            });
+            displaySelect.onchange = async () => {
+              rule.titleDisplay = displaySelect.value;
+              await this.plugin.saveSettings();
+              renderRulesList();
+            };
+            if (rule.titleDisplay !== "title") {
+              displayRow.createEl("span", { text: "Separator:", attr: { style: "font-size: 0.88em; color: var(--text-muted); white-space: nowrap;" } });
+              const sepInput = displayRow.createEl("input", {
+                type: "text",
+                value: (_b = rule.titleSeparator) != null ? _b : "\u2013",
+                attr: { placeholder: "leave empty for none", style: "width: 140px; padding: 4px 6px;" }
+              });
+              sepInput.setAttribute("aria-label", "Separator character between title and property name (leave empty for none)");
+              sepInput.onchange = async (e) => {
+                rule.titleSeparator = e.target.value;
+                await this.plugin.saveSettings();
+              };
+            }
+            if (currentFmt === "rrule") {
+              const startRow = ruleRow.createDiv();
+              startRow.style.cssText = "display: flex; gap: 8px; align-items: center; margin-bottom: 8px;";
+              startRow.createEl("span", { text: "Start date property:", attr: { style: "font-size: 0.88em; color: var(--text-muted); white-space: nowrap;" } });
+              const startInput = startRow.createEl("input", {
+                type: "text",
+                value: (_c = rule.startPropertyName) != null ? _c : "",
+                attr: { placeholder: "e.g. start_date (optional)" }
+              });
+              startInput.style.cssText = "flex: 1; padding: 4px 8px;";
+              new PropertySuggest(this.app, startInput);
+              startInput.onchange = async (e) => {
+                rule.startPropertyName = e.target.value.trim();
+                await this.plugin.saveSettings();
+              };
+              startRow.createEl("span", { text: "If set, the rule starts from that date (YYYY-MM-DD).", attr: { style: "font-size: 0.82em; color: var(--text-muted);" } });
+            }
+            const endRow = ruleRow.createDiv();
+            endRow.style.cssText = "display: flex; gap: 8px; align-items: center;";
+            endRow.createEl("span", { text: "Stop after:", attr: { style: "font-size: 0.88em; color: var(--text-muted); white-space: nowrap;" } });
+            const endInput = endRow.createEl("input", {
+              type: "text",
+              value: rule.endPropertyName,
+              attr: { placeholder: "End date property (optional)" }
+            });
+            endInput.style.cssText = "flex: 1; padding: 4px 8px;";
+            new PropertySuggest(this.app, endInput);
+            endInput.onchange = async (e) => {
+              rule.endPropertyName = e.target.value.trim();
+              await this.plugin.saveSettings();
+            };
+            endRow.createEl("span", { text: "If set, the note stops appearing after that date.", attr: { style: "font-size: 0.82em; color: var(--text-muted);" } });
+          });
+        };
+        renderRulesList();
+        const addBtn = containerEl.createEl("button", { text: "+ Add property rule" });
+        addBtn.style.cssText = "margin-top: 4px; margin-bottom: 20px; padding: 7px 14px; cursor: pointer; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 4px; font-weight: 500;";
+        addBtn.onclick = async () => {
+          config.propertyRules.push({
+            id: Date.now().toString(),
+            propertyName: "",
+            dateFormat: "iso_date",
+            frequency: "yearly",
+            startPropertyName: "",
+            endPropertyName: "",
+            titleDisplay: "title_property",
+            titleSeparator: "\u2013"
+          });
+          await this.plugin.saveSettings();
+          renderRulesList();
+        };
+      }
+    };
+    CategoryEditModal = class extends import_obsidian5.Modal {
+      constructor(app, plugin, category, onSave) {
+        super(app);
+        this.plugin = plugin;
+        this.category = category;
+        this.onSave = onSave;
+      }
+      /**
+       * Helper to create a checkbox with label in a consistent format.
+       * The checkbox is placed inside a wrapper div, NOT inside a <label> element.
+       * This prevents accidental toggling when clicking the label text.
+       */
+      createCheckboxWithLabel(container, text, checked, onChange) {
+        const wrapper = container.createDiv();
+        wrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
+        const checkbox = wrapper.createEl("input", { type: "checkbox" });
+        checkbox.checked = checked;
+        checkbox.onchange = async (e) => {
+          await onChange(e.target.checked);
+        };
+        wrapper.createEl("span", { text });
+        return checkbox;
+      }
+      /**
+       * IMPORTANT: This method is duplicated from CalendarSettingTab.renderConditionsInfoIcon().
+       * When making changes here, apply the same changes to CalendarSettingTab.renderConditionsInfoIcon().
+       * This ensures both main settings and modal have consistent info icon behavior.
+       */
+      renderConditionsInfoIcon(container) {
+        const infoIcon = container.createEl("span");
+        (0, import_obsidian5.setIcon)(infoIcon, "info");
+        infoIcon.style.cssText = "cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;";
+        infoIcon.title = "Click to see examples";
+        let popover = null;
+        const closePopover = () => {
+          if (popover) {
+            popover.remove();
+            popover = null;
+          }
+        };
+        infoIcon.onclick = (e) => {
+          e.preventDefault();
+          if (popover) {
+            closePopover();
+            return;
+          }
+          popover = document.body.createDiv();
+          popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px;";
+          const closeBtn = popover.createEl("button");
+          closeBtn.textContent = "\xD7";
+          closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
+          closeBtn.title = "Close";
+          closeBtn.onmouseenter = () => {
+            closeBtn.style.background = "var(--background-modifier-hover)";
+          };
+          closeBtn.onmouseleave = () => {
+            closeBtn.style.background = "transparent";
+          };
+          closeBtn.onclick = (e2) => {
+            e2.preventDefault();
+            closePopover();
+          };
+          popover.createEl("div", {
+            text: "Examples:",
+            attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--text-normal); padding-right: 20px;" }
+          });
+          popover.createEl("div", {
+            text: '\u2022 Property "category" is "school"',
+            attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
+          });
+          popover.createEl("div", {
+            text: '\u2022 File tags has tag "holidays"',
+            attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
+          });
+          popover.createEl("div", {
+            text: '\u2022 File name contains "meeting"',
+            attr: { style: "margin-left: 8px; color: var(--text-muted); font-size: 0.9em;" }
+          });
+          const iconRect = infoIcon.getBoundingClientRect();
+          popover.style.top = iconRect.bottom + 6 + "px";
+          popover.style.left = iconRect.left + "px";
+          setTimeout(() => {
+            if (popover) {
+              const popoverRect = popover.getBoundingClientRect();
+              if (popoverRect.right > window.innerWidth) {
+                popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+              }
+              if (popoverRect.bottom > window.innerHeight) {
+                popover.style.top = iconRect.top - popoverRect.height - 6 + "px";
+              }
+            }
+          }, 0);
+          const closeHandler = (e2) => {
+            if (popover && !popover.contains(e2.target) && !infoIcon.contains(e2.target)) {
+              closePopover();
+              document.removeEventListener("click", closeHandler);
+            }
+          };
+          setTimeout(() => {
+            document.addEventListener("click", closeHandler);
+          }, 0);
+          const escHandler = (e2) => {
+            if (e2.key === "Escape") {
+              closePopover();
+              document.removeEventListener("keydown", escHandler);
+            }
+          };
+          document.addEventListener("keydown", escHandler);
+        };
+      }
+      onOpen() {
+        const { contentEl } = this;
+        contentEl.empty();
+        contentEl.createEl("h2", { text: "Edit Category" });
+        new import_obsidian5.Setting(contentEl).setName("Category name").addText((text) => text.setValue(this.category.name).onChange(async (value) => {
+          this.category.name = value;
+          await this.plugin.saveSettings();
+          this.onSave();
+        }));
+        contentEl.createEl("div", {
+          attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+        });
+        const colorSetting = new import_obsidian5.Setting(contentEl).setName("Color").setDesc("Choose a color for this category");
+        this.renderColorPickerInModal(colorSetting.controlEl);
+        contentEl.createEl("div", {
+          attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
+        });
+        const useIconSetting = contentEl.createDiv();
+        useIconSetting.style.cssText = "display: flex; flex-direction: column; gap: 4px; padding: 12px 0;";
+        const useIconHeader = useIconSetting.createDiv();
+        useIconHeader.style.cssText = "display: flex; flex-direction: column; gap: 4px;";
+        this.createCheckboxWithLabel(
+          useIconHeader,
+          "Use icon",
+          this.category.iconType !== null,
+          async (checked) => {
+            if (checked) {
+              this.category.iconType = "emoji";
+              this.category.iconValue = "\u2B50";
+            } else {
+              this.category.iconType = null;
+              this.category.iconValue = "";
+            }
+            await this.plugin.saveSettings();
+            this.onSave();
+            this.onOpen();
+          }
+        );
+        const useIconDesc = useIconSetting.createEl("div");
+        useIconDesc.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-left: 24px;";
+        useIconDesc.textContent = "Add an emoji or Lucide icon to this category";
+        if (this.category.iconType !== null) {
+          const iconSetting = new import_obsidian5.Setting(contentEl).setName("Icon").setDesc("Search for emoji or Lucide icon");
+          const inputContainer = iconSetting.controlEl.createDiv();
+          inputContainer.style.cssText = "display: flex; gap: 10px; align-items: center; width: 100%;";
+          const iconInput = inputContainer.createEl("input", {
+            type: "text",
+            value: this.category.iconValue,
+            attr: { placeholder: "Type to search icons..." }
+          });
+          iconInput.style.cssText = "flex: 1; padding: 6px;";
+          if (this.category.iconType) {
+            iconInput.dataset.iconType = this.category.iconType;
+          }
+          const saveIconValue = async () => {
+            this.category.iconValue = iconInput.value;
+            if (iconInput.dataset.iconType) {
+              this.category.iconType = iconInput.dataset.iconType;
+            }
+            await this.plugin.saveSettings();
+            this.onSave();
+          };
+          iconInput.addEventListener("input", saveIconValue);
+          const iconPreviewEl = inputContainer.createEl("div");
+          iconPreviewEl.style.cssText = "width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--background-modifier-border); border-radius: 3px; font-size: 1.2em;";
+          if (this.category.iconValue) {
+            if (this.category.iconType === "emoji") {
+              iconPreviewEl.textContent = this.category.iconValue;
+            } else {
+              (0, import_obsidian5.setIcon)(iconPreviewEl, this.category.iconValue);
+            }
+          }
+          new IconSuggest(iconInput, iconPreviewEl);
+        }
+        contentEl.createEl("div", {
+          attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 20px 0;" }
+        });
+        const conditionsHeader = contentEl.createDiv();
+        conditionsHeader.style.cssText = "display: flex; align-items: center; gap: 8px; margin-top: 0; margin-bottom: 10px;";
+        conditionsHeader.createEl("h3", { text: "Conditions", attr: { style: "margin: 0;" } });
+        this.renderConditionsInfoIcon(conditionsHeader);
+        new import_obsidian5.Setting(contentEl).setName("Match mode").setDesc("Choose how conditions should be evaluated").addDropdown((dropdown) => dropdown.addOption("all", "AND - All conditions must match").addOption("any", "OR - Any condition can match").setValue(this.category.matchMode).onChange(async (value) => {
+          this.category.matchMode = value;
+          await this.plugin.saveSettings();
+          this.onSave();
+        }));
+        const conditionsContainer = contentEl.createDiv();
+        conditionsContainer.style.cssText = "max-height: 300px; overflow-y: auto;";
+        if (this.category.conditions.length === 0) {
+          conditionsContainer.createEl("div", {
+            text: "No conditions yet. Add at least one condition for this category to match notes.",
+            attr: { style: "color: var(--text-muted); font-style: italic; padding: 10px;" }
+          });
+        } else {
+          this.category.conditions.forEach((condition, index) => {
+            this.renderCondition(conditionsContainer, condition, index);
+          });
+        }
+        new import_obsidian5.Setting(contentEl).addButton((btn) => btn.setButtonText("+ Add condition").onClick(async () => {
+          this.category.conditions.push({
+            property: "file.name",
+            operator: "contains",
+            value: ""
+          });
+          await this.plugin.saveSettings();
+          this.onSave();
+          this.onOpen();
+        }));
+        const footer = contentEl.createDiv();
+        footer.style.cssText = "display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;";
+        const leftBtns = footer.createDiv();
+        leftBtns.style.cssText = "display: flex; gap: 8px; align-items: center;";
+        const deleteBtn = leftBtns.createEl("button", { cls: "category-disable-btn is-modal" });
+        (0, import_obsidian5.setIcon)(deleteBtn, "trash");
+        deleteBtn.setAttribute("data-tooltip", "Delete category");
+        deleteBtn.onclick = async () => {
+          const confirmed = confirm(`Are you sure you want to delete the category "${this.category.name}"?`);
+          if (confirmed) {
+            const config = this.plugin.settings.colorCategories;
+            const index = config.categories.indexOf(this.category);
+            if (index > -1) {
+              config.categories.splice(index, 1);
+              await this.plugin.saveSettings();
+              this.onSave();
+              this.close();
+            }
+          }
+        };
+        const disableBtn = leftBtns.createEl("button", { cls: "category-disable-btn is-modal" });
+        (0, import_obsidian5.setIcon)(disableBtn, "ban");
+        if (!this.category.enabled) disableBtn.addClass("is-disabled");
+        disableBtn.setAttribute("data-tooltip", this.category.enabled ? "Disable \u2014 acts like deletion but is recoverable in settings" : "Enable");
+        disableBtn.onclick = async () => {
+          if (this.category.enabled) {
+            const confirmed = confirm("Disable Category \u2014 it acts like deletion but is recoverable in settings. Proceed?");
+            if (!confirmed) return;
+          }
+          this.category.enabled = !this.category.enabled;
+          await this.plugin.saveSettings();
+          this.onSave();
+          this.close();
+        };
+        const closeBtn = footer.createEl("button", { text: "Close" });
+        closeBtn.addClass("mod-cta");
+        closeBtn.onclick = () => this.close();
+      }
+      renderCondition(container, condition, condIndex) {
+        ConditionRenderer.render(container, condition, condIndex, this.category.conditions, this.app, {
+          onSave: async () => {
+            await this.plugin.saveSettings();
+            this.onSave();
+          },
+          onRefresh: () => {
+            this.onOpen();
+          }
+        });
+      }
+      renderColorPickerInModal(container) {
+        const config = this.plugin.settings.colorCategories;
+        ColorPickerRenderer.render({
+          container,
+          currentColor: this.category.color,
+          palettes: config.colorPalettes || [],
+          onColorChange: async (newColor) => {
+            this.category.color = newColor;
+            await this.plugin.saveSettings();
+            this.onSave();
+          }
+        });
+      }
+      onClose() {
+        const { contentEl } = this;
+        contentEl.empty();
+      }
+    };
+    CustomPeriodEditModal = class extends import_obsidian5.Modal {
+      constructor(app, plugin, period, group, onSave, onDelete) {
+        super(app);
+        this.plugin = plugin;
+        this.period = period;
+        this.group = group;
+        this.onSave = onSave;
+        this.onDelete = onDelete;
+      }
+      /**
+       * Get the template folder path based on settings.
+       */
+      getTemplateFolderPath() {
+        var _a, _b, _c, _d, _e, _f, _g;
+        const settings = this.plugin.settings.periodicNotes;
+        if (settings.templateFolderSource === "custom") {
+          return settings.templateCustomFolder || void 0;
+        }
+        const templatesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["templates"];
+        if ((templatesPlugin == null ? void 0 : templatesPlugin.enabled) && ((_d = (_c = templatesPlugin == null ? void 0 : templatesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder)) {
+          return templatesPlugin.instance.options.folder;
+        }
+        const templaterPlugin = (_f = (_e = this.app.plugins) == null ? void 0 : _e.plugins) == null ? void 0 : _f["templater-obsidian"];
+        if ((_g = templaterPlugin == null ? void 0 : templaterPlugin.settings) == null ? void 0 : _g.templates_folder) {
+          return templaterPlugin.settings.templates_folder;
+        }
+        return void 0;
+      }
+      /**
+       * Get months that are used by other periods in this group (not available for selection)
+       */
+      getUnavailableMonths() {
+        const unavailable = /* @__PURE__ */ new Set();
+        for (const p of this.group.periods) {
+          if (p.id !== this.period.id) {
+            p.months.forEach((m) => unavailable.add(m));
+          }
+        }
+        return unavailable;
+      }
+      /**
+       * Check if months array is consecutive (allowing year wrap like [11,12,1,2])
+       */
+      areMonthsConsecutive(months) {
+        if (months.length <= 1) return true;
+        const sorted = [...months].sort((a, b) => a - b);
+        let isConsecutiveNormal = true;
+        for (let i = 1; i < sorted.length; i++) {
+          if (sorted[i] - sorted[i - 1] !== 1) {
+            isConsecutiveNormal = false;
+            break;
+          }
+        }
+        if (isConsecutiveNormal) return true;
+        const hasDecember = sorted.includes(12);
+        const hasJanuary = sorted.includes(1);
+        if (!hasDecember || !hasJanuary) return false;
+        const highMonths = sorted.filter((m) => m >= 7);
+        const lowMonths = sorted.filter((m) => m <= 6);
+        for (let i = 1; i < highMonths.length; i++) {
+          if (highMonths[i] - highMonths[i - 1] !== 1) return false;
+        }
+        if (highMonths.length > 0 && highMonths[highMonths.length - 1] !== 12) return false;
+        for (let i = 1; i < lowMonths.length; i++) {
+          if (lowMonths[i] - lowMonths[i - 1] !== 1) return false;
+        }
+        if (lowMonths.length > 0 && lowMonths[0] !== 1) return false;
+        return true;
+      }
+      onOpen() {
+        var _a;
+        const { contentEl } = this;
+        contentEl.empty();
+        contentEl.createEl("h2", { text: "Edit Custom Period" });
+        new import_obsidian5.Setting(contentEl).setName("Name").setDesc('Display name for this period (e.g., "Semester 1", "Winter")').addText((text) => text.setPlaceholder("Period name").setValue(this.period.name).onChange(async (value) => {
+          this.period.name = value;
+          await this.plugin.saveSettings();
+          this.onSave();
+        }));
+        const monthsSection = contentEl.createDiv();
+        monthsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin: 15px 0;";
+        const monthsHeader = monthsSection.createDiv();
+        monthsHeader.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;";
+        monthsHeader.createEl("h4", { text: "Months", attr: { style: "margin: 0;" } });
+        const unavailableMonths = this.getUnavailableMonths();
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthsGrid = monthsSection.createDiv();
+        monthsGrid.style.cssText = "display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;";
+        monthNames.forEach((name, index) => {
+          const monthNum = index + 1;
+          const isSelected = this.period.months.includes(monthNum);
+          const isUnavailable = unavailableMonths.has(monthNum);
+          const monthBtn = monthsGrid.createEl("button");
+          monthBtn.textContent = name;
+          if (isUnavailable) {
+            monthBtn.style.cssText = `
+                    padding: 8px 12px;
+                    border: 2px solid var(--background-modifier-border);
+                    background: var(--background-modifier-border);
+                    color: var(--text-muted);
+                    border-radius: 4px;
+                    cursor: not-allowed;
+                    font-weight: 400;
+                    opacity: 0.5;
+                `;
+            monthBtn.title = "Used by another period in this group";
+          } else {
+            monthBtn.style.cssText = `
+                    padding: 8px 12px;
+                    border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"};
+                    background: ${isSelected ? "var(--interactive-accent)" : "var(--background-primary)"};
+                    color: ${isSelected ? "var(--text-on-accent)" : "var(--text-normal)"};
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-weight: ${isSelected ? "600" : "400"};
+                    transition: all 0.15s;
+                `;
+            monthBtn.onclick = async () => {
+              let newMonths;
+              if (isSelected) {
+                newMonths = this.period.months.filter((m) => m !== monthNum);
+              } else {
+                newMonths = [...this.period.months, monthNum];
+              }
+              if (!this.areMonthsConsecutive(newMonths)) {
+              }
+              this.period.months = newMonths.sort((a, b) => a - b);
+              await this.plugin.saveSettings();
+              this.onSave();
+              this.onOpen();
+            };
+          }
+        });
+        const validationEl = monthsSection.createDiv();
+        validationEl.style.cssText = "margin-top: 10px; font-size: 0.85em;";
+        if (this.period.months.length === 0) {
+          validationEl.style.color = "var(--text-error)";
+          validationEl.textContent = "\u26A0 Please select at least one month.";
+        } else if (!this.areMonthsConsecutive(this.period.months)) {
+          validationEl.style.color = "var(--text-error)";
+          validationEl.textContent = "\u26A0 Months must be consecutive. Remove gaps between selected months.";
+        } else {
+          validationEl.style.color = "var(--text-muted)";
+          validationEl.textContent = "Tip: Months can wrap across year boundary (e.g., Nov-Dec-Jan-Feb for Winter).";
+        }
+        new import_obsidian5.Setting(contentEl).setName("Year basis").setDesc("Which year to use when the period spans across year boundary").addDropdown((dropdown) => dropdown.addOption("start", "Use year of first month").addOption("end", "Use year of last month").addOption("majority", "Use year where most months fall").setValue(this.period.yearBasis).onChange(async (value) => {
+          this.period.yearBasis = value;
+          await this.plugin.saveSettings();
+          this.onSave();
+        }));
+        const formatSetting = new import_obsidian5.Setting(contentEl).setName("Format").addText((text) => text.setPlaceholder("YYYY-[S1]").setValue(this.period.format).onChange(async (value) => {
+          this.period.format = value;
+          await this.plugin.saveSettings();
+          this.onSave();
+          this.updateFormatPreview(previewEl);
+        }));
+        formatSetting.descEl.innerHTML = `Filename format for period notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
+        const previewEl = formatSetting.descEl.createDiv();
+        previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
+        this.updateFormatPreview(previewEl);
+        const useGroupSettingsSection = contentEl.createDiv();
+        useGroupSettingsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin: 15px 0;";
+        new import_obsidian5.Setting(useGroupSettingsSection).setName("Use group defaults").setDesc(`Use the group's folder, template, and color settings`).addToggle((toggle) => toggle.setValue(this.period.useGroupSettings !== false).onChange(async (value) => {
+          this.period.useGroupSettings = value;
+          await this.plugin.saveSettings();
+          this.onSave();
+          this.onOpen();
+        }));
+        if (this.period.useGroupSettings !== false) {
+          const groupInfoEl = useGroupSettingsSection.createDiv();
+          groupInfoEl.style.cssText = "font-size: 0.85em; color: var(--text-muted); padding: 8px; background: var(--background-primary); border-radius: 4px; margin-top: 8px;";
+          groupInfoEl.innerHTML = `
+                <div style="margin-bottom: 4px;"><strong>Group "${this.group.name}" defaults:</strong></div>
+                <div>Folder: ${this.group.folder || "(vault root)"}</div>
+                <div>Template: ${this.group.template || "(none)"}</div>
+                <div>Color: ${this.group.color ? `<span style="display:inline-block; width:12px; height:12px; background:${this.group.color}; border-radius:2px; vertical-align:middle;"></span> ${this.group.color}` : "(none)"}</div>
+            `;
+        } else {
+          const individualSettingsLabel = useGroupSettingsSection.createDiv();
+          individualSettingsLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-top: 8px; margin-bottom: 4px;";
+          individualSettingsLabel.textContent = "Custom settings for this period:";
+          const periodFolderSetting = new import_obsidian5.Setting(useGroupSettingsSection).setName("Folder").addText((text) => {
+            text.setPlaceholder("Leave empty for vault root").setValue(this.period.folder).onChange(async (value) => {
+              const cleaned = value.replace(/^\/+|\/+$/g, "");
+              this.period.folder = cleaned;
+              await this.plugin.saveSettings();
+              this.onSave();
+            });
+            new FolderSuggest(this.app, text.inputEl);
+          });
+          periodFolderSetting.controlEl.style.cssText = "display: flex; flex-direction: column; align-items: flex-end; gap: 4px;";
+          const periodSubfolderLabel = periodFolderSetting.controlEl.createEl("label");
+          periodSubfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
+          const periodSubfolderCheckbox = periodSubfolderLabel.createEl("input", { type: "checkbox" });
+          periodSubfolderCheckbox.checked = (_a = this.period.includeSubfolders) != null ? _a : true;
+          periodSubfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
+          periodSubfolderLabel.appendText("Include sub-folders");
+          periodSubfolderCheckbox.addEventListener("change", async () => {
+            this.period.includeSubfolders = periodSubfolderCheckbox.checked;
+            await this.plugin.saveSettings();
+            this.onSave();
+          });
+          new import_obsidian5.Setting(useGroupSettingsSection).setName("Template").setDesc("Template file to use when creating notes for this period").addText((text) => {
+            text.setPlaceholder("templates/semester").setValue(this.period.template).onChange(async (value) => {
+              this.period.template = value;
+              await this.plugin.saveSettings();
+              this.onSave();
+            });
+            new FileSuggest(this.app, text.inputEl, this.getTemplateFolderPath());
+          });
+          const colorSetting = new import_obsidian5.Setting(useGroupSettingsSection).setName("Color (optional)").setDesc("Visual indicator color for this period in the calendar");
+          const colorContainer = colorSetting.controlEl.createDiv();
+          colorContainer.style.cssText = "display: flex; align-items: center; gap: 8px; flex-wrap: wrap;";
+          const colorEnabled = colorContainer.createEl("input", { type: "checkbox" });
+          colorEnabled.checked = !!this.period.color;
+          const colorPickerWrapper = colorContainer.createDiv();
+          colorPickerWrapper.style.cssText = this.period.color ? "display: flex; align-items: center;" : "display: none;";
+          if (this.period.color) {
+            const config = this.plugin.settings.colorCategories;
+            ColorPickerRenderer.render({
+              container: colorPickerWrapper,
+              currentColor: this.period.color,
+              palettes: config.colorPalettes || [],
+              onColorChange: async (newColor) => {
+                this.period.color = newColor;
+                await this.plugin.saveSettings();
+                this.onSave();
+              }
+            });
+          }
+          const colorLabel = colorContainer.createSpan({ text: this.period.color ? "" : "Enable color" });
+          colorLabel.style.cssText = "font-size: 0.9em; color: var(--text-muted);";
+          colorEnabled.onchange = async () => {
+            if (colorEnabled.checked) {
+              this.period.color = "#4a90d9";
+            } else {
+              this.period.color = void 0;
+            }
+            await this.plugin.saveSettings();
+            this.onSave();
+            this.onOpen();
+          };
+        }
+        const footer = contentEl.createDiv();
+        footer.style.cssText = "display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--background-modifier-border);";
+        const deleteBtn = footer.createEl("button", { text: "Delete Period" });
+        deleteBtn.style.cssText = "padding: 8px 16px; cursor: pointer; color: var(--text-error); background: transparent; border: 1px solid var(--text-error); border-radius: 4px;";
+        deleteBtn.onclick = async () => {
+          const confirmed = confirm(`Are you sure you want to delete "${this.period.name}"?`);
+          if (confirmed) {
+            await this.onDelete();
+            this.close();
+          }
+        };
+        const closeBtn = footer.createEl("button", { text: "Close", cls: "mod-cta" });
+        closeBtn.style.cssText = "padding: 8px 16px; cursor: pointer;";
+        closeBtn.onclick = () => this.close();
+      }
+      updateFormatPreview(previewEl) {
+        const moment = window.moment;
+        try {
+          const preview = moment().format(this.period.format || "YYYY-[P1]");
+          previewEl.textContent = `Preview: ${preview}`;
+        } catch (e) {
+          previewEl.textContent = "Preview: (invalid format)";
+        }
+      }
+      onClose() {
+        const { contentEl } = this;
+        contentEl.empty();
+      }
+    };
+    RecurringRuleBuilderModal = class extends import_obsidian5.Modal {
+      constructor(app, plugin, file) {
+        super(app);
+        this.frequency = "yearly";
+        this.yearlyMonth = 1;
+        this.yearlyDay = 1;
+        this.monthlyMode = "day";
+        this.monthlyDay = 1;
+        this.monthlyNth = 1;
+        this.monthlyWeekday = 0;
+        this.weeklyDays = [false, true, false, false, false, false, false];
+        this.targetPropertyName = "";
+        this.plugin = plugin;
+        this.file = file;
+        this.detectCurrentRule();
+      }
+      detectCurrentRule() {
+        var _a, _b, _c, _d, _e;
+        const rules = this.plugin.settings.recurringEvents.propertyRules.filter((r) => {
+          var _a2;
+          return ((_a2 = r.dateFormat) != null ? _a2 : "iso_date") === "rrule";
+        });
+        if (rules.length === 0) return;
+        const fm = (_a = this.app.metadataCache.getFileCache(this.file)) == null ? void 0 : _a.frontmatter;
+        if (!fm) {
+          this.targetPropertyName = (_c = (_b = rules[0]) == null ? void 0 : _b.propertyName) != null ? _c : "";
+          return;
+        }
+        for (const rule of rules) {
+          const val = fm[rule.propertyName];
+          if (val) {
+            this.targetPropertyName = rule.propertyName;
+            this.parseExistingValue(String(val).trim(), rule.frequency);
+            return;
+          }
+        }
+        this.targetPropertyName = (_e = (_d = rules[0]) == null ? void 0 : _d.propertyName) != null ? _e : "";
+      }
+      parseExistingValue(val, frequency) {
+        var _a, _b, _c;
+        this.frequency = frequency;
+        if (val.startsWith("FREQ=")) {
+          const freqMatch = val.match(/FREQ=(\w+)/);
+          if ((freqMatch == null ? void 0 : freqMatch[1]) === "YEARLY") this.frequency = "yearly";
+          else if ((freqMatch == null ? void 0 : freqMatch[1]) === "MONTHLY") this.frequency = "monthly";
+          else if ((freqMatch == null ? void 0 : freqMatch[1]) === "WEEKLY") this.frequency = "weekly";
+          const byMonth = val.match(/BYMONTH=(\d+)/);
+          if (byMonth) this.yearlyMonth = parseInt(byMonth[1], 10);
+          const byMonthDay = val.match(/BYMONTHDAY=(\d+)/);
+          if (byMonthDay) {
+            this.yearlyDay = parseInt(byMonthDay[1], 10);
+            this.monthlyDay = parseInt(byMonthDay[1], 10);
+          }
+          const byDayMatch = val.match(/BYDAY=(-?\d+)?([A-Z]{2})/);
+          if (byDayMatch) {
+            const dayMap = { SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6 };
+            if (this.frequency === "weekly") {
+              const days = (_b = (_a = val.match(/BYDAY=([\w,]+)/)) == null ? void 0 : _a[1]) != null ? _b : "";
+              days.split(",").forEach((d) => {
+                const idx = dayMap[d.toUpperCase()];
+                if (idx !== void 0) this.weeklyDays[idx] = true;
+              });
+            } else if (byDayMatch[1]) {
+              this.monthlyMode = "nth";
+              this.monthlyNth = parseInt(byDayMatch[1], 10);
+              this.monthlyWeekday = (_c = dayMap[byDayMatch[2]]) != null ? _c : 0;
+            }
+          }
+        }
+      }
+      buildRRuleValue() {
+        if (this.frequency === "yearly") {
+          return `FREQ=YEARLY;BYMONTH=${this.yearlyMonth};BYMONTHDAY=${this.yearlyDay}`;
+        }
+        if (this.frequency === "monthly") {
+          if (this.monthlyMode === "day") {
+            return `FREQ=MONTHLY;BYMONTHDAY=${this.monthlyDay}`;
+          }
+          const days2 = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+          const nth = this.monthlyNth === -1 ? "-1" : String(this.monthlyNth);
+          return `FREQ=MONTHLY;BYDAY=${nth}${days2[this.monthlyWeekday]}`;
+        }
+        const days = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+        const selected = days.filter((_, i) => this.weeklyDays[i]);
+        return `FREQ=WEEKLY;BYDAY=${selected.length ? selected.join(",") : "MO"}`;
+      }
+      buildPreview() {
+        var _a, _b, _c, _d;
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+        const ordinals = ["", "1st", "2nd", "3rd", "4th"];
+        if (this.frequency === "yearly") {
+          const mon = (_a = months[this.yearlyMonth - 1]) != null ? _a : "?";
+          const suffix = (_b = ["st", "nd", "rd"][this.yearlyDay - 1]) != null ? _b : "th";
+          return `Every year on ${mon} ${this.yearlyDay}${suffix}`;
+        }
+        if (this.frequency === "monthly") {
+          if (this.monthlyMode === "day") {
+            const suffix = (_c = ["st", "nd", "rd"][this.monthlyDay - 1]) != null ? _c : "th";
+            return `Every month on the ${this.monthlyDay}${suffix}`;
+          }
+          const nth = this.monthlyNth === -1 ? "last" : (_d = ordinals[this.monthlyNth]) != null ? _d : `${this.monthlyNth}th`;
+          return `Every month on the ${nth} ${weekdays[this.monthlyWeekday]}`;
+        }
+        const selected = weekdays.filter((_, i) => this.weeklyDays[i]);
+        return selected.length ? `Every ${selected.join(", ")}` : "Every week (select a day above)";
+      }
+      onOpen() {
+        const { contentEl } = this;
+        contentEl.empty();
+        contentEl.createEl("h2", { text: "Edit Recurring Rule" });
+        const rules = this.plugin.settings.recurringEvents.propertyRules.filter((r) => {
+          var _a;
+          return ((_a = r.dateFormat) != null ? _a : "iso_date") === "rrule";
+        });
+        if (rules.length === 0) {
+          contentEl.createEl("p", { text: 'No RRULE property rules configured. Add one (with "RRULE pattern" format) in the Recurring Events settings tab first.' });
+          contentEl.createEl("button", { text: "Close", cls: "mod-cta" }).onclick = () => this.close();
+          return;
+        }
+        if (rules.length > 1) {
+          const propRow = contentEl.createDiv({ attr: { style: "margin-bottom: 14px;" } });
+          propRow.createEl("label", { text: "Property: ", attr: { style: "font-weight: 600; margin-right: 8px;" } });
+          const propSelect = propRow.createEl("select", { attr: { style: "padding: 4px 8px;" } });
+          rules.forEach((r) => {
+            const opt = propSelect.createEl("option", { value: r.propertyName, text: r.propertyName });
+            if (r.propertyName === this.targetPropertyName) opt.selected = true;
+          });
+          propSelect.onchange = () => {
+            this.targetPropertyName = propSelect.value;
+            const rule = rules.find((r) => r.propertyName === propSelect.value);
+            if (rule) this.frequency = rule.frequency;
+            this.onOpen();
+          };
+        }
+        const freqRow = contentEl.createDiv({ attr: { style: "display: flex; gap: 8px; margin-bottom: 18px;" } });
+        ["yearly", "monthly", "weekly"].forEach((f) => {
+          const btn = freqRow.createEl("button", { text: f.charAt(0).toUpperCase() + f.slice(1) });
+          const active = this.frequency === f;
+          btn.style.cssText = `padding: 7px 16px; border-radius: 4px; cursor: pointer; border: none; font-weight: ${active ? "600" : "400"}; background: ${active ? "var(--interactive-accent)" : "var(--background-secondary)"}; color: ${active ? "var(--text-on-accent)" : "var(--text-normal)"};`;
+          btn.onclick = () => {
+            this.frequency = f;
+            this.onOpen();
+          };
+        });
+        const optionsEl = contentEl.createDiv({ attr: { style: "margin-bottom: 14px;" } });
+        if (this.frequency === "yearly") {
+          const row = optionsEl.createDiv({ attr: { style: "display: flex; gap: 10px; align-items: center;" } });
+          row.createEl("span", { text: "Every year on" });
+          const monthSelect = row.createEl("select", { attr: { style: "padding: 4px 8px;" } });
+          ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].forEach((m, i) => {
+            const opt = monthSelect.createEl("option", { value: String(i + 1), text: m });
+            if (this.yearlyMonth === i + 1) opt.selected = true;
+          });
+          monthSelect.onchange = () => {
+            this.yearlyMonth = parseInt(monthSelect.value);
+            this.updatePreview(previewEl, valueText);
+          };
+          const dayInput = row.createEl("input", { type: "number", value: String(this.yearlyDay), attr: { min: "1", max: "31", style: "width: 60px; padding: 4px 6px;" } });
+          dayInput.oninput = () => {
+            this.yearlyDay = parseInt(dayInput.value) || 1;
+            this.updatePreview(previewEl, valueText);
+          };
+        } else if (this.frequency === "monthly") {
+          const modeRow = optionsEl.createDiv({ attr: { style: "display: flex; gap: 16px; margin-bottom: 12px;" } });
+          ["day", "nth"].forEach((mode) => {
+            const label = modeRow.createEl("label", { attr: { style: "display: flex; align-items: center; gap: 5px; cursor: pointer;" } });
+            const radio = label.createEl("input", { type: "radio", attr: { name: "monthly-mode" } });
+            radio.checked = this.monthlyMode === mode;
+            label.createEl("span", { text: mode === "day" ? "On day of month" : "On Nth weekday" });
+            radio.onchange = () => {
+              this.monthlyMode = mode;
+              this.onOpen();
+            };
+          });
+          if (this.monthlyMode === "day") {
+            const row = optionsEl.createDiv({ attr: { style: "display: flex; gap: 10px; align-items: center;" } });
+            row.createEl("span", { text: "Every month on day" });
+            const dayInput = row.createEl("input", { type: "number", value: String(this.monthlyDay), attr: { min: "1", max: "31", style: "width: 60px; padding: 4px 6px;" } });
+            dayInput.oninput = () => {
+              this.monthlyDay = parseInt(dayInput.value) || 1;
+              this.updatePreview(previewEl, valueText);
+            };
+          } else {
+            const row = optionsEl.createDiv({ attr: { style: "display: flex; gap: 10px; align-items: center; flex-wrap: wrap;" } });
+            row.createEl("span", { text: "Every month on the" });
+            const nthSelect = row.createEl("select", { attr: { style: "padding: 4px 8px;" } });
+            [["1", "1st"], ["2", "2nd"], ["3", "3rd"], ["4", "4th"], ["-1", "last"]].forEach(([val, label]) => {
+              const opt = nthSelect.createEl("option", { value: val, text: label });
+              if (String(this.monthlyNth) === val) opt.selected = true;
+            });
+            nthSelect.onchange = () => {
+              this.monthlyNth = parseInt(nthSelect.value);
+              this.updatePreview(previewEl, valueText);
+            };
+            const wdSelect = row.createEl("select", { attr: { style: "padding: 4px 8px;" } });
+            ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].forEach((d, i) => {
+              const opt = wdSelect.createEl("option", { value: String(i), text: d });
+              if (this.monthlyWeekday === i) opt.selected = true;
+            });
+            wdSelect.onchange = () => {
+              this.monthlyWeekday = parseInt(wdSelect.value);
+              this.updatePreview(previewEl, valueText);
+            };
+          }
+        } else {
+          const row = optionsEl.createDiv({ attr: { style: "display: flex; gap: 8px; flex-wrap: wrap;" } });
+          ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].forEach((d, i) => {
+            const btn = row.createEl("button", { text: d });
+            const on = this.weeklyDays[i];
+            btn.style.cssText = `padding: 6px 10px; border-radius: 4px; cursor: pointer; border: 1px solid var(--background-modifier-border); background: ${on ? "var(--interactive-accent)" : "var(--background-secondary)"}; color: ${on ? "var(--text-on-accent)" : "var(--text-normal)"};`;
+            btn.onclick = () => {
+              this.weeklyDays[i] = !this.weeklyDays[i];
+              this.onOpen();
+            };
+          });
+        }
+        const previewEl = contentEl.createEl("div", { attr: { style: "font-size: 0.9em; color: var(--text-muted); font-style: italic; margin-bottom: 10px;" } });
+        previewEl.textContent = this.buildPreview();
+        const valueBox = contentEl.createDiv({ attr: { style: "background: var(--background-secondary); border-radius: 4px; padding: 8px 12px; font-family: monospace; font-size: 0.88em; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;" } });
+        const valueText = valueBox.createEl("span", { text: this.buildRRuleValue() });
+        const copyBtn = valueBox.createEl("button", { text: "Copy", attr: { style: "padding: 3px 10px; cursor: pointer; font-size: 0.85em; white-space: nowrap;" } });
+        copyBtn.onclick = () => {
+          var _a;
+          navigator.clipboard.writeText((_a = valueText.textContent) != null ? _a : "");
+          copyBtn.textContent = "Copied!";
+          setTimeout(() => copyBtn.textContent = "Copy", 1500);
+        };
+        const footer = contentEl.createDiv({ attr: { style: "display: flex; justify-content: flex-end; gap: 8px; padding-top: 14px; border-top: 1px solid var(--background-modifier-border);" } });
+        footer.createEl("button", { text: "Cancel", attr: { style: "padding: 8px 16px; cursor: pointer;" } }).onclick = () => this.close();
+        const saveBtn = footer.createEl("button", { text: "Write to note", cls: "mod-cta", attr: { style: "padding: 8px 16px; cursor: pointer;" } });
+        saveBtn.onclick = async () => {
+          if (!this.targetPropertyName) {
+            new import_obsidian5.Notice("No property name configured.");
+            return;
+          }
+          await this.app.fileManager.processFrontMatter(this.file, (fm) => {
+            fm[this.targetPropertyName] = this.buildRRuleValue();
+          });
+          this.close();
+        };
+      }
+      updatePreview(previewEl, valueText) {
+        previewEl.textContent = this.buildPreview();
+        valueText.textContent = this.buildRRuleValue();
+      }
+      onClose() {
+        this.contentEl.empty();
       }
     };
   }
@@ -745,6537 +9790,1228 @@ var init_QuickNoteModal = __esm({
   }
 });
 
-// src/main.ts
-var main_exports = {};
-__export(main_exports, {
-  default: () => LinearCalendarPlugin
-});
-module.exports = __toCommonJS(main_exports);
-var import_obsidian8 = require("obsidian");
-
 // src/CalendarView.ts
-var import_obsidian7 = require("obsidian");
-
-// src/types.ts
-var DEFAULT_PERIODIC_NOTES = {
-  usePeriodicNotesPlugin: true,
-  templateFolderSource: "obsidian",
-  // Use Obsidian's template folder by default
-  templateCustomFolder: "",
-  weekStart: 1,
-  // Monday
-  weekNumberDisplay: "header-row",
-  // Default to row above month with week spans
-  weekBorderColor: {
-    mode: "neutral"
-    // Neutral border color by default
-  },
-  showWeekNumbers: true,
-  showQuarters: false,
-  weekly: {
-    enabled: false,
-    folder: "",
-    includeSubfolders: true,
-    format: "gggg-[W]ww",
-    template: ""
-  },
-  monthly: {
-    enabled: false,
-    folder: "",
-    includeSubfolders: true,
-    format: "YYYY-MM",
-    template: ""
-  },
-  quarterly: {
-    enabled: false,
-    folder: "",
-    includeSubfolders: true,
-    format: "YYYY-[Q]Q",
-    template: ""
-  },
-  yearly: {
-    enabled: false,
-    folder: "",
-    includeSubfolders: true,
-    format: "YYYY",
-    template: ""
-  },
-  customPeriodGroups: [
-    {
-      id: "quinter-example",
-      name: "Quinter",
-      enabled: false,
-      folder: "",
-      template: "",
-      periods: [
-        {
-          id: "a",
-          name: "A",
-          format: "YYYY-[A]",
-          months: [1, 2],
-          yearBasis: "start",
-          useGroupSettings: true,
-          folder: "",
-          template: ""
-        },
-        {
-          id: "b",
-          name: "B",
-          format: "YYYY-[B]",
-          months: [3, 4, 5],
-          yearBasis: "start",
-          useGroupSettings: true,
-          folder: "",
-          template: ""
-        },
-        {
-          id: "c",
-          name: "C",
-          format: "YYYY-[C]",
-          months: [6, 7, 8],
-          yearBasis: "start",
-          useGroupSettings: true,
-          folder: "",
-          template: ""
-        },
-        {
-          id: "d",
-          name: "D",
-          format: "YYYY-[D]",
-          months: [9, 10, 11],
-          yearBasis: "start",
-          useGroupSettings: true,
-          folder: "",
-          template: ""
-        },
-        {
-          id: "e",
-          name: "E",
-          format: "YYYY-[E]",
-          months: [12],
-          yearBasis: "start",
-          useGroupSettings: true,
-          folder: "",
-          template: ""
-        }
-      ]
-    }
-  ]
-};
-var DEFAULT_SETTINGS = {
-  currentYear: (/* @__PURE__ */ new Date()).getFullYear(),
-  dailyNoteFormat: "YYYY-MM-DD",
-  dailyNoteFolderMode: "obsidian",
-  dailyNoteCustomFolder: "",
-  showDailyNotesInCells: false,
-  // Don't show daily notes as cells by default
-  showNotesWithDateAndText: true,
-  // Show notes with date + text by default
-  hideDateInTitle: false,
-  // Show full title by default
-  hideSecondDateInTitle: false,
-  calendarWidth: "fit-screen",
-  // Fit to screen width by default
-  cellMinWidth: 30,
-  // Minimum 30px per cell when scrollable
-  columnAlignment: "weekday",
-  // Align by weekday by default
-  weekStartDay: 0,
-  // Sunday by default
-  highlightedWeekdays: [0, 6],
-  // Saturday and Sunday by default
-  showCellBorders: true,
-  // Show cell borders by default
-  showWeekSpanBorders: false,
-  // No week span borders by default
-  dateExtraction: {
-    startFromProperties: ["date"],
-    startFromFilename: false,
-    startPriority: "property",
-    endFromProperties: [],
-    endFromFilename: false,
-    endPriority: "property"
-  },
-  filterMode: "none",
-  filterConditions: [],
-  colorCategories: {
-    enabled: true,
-    // Enable colors by default
-    categories: [],
-    defaultCategoryColor: null,
-    showCategoryIndex: true,
-    showIconsInCalendar: true,
-    colorPalettes: [
-      {
-        name: "Default",
-        colors: [
-          { name: "Purple", hex: "#876c9d" },
-          { name: "Blue", hex: "#6c849d" },
-          { name: "Red", hex: "#9d6c6c" },
-          { name: "Yellow", hex: "#9d906c" },
-          { name: "Green", hex: "#779d6c" }
-        ]
+var import_obsidian7, LinearCalendarView;
+var init_CalendarView = __esm({
+  "src/CalendarView.ts"() {
+    "use strict";
+    import_obsidian7 = require("obsidian");
+    init_types();
+    init_esm();
+    init_banners();
+    init_SettingsTab();
+    LinearCalendarView = class extends import_obsidian7.ItemView {
+      constructor(leaf, plugin) {
+        super(leaf);
+        this.resizeObserver = null;
+        this.tooltip = null;
+        this.dragStartDate = null;
+        this.dragEndDate = null;
+        this.isDragging = false;
+        this.mouseUpHandler = null;
+        this.plugin = plugin;
       }
-    ]
-  },
-  quickNoteCreation: {
-    enabled: true,
-    showAddNoteButton: true,
-    defaultFolder: "dailynotes",
-    customFolder: "",
-    defaultStartDateProperty: "date",
-    defaultEndDateProperty: "date_end",
-    defaultCategoryProperty: "category",
-    defaultMetadata: [
-      { key: "category", value: "" }
-    ]
-  },
-  periodicNotes: { ...DEFAULT_PERIODIC_NOTES },
-  banners: {
-    quickNotes: false,
-    periodicNotes: false,
-    communityPlugin: false
-  },
-  experimental: {
-    multilineNotes: false,
-    verticalText: false,
-    compactFontSize: false,
-    condensedLetters: false
-  }
-};
-var VIEW_TYPE_CALENDAR = "linear-calendar-view";
-
-// src/banners.ts
-var BANNERS = [
-  {
-    id: "quick-notes",
-    cssClass: "quick-note-welcome-banner",
-    borderColor: "var(--interactive-accent)",
-    title: "\u{1F988}\u2728 Get Faster",
-    contentHtml: `
-            <strong>Click "Add Note"</strong> above to create a new note, or<br>
-            <strong>Cmd/Ctrl+Click on any day</strong> number to create a dated note instantly<br>
-            <strong>Cmd/Ctrl+Click and drag</strong> across days to create a multi-day note<br>
-            \u2699\uFE0F <strong>Configure</strong> your preferred default behavior in this plugin's settings
-        `,
-    settingsName: "Show Quick Notes banner",
-    settingsDesc: "Display the Quick Notes welcome banner with tips about creating notes quickly",
-    shouldShow: (s) => s.quickNoteCreation.enabled && !s.banners.quickNotes,
-    dismiss: (s) => {
-      s.banners.quickNotes = true;
-    },
-    reset: (s) => {
-      s.banners.quickNotes = false;
-    }
-  },
-  {
-    id: "periodic-notes",
-    cssClass: "periodic-notes-welcome-banner",
-    borderColor: "var(--text-accent)",
-    title: "\u{1F4C5} Periodic Notes",
-    contentHtml: `
-            <strong>Show periodic notes</strong> in the calendar<br>
-            <strong>Click on periodic notes</strong> to create or open them<br>
-            <strong>Compatible with the Periodic Notes Plugin</strong> so you don't have to transfer anything<br>
-            <strong>Show various periods:</strong> Weekly, Monthly, Quarterly, Yearly, Custom Period<br>
-            \u2699\uFE0F <strong>Configure</strong> periodic notes in this plugin's settings under "Periodic Notes"
-        `,
-    settingsName: "Show Periodic Notes banner",
-    settingsDesc: "Display the Periodic Notes welcome banner with tips about weekly, monthly, and quarterly notes",
-    shouldShow: (s) => !s.banners.periodicNotes,
-    dismiss: (s) => {
-      s.banners.periodicNotes = true;
-    },
-    reset: (s) => {
-      s.banners.periodicNotes = false;
-    }
-  },
-  {
-    id: "community-plugin",
-    cssClass: "community-plugin-banner",
-    borderColor: "var(--text-accent)",
-    title: "\u{1F389} Now on Community Plugins",
-    contentHtml: `
-            <strong>Linear Calendar is now available in Obsidian's Community Plugins</strong> \u2014 for more transparency and ease of use!<br><br>
-            <strong>Migration is seamless</strong> \u2014 your plugin folder and settings stay exactly the same, only the update method changes.<br>
-            Your settings are stored in your vault at <code>.obsidian/plugins/linear-calendar/data.json</code> and are not affected.<br><br>
-            <strong>How to migrate:</strong><br>
-            1. Remove this plugin in BRAT settings (this will <em>not</em> uninstall the plugin)<br>
-            2. Go to <strong>Linear Calendar</strong> through Settings \u2192 Community Plugins \u2013 it should already be installed<br>
-            \u26A0\uFE0F Always back up your vault before migrating, just to be safe.
-        `,
-    settingsName: "Show Community Plugin banner",
-    settingsDesc: "Display the migration banner for users who installed via BRAT",
-    shouldShow: (s, ctx) => ctx.isBratUser && !s.banners.communityPlugin,
-    dismiss: (s) => {
-      s.banners.communityPlugin = true;
-    },
-    reset: (s) => {
-      s.banners.communityPlugin = false;
-    },
-    settingsVisible: (ctx) => ctx.isBratUser
-  }
-];
-
-// src/SettingsTab.ts
-var import_obsidian5 = require("obsidian");
-
-// src/FolderSuggest.ts
-var import_obsidian = require("obsidian");
-init_BaseSuggest();
-var FolderSuggest = class extends BaseSuggest {
-  getSuggestions(query) {
-    const folders = this.getAllFolders();
-    return folders.filter((folder) => folder.toLowerCase().includes(query)).slice(0, 10).map((folder) => ({ value: folder }));
-  }
-  getAllFolders() {
-    const folders = [];
-    const recurse = (folder) => {
-      if (folder.path) folders.push(folder.path);
-      if (folder.children) {
-        for (const child of folder.children) {
-          if (child instanceof import_obsidian.TFolder) {
-            recurse(child);
-          }
-        }
+      getViewType() {
+        return VIEW_TYPE_CALENDAR;
       }
-    };
-    recurse(this.app.vault.getRoot());
-    return folders;
-  }
-};
-
-// src/FileSuggest.ts
-var import_obsidian2 = require("obsidian");
-init_BaseSuggest();
-var FileSuggest = class extends BaseSuggest {
-  constructor(app, inputEl, baseFolderPath, extension = "md") {
-    super(app, inputEl);
-    this.baseFolderPath = baseFolderPath || null;
-    this.extension = extension;
-  }
-  getSuggestions(query) {
-    const files = this.getFiles();
-    return files.filter((file) => file.toLowerCase().includes(query)).slice(0, 15).map((file) => ({ value: file }));
-  }
-  getFiles() {
-    const files = [];
-    let startFolder = null;
-    if (this.baseFolderPath) {
-      const folder = this.app.vault.getAbstractFileByPath(this.baseFolderPath);
-      if (folder instanceof import_obsidian2.TFolder) {
-        startFolder = folder;
+      getDisplayText() {
+        return "Linear Calendar";
       }
-    }
-    if (!startFolder) {
-      startFolder = this.app.vault.getRoot();
-    }
-    const recurse = (folder) => {
-      if (folder.children) {
-        for (const child of folder.children) {
-          if (child instanceof import_obsidian2.TFile && child.extension === this.extension) {
-            files.push(child.path.replace(new RegExp(`\\.${this.extension}$`), ""));
-          } else if (child instanceof import_obsidian2.TFolder) {
-            recurse(child);
-          }
-        }
+      getIcon() {
+        return "calendar-range";
       }
-    };
-    recurse(startFolder);
-    return files.sort();
-  }
-  /**
-   * Update the base folder path (useful if the folder setting changes)
-   */
-  setBaseFolderPath(path) {
-    this.baseFolderPath = path;
-  }
-};
-
-// src/IconSuggest.ts
-var import_obsidian3 = require("obsidian");
-var IconSuggest = class {
-  constructor(inputEl, previewEl) {
-    this.previewEl = null;
-    this.suggestions = null;
-    this.allIcons = [];
-    this.inputEl = inputEl;
-    this.previewEl = previewEl || null;
-    this.allIcons = this.buildIconLibrary();
-    this.inputEl.addEventListener("input", () => {
-      this.updateSuggestions();
-      this.updatePreview();
-    });
-    this.inputEl.addEventListener("focus", () => this.updateSuggestions());
-    this.inputEl.addEventListener("blur", () => {
-      setTimeout(() => this.closeSuggestions(), 200);
-    });
-    if (this.previewEl && this.inputEl.value) {
-      this.updatePreview();
-    }
-  }
-  /**
-   * Build comprehensive library of emojis and Lucide icons
-   */
-  buildIconLibrary() {
-    const items = [];
-    const emojis = [
-      // Smileys & Emotion
-      { emoji: "\u{1F600}", keywords: ["smile", "happy", "grin", "face"], category: "smileys" },
-      { emoji: "\u{1F603}", keywords: ["smile", "happy", "joy", "face"], category: "smileys" },
-      { emoji: "\u{1F604}", keywords: ["smile", "happy", "laugh", "face"], category: "smileys" },
-      { emoji: "\u{1F601}", keywords: ["grin", "smile", "happy", "face"], category: "smileys" },
-      { emoji: "\u{1F60A}", keywords: ["smile", "blush", "happy", "face"], category: "smileys" },
-      { emoji: "\u{1F642}", keywords: ["smile", "happy", "face"], category: "smileys" },
-      { emoji: "\u{1F609}", keywords: ["wink", "flirt", "face"], category: "smileys" },
-      { emoji: "\u{1F60D}", keywords: ["love", "heart", "eyes", "face"], category: "smileys" },
-      { emoji: "\u{1F970}", keywords: ["love", "hearts", "smile", "face"], category: "smileys" },
-      { emoji: "\u{1F618}", keywords: ["kiss", "love", "face"], category: "smileys" },
-      { emoji: "\u{1F617}", keywords: ["kiss", "face"], category: "smileys" },
-      { emoji: "\u{1F619}", keywords: ["kiss", "smile", "face"], category: "smileys" },
-      { emoji: "\u{1F61A}", keywords: ["kiss", "closed", "eyes", "face"], category: "smileys" },
-      { emoji: "\u263A\uFE0F", keywords: ["smile", "happy", "face"], category: "smileys" },
-      { emoji: "\u{1F917}", keywords: ["hug", "smile", "face"], category: "smileys" },
-      { emoji: "\u{1F929}", keywords: ["star", "eyes", "excited", "face"], category: "smileys" },
-      { emoji: "\u{1F914}", keywords: ["think", "hmm", "face"], category: "smileys" },
-      { emoji: "\u{1F610}", keywords: ["neutral", "meh", "face"], category: "smileys" },
-      { emoji: "\u{1F611}", keywords: ["expressionless", "meh", "face"], category: "smileys" },
-      { emoji: "\u{1F636}", keywords: ["silence", "quiet", "face"], category: "smileys" },
-      { emoji: "\u{1F60F}", keywords: ["smirk", "smug", "face"], category: "smileys" },
-      { emoji: "\u{1F612}", keywords: ["unamused", "meh", "face"], category: "smileys" },
-      { emoji: "\u{1F644}", keywords: ["eye", "roll", "annoyed", "face"], category: "smileys" },
-      { emoji: "\u{1F62C}", keywords: ["grimace", "awkward", "face"], category: "smileys" },
-      { emoji: "\u{1F614}", keywords: ["sad", "pensive", "face"], category: "smileys" },
-      { emoji: "\u{1F62A}", keywords: ["sleepy", "tired", "face"], category: "smileys" },
-      { emoji: "\u{1F924}", keywords: ["drool", "sleep", "face"], category: "smileys" },
-      { emoji: "\u{1F634}", keywords: ["sleep", "zzz", "face"], category: "smileys" },
-      { emoji: "\u{1F637}", keywords: ["mask", "sick", "face"], category: "smileys" },
-      { emoji: "\u{1F912}", keywords: ["sick", "thermometer", "face"], category: "smileys" },
-      { emoji: "\u{1F915}", keywords: ["hurt", "bandage", "face"], category: "smileys" },
-      { emoji: "\u{1F922}", keywords: ["nausea", "sick", "face"], category: "smileys" },
-      { emoji: "\u{1F92E}", keywords: ["vomit", "sick", "face"], category: "smileys" },
-      { emoji: "\u{1F927}", keywords: ["sneeze", "sick", "face"], category: "smileys" },
-      { emoji: "\u{1F975}", keywords: ["hot", "heat", "face"], category: "smileys" },
-      { emoji: "\u{1F976}", keywords: ["cold", "freeze", "face"], category: "smileys" },
-      { emoji: "\u{1F60E}", keywords: ["cool", "sunglasses", "face"], category: "smileys" },
-      { emoji: "\u{1F913}", keywords: ["nerd", "geek", "glasses", "face"], category: "smileys" },
-      { emoji: "\u{1F9D0}", keywords: ["monocle", "inspect", "face"], category: "smileys" },
-      { emoji: "\u{1F615}", keywords: ["confused", "unsure", "face"], category: "smileys" },
-      { emoji: "\u{1F61F}", keywords: ["worried", "sad", "face"], category: "smileys" },
-      { emoji: "\u{1F641}", keywords: ["frown", "sad", "face"], category: "smileys" },
-      { emoji: "\u2639\uFE0F", keywords: ["frown", "sad", "face"], category: "smileys" },
-      { emoji: "\u{1F62E}", keywords: ["wow", "surprised", "face"], category: "smileys" },
-      { emoji: "\u{1F62F}", keywords: ["hushed", "surprised", "face"], category: "smileys" },
-      { emoji: "\u{1F632}", keywords: ["shocked", "surprised", "face"], category: "smileys" },
-      { emoji: "\u{1F633}", keywords: ["flushed", "embarrassed", "face"], category: "smileys" },
-      { emoji: "\u{1F97A}", keywords: ["pleading", "puppy", "eyes", "face"], category: "smileys" },
-      { emoji: "\u{1F626}", keywords: ["frown", "open", "mouth", "face"], category: "smileys" },
-      { emoji: "\u{1F627}", keywords: ["anguish", "face"], category: "smileys" },
-      { emoji: "\u{1F628}", keywords: ["fear", "scared", "face"], category: "smileys" },
-      { emoji: "\u{1F630}", keywords: ["anxious", "sweat", "face"], category: "smileys" },
-      { emoji: "\u{1F625}", keywords: ["sad", "relieved", "face"], category: "smileys" },
-      { emoji: "\u{1F622}", keywords: ["cry", "sad", "tear", "face"], category: "smileys" },
-      { emoji: "\u{1F62D}", keywords: ["sob", "cry", "sad", "face"], category: "smileys" },
-      { emoji: "\u{1F631}", keywords: ["scream", "fear", "face"], category: "smileys" },
-      { emoji: "\u{1F616}", keywords: ["confound", "face"], category: "smileys" },
-      { emoji: "\u{1F623}", keywords: ["persevere", "face"], category: "smileys" },
-      { emoji: "\u{1F61E}", keywords: ["disappointed", "sad", "face"], category: "smileys" },
-      { emoji: "\u{1F613}", keywords: ["sweat", "face"], category: "smileys" },
-      { emoji: "\u{1F629}", keywords: ["weary", "tired", "face"], category: "smileys" },
-      { emoji: "\u{1F62B}", keywords: ["tired", "face"], category: "smileys" },
-      { emoji: "\u{1F971}", keywords: ["yawn", "tired", "face"], category: "smileys" },
-      { emoji: "\u{1F624}", keywords: ["triumph", "face"], category: "smileys" },
-      { emoji: "\u{1F621}", keywords: ["angry", "mad", "face"], category: "smileys" },
-      { emoji: "\u{1F620}", keywords: ["angry", "face"], category: "smileys" },
-      { emoji: "\u{1F92C}", keywords: ["swear", "curse", "face"], category: "smileys" },
-      { emoji: "\u{1F608}", keywords: ["devil", "smile", "face"], category: "smileys" },
-      { emoji: "\u{1F47F}", keywords: ["devil", "angry", "face"], category: "smileys" },
-      { emoji: "\u{1F480}", keywords: ["skull", "death", "dead"], category: "smileys" },
-      { emoji: "\u2620\uFE0F", keywords: ["skull", "crossbones", "death"], category: "smileys" },
-      // Hearts & Love
-      { emoji: "\u2764\uFE0F", keywords: ["heart", "love", "red"], category: "hearts" },
-      { emoji: "\u{1F9E1}", keywords: ["heart", "orange", "love"], category: "hearts" },
-      { emoji: "\u{1F49B}", keywords: ["heart", "yellow", "love"], category: "hearts" },
-      { emoji: "\u{1F49A}", keywords: ["heart", "green", "love"], category: "hearts" },
-      { emoji: "\u{1F499}", keywords: ["heart", "blue", "love"], category: "hearts" },
-      { emoji: "\u{1F49C}", keywords: ["heart", "purple", "love"], category: "hearts" },
-      { emoji: "\u{1F5A4}", keywords: ["heart", "black", "love"], category: "hearts" },
-      { emoji: "\u{1F90D}", keywords: ["heart", "white", "love"], category: "hearts" },
-      { emoji: "\u{1F90E}", keywords: ["heart", "brown", "love"], category: "hearts" },
-      { emoji: "\u{1F494}", keywords: ["broken", "heart", "sad"], category: "hearts" },
-      { emoji: "\u2763\uFE0F", keywords: ["heart", "exclamation", "love"], category: "hearts" },
-      { emoji: "\u{1F495}", keywords: ["two", "hearts", "love"], category: "hearts" },
-      { emoji: "\u{1F49E}", keywords: ["revolving", "hearts", "love"], category: "hearts" },
-      { emoji: "\u{1F493}", keywords: ["beating", "heart", "love"], category: "hearts" },
-      { emoji: "\u{1F497}", keywords: ["growing", "heart", "love"], category: "hearts" },
-      { emoji: "\u{1F496}", keywords: ["sparkling", "heart", "love"], category: "hearts" },
-      { emoji: "\u{1F498}", keywords: ["arrow", "heart", "cupid", "love"], category: "hearts" },
-      { emoji: "\u{1F49D}", keywords: ["gift", "heart", "love"], category: "hearts" },
-      // Hands & Body
-      { emoji: "\u{1F44D}", keywords: ["thumbs", "up", "yes", "like", "good"], category: "hands" },
-      { emoji: "\u{1F44E}", keywords: ["thumbs", "down", "no", "bad"], category: "hands" },
-      { emoji: "\u{1F44A}", keywords: ["fist", "punch", "bump"], category: "hands" },
-      { emoji: "\u270A", keywords: ["fist", "raised", "power"], category: "hands" },
-      { emoji: "\u{1F91B}", keywords: ["fist", "left", "bump"], category: "hands" },
-      { emoji: "\u{1F91C}", keywords: ["fist", "right", "bump"], category: "hands" },
-      { emoji: "\u{1F44F}", keywords: ["clap", "applause", "hands"], category: "hands" },
-      { emoji: "\u{1F64C}", keywords: ["raised", "hands", "celebrate"], category: "hands" },
-      { emoji: "\u{1F450}", keywords: ["open", "hands"], category: "hands" },
-      { emoji: "\u{1F932}", keywords: ["palms", "together", "pray"], category: "hands" },
-      { emoji: "\u{1F91D}", keywords: ["handshake", "deal", "agreement"], category: "hands" },
-      { emoji: "\u{1F64F}", keywords: ["pray", "thanks", "please", "hands"], category: "hands" },
-      { emoji: "\u270D\uFE0F", keywords: ["write", "hand", "pen"], category: "hands" },
-      { emoji: "\u270B", keywords: ["hand", "stop", "raised"], category: "hands" },
-      { emoji: "\u{1F91A}", keywords: ["raised", "back", "hand"], category: "hands" },
-      { emoji: "\u{1F590}\uFE0F", keywords: ["hand", "fingers", "splayed"], category: "hands" },
-      { emoji: "\u270C\uFE0F", keywords: ["victory", "peace", "hand"], category: "hands" },
-      { emoji: "\u{1F91E}", keywords: ["fingers", "crossed", "luck"], category: "hands" },
-      { emoji: "\u{1F91F}", keywords: ["love", "you", "hand"], category: "hands" },
-      { emoji: "\u{1F918}", keywords: ["rock", "on", "horns", "hand"], category: "hands" },
-      { emoji: "\u{1F44C}", keywords: ["ok", "hand", "perfect"], category: "hands" },
-      { emoji: "\u{1F90C}", keywords: ["pinched", "fingers", "hand"], category: "hands" },
-      { emoji: "\u{1F448}", keywords: ["point", "left", "hand"], category: "hands" },
-      { emoji: "\u{1F449}", keywords: ["point", "right", "hand"], category: "hands" },
-      { emoji: "\u{1F446}", keywords: ["point", "up", "hand"], category: "hands" },
-      { emoji: "\u{1F447}", keywords: ["point", "down", "hand"], category: "hands" },
-      { emoji: "\u261D\uFE0F", keywords: ["point", "up", "index", "hand"], category: "hands" },
-      { emoji: "\u{1F595}", keywords: ["middle", "finger", "hand"], category: "hands" },
-      { emoji: "\u{1F4AA}", keywords: ["muscle", "strong", "flex", "bicep"], category: "hands" },
-      // Nature & Weather
-      { emoji: "\u{1F31E}", keywords: ["sun", "face", "bright", "weather"], category: "nature" },
-      { emoji: "\u{1F31D}", keywords: ["moon", "face", "full", "night"], category: "nature" },
-      { emoji: "\u{1F31B}", keywords: ["moon", "face", "quarter", "night"], category: "nature" },
-      { emoji: "\u{1F31C}", keywords: ["moon", "face", "quarter", "night"], category: "nature" },
-      { emoji: "\u{1F31A}", keywords: ["moon", "face", "new", "dark"], category: "nature" },
-      { emoji: "\u{1F315}", keywords: ["moon", "full", "night"], category: "nature" },
-      { emoji: "\u{1F316}", keywords: ["moon", "waning", "night"], category: "nature" },
-      { emoji: "\u{1F317}", keywords: ["moon", "quarter", "night"], category: "nature" },
-      { emoji: "\u{1F318}", keywords: ["moon", "crescent", "night"], category: "nature" },
-      { emoji: "\u{1F311}", keywords: ["moon", "new", "dark"], category: "nature" },
-      { emoji: "\u{1F312}", keywords: ["moon", "waxing", "night"], category: "nature" },
-      { emoji: "\u{1F313}", keywords: ["moon", "quarter", "night"], category: "nature" },
-      { emoji: "\u{1F314}", keywords: ["moon", "waxing", "night"], category: "nature" },
-      { emoji: "\u2B50", keywords: ["star", "night", "favorite"], category: "nature" },
-      { emoji: "\u{1F31F}", keywords: ["star", "glowing", "sparkle"], category: "nature" },
-      { emoji: "\u2728", keywords: ["sparkles", "shine", "magic"], category: "nature" },
-      { emoji: "\u26A1", keywords: ["lightning", "bolt", "zap", "electric"], category: "nature" },
-      { emoji: "\u2604\uFE0F", keywords: ["comet", "space"], category: "nature" },
-      { emoji: "\u{1F4AB}", keywords: ["dizzy", "star"], category: "nature" },
-      { emoji: "\u{1F525}", keywords: ["fire", "flame", "hot", "burn"], category: "nature" },
-      { emoji: "\u{1F4A7}", keywords: ["droplet", "water", "drop"], category: "nature" },
-      { emoji: "\u{1F30A}", keywords: ["wave", "water", "ocean", "sea"], category: "nature" },
-      { emoji: "\u{1F308}", keywords: ["rainbow", "colors", "weather"], category: "nature" },
-      { emoji: "\u2600\uFE0F", keywords: ["sun", "sunny", "weather"], category: "nature" },
-      { emoji: "\u26C5", keywords: ["cloud", "sun", "weather"], category: "nature" },
-      { emoji: "\u2601\uFE0F", keywords: ["cloud", "weather"], category: "nature" },
-      { emoji: "\u{1F324}\uFE0F", keywords: ["sun", "cloud", "weather"], category: "nature" },
-      { emoji: "\u26C8\uFE0F", keywords: ["storm", "cloud", "lightning", "weather"], category: "nature" },
-      { emoji: "\u{1F327}\uFE0F", keywords: ["rain", "cloud", "weather"], category: "nature" },
-      { emoji: "\u26C4", keywords: ["snowman", "snow", "winter"], category: "nature" },
-      { emoji: "\u2744\uFE0F", keywords: ["snowflake", "snow", "cold", "winter"], category: "nature" },
-      { emoji: "\u{1F32C}\uFE0F", keywords: ["wind", "blow", "weather"], category: "nature" },
-      { emoji: "\u{1F4A8}", keywords: ["dash", "wind", "fast"], category: "nature" },
-      { emoji: "\u{1F32A}\uFE0F", keywords: ["tornado", "cyclone", "weather"], category: "nature" },
-      { emoji: "\u{1F32B}\uFE0F", keywords: ["fog", "weather"], category: "nature" },
-      { emoji: "\u{1F332}", keywords: ["tree", "evergreen", "pine", "nature"], category: "nature" },
-      { emoji: "\u{1F333}", keywords: ["tree", "deciduous", "nature"], category: "nature" },
-      { emoji: "\u{1F334}", keywords: ["palm", "tree", "tropical"], category: "nature" },
-      { emoji: "\u{1F331}", keywords: ["seedling", "plant", "grow"], category: "nature" },
-      { emoji: "\u{1F33F}", keywords: ["herb", "leaf", "plant"], category: "nature" },
-      { emoji: "\u2618\uFE0F", keywords: ["shamrock", "clover", "luck"], category: "nature" },
-      { emoji: "\u{1F340}", keywords: ["clover", "four", "leaf", "luck"], category: "nature" },
-      { emoji: "\u{1F339}", keywords: ["rose", "flower", "red"], category: "nature" },
-      { emoji: "\u{1F33A}", keywords: ["hibiscus", "flower"], category: "nature" },
-      { emoji: "\u{1F33B}", keywords: ["sunflower", "flower"], category: "nature" },
-      { emoji: "\u{1F33C}", keywords: ["blossom", "flower"], category: "nature" },
-      { emoji: "\u{1F337}", keywords: ["tulip", "flower"], category: "nature" },
-      // Food & Drink
-      { emoji: "\u{1F355}", keywords: ["pizza", "food"], category: "food" },
-      { emoji: "\u{1F354}", keywords: ["burger", "hamburger", "food"], category: "food" },
-      { emoji: "\u{1F35F}", keywords: ["fries", "french", "food"], category: "food" },
-      { emoji: "\u{1F32D}", keywords: ["hotdog", "food"], category: "food" },
-      { emoji: "\u{1F37F}", keywords: ["popcorn", "food", "snack"], category: "food" },
-      { emoji: "\u{1F953}", keywords: ["bacon", "food"], category: "food" },
-      { emoji: "\u{1F95A}", keywords: ["egg", "food"], category: "food" },
-      { emoji: "\u{1F373}", keywords: ["cooking", "egg", "food"], category: "food" },
-      { emoji: "\u{1F95E}", keywords: ["pancakes", "food"], category: "food" },
-      { emoji: "\u{1F9C7}", keywords: ["waffle", "food"], category: "food" },
-      { emoji: "\u{1F35E}", keywords: ["bread", "food"], category: "food" },
-      { emoji: "\u{1F950}", keywords: ["croissant", "food"], category: "food" },
-      { emoji: "\u{1F956}", keywords: ["baguette", "bread", "food"], category: "food" },
-      { emoji: "\u{1F9C0}", keywords: ["cheese", "food"], category: "food" },
-      { emoji: "\u{1F957}", keywords: ["salad", "food", "healthy"], category: "food" },
-      { emoji: "\u{1F35D}", keywords: ["spaghetti", "pasta", "food"], category: "food" },
-      { emoji: "\u{1F35C}", keywords: ["ramen", "noodles", "food"], category: "food" },
-      { emoji: "\u{1F372}", keywords: ["stew", "food"], category: "food" },
-      { emoji: "\u{1F35B}", keywords: ["curry", "rice", "food"], category: "food" },
-      { emoji: "\u{1F363}", keywords: ["sushi", "food"], category: "food" },
-      { emoji: "\u{1F371}", keywords: ["bento", "box", "food"], category: "food" },
-      { emoji: "\u{1F364}", keywords: ["shrimp", "food"], category: "food" },
-      { emoji: "\u{1F359}", keywords: ["rice", "ball", "food"], category: "food" },
-      { emoji: "\u{1F35A}", keywords: ["rice", "food"], category: "food" },
-      { emoji: "\u{1F358}", keywords: ["cracker", "rice", "food"], category: "food" },
-      { emoji: "\u{1F95F}", keywords: ["dumpling", "food"], category: "food" },
-      { emoji: "\u{1F362}", keywords: ["oden", "food"], category: "food" },
-      { emoji: "\u{1F361}", keywords: ["dango", "food"], category: "food" },
-      { emoji: "\u{1F367}", keywords: ["shaved", "ice", "dessert"], category: "food" },
-      { emoji: "\u{1F368}", keywords: ["ice", "cream", "dessert"], category: "food" },
-      { emoji: "\u{1F366}", keywords: ["soft", "ice", "cream", "dessert"], category: "food" },
-      { emoji: "\u{1F967}", keywords: ["pie", "dessert"], category: "food" },
-      { emoji: "\u{1F370}", keywords: ["cake", "dessert"], category: "food" },
-      { emoji: "\u{1F382}", keywords: ["birthday", "cake", "dessert"], category: "food" },
-      { emoji: "\u{1F9C1}", keywords: ["cupcake", "dessert"], category: "food" },
-      { emoji: "\u{1F36E}", keywords: ["custard", "pudding", "dessert"], category: "food" },
-      { emoji: "\u{1F36D}", keywords: ["lollipop", "candy"], category: "food" },
-      { emoji: "\u{1F36C}", keywords: ["candy", "sweet"], category: "food" },
-      { emoji: "\u{1F36B}", keywords: ["chocolate", "bar", "candy"], category: "food" },
-      { emoji: "\u{1F369}", keywords: ["doughnut", "donut", "dessert"], category: "food" },
-      { emoji: "\u{1F36A}", keywords: ["cookie", "dessert"], category: "food" },
-      { emoji: "\u{1F36F}", keywords: ["honey", "pot"], category: "food" },
-      { emoji: "\u{1F34E}", keywords: ["apple", "red", "fruit"], category: "food" },
-      { emoji: "\u{1F34F}", keywords: ["apple", "green", "fruit"], category: "food" },
-      { emoji: "\u{1F34A}", keywords: ["orange", "tangerine", "fruit"], category: "food" },
-      { emoji: "\u{1F34B}", keywords: ["lemon", "fruit"], category: "food" },
-      { emoji: "\u{1F34C}", keywords: ["banana", "fruit"], category: "food" },
-      { emoji: "\u{1F349}", keywords: ["watermelon", "fruit"], category: "food" },
-      { emoji: "\u{1F347}", keywords: ["grapes", "fruit"], category: "food" },
-      { emoji: "\u{1F353}", keywords: ["strawberry", "fruit"], category: "food" },
-      { emoji: "\u{1F348}", keywords: ["melon", "fruit"], category: "food" },
-      { emoji: "\u{1F352}", keywords: ["cherries", "fruit"], category: "food" },
-      { emoji: "\u{1F351}", keywords: ["peach", "fruit"], category: "food" },
-      { emoji: "\u{1F96D}", keywords: ["mango", "fruit"], category: "food" },
-      { emoji: "\u{1F34D}", keywords: ["pineapple", "fruit"], category: "food" },
-      { emoji: "\u{1F965}", keywords: ["coconut", "fruit"], category: "food" },
-      { emoji: "\u{1F95D}", keywords: ["kiwi", "fruit"], category: "food" },
-      { emoji: "\u2615", keywords: ["coffee", "drink", "hot"], category: "food" },
-      { emoji: "\u{1F375}", keywords: ["tea", "drink", "hot"], category: "food" },
-      { emoji: "\u{1F9C3}", keywords: ["juice", "box", "drink"], category: "food" },
-      { emoji: "\u{1F964}", keywords: ["cup", "straw", "drink"], category: "food" },
-      { emoji: "\u{1F376}", keywords: ["sake", "drink"], category: "food" },
-      { emoji: "\u{1F37A}", keywords: ["beer", "drink"], category: "food" },
-      { emoji: "\u{1F37B}", keywords: ["beers", "cheers", "drink"], category: "food" },
-      { emoji: "\u{1F377}", keywords: ["wine", "glass", "drink"], category: "food" },
-      { emoji: "\u{1F942}", keywords: ["champagne", "glasses", "cheers", "drink"], category: "food" },
-      { emoji: "\u{1F378}", keywords: ["cocktail", "drink"], category: "food" },
-      { emoji: "\u{1F379}", keywords: ["tropical", "drink"], category: "food" },
-      // Activities & Sports
-      { emoji: "\u26BD", keywords: ["soccer", "ball", "sport"], category: "activities" },
-      { emoji: "\u{1F3C0}", keywords: ["basketball", "ball", "sport"], category: "activities" },
-      { emoji: "\u{1F3C8}", keywords: ["football", "american", "ball", "sport"], category: "activities" },
-      { emoji: "\u26BE", keywords: ["baseball", "ball", "sport"], category: "activities" },
-      { emoji: "\u{1F94E}", keywords: ["softball", "ball", "sport"], category: "activities" },
-      { emoji: "\u{1F3BE}", keywords: ["tennis", "ball", "sport"], category: "activities" },
-      { emoji: "\u{1F3D0}", keywords: ["volleyball", "ball", "sport"], category: "activities" },
-      { emoji: "\u{1F3C9}", keywords: ["rugby", "ball", "sport"], category: "activities" },
-      { emoji: "\u{1F3B1}", keywords: ["pool", "8", "ball", "sport"], category: "activities" },
-      { emoji: "\u{1F3D3}", keywords: ["ping", "pong", "table", "tennis", "sport"], category: "activities" },
-      { emoji: "\u{1F3F8}", keywords: ["badminton", "sport"], category: "activities" },
-      { emoji: "\u{1F945}", keywords: ["goal", "net", "sport"], category: "activities" },
-      { emoji: "\u{1F3D2}", keywords: ["hockey", "ice", "sport"], category: "activities" },
-      { emoji: "\u{1F3D1}", keywords: ["hockey", "field", "sport"], category: "activities" },
-      { emoji: "\u{1F94D}", keywords: ["lacrosse", "sport"], category: "activities" },
-      { emoji: "\u{1F3CF}", keywords: ["cricket", "sport"], category: "activities" },
-      { emoji: "\u{1F3AF}", keywords: ["dart", "target", "bullseye"], category: "activities" },
-      { emoji: "\u{1F3AE}", keywords: ["game", "controller", "video"], category: "activities" },
-      { emoji: "\u{1F3B2}", keywords: ["dice", "game"], category: "activities" },
-      { emoji: "\u{1F3AD}", keywords: ["theater", "masks", "drama"], category: "activities" },
-      { emoji: "\u{1F3A8}", keywords: ["art", "palette", "paint"], category: "activities" },
-      { emoji: "\u{1F3AC}", keywords: ["movie", "clapper", "film"], category: "activities" },
-      { emoji: "\u{1F3A4}", keywords: ["microphone", "sing", "music"], category: "activities" },
-      { emoji: "\u{1F3A7}", keywords: ["headphones", "music"], category: "activities" },
-      { emoji: "\u{1F3BC}", keywords: ["music", "score"], category: "activities" },
-      { emoji: "\u{1F3B9}", keywords: ["keyboard", "piano", "music"], category: "activities" },
-      { emoji: "\u{1F941}", keywords: ["drum", "music"], category: "activities" },
-      { emoji: "\u{1F3B7}", keywords: ["saxophone", "music"], category: "activities" },
-      { emoji: "\u{1F3BA}", keywords: ["trumpet", "music"], category: "activities" },
-      { emoji: "\u{1F3B8}", keywords: ["guitar", "music"], category: "activities" },
-      { emoji: "\u{1F3BB}", keywords: ["violin", "music"], category: "activities" },
-      // Objects & Symbols
-      { emoji: "\u{1F4F1}", keywords: ["phone", "mobile", "cell"], category: "objects" },
-      { emoji: "\u{1F4BB}", keywords: ["laptop", "computer"], category: "objects" },
-      { emoji: "\u2328\uFE0F", keywords: ["keyboard", "computer"], category: "objects" },
-      { emoji: "\u{1F5A5}\uFE0F", keywords: ["desktop", "computer"], category: "objects" },
-      { emoji: "\u{1F5A8}\uFE0F", keywords: ["printer"], category: "objects" },
-      { emoji: "\u{1F5B1}\uFE0F", keywords: ["mouse", "computer"], category: "objects" },
-      { emoji: "\u{1F4F7}", keywords: ["camera", "photo"], category: "objects" },
-      { emoji: "\u{1F4F8}", keywords: ["camera", "flash", "photo"], category: "objects" },
-      { emoji: "\u{1F4F9}", keywords: ["video", "camera"], category: "objects" },
-      { emoji: "\u{1F3A5}", keywords: ["movie", "camera", "film"], category: "objects" },
-      { emoji: "\u{1F4DE}", keywords: ["phone", "telephone"], category: "objects" },
-      { emoji: "\u260E\uFE0F", keywords: ["telephone", "phone"], category: "objects" },
-      { emoji: "\u{1F4FA}", keywords: ["tv", "television"], category: "objects" },
-      { emoji: "\u{1F4FB}", keywords: ["radio"], category: "objects" },
-      { emoji: "\u23F0", keywords: ["alarm", "clock", "time"], category: "objects" },
-      { emoji: "\u23F1\uFE0F", keywords: ["stopwatch", "timer"], category: "objects" },
-      { emoji: "\u23F2\uFE0F", keywords: ["timer", "clock"], category: "objects" },
-      { emoji: "\u231A", keywords: ["watch", "time"], category: "objects" },
-      { emoji: "\u{1F4C5}", keywords: ["calendar", "date"], category: "objects" },
-      { emoji: "\u{1F4C6}", keywords: ["calendar", "tear-off", "date"], category: "objects" },
-      { emoji: "\u{1F4DD}", keywords: ["memo", "note", "pencil", "write"], category: "objects" },
-      { emoji: "\u270F\uFE0F", keywords: ["pencil", "write"], category: "objects" },
-      { emoji: "\u2712\uFE0F", keywords: ["pen", "black", "write"], category: "objects" },
-      { emoji: "\u{1F58A}\uFE0F", keywords: ["pen", "write"], category: "objects" },
-      { emoji: "\u{1F58B}\uFE0F", keywords: ["pen", "fountain", "write"], category: "objects" },
-      { emoji: "\u{1F4D4}", keywords: ["notebook", "decorative", "write"], category: "objects" },
-      { emoji: "\u{1F4D5}", keywords: ["book", "closed", "red"], category: "objects" },
-      { emoji: "\u{1F4D6}", keywords: ["book", "open", "read"], category: "objects" },
-      { emoji: "\u{1F4D7}", keywords: ["book", "green"], category: "objects" },
-      { emoji: "\u{1F4D8}", keywords: ["book", "blue"], category: "objects" },
-      { emoji: "\u{1F4D9}", keywords: ["book", "orange"], category: "objects" },
-      { emoji: "\u{1F4DA}", keywords: ["books", "stack", "library"], category: "objects" },
-      { emoji: "\u{1F4D3}", keywords: ["notebook"], category: "objects" },
-      { emoji: "\u{1F4D2}", keywords: ["ledger", "notebook"], category: "objects" },
-      { emoji: "\u{1F4C3}", keywords: ["page", "curl"], category: "objects" },
-      { emoji: "\u{1F4C4}", keywords: ["page", "document"], category: "objects" },
-      { emoji: "\u{1F4F0}", keywords: ["newspaper", "news"], category: "objects" },
-      { emoji: "\u{1F5DE}\uFE0F", keywords: ["newspaper", "rolled"], category: "objects" },
-      { emoji: "\u{1F4D1}", keywords: ["bookmark", "tabs"], category: "objects" },
-      { emoji: "\u{1F516}", keywords: ["bookmark"], category: "objects" },
-      { emoji: "\u{1F4B0}", keywords: ["money", "bag", "dollar"], category: "objects" },
-      { emoji: "\u{1F4B5}", keywords: ["dollar", "bill", "money"], category: "objects" },
-      { emoji: "\u{1F4B4}", keywords: ["yen", "bill", "money"], category: "objects" },
-      { emoji: "\u{1F4B6}", keywords: ["euro", "bill", "money"], category: "objects" },
-      { emoji: "\u{1F4B7}", keywords: ["pound", "bill", "money"], category: "objects" },
-      { emoji: "\u{1F4B3}", keywords: ["credit", "card"], category: "objects" },
-      { emoji: "\u{1F48E}", keywords: ["gem", "diamond", "jewel"], category: "objects" },
-      { emoji: "\u2699\uFE0F", keywords: ["gear", "settings", "cog"], category: "objects" },
-      { emoji: "\u{1F527}", keywords: ["wrench", "tool"], category: "objects" },
-      { emoji: "\u{1F528}", keywords: ["hammer", "tool"], category: "objects" },
-      { emoji: "\u2692\uFE0F", keywords: ["hammer", "pick", "tool"], category: "objects" },
-      { emoji: "\u{1F6E0}\uFE0F", keywords: ["tools", "hammer", "wrench"], category: "objects" },
-      { emoji: "\u{1F529}", keywords: ["nut", "bolt"], category: "objects" },
-      { emoji: "\u26A1", keywords: ["lightning", "zap", "electric", "fast"], category: "objects" },
-      { emoji: "\u{1F525}", keywords: ["fire", "flame", "hot"], category: "objects" },
-      { emoji: "\u{1F4A1}", keywords: ["bulb", "light", "idea"], category: "objects" },
-      { emoji: "\u{1F526}", keywords: ["flashlight", "torch"], category: "objects" },
-      { emoji: "\u{1F514}", keywords: ["bell", "notification"], category: "objects" },
-      { emoji: "\u{1F515}", keywords: ["bell", "slash", "mute"], category: "objects" },
-      { emoji: "\u{1F4E2}", keywords: ["loudspeaker", "announcement"], category: "objects" },
-      { emoji: "\u{1F4E3}", keywords: ["megaphone", "cheering"], category: "objects" },
-      { emoji: "\u{1F4EF}", keywords: ["horn", "postal"], category: "objects" },
-      { emoji: "\u{1F3BA}", keywords: ["trumpet", "horn"], category: "objects" },
-      { emoji: "\u{1F511}", keywords: ["key", "lock"], category: "objects" },
-      { emoji: "\u{1F5DD}\uFE0F", keywords: ["key", "old"], category: "objects" },
-      { emoji: "\u{1F510}", keywords: ["locked", "key"], category: "objects" },
-      { emoji: "\u{1F512}", keywords: ["locked", "lock"], category: "objects" },
-      { emoji: "\u{1F513}", keywords: ["unlocked", "open"], category: "objects" },
-      // Symbols & Arrows
-      { emoji: "\u2705", keywords: ["check", "mark", "green", "done", "yes"], category: "symbols" },
-      { emoji: "\u2714\uFE0F", keywords: ["check", "mark", "done", "yes"], category: "symbols" },
-      { emoji: "\u274C", keywords: ["x", "cross", "mark", "no", "wrong"], category: "symbols" },
-      { emoji: "\u274E", keywords: ["x", "cross", "mark", "button", "no"], category: "symbols" },
-      { emoji: "\u2B55", keywords: ["circle", "o", "hollow"], category: "symbols" },
-      { emoji: "\u2795", keywords: ["plus", "add", "heavy"], category: "symbols" },
-      { emoji: "\u2796", keywords: ["minus", "subtract", "heavy"], category: "symbols" },
-      { emoji: "\u2797", keywords: ["divide", "division", "heavy"], category: "symbols" },
-      { emoji: "\u2716\uFE0F", keywords: ["multiply", "multiplication", "heavy", "x"], category: "symbols" },
-      { emoji: "\u{1F7F0}", keywords: ["equals", "heavy"], category: "symbols" },
-      { emoji: "\u203C\uFE0F", keywords: ["exclamation", "double", "mark"], category: "symbols" },
-      { emoji: "\u2049\uFE0F", keywords: ["question", "exclamation", "mark"], category: "symbols" },
-      { emoji: "\u2753", keywords: ["question", "mark", "red"], category: "symbols" },
-      { emoji: "\u2754", keywords: ["question", "mark", "white"], category: "symbols" },
-      { emoji: "\u2755", keywords: ["exclamation", "mark", "white"], category: "symbols" },
-      { emoji: "\u2757", keywords: ["exclamation", "mark", "red"], category: "symbols" },
-      { emoji: "\u26A0\uFE0F", keywords: ["warning", "caution"], category: "symbols" },
-      { emoji: "\u{1F6AB}", keywords: ["prohibited", "forbidden", "no"], category: "symbols" },
-      { emoji: "\u{1F51E}", keywords: ["no", "under", "18", "adult"], category: "symbols" },
-      { emoji: "\u2622\uFE0F", keywords: ["radioactive", "radiation"], category: "symbols" },
-      { emoji: "\u2623\uFE0F", keywords: ["biohazard", "danger"], category: "symbols" },
-      { emoji: "\u2B06\uFE0F", keywords: ["arrow", "up", "north"], category: "symbols" },
-      { emoji: "\u2197\uFE0F", keywords: ["arrow", "up", "right", "northeast"], category: "symbols" },
-      { emoji: "\u27A1\uFE0F", keywords: ["arrow", "right", "east"], category: "symbols" },
-      { emoji: "\u2198\uFE0F", keywords: ["arrow", "down", "right", "southeast"], category: "symbols" },
-      { emoji: "\u2B07\uFE0F", keywords: ["arrow", "down", "south"], category: "symbols" },
-      { emoji: "\u2199\uFE0F", keywords: ["arrow", "down", "left", "southwest"], category: "symbols" },
-      { emoji: "\u2B05\uFE0F", keywords: ["arrow", "left", "west"], category: "symbols" },
-      { emoji: "\u2196\uFE0F", keywords: ["arrow", "up", "left", "northwest"], category: "symbols" },
-      { emoji: "\u2195\uFE0F", keywords: ["arrow", "up", "down"], category: "symbols" },
-      { emoji: "\u2194\uFE0F", keywords: ["arrow", "left", "right"], category: "symbols" },
-      { emoji: "\u21A9\uFE0F", keywords: ["arrow", "left", "curve"], category: "symbols" },
-      { emoji: "\u21AA\uFE0F", keywords: ["arrow", "right", "curve"], category: "symbols" },
-      { emoji: "\u2934\uFE0F", keywords: ["arrow", "up", "curve"], category: "symbols" },
-      { emoji: "\u2935\uFE0F", keywords: ["arrow", "down", "curve"], category: "symbols" },
-      { emoji: "\u{1F503}", keywords: ["arrows", "clockwise", "vertical"], category: "symbols" },
-      { emoji: "\u{1F504}", keywords: ["arrows", "counterclockwise", "button"], category: "symbols" },
-      { emoji: "\u{1F519}", keywords: ["back", "arrow"], category: "symbols" },
-      { emoji: "\u{1F51A}", keywords: ["end", "arrow"], category: "symbols" },
-      { emoji: "\u{1F51B}", keywords: ["on", "arrow"], category: "symbols" },
-      { emoji: "\u{1F51C}", keywords: ["soon", "arrow"], category: "symbols" },
-      { emoji: "\u{1F51D}", keywords: ["top", "arrow", "up"], category: "symbols" },
-      { emoji: "\u267B\uFE0F", keywords: ["recycle", "symbol"], category: "symbols" },
-      { emoji: "\u269C\uFE0F", keywords: ["fleur-de-lis"], category: "symbols" },
-      { emoji: "\u{1F531}", keywords: ["trident", "emblem"], category: "symbols" },
-      { emoji: "\u{1F4DB}", keywords: ["name", "badge"], category: "symbols" },
-      { emoji: "\u2B50", keywords: ["star", "white", "medium"], category: "symbols" },
-      { emoji: "\u{1F31F}", keywords: ["star", "glowing"], category: "symbols" },
-      { emoji: "\u{1F4AB}", keywords: ["dizzy", "star"], category: "symbols" },
-      { emoji: "\u2728", keywords: ["sparkles", "shine"], category: "symbols" },
-      { emoji: "\u26A1", keywords: ["lightning", "bolt", "zap"], category: "symbols" },
-      { emoji: "\u2604\uFE0F", keywords: ["comet"], category: "symbols" },
-      { emoji: "\u{1F4A5}", keywords: ["collision", "boom", "bang"], category: "symbols" },
-      { emoji: "\u{1F506}", keywords: ["bright", "button"], category: "symbols" },
-      { emoji: "\u{1F505}", keywords: ["dim", "button"], category: "symbols" },
-      { emoji: "\u{1F4A4}", keywords: ["zzz", "sleep"], category: "symbols" },
-      { emoji: "\u{1F4A2}", keywords: ["anger", "symbol"], category: "symbols" },
-      { emoji: "\u{1F4AC}", keywords: ["speech", "balloon", "chat"], category: "symbols" },
-      { emoji: "\u{1F4AD}", keywords: ["thought", "balloon"], category: "symbols" },
-      { emoji: "\u{1F5EF}\uFE0F", keywords: ["anger", "balloon"], category: "symbols" },
-      // Travel & Places
-      { emoji: "\u{1F697}", keywords: ["car", "automobile", "vehicle"], category: "travel" },
-      { emoji: "\u{1F695}", keywords: ["taxi", "car", "vehicle"], category: "travel" },
-      { emoji: "\u{1F699}", keywords: ["suv", "car", "vehicle"], category: "travel" },
-      { emoji: "\u{1F68C}", keywords: ["bus", "vehicle"], category: "travel" },
-      { emoji: "\u{1F68E}", keywords: ["trolleybus", "vehicle"], category: "travel" },
-      { emoji: "\u{1F3CE}\uFE0F", keywords: ["race", "car", "vehicle"], category: "travel" },
-      { emoji: "\u{1F693}", keywords: ["police", "car", "vehicle"], category: "travel" },
-      { emoji: "\u{1F691}", keywords: ["ambulance", "vehicle"], category: "travel" },
-      { emoji: "\u{1F692}", keywords: ["fire", "engine", "truck"], category: "travel" },
-      { emoji: "\u{1F690}", keywords: ["minibus", "vehicle"], category: "travel" },
-      { emoji: "\u{1F69A}", keywords: ["truck", "delivery", "vehicle"], category: "travel" },
-      { emoji: "\u{1F69B}", keywords: ["truck", "articulated", "vehicle"], category: "travel" },
-      { emoji: "\u{1F69C}", keywords: ["tractor", "vehicle"], category: "travel" },
-      { emoji: "\u{1F3CD}\uFE0F", keywords: ["motorcycle", "vehicle"], category: "travel" },
-      { emoji: "\u{1F6F5}", keywords: ["scooter", "motor", "vehicle"], category: "travel" },
-      { emoji: "\u{1F6B2}", keywords: ["bike", "bicycle", "vehicle"], category: "travel" },
-      { emoji: "\u{1F6F4}", keywords: ["scooter", "kick", "vehicle"], category: "travel" },
-      { emoji: "\u2708\uFE0F", keywords: ["airplane", "plane", "flight"], category: "travel" },
-      { emoji: "\u{1F6EB}", keywords: ["airplane", "departure", "takeoff"], category: "travel" },
-      { emoji: "\u{1F6EC}", keywords: ["airplane", "arrival", "landing"], category: "travel" },
-      { emoji: "\u{1F681}", keywords: ["helicopter", "vehicle"], category: "travel" },
-      { emoji: "\u{1F682}", keywords: ["train", "locomotive", "vehicle"], category: "travel" },
-      { emoji: "\u{1F686}", keywords: ["train", "vehicle"], category: "travel" },
-      { emoji: "\u{1F687}", keywords: ["metro", "subway", "train"], category: "travel" },
-      { emoji: "\u{1F68A}", keywords: ["tram", "vehicle"], category: "travel" },
-      { emoji: "\u{1F69D}", keywords: ["monorail", "vehicle"], category: "travel" },
-      { emoji: "\u{1F684}", keywords: ["train", "bullet", "high-speed"], category: "travel" },
-      { emoji: "\u{1F685}", keywords: ["train", "bullet", "high-speed"], category: "travel" },
-      { emoji: "\u{1F688}", keywords: ["train", "light", "rail"], category: "travel" },
-      { emoji: "\u{1F69E}", keywords: ["train", "mountain", "railway"], category: "travel" },
-      { emoji: "\u{1F68B}", keywords: ["tram", "car"], category: "travel" },
-      { emoji: "\u{1F683}", keywords: ["train", "railway", "car"], category: "travel" },
-      { emoji: "\u{1F69F}", keywords: ["railway", "suspension"], category: "travel" },
-      { emoji: "\u{1F6A0}", keywords: ["cable", "car", "mountain"], category: "travel" },
-      { emoji: "\u{1F6A1}", keywords: ["aerial", "tramway"], category: "travel" },
-      { emoji: "\u{1F6A2}", keywords: ["ship", "boat"], category: "travel" },
-      { emoji: "\u26F5", keywords: ["sailboat", "boat"], category: "travel" },
-      { emoji: "\u{1F6F6}", keywords: ["canoe", "boat"], category: "travel" },
-      { emoji: "\u{1F6A4}", keywords: ["speedboat", "boat"], category: "travel" },
-      { emoji: "\u{1F6F3}\uFE0F", keywords: ["ship", "passenger"], category: "travel" },
-      { emoji: "\u26F4\uFE0F", keywords: ["ferry", "boat"], category: "travel" },
-      { emoji: "\u{1F6E5}\uFE0F", keywords: ["boat", "motor"], category: "travel" },
-      { emoji: "\u{1F680}", keywords: ["rocket", "space", "launch"], category: "travel" },
-      { emoji: "\u{1F6F8}", keywords: ["ufo", "flying", "saucer"], category: "travel" },
-      { emoji: "\u23F1\uFE0F", keywords: ["stopwatch", "timer"], category: "travel" },
-      { emoji: "\u23F0", keywords: ["alarm", "clock"], category: "travel" },
-      { emoji: "\u23F2\uFE0F", keywords: ["timer", "clock"], category: "travel" },
-      { emoji: "\u{1F550}", keywords: ["clock", "one", "time"], category: "travel" },
-      { emoji: "\u{1F3E0}", keywords: ["house", "home"], category: "travel" },
-      { emoji: "\u{1F3E1}", keywords: ["house", "garden", "home"], category: "travel" },
-      { emoji: "\u{1F3E2}", keywords: ["building", "office"], category: "travel" },
-      { emoji: "\u{1F3E3}", keywords: ["post", "office"], category: "travel" },
-      { emoji: "\u{1F3E4}", keywords: ["post", "office", "european"], category: "travel" },
-      { emoji: "\u{1F3E5}", keywords: ["hospital", "medical"], category: "travel" },
-      { emoji: "\u{1F3E6}", keywords: ["bank", "building"], category: "travel" },
-      { emoji: "\u{1F3E8}", keywords: ["hotel", "building"], category: "travel" },
-      { emoji: "\u{1F3E9}", keywords: ["hotel", "love"], category: "travel" },
-      { emoji: "\u{1F3EA}", keywords: ["store", "convenience"], category: "travel" },
-      { emoji: "\u{1F3EB}", keywords: ["school", "building"], category: "travel" },
-      { emoji: "\u{1F3EC}", keywords: ["store", "department"], category: "travel" },
-      { emoji: "\u{1F3ED}", keywords: ["factory", "building"], category: "travel" },
-      { emoji: "\u{1F3EF}", keywords: ["castle", "japanese"], category: "travel" },
-      { emoji: "\u{1F3F0}", keywords: ["castle", "european"], category: "travel" },
-      { emoji: "\u{1F492}", keywords: ["wedding", "chapel"], category: "travel" },
-      { emoji: "\u{1F5FC}", keywords: ["tower", "tokyo"], category: "travel" },
-      { emoji: "\u{1F5FD}", keywords: ["statue", "liberty"], category: "travel" },
-      { emoji: "\u26EA", keywords: ["church", "christian"], category: "travel" },
-      { emoji: "\u{1F54C}", keywords: ["mosque", "islam"], category: "travel" },
-      { emoji: "\u{1F6D5}", keywords: ["temple", "hindu"], category: "travel" },
-      { emoji: "\u{1F54D}", keywords: ["synagogue", "jewish"], category: "travel" }
-    ];
-    emojis.forEach(({ emoji, keywords, category }) => {
-      items.push({
-        value: emoji,
-        type: "emoji",
-        keywords,
-        category
-      });
-    });
-    const lucideIcons = this.getLucideIcons();
-    lucideIcons.forEach((iconName) => {
-      if (!(0, import_obsidian3.getIcon)(iconName)) return;
-      const keywords = iconName.split("-");
-      items.push({
-        value: iconName,
-        type: "lucide",
-        keywords,
-        category: "lucide"
-      });
-    });
-    return items;
-  }
-  /**
-   * Get comprehensive list of Lucide icon names
-   * Full library from https://lucide.dev/icons/
-   */
-  getLucideIcons() {
-    return [
-      "a-arrow-down",
-      "a-arrow-up",
-      "a-large-small",
-      "accessibility",
-      "activity",
-      "air-vent",
-      "airplay",
-      "alarm-check",
-      "alarm-clock",
-      "alarm-clock-check",
-      "alarm-clock-minus",
-      "alarm-clock-off",
-      "alarm-clock-plus",
-      "alarm-minus",
-      "alarm-plus",
-      "alarm-smoke",
-      "album",
-      "alert-circle",
-      "alert-octagon",
-      "alert-triangle",
-      "align-center",
-      "align-center-horizontal",
-      "align-center-vertical",
-      "align-end-horizontal",
-      "align-end-vertical",
-      "align-horizontal-distribute-center",
-      "align-horizontal-distribute-end",
-      "align-horizontal-distribute-start",
-      "align-horizontal-justify-center",
-      "align-horizontal-justify-end",
-      "align-horizontal-justify-start",
-      "align-horizontal-space-around",
-      "align-horizontal-space-between",
-      "align-justify",
-      "align-left",
-      "align-right",
-      "align-start-horizontal",
-      "align-start-vertical",
-      "align-vertical-distribute-center",
-      "align-vertical-distribute-end",
-      "align-vertical-distribute-start",
-      "align-vertical-justify-center",
-      "align-vertical-justify-end",
-      "align-vertical-justify-start",
-      "align-vertical-space-around",
-      "align-vertical-space-between",
-      "ambulance",
-      "ampersand",
-      "ampersands",
-      "anchor",
-      "angry",
-      "annoyed",
-      "antenna",
-      "anvil",
-      "aperture",
-      "app-window",
-      "app-window-mac",
-      "apple",
-      "archive",
-      "archive-restore",
-      "archive-x",
-      "area-chart",
-      "armchair",
-      "arrow-big-down",
-      "arrow-big-down-dash",
-      "arrow-big-left",
-      "arrow-big-left-dash",
-      "arrow-big-right",
-      "arrow-big-right-dash",
-      "arrow-big-up",
-      "arrow-big-up-dash",
-      "arrow-down",
-      "arrow-down-0-1",
-      "arrow-down-1-0",
-      "arrow-down-a-z",
-      "arrow-down-circle",
-      "arrow-down-from-line",
-      "arrow-down-left",
-      "arrow-down-left-from-circle",
-      "arrow-down-left-from-square",
-      "arrow-down-narrow-wide",
-      "arrow-down-right",
-      "arrow-down-right-from-circle",
-      "arrow-down-right-from-square",
-      "arrow-down-square",
-      "arrow-down-to-dot",
-      "arrow-down-to-line",
-      "arrow-down-up",
-      "arrow-down-wide-narrow",
-      "arrow-down-z-a",
-      "arrow-left",
-      "arrow-left-circle",
-      "arrow-left-from-line",
-      "arrow-left-right",
-      "arrow-left-square",
-      "arrow-left-to-line",
-      "arrow-right",
-      "arrow-right-circle",
-      "arrow-right-from-line",
-      "arrow-right-left",
-      "arrow-right-square",
-      "arrow-right-to-line",
-      "arrow-up",
-      "arrow-up-0-1",
-      "arrow-up-1-0",
-      "arrow-up-a-z",
-      "arrow-up-circle",
-      "arrow-up-down",
-      "arrow-up-from-dot",
-      "arrow-up-from-line",
-      "arrow-up-left",
-      "arrow-up-left-from-circle",
-      "arrow-up-left-from-square",
-      "arrow-up-narrow-wide",
-      "arrow-up-right",
-      "arrow-up-right-from-circle",
-      "arrow-up-right-from-square",
-      "arrow-up-square",
-      "arrow-up-to-line",
-      "arrow-up-wide-narrow",
-      "arrow-up-z-a",
-      "arrows-up-from-line",
-      "asterisk",
-      "at-sign",
-      "atom",
-      "audio-lines",
-      "audio-waveform",
-      "award",
-      "axe",
-      "axis-3d",
-      "baby",
-      "backpack",
-      "badge",
-      "badge-alert",
-      "badge-cent",
-      "badge-check",
-      "badge-dollar-sign",
-      "badge-euro",
-      "badge-help",
-      "badge-indian-rupee",
-      "badge-info",
-      "badge-japanese-yen",
-      "badge-minus",
-      "badge-percent",
-      "badge-plus",
-      "badge-pound-sterling",
-      "badge-russian-ruble",
-      "badge-swiss-franc",
-      "badge-x",
-      "baggage-claim",
-      "ban",
-      "banana",
-      "banknote",
-      "bar-chart",
-      "bar-chart-2",
-      "bar-chart-3",
-      "bar-chart-4",
-      "bar-chart-big",
-      "bar-chart-horizontal",
-      "bar-chart-horizontal-big",
-      "barcode",
-      "baseline",
-      "bath",
-      "battery",
-      "battery-charging",
-      "battery-full",
-      "battery-low",
-      "battery-medium",
-      "battery-warning",
-      "beaker",
-      "bean",
-      "bean-off",
-      "bed",
-      "bed-double",
-      "bed-single",
-      "beef",
-      "beer",
-      "beer-off",
-      "bell",
-      "bell-dot",
-      "bell-electric",
-      "bell-minus",
-      "bell-off",
-      "bell-plus",
-      "bell-ring",
-      "between-horizontal-end",
-      "between-horizontal-start",
-      "between-vertical-end",
-      "between-vertical-start",
-      "bicycle",
-      "bike",
-      "binary",
-      "binoculars",
-      "biohazard",
-      "bird",
-      "bitcoin",
-      "blend",
-      "blinds",
-      "blocks",
-      "bluetooth",
-      "bluetooth-connected",
-      "bluetooth-off",
-      "bluetooth-searching",
-      "bold",
-      "bolt",
-      "bomb",
-      "bone",
-      "book",
-      "book-a",
-      "book-audio",
-      "book-check",
-      "book-copy",
-      "book-dashed",
-      "book-down",
-      "book-headphones",
-      "book-heart",
-      "book-image",
-      "book-key",
-      "book-lock",
-      "book-marked",
-      "book-minus",
-      "book-open",
-      "book-open-check",
-      "book-open-text",
-      "book-plus",
-      "book-text",
-      "book-type",
-      "book-up",
-      "book-up-2",
-      "book-user",
-      "book-x",
-      "bookmark",
-      "bookmark-check",
-      "bookmark-minus",
-      "bookmark-plus",
-      "bookmark-x",
-      "boom-box",
-      "bot",
-      "bot-message-square",
-      "box",
-      "box-select",
-      "boxes",
-      "braces",
-      "brackets",
-      "brain",
-      "brain-circuit",
-      "brain-cog",
-      "brick-wall",
-      "briefcase",
-      "briefcase-business",
-      "briefcase-conveyor-belt",
-      "briefcase-medical",
-      "bring-to-front",
-      "brush",
-      "bug",
-      "bug-off",
-      "bug-play",
-      "building",
-      "building-2",
-      "bus",
-      "bus-front",
-      "cable",
-      "cable-car",
-      "cake",
-      "cake-slice",
-      "calculator",
-      "calendar",
-      "calendar-arrow-down",
-      "calendar-arrow-up",
-      "calendar-check",
-      "calendar-check-2",
-      "calendar-clock",
-      "calendar-cog",
-      "calendar-days",
-      "calendar-fold",
-      "calendar-heart",
-      "calendar-minus",
-      "calendar-minus-2",
-      "calendar-off",
-      "calendar-plus",
-      "calendar-plus-2",
-      "calendar-range",
-      "calendar-search",
-      "calendar-sync",
-      "calendar-x",
-      "calendar-x-2",
-      "camera",
-      "camera-off",
-      "camping-tent",
-      "candy",
-      "candy-cane",
-      "candy-off",
-      "cannabis",
-      "captions",
-      "captions-off",
-      "car",
-      "car-front",
-      "car-taxi-front",
-      "caravan",
-      "carrot",
-      "case-lower",
-      "case-sensitive",
-      "case-upper",
-      "cassette-tape",
-      "cast",
-      "castle",
-      "cat",
-      "cctv",
-      "check",
-      "check-check",
-      "check-circle",
-      "check-circle-2",
-      "check-square",
-      "check-square-2",
-      "chef-hat",
-      "cherry",
-      "chevron-down",
-      "chevron-down-circle",
-      "chevron-down-square",
-      "chevron-first",
-      "chevron-last",
-      "chevron-left",
-      "chevron-left-circle",
-      "chevron-left-square",
-      "chevron-right",
-      "chevron-right-circle",
-      "chevron-right-square",
-      "chevron-up",
-      "chevron-up-circle",
-      "chevron-up-square",
-      "chevrons-down",
-      "chevrons-down-up",
-      "chevrons-left",
-      "chevrons-left-right",
-      "chevrons-left-right-ellipsis",
-      "chevrons-right",
-      "chevrons-right-left",
-      "chevrons-up",
-      "chevrons-up-down",
-      "chrome",
-      "church",
-      "cigarette",
-      "cigarette-off",
-      "circle",
-      "circle-alert",
-      "circle-arrow-down",
-      "circle-arrow-left",
-      "circle-arrow-out-down-left",
-      "circle-arrow-out-down-right",
-      "circle-arrow-out-up-left",
-      "circle-arrow-out-up-right",
-      "circle-arrow-right",
-      "circle-arrow-up",
-      "circle-check",
-      "circle-check-big",
-      "circle-chevron-down",
-      "circle-chevron-left",
-      "circle-chevron-right",
-      "circle-chevron-up",
-      "circle-dashed",
-      "circle-divide",
-      "circle-dollar-sign",
-      "circle-dot",
-      "circle-dot-dashed",
-      "circle-ellipsis",
-      "circle-equal",
-      "circle-fading-arrow-up",
-      "circle-fading-plus",
-      "circle-gauge",
-      "circle-help",
-      "circle-minus",
-      "circle-off",
-      "circle-parking",
-      "circle-parking-off",
-      "circle-pause",
-      "circle-percent",
-      "circle-play",
-      "circle-plus",
-      "circle-power",
-      "circle-slash",
-      "circle-slash-2",
-      "circle-stop",
-      "circle-user",
-      "circle-user-round",
-      "circle-x",
-      "circuit-board",
-      "citrus",
-      "clapperboard",
-      "clipboard",
-      "clipboard-check",
-      "clipboard-copy",
-      "clipboard-edit",
-      "clipboard-list",
-      "clipboard-minus",
-      "clipboard-paste",
-      "clipboard-pen",
-      "clipboard-pen-line",
-      "clipboard-plus",
-      "clipboard-signature",
-      "clipboard-type",
-      "clipboard-x",
-      "clock",
-      "clock-1",
-      "clock-10",
-      "clock-11",
-      "clock-12",
-      "clock-2",
-      "clock-3",
-      "clock-4",
-      "clock-5",
-      "clock-6",
-      "clock-7",
-      "clock-8",
-      "clock-9",
-      "clock-alert",
-      "clock-arrow-down",
-      "clock-arrow-up",
-      "cloud",
-      "cloud-cog",
-      "cloud-download",
-      "cloud-drizzle",
-      "cloud-fog",
-      "cloud-hail",
-      "cloud-lightning",
-      "cloud-moon",
-      "cloud-moon-rain",
-      "cloud-off",
-      "cloud-rain",
-      "cloud-rain-wind",
-      "cloud-snow",
-      "cloud-sun",
-      "cloud-sun-rain",
-      "cloud-upload",
-      "cloudy",
-      "clover",
-      "club",
-      "code",
-      "code-2",
-      "code-xml",
-      "codepen",
-      "codesandbox",
-      "coffee",
-      "cog",
-      "coins",
-      "columns-2",
-      "columns-3",
-      "columns-4",
-      "combine",
-      "command",
-      "compass",
-      "component",
-      "computer",
-      "concierge-bell",
-      "cone",
-      "construction",
-      "contact",
-      "contact-round",
-      "container",
-      "contrast",
-      "cookie",
-      "cooking-pot",
-      "copy",
-      "copy-check",
-      "copy-minus",
-      "copy-plus",
-      "copy-slash",
-      "copy-x",
-      "copyleft",
-      "copyright",
-      "corner-down-left",
-      "corner-down-right",
-      "corner-left-down",
-      "corner-left-up",
-      "corner-right-down",
-      "corner-right-up",
-      "corner-up-left",
-      "corner-up-right",
-      "cpu",
-      "creative-commons",
-      "credit-card",
-      "croissant",
-      "crop",
-      "cross",
-      "crosshair",
-      "crown",
-      "cuboid",
-      "cup-soda",
-      "currency",
-      "cylinder",
-      "database",
-      "database-backup",
-      "database-zap",
-      "delete",
-      "dessert",
-      "diameter",
-      "diamond",
-      "diamond-minus",
-      "diamond-percent",
-      "diamond-plus",
-      "dice-1",
-      "dice-2",
-      "dice-3",
-      "dice-4",
-      "dice-5",
-      "dice-6",
-      "dices",
-      "diff",
-      "disc",
-      "disc-2",
-      "disc-3",
-      "disc-album",
-      "divide",
-      "divide-circle",
-      "divide-square",
-      "dna",
-      "dna-off",
-      "dock",
-      "dog",
-      "dollar-sign",
-      "donut",
-      "door-closed",
-      "door-open",
-      "dot",
-      "download",
-      "download-cloud",
-      "drafting-compass",
-      "drama",
-      "dribbble",
-      "drill",
-      "droplet",
-      "droplets",
-      "drumstick",
-      "dumbbell",
-      "ear",
-      "ear-off",
-      "earth",
-      "earth-lock",
-      "eclipse",
-      "egg",
-      "egg-fried",
-      "egg-off",
-      "ellipsis",
-      "ellipsis-vertical",
-      "equal",
-      "equal-not",
-      "eraser",
-      "euro",
-      "expand",
-      "external-link",
-      "eye",
-      "eye-closed",
-      "eye-off",
-      "facebook",
-      "factory",
-      "fan",
-      "fast-forward",
-      "feather",
-      "fence",
-      "ferris-wheel",
-      "figma",
-      "file",
-      "file-archive",
-      "file-audio",
-      "file-audio-2",
-      "file-axis-3d",
-      "file-badge",
-      "file-badge-2",
-      "file-bar-chart",
-      "file-bar-chart-2",
-      "file-box",
-      "file-check",
-      "file-check-2",
-      "file-clock",
-      "file-code",
-      "file-code-2",
-      "file-cog",
-      "file-diff",
-      "file-digit",
-      "file-down",
-      "file-edit",
-      "file-heart",
-      "file-image",
-      "file-input",
-      "file-json",
-      "file-json-2",
-      "file-key",
-      "file-key-2",
-      "file-line-chart",
-      "file-lock",
-      "file-lock-2",
-      "file-minus",
-      "file-minus-2",
-      "file-music",
-      "file-output",
-      "file-pen",
-      "file-pen-line",
-      "file-pie-chart",
-      "file-plus",
-      "file-plus-2",
-      "file-question",
-      "file-scan",
-      "file-search",
-      "file-search-2",
-      "file-signature",
-      "file-sliders",
-      "file-spreadsheet",
-      "file-stack",
-      "file-symlink",
-      "file-terminal",
-      "file-text",
-      "file-type",
-      "file-type-2",
-      "file-up",
-      "file-user",
-      "file-video",
-      "file-video-2",
-      "file-volume",
-      "file-volume-2",
-      "file-warning",
-      "file-x",
-      "file-x-2",
-      "files",
-      "film",
-      "filter",
-      "filter-x",
-      "fingerprint",
-      "fire-extinguisher",
-      "fish",
-      "fish-off",
-      "fish-symbol",
-      "flag",
-      "flag-off",
-      "flag-triangle-left",
-      "flag-triangle-right",
-      "flame",
-      "flame-kindling",
-      "flashlight",
-      "flashlight-off",
-      "flask-conical",
-      "flask-conical-off",
-      "flask-round",
-      "flip-horizontal",
-      "flip-horizontal-2",
-      "flip-vertical",
-      "flip-vertical-2",
-      "flower",
-      "flower-2",
-      "focus",
-      "fold-horizontal",
-      "fold-vertical",
-      "folder",
-      "folder-archive",
-      "folder-check",
-      "folder-clock",
-      "folder-closed",
-      "folder-cog",
-      "folder-dot",
-      "folder-down",
-      "folder-edit",
-      "folder-git",
-      "folder-git-2",
-      "folder-heart",
-      "folder-input",
-      "folder-kanban",
-      "folder-key",
-      "folder-lock",
-      "folder-minus",
-      "folder-open",
-      "folder-open-dot",
-      "folder-output",
-      "folder-pen",
-      "folder-plus",
-      "folder-root",
-      "folder-search",
-      "folder-search-2",
-      "folder-symlink",
-      "folder-sync",
-      "folder-tree",
-      "folder-up",
-      "folder-x",
-      "folders",
-      "footprints",
-      "forklift",
-      "form-input",
-      "forward",
-      "frame",
-      "framer",
-      "frown",
-      "fuel",
-      "fullscreen",
-      "function-square",
-      "gallery-horizontal",
-      "gallery-horizontal-end",
-      "gallery-thumbnails",
-      "gallery-vertical",
-      "gallery-vertical-end",
-      "gamepad",
-      "gamepad-2",
-      "gauge",
-      "gauge-circle",
-      "gavel",
-      "gem",
-      "ghost",
-      "gift",
-      "git-branch",
-      "git-branch-plus",
-      "git-commit-horizontal",
-      "git-commit-vertical",
-      "git-compare",
-      "git-compare-arrows",
-      "git-fork",
-      "git-graph",
-      "git-merge",
-      "git-pull-request",
-      "git-pull-request-arrow",
-      "git-pull-request-closed",
-      "git-pull-request-create",
-      "git-pull-request-create-arrow",
-      "git-pull-request-draft",
-      "github",
-      "gitlab",
-      "glass-water",
-      "glasses",
-      "globe",
-      "globe-2",
-      "globe-lock",
-      "goal",
-      "grab",
-      "graduation-cap",
-      "grape",
-      "grid-2x2",
-      "grid-2x2-check",
-      "grid-2x2-plus",
-      "grid-2x2-x",
-      "grid-3x3",
-      "grip",
-      "grip-horizontal",
-      "grip-vertical",
-      "group",
-      "guitar",
-      "ham",
-      "hammer",
-      "hand",
-      "hand-coins",
-      "hand-heart",
-      "hand-helping",
-      "hand-metal",
-      "hand-platter",
-      "handshake",
-      "hard-drive",
-      "hard-drive-download",
-      "hard-drive-upload",
-      "hard-hat",
-      "hash",
-      "haze",
-      "hdmi-port",
-      "heading",
-      "heading-1",
-      "heading-2",
-      "heading-3",
-      "heading-4",
-      "heading-5",
-      "heading-6",
-      "headphone-off",
-      "headphones",
-      "headset",
-      "heart",
-      "heart-crack",
-      "heart-handshake",
-      "heart-off",
-      "heart-pulse",
-      "heater",
-      "help-circle",
-      "hexagon",
-      "highlighter",
-      "history",
-      "hop",
-      "hop-off",
-      "hospital",
-      "hotel",
-      "hourglass",
-      "house",
-      "house-plus",
-      "ice-cream",
-      "ice-cream-bowl",
-      "ice-cream-cone",
-      "image",
-      "image-down",
-      "image-minus",
-      "image-off",
-      "image-play",
-      "image-plus",
-      "image-up",
-      "images",
-      "import",
-      "inbox",
-      "indent-decrease",
-      "indent-increase",
-      "indian-rupee",
-      "infinity",
-      "info",
-      "inspection-panel",
-      "instagram",
-      "italic",
-      "iteration-ccw",
-      "iteration-cw",
-      "japanese-yen",
-      "joystick",
-      "kanban",
-      "key",
-      "key-round",
-      "key-square",
-      "keyboard",
-      "keyboard-music",
-      "keyboard-off",
-      "lamp",
-      "lamp-ceiling",
-      "lamp-desk",
-      "lamp-floor",
-      "lamp-wall-down",
-      "lamp-wall-up",
-      "land-plot",
-      "landmark",
-      "languages",
-      "laptop",
-      "laptop-2",
-      "laptop-minimal",
-      "lasso",
-      "lasso-select",
-      "laugh",
-      "layers",
-      "layers-2",
-      "layers-3",
-      "layout",
-      "layout-dashboard",
-      "layout-grid",
-      "layout-list",
-      "layout-panel-left",
-      "layout-panel-top",
-      "layout-template",
-      "leaf",
-      "leafy-green",
-      "lectern",
-      "library",
-      "library-big",
-      "library-square",
-      "life-buoy",
-      "ligature",
-      "lightbulb",
-      "lightbulb-off",
-      "line-chart",
-      "link",
-      "link-2",
-      "link-2-off",
-      "linkedin",
-      "list",
-      "list-check",
-      "list-checks",
-      "list-collapse",
-      "list-end",
-      "list-filter",
-      "list-minus",
-      "list-music",
-      "list-ordered",
-      "list-plus",
-      "list-restart",
-      "list-start",
-      "list-todo",
-      "list-tree",
-      "list-video",
-      "list-x",
-      "loader",
-      "loader-circle",
-      "loader-pinwheel",
-      "locate",
-      "locate-fixed",
-      "locate-off",
-      "lock",
-      "lock-keyhole",
-      "lock-keyhole-open",
-      "lock-open",
-      "log-in",
-      "log-out",
-      "logs",
-      "lollipop",
-      "luggage",
-      "magnet",
-      "mail",
-      "mail-check",
-      "mail-minus",
-      "mail-open",
-      "mail-plus",
-      "mail-question",
-      "mail-search",
-      "mail-warning",
-      "mail-x",
-      "mailbox",
-      "mails",
-      "map",
-      "map-pin",
-      "map-pin-off",
-      "map-pinned",
-      "martini",
-      "maximize",
-      "maximize-2",
-      "medal",
-      "megaphone",
-      "megaphone-off",
-      "meh",
-      "memory-stick",
-      "menu",
-      "merge",
-      "message-circle",
-      "message-circle-code",
-      "message-circle-dashed",
-      "message-circle-heart",
-      "message-circle-more",
-      "message-circle-off",
-      "message-circle-plus",
-      "message-circle-question",
-      "message-circle-reply",
-      "message-circle-warning",
-      "message-circle-x",
-      "message-square",
-      "message-square-code",
-      "message-square-dashed",
-      "message-square-diff",
-      "message-square-dot",
-      "message-square-heart",
-      "message-square-more",
-      "message-square-off",
-      "message-square-plus",
-      "message-square-quote",
-      "message-square-reply",
-      "message-square-share",
-      "message-square-text",
-      "message-square-warning",
-      "message-square-x",
-      "messages-square",
-      "mic",
-      "mic-off",
-      "mic-vocal",
-      "microchip",
-      "microscope",
-      "microwave",
-      "milestone",
-      "milk",
-      "milk-off",
-      "minimize",
-      "minimize-2",
-      "minus",
-      "minus-circle",
-      "minus-square",
-      "monitor",
-      "monitor-check",
-      "monitor-dot",
-      "monitor-down",
-      "monitor-off",
-      "monitor-pause",
-      "monitor-play",
-      "monitor-smartphone",
-      "monitor-speaker",
-      "monitor-stop",
-      "monitor-up",
-      "monitor-x",
-      "moon",
-      "moon-star",
-      "more-horizontal",
-      "more-vertical",
-      "mountain",
-      "mountain-snow",
-      "mouse",
-      "mouse-off",
-      "mouse-pointer",
-      "mouse-pointer-2",
-      "mouse-pointer-click",
-      "mouse-pointer-square",
-      "mouse-pointer-square-dashed",
-      "move",
-      "move-3d",
-      "move-diagonal",
-      "move-diagonal-2",
-      "move-down",
-      "move-down-left",
-      "move-down-right",
-      "move-horizontal",
-      "move-left",
-      "move-right",
-      "move-up",
-      "move-up-left",
-      "move-up-right",
-      "move-vertical",
-      "music",
-      "music-2",
-      "music-3",
-      "music-4",
-      "navigation",
-      "navigation-2",
-      "navigation-2-off",
-      "navigation-off",
-      "network",
-      "newspaper",
-      "nfc",
-      "notebook",
-      "notebook-pen",
-      "notebook-tabs",
-      "notebook-text",
-      "notepad-text",
-      "notepad-text-dashed",
-      "npm",
-      "nut",
-      "nut-off",
-      "octagon",
-      "octagon-alert",
-      "octagon-pause",
-      "octagon-x",
-      "omega",
-      "option",
-      "orbit",
-      "origami",
-      "package",
-      "package-2",
-      "package-check",
-      "package-minus",
-      "package-open",
-      "package-plus",
-      "package-search",
-      "package-x",
-      "paint-bucket",
-      "paint-roller",
-      "paintbrush",
-      "paintbrush-2",
-      "paintbrush-vertical",
-      "palette",
-      "palmtree",
-      "panel-bottom",
-      "panel-bottom-close",
-      "panel-bottom-dashed",
-      "panel-bottom-open",
-      "panel-left",
-      "panel-left-close",
-      "panel-left-dashed",
-      "panel-left-open",
-      "panel-right",
-      "panel-right-close",
-      "panel-right-dashed",
-      "panel-right-open",
-      "panel-top",
-      "panel-top-close",
-      "panel-top-dashed",
-      "panel-top-open",
-      "panels-left-bottom",
-      "panels-right-bottom",
-      "panels-top-left",
-      "paperclip",
-      "parentheses",
-      "parking-circle",
-      "parking-circle-off",
-      "parking-meter",
-      "parking-square",
-      "parking-square-off",
-      "party-popper",
-      "pause",
-      "pause-circle",
-      "pause-octagon",
-      "paw-print",
-      "pc-case",
-      "pen",
-      "pen-line",
-      "pen-off",
-      "pen-tool",
-      "pencil",
-      "pencil-line",
-      "pencil-off",
-      "pencil-ruler",
-      "pentagon",
-      "percent",
-      "percent-circle",
-      "percent-diamond",
-      "percent-square",
-      "person-standing",
-      "phone",
-      "phone-call",
-      "phone-forwarded",
-      "phone-incoming",
-      "phone-missed",
-      "phone-off",
-      "phone-outgoing",
-      "pi",
-      "pi-square",
-      "piano",
-      "pickaxe",
-      "picture-in-picture",
-      "picture-in-picture-2",
-      "pie-chart",
-      "pig",
-      "piggy-bank",
-      "pilcrow",
-      "pilcrow-left",
-      "pilcrow-right",
-      "pilcrow-square",
-      "pill",
-      "pin",
-      "pin-off",
-      "pipette",
-      "pizza",
-      "plane",
-      "plane-landing",
-      "plane-takeoff",
-      "play",
-      "play-circle",
-      "play-square",
-      "plug",
-      "plug-2",
-      "plug-zap",
-      "plug-zap-2",
-      "plus",
-      "plus-circle",
-      "plus-square",
-      "pocket",
-      "pocket-knife",
-      "podcast",
-      "pointer",
-      "pointer-off",
-      "popcorn",
-      "popsicle",
-      "pound-sterling",
-      "power",
-      "power-circle",
-      "power-off",
-      "power-square",
-      "presentation",
-      "printer",
-      "printer-check",
-      "projector",
-      "proportions",
-      "puzzle",
-      "pyramid",
-      "qr-code",
-      "quote",
-      "rabbit",
-      "radar",
-      "radiation",
-      "radical",
-      "radio",
-      "radio-receiver",
-      "radio-tower",
-      "radius",
-      "rail-symbol",
-      "rainbow",
-      "rat",
-      "ratio",
-      "receipt",
-      "receipt-cent",
-      "receipt-euro",
-      "receipt-indian-rupee",
-      "receipt-japanese-yen",
-      "receipt-pound-sterling",
-      "receipt-russian-ruble",
-      "receipt-swiss-franc",
-      "receipt-text",
-      "rectangle-ellipsis",
-      "rectangle-horizontal",
-      "rectangle-vertical",
-      "recycle",
-      "redo",
-      "redo-2",
-      "redo-dot",
-      "refresh-ccw",
-      "refresh-ccw-dot",
-      "refresh-cw",
-      "refresh-cw-off",
-      "refrigerator",
-      "regex",
-      "remove-formatting",
-      "repeat",
-      "repeat-1",
-      "repeat-2",
-      "replace",
-      "replace-all",
-      "reply",
-      "reply-all",
-      "rewind",
-      "ribbon",
-      "rocket",
-      "rocking-chair",
-      "roller-coaster",
-      "rotate-3d",
-      "rotate-ccw",
-      "rotate-ccw-square",
-      "rotate-cw",
-      "rotate-cw-square",
-      "route",
-      "route-off",
-      "router",
-      "rows-2",
-      "rows-3",
-      "rows-4",
-      "rss",
-      "ruler",
-      "russian-ruble",
-      "sailboat",
-      "salad",
-      "sandwich",
-      "satellite",
-      "satellite-dish",
-      "save",
-      "save-all",
-      "save-off",
-      "scale",
-      "scale-3d",
-      "scaling",
-      "scan",
-      "scan-barcode",
-      "scan-eye",
-      "scan-face",
-      "scan-line",
-      "scan-qr-code",
-      "scan-search",
-      "scan-text",
-      "scatter-chart",
-      "school",
-      "scissors",
-      "scissors-line-dashed",
-      "screen-share",
-      "screen-share-off",
-      "scroll",
-      "scroll-text",
-      "search",
-      "search-check",
-      "search-code",
-      "search-slash",
-      "search-x",
-      "section",
-      "send",
-      "send-horizontal",
-      "send-to-back",
-      "separator-horizontal",
-      "separator-vertical",
-      "server",
-      "server-cog",
-      "server-crash",
-      "server-off",
-      "settings",
-      "settings-2",
-      "shapes",
-      "share",
-      "share-2",
-      "sheet",
-      "shell",
-      "shield",
-      "shield-alert",
-      "shield-ban",
-      "shield-check",
-      "shield-ellipsis",
-      "shield-half",
-      "shield-minus",
-      "shield-off",
-      "shield-plus",
-      "shield-question",
-      "shield-x",
-      "ship",
-      "ship-wheel",
-      "shirt",
-      "shopping-bag",
-      "shopping-basket",
-      "shopping-cart",
-      "shovel",
-      "shower-head",
-      "shrink",
-      "shrub",
-      "shuffle",
-      "sigma",
-      "sigma-square",
-      "signal",
-      "signal-high",
-      "signal-low",
-      "signal-medium",
-      "signal-zero",
-      "signature",
-      "signpost",
-      "signpost-big",
-      "siren",
-      "skip-back",
-      "skip-forward",
-      "skull",
-      "slack",
-      "slash",
-      "slice",
-      "sliders",
-      "sliders-horizontal",
-      "sliders-vertical",
-      "smartphone",
-      "smartphone-charging",
-      "smartphone-nfc",
-      "smile",
-      "smile-plus",
-      "snail",
-      "snowflake",
-      "sofa",
-      "sort-asc",
-      "sort-desc",
-      "soup",
-      "space",
-      "spade",
-      "sparkle",
-      "sparkles",
-      "speaker",
-      "speech",
-      "spell-check",
-      "spell-check-2",
-      "spline",
-      "split",
-      "split-square-horizontal",
-      "split-square-vertical",
-      "spray-can",
-      "sprout",
-      "square",
-      "square-activity",
-      "square-alert",
-      "square-arrow-down",
-      "square-arrow-down-left",
-      "square-arrow-down-right",
-      "square-arrow-left",
-      "square-arrow-out-down-left",
-      "square-arrow-out-down-right",
-      "square-arrow-out-up-left",
-      "square-arrow-out-up-right",
-      "square-arrow-right",
-      "square-arrow-up",
-      "square-arrow-up-left",
-      "square-arrow-up-right",
-      "square-asterisk",
-      "square-bottom-dashed-scissors",
-      "square-chart-gantt",
-      "square-check",
-      "square-check-big",
-      "square-chevron-down",
-      "square-chevron-left",
-      "square-chevron-right",
-      "square-chevron-up",
-      "square-code",
-      "square-dashed",
-      "square-dashed-bottom",
-      "square-dashed-bottom-code",
-      "square-dashed-kanban",
-      "square-dashed-mouse-pointer",
-      "square-divide",
-      "square-dot",
-      "square-equal",
-      "square-function",
-      "square-kanban",
-      "square-library",
-      "square-m",
-      "square-menu",
-      "square-minus",
-      "square-mouse-pointer",
-      "square-parking",
-      "square-parking-off",
-      "square-pen",
-      "square-percent",
-      "square-pi",
-      "square-pilcrow",
-      "square-play",
-      "square-plus",
-      "square-power",
-      "square-radical",
-      "square-scissors",
-      "square-sigma",
-      "square-slash",
-      "square-split-horizontal",
-      "square-split-vertical",
-      "square-square",
-      "square-stack",
-      "square-terminal",
-      "square-user",
-      "square-user-round",
-      "square-x",
-      "squircle",
-      "squirrel",
-      "stamp",
-      "star",
-      "star-half",
-      "star-off",
-      "stars",
-      "step-back",
-      "step-forward",
-      "stethoscope",
-      "sticker",
-      "sticky-note",
-      "store",
-      "stretch-horizontal",
-      "stretch-vertical",
-      "strikethrough",
-      "subscript",
-      "subtitles",
-      "sun",
-      "sun-dim",
-      "sun-medium",
-      "sun-moon",
-      "sun-snow",
-      "sunrise",
-      "sunset",
-      "superscript",
-      "swatch-book",
-      "swiss-franc",
-      "switch-camera",
-      "sword",
-      "swords",
-      "syringe",
-      "table",
-      "table-2",
-      "table-cells-merge",
-      "table-cells-split",
-      "table-columns-split",
-      "table-of-contents",
-      "table-properties",
-      "table-rows-split",
-      "tablet",
-      "tablet-smartphone",
-      "tablets",
-      "tag",
-      "tags",
-      "tally-1",
-      "tally-2",
-      "tally-3",
-      "tally-4",
-      "tally-5",
-      "tangent",
-      "target",
-      "telescope",
-      "tent",
-      "tent-tree",
-      "terminal",
-      "test-tube",
-      "test-tube-diagonal",
-      "test-tubes",
-      "text",
-      "text-cursor",
-      "text-cursor-input",
-      "text-quote",
-      "text-search",
-      "text-select",
-      "theater",
-      "thermometer",
-      "thermometer-snowflake",
-      "thermometer-sun",
-      "thumbs-down",
-      "thumbs-up",
-      "ticket",
-      "ticket-check",
-      "ticket-minus",
-      "ticket-percent",
-      "ticket-plus",
-      "ticket-slash",
-      "ticket-x",
-      "tickets",
-      "tickets-plane",
-      "timer",
-      "timer-off",
-      "timer-reset",
-      "toggle-left",
-      "toggle-right",
-      "toilet",
-      "tornado",
-      "torus",
-      "touchpad",
-      "touchpad-off",
-      "tower-control",
-      "toy-brick",
-      "tractor",
-      "traffic-cone",
-      "train-front",
-      "train-front-tunnel",
-      "train-track",
-      "tram-front",
-      "trash",
-      "trash-2",
-      "tree-deciduous",
-      "tree-palm",
-      "tree-pine",
-      "trees",
-      "trello",
-      "trending-down",
-      "trending-up",
-      "trending-up-down",
-      "triangle",
-      "triangle-alert",
-      "triangle-right",
-      "trophy",
-      "truck",
-      "turtle",
-      "tv",
-      "tv-2",
-      "tv-minimal",
-      "tv-minimal-play",
-      "twitch",
-      "twitter",
-      "type",
-      "type-outline",
-      "umbrella",
-      "umbrella-off",
-      "underline",
-      "undo",
-      "undo-2",
-      "undo-dot",
-      "unfold-horizontal",
-      "unfold-vertical",
-      "ungroup",
-      "university",
-      "unlink",
-      "unlink-2",
-      "unplug",
-      "upload",
-      "upload-cloud",
-      "usb",
-      "user",
-      "user-check",
-      "user-circle",
-      "user-cog",
-      "user-minus",
-      "user-pen",
-      "user-plus",
-      "user-round",
-      "user-round-check",
-      "user-round-cog",
-      "user-round-minus",
-      "user-round-pen",
-      "user-round-plus",
-      "user-round-search",
-      "user-round-x",
-      "user-search",
-      "user-x",
-      "users",
-      "users-round",
-      "utensils",
-      "utensils-crossed",
-      "utility-pole",
-      "variable",
-      "vegan",
-      "venetian-mask",
-      "vibrate",
-      "vibrate-off",
-      "video",
-      "video-off",
-      "videotape",
-      "view",
-      "voicemail",
-      "volume",
-      "volume-1",
-      "volume-2",
-      "volume-off",
-      "volume-x",
-      "vote",
-      "wallet",
-      "wallet-cards",
-      "wallet-minimal",
-      "wallpaper",
-      "wand",
-      "wand-sparkles",
-      "warehouse",
-      "washing-machine",
-      "watch",
-      "waves",
-      "waves-ladder",
-      "waypoints",
-      "webcam",
-      "webhook",
-      "webhook-off",
-      "weight",
-      "wheat",
-      "wheat-off",
-      "whole-word",
-      "wifi",
-      "wifi-high",
-      "wifi-low",
-      "wifi-off",
-      "wifi-zero",
-      "wind",
-      "wind-arrow-down",
-      "wine",
-      "wine-off",
-      "workflow",
-      "worm",
-      "wrap-text",
-      "wrench",
-      "x",
-      "x-circle",
-      "x-octagon",
-      "x-square",
-      "youtube",
-      "zap",
-      "zap-off",
-      "zoom-in",
-      "zoom-out"
-    ];
-  }
-  updateSuggestions() {
-    const query = this.inputEl.value.toLowerCase().trim();
-    if (!query) {
-      this.closeSuggestions();
-      return;
-    }
-    const matches = this.allIcons.filter((icon) => {
-      return icon.keywords.some(
-        (keyword) => keyword.toLowerCase().includes(query)
-      );
-    }).slice(0, 20);
-    this.showSuggestions(matches);
-  }
-  showSuggestions(icons) {
-    var _a;
-    this.closeSuggestions();
-    if (icons.length === 0) return;
-    this.suggestions = document.createElement("div");
-    this.suggestions.className = "suggestion-container";
-    this.suggestions.style.cssText = "position: absolute; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 4px; z-index: 1000; max-height: 350px; overflow-y: auto;";
-    icons.forEach((iconItem) => {
-      var _a2;
-      const item = document.createElement("div");
-      item.className = "suggestion-item";
-      item.style.cssText = "padding: 6px 10px; cursor: pointer; border-radius: 3px; display: flex; align-items: center; gap: 10px;";
-      const preview = document.createElement("span");
-      preview.style.cssText = "width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px;";
-      if (iconItem.type === "emoji") {
-        preview.textContent = iconItem.value;
-      } else {
-        (0, import_obsidian3.setIcon)(preview, iconItem.value);
-      }
-      item.appendChild(preview);
-      const textSpan = document.createElement("span");
-      if (iconItem.type === "emoji") {
-        textSpan.textContent = iconItem.keywords.join(", ");
-        textSpan.style.cssText = "font-size: 0.9em; color: var(--text-muted);";
-      } else {
-        textSpan.textContent = iconItem.value;
-        textSpan.style.cssText = "font-family: var(--font-monospace); font-size: 0.85em;";
-      }
-      item.appendChild(textSpan);
-      const badge = document.createElement("span");
-      badge.textContent = iconItem.type;
-      badge.style.cssText = `
-                margin-left: auto;
-                font-size: 0.7em;
-                padding: 2px 6px;
-                border-radius: 3px;
-                background: ${iconItem.type === "emoji" ? "var(--color-green)" : "var(--color-blue)"};
-                color: white;
-                opacity: 0.7;
-            `;
-      item.appendChild(badge);
-      item.addEventListener("mouseenter", () => {
-        item.style.background = "var(--background-modifier-hover)";
-      });
-      item.addEventListener("mouseleave", () => {
-        item.style.background = "";
-      });
-      item.addEventListener("click", () => {
-        this.inputEl.value = iconItem.value;
-        this.inputEl.dataset.iconType = iconItem.type;
-        this.inputEl.dispatchEvent(new Event("input"));
-        this.updatePreview();
-        this.closeSuggestions();
-      });
-      (_a2 = this.suggestions) == null ? void 0 : _a2.appendChild(item);
-    });
-    const footer = document.createElement("div");
-    footer.style.cssText = `
-            padding: 8px 10px;
-            margin-top: 4px;
-            border-top: 1px solid var(--background-modifier-border);
-            font-size: 0.75em;
-            color: var(--text-muted);
-            text-align: center;
-        `;
-    footer.innerHTML = '\u{1F4A1} Browse all Lucide icons at <a href="https://lucide.dev/icons/" target="_blank" style="color: var(--text-accent); text-decoration: underline;">lucide.dev/icons</a>';
-    (_a = this.suggestions) == null ? void 0 : _a.appendChild(footer);
-    const rect = this.inputEl.getBoundingClientRect();
-    this.suggestions.style.top = rect.bottom + 2 + "px";
-    this.suggestions.style.left = rect.left + "px";
-    this.suggestions.style.width = Math.max(rect.width, 300) + "px";
-    document.body.appendChild(this.suggestions);
-  }
-  updatePreview() {
-    if (!this.previewEl) return;
-    this.previewEl.empty();
-    const value = this.inputEl.value.trim();
-    if (!value) return;
-    const iconType = this.inputEl.dataset.iconType;
-    if (iconType === "emoji" || value.length <= 2) {
-      this.previewEl.textContent = value;
-      this.previewEl.style.fontSize = "20px";
-    } else {
-      try {
-        (0, import_obsidian3.setIcon)(this.previewEl, value);
-        this.previewEl.style.fontSize = "";
-      } catch (e) {
-        this.previewEl.textContent = "?";
-        this.previewEl.style.fontSize = "16px";
-      }
-    }
-  }
-  closeSuggestions() {
-    if (this.suggestions) {
-      this.suggestions.remove();
-      this.suggestions = null;
-    }
-  }
-};
-
-// src/SettingsTab.ts
-init_PropertySuggest();
-
-// src/helpers/ConditionRenderer.ts
-init_TagPillRenderer();
-init_PropertySuggest();
-init_ValueSuggest();
-function getValidOperators(property) {
-  if (property === "file.tags") {
-    return [
-      { value: "contains", label: "contains" },
-      { value: "doesNotContain", label: "does not contain" },
-      { value: "exists", label: "exists" },
-      { value: "doesNotExist", label: "does not exist" }
-    ];
-  } else if (property === "file.folder") {
-    return [
-      { value: "is", label: "is" },
-      { value: "isNot", label: "is not" },
-      { value: "contains", label: "contains" },
-      { value: "doesNotContain", label: "does not contain" }
-    ];
-  } else if (property === "file.name" || property === "file.basename") {
-    return [
-      { value: "is", label: "is" },
-      { value: "isNot", label: "is not" },
-      { value: "contains", label: "contains" },
-      { value: "doesNotContain", label: "does not contain" },
-      { value: "exists", label: "exists" },
-      { value: "doesNotExist", label: "does not exist" },
-      { value: "matchesDatePattern", label: "matches date pattern" }
-    ];
-  } else {
-    return [
-      { value: "is", label: "is" },
-      { value: "isNot", label: "is not" },
-      { value: "contains", label: "contains" },
-      { value: "doesNotContain", label: "does not contain" },
-      { value: "exists", label: "exists" },
-      { value: "doesNotExist", label: "does not exist" }
-    ];
-  }
-}
-var ConditionRenderer = class {
-  static render(container, condition, condIndex, conditions, app, callbacks) {
-    const condEl = container.createDiv();
-    condEl.style.cssText = "display: flex; gap: 5px; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; padding: 10px; background: var(--background-primary); border-radius: 3px; border: 1px solid var(--background-modifier-border);";
-    const fieldsContainer = condEl.createDiv();
-    fieldsContainer.style.cssText = "display: flex; gap: 5px; flex-wrap: wrap; flex: 1; align-items: center;";
-    this.renderPropertySelector(fieldsContainer, condition, callbacks);
-    this.renderCustomPropertyInput(fieldsContainer, condition, app, callbacks);
-    this.renderOperatorSelector(fieldsContainer, condition, callbacks);
-    this.renderValueInput(fieldsContainer, condition, app, callbacks);
-    this.renderConditionalCheckboxes(fieldsContainer, condition, callbacks);
-    this.renderDeleteButton(condEl, conditions, condIndex, callbacks);
-  }
-  static renderPropertySelector(container, condition, callbacks) {
-    const properties = [
-      { value: "file.folder", label: "Folder" },
-      { value: "file.tags", label: "Tags" },
-      { value: "file.name", label: "File Name" },
-      { value: "file.basename", label: "File Basename" },
-      { value: "file.ext", label: "Extension" },
-      { value: "file.path", label: "Path" },
-      { value: "custom", label: "Custom property" }
-    ];
-    const propertySelect = container.createEl("select");
-    propertySelect.style.cssText = "padding: 4px 8px;";
-    properties.forEach((prop) => {
-      const option = propertySelect.createEl("option", {
-        text: prop.label,
-        value: prop.value
-      });
-      if (condition.property === prop.value || prop.value === "custom" && !properties.find((p) => p.value === condition.property)) {
-        option.selected = true;
-      }
-    });
-    propertySelect.onchange = async (e) => {
-      var _a;
-      if (e.target.value === "custom") {
-        condition.property = "category";
-      } else {
-        condition.property = e.target.value;
-      }
-      await callbacks.onSave();
-      (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
-    };
-  }
-  static renderCustomPropertyInput(container, condition, app, callbacks) {
-    const properties = [
-      { value: "file.folder", label: "Folder" },
-      { value: "file.tags", label: "Tags" },
-      { value: "file.name", label: "File Name" },
-      { value: "file.basename", label: "File Basename" },
-      { value: "file.ext", label: "Extension" },
-      { value: "file.path", label: "Path" },
-      { value: "custom", label: "Custom property" }
-    ];
-    const needsCustomInput = !properties.find((p) => p.value === condition.property);
-    if (needsCustomInput) {
-      const customInput = container.createEl("input", {
-        type: "text",
-        attr: { placeholder: "property name" },
-        value: condition.property
-      });
-      customInput.style.cssText = "padding: 4px 8px; width: 120px;";
-      customInput.onchange = async (e) => {
-        condition.property = e.target.value;
-        await callbacks.onSave();
-      };
-      new PropertySuggest(app, customInput);
-    }
-  }
-  static renderOperatorSelector(container, condition, callbacks) {
-    const operatorSelect = container.createEl("select");
-    operatorSelect.style.cssText = "padding: 4px 8px;";
-    const operators = getValidOperators(condition.property);
-    operators.forEach((op) => {
-      const option = operatorSelect.createEl("option", {
-        text: op.label,
-        value: op.value
-      });
-      if (condition.operator === op.value) {
-        option.selected = true;
-      }
-    });
-    operatorSelect.onchange = async (e) => {
-      var _a;
-      condition.operator = e.target.value;
-      await callbacks.onSave();
-      (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
-    };
-  }
-  static renderValueInput(container, condition, app, callbacks) {
-    if (["exists", "doesNotExist"].includes(condition.operator)) {
-      return;
-    }
-    if (condition.operator === "matchesDatePattern") {
-      const formatInput = container.createEl("input", {
-        type: "text",
-        attr: { placeholder: "YYYY-MM-DD" },
-        value: condition.value || "YYYY-MM-DD"
-      });
-      formatInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 150px;";
-      formatInput.onchange = async (e) => {
-        condition.value = e.target.value;
-        await callbacks.onSave();
-      };
-      return;
-    }
-    if (condition.property === "file.tags") {
-      const tags = condition.value ? condition.value.split(",").map((t) => t.trim()).filter((t) => t) : [];
-      const tagContainer = container.createDiv();
-      TagPillRenderer.render({
-        tags,
-        onTagsChange: async (updatedTags) => {
-          condition.value = updatedTags.join(", ");
-          await callbacks.onSave();
-        },
-        container: tagContainer,
-        app
-      });
-    } else {
-      const valueInput = container.createEl("input", {
-        type: "text",
-        attr: { placeholder: "value" },
-        value: condition.value || ""
-      });
-      valueInput.style.cssText = "padding: 4px 8px; flex: 1; min-width: 120px;";
-      valueInput.onchange = async (e) => {
-        condition.value = e.target.value;
-        await callbacks.onSave();
-      };
-      if (condition.property === "file.folder") {
-        new FolderSuggest(app, valueInput);
-      } else {
-        new ValueSuggest(app, valueInput, () => condition.property);
-      }
-    }
-  }
-  static renderConditionalCheckboxes(container, condition, callbacks) {
-    if (condition.property === "file.folder" && condition.operator === "is") {
-      const subfolderLabel = container.createEl("label");
-      subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-      const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
-      subfolderCheckbox.checked = condition.includeSubfolders || false;
-      subfolderCheckbox.onchange = async (e) => {
-        condition.includeSubfolders = e.target.checked;
-        await callbacks.onSave();
-      };
-      subfolderLabel.createEl("span", { text: "Include subfolders" });
-    }
-    if (condition.operator === "matchesDatePattern") {
-      const additionalTextLabel = container.createEl("label");
-      additionalTextLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-      const additionalTextCheckbox = additionalTextLabel.createEl("input", { type: "checkbox" });
-      additionalTextCheckbox.checked = condition.requireAdditionalText || false;
-      additionalTextCheckbox.onchange = async (e) => {
-        condition.requireAdditionalText = e.target.checked;
-        await callbacks.onSave();
-      };
-      additionalTextLabel.createEl("span", { text: "And contains additional text" });
-    }
-  }
-  static renderDeleteButton(container, conditions, condIndex, callbacks) {
-    const deleteBtn = container.createEl("button", { text: "\xD7" });
-    deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: none;";
-    deleteBtn.onclick = async () => {
-      var _a;
-      conditions.splice(condIndex, 1);
-      await callbacks.onSave();
-      (_a = callbacks.onRefresh) == null ? void 0 : _a.call(callbacks);
-    };
-  }
-};
-
-// src/SettingsTab.ts
-init_MetadataRowRenderer();
-
-// src/helpers/ColorPickerRenderer.ts
-var import_obsidian4 = require("obsidian");
-var ColorPickerRenderer = class {
-  static render(config) {
-    const { container, currentColor, palettes, onColorChange } = config;
-    container.empty();
-    const colorPickerContainer = container.createDiv();
-    colorPickerContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
-    const colorInput = colorPickerContainer.createEl("input", { type: "color", value: currentColor });
-    colorInput.style.cssText = "width: 60px; height: 32px; cursor: pointer; border-radius: 4px;";
-    const hexDisplay = colorPickerContainer.createEl("code");
-    hexDisplay.textContent = currentColor.toUpperCase();
-    hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.9em;";
-    colorInput.oninput = () => {
-      hexDisplay.textContent = colorInput.value.toUpperCase();
-    };
-    colorInput.onchange = async (e) => {
-      const newColor = e.target.value;
-      hexDisplay.textContent = newColor.toUpperCase();
-      await onColorChange(newColor);
-    };
-    if (palettes && palettes.length > 0) {
-      const paletteBtn = colorPickerContainer.createEl("button");
-      paletteBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 1.1em; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); border-radius: 4px; white-space: nowrap; line-height: 1; display: flex; align-items: center; justify-content: center;";
-      (0, import_obsidian4.setIcon)(paletteBtn, "palette");
-      paletteBtn.title = "Open Color Palettes";
-      let popover = null;
-      const closePopover = () => {
-        if (popover) {
-          popover.remove();
-          popover = null;
-        }
-      };
-      paletteBtn.onclick = (e) => {
-        e.preventDefault();
-        if (popover) {
-          closePopover();
-          return;
-        }
-        popover = document.body.createDiv();
-        popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; padding-top: 8px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px; max-height: 400px; overflow-y: auto;";
-        const closeBtn = popover.createEl("button");
-        closeBtn.textContent = "\xD7";
-        closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
-        closeBtn.title = "Close";
-        closeBtn.onmouseenter = () => {
-          closeBtn.style.background = "var(--background-modifier-hover)";
-        };
-        closeBtn.onmouseleave = () => {
-          closeBtn.style.background = "transparent";
-        };
-        closeBtn.onclick = (e2) => {
-          e2.preventDefault();
-          closePopover();
-        };
-        const btnRect = paletteBtn.getBoundingClientRect();
-        popover.style.top = btnRect.bottom + 6 + "px";
-        popover.style.left = btnRect.left + "px";
-        setTimeout(() => {
-          if (popover) {
-            const popoverRect = popover.getBoundingClientRect();
-            if (popoverRect.right > window.innerWidth) {
-              popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
+      async onOpen() {
+        const container = this.containerEl.children[1];
+        container.empty();
+        container.addClass("linear-calendar-container");
+        await this.renderCalendar(container);
+        this.resizeObserver = new ResizeObserver(() => {
+          this.updateMultiDayBarWidths(container);
+        });
+        this.resizeObserver.observe(container);
+        this.registerEvent(
+          this.app.workspace.on("active-leaf-change", (leaf) => {
+            if (leaf && leaf.view === this) {
+              this.reload();
             }
-            if (popoverRect.bottom > window.innerHeight) {
-              popover.style.top = btnRect.top - popoverRect.height - 6 + "px";
+          })
+        );
+      }
+      async reload() {
+        const container = this.containerEl.children[1];
+        if (container) {
+          container.empty();
+          await this.renderCalendar(container);
+        }
+      }
+      updateMultiDayBarWidths(container) {
+        const bars = container.querySelectorAll(".multi-day-bar[data-span]");
+        bars.forEach((bar) => {
+          const span = parseInt(bar.dataset.span || "0");
+          const parentCell = bar.parentElement;
+          if (parentCell && parentCell.parentElement) {
+            const row = parentCell.parentElement;
+            const cells = Array.from(row.querySelectorAll(".day-cell"));
+            const startIndex = cells.indexOf(parentCell);
+            if (startIndex >= 0 && startIndex + span - 1 < cells.length) {
+              const lastCell = cells[startIndex + span - 1];
+              const firstCellRect = parentCell.getBoundingClientRect();
+              const lastCellRect = lastCell.getBoundingClientRect();
+              const totalWidth = lastCellRect.right - firstCellRect.left - 6;
+              bar.style.width = `${totalWidth}px`;
             }
           }
-        }, 0);
-        palettes.forEach((palette, idx) => {
-          const paletteSection = popover.createDiv();
-          paletteSection.style.cssText = idx > 0 ? "margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--background-modifier-border);" : "margin-top: 4px;";
-          const paletteName = paletteSection.createEl("div", { text: palette.name });
-          paletteName.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-weight: 500;";
-          const swatchesGrid = paletteSection.createDiv();
-          swatchesGrid.style.cssText = "display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;";
-          palette.colors.forEach((colorEntry) => {
-            const swatch = swatchesGrid.createEl("button");
-            const isSelected = colorInput.value.toLowerCase() === colorEntry.hex.toLowerCase();
-            swatch.style.cssText = `width: 100%; aspect-ratio: 1; border-radius: 4px; border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"}; background: ${colorEntry.hex}; cursor: pointer; padding: 0; transition: all 0.15s;`;
-            swatch.title = `${colorEntry.name}
-${colorEntry.hex}`;
-            swatch.onclick = async (e2) => {
-              e2.preventDefault();
-              colorInput.value = colorEntry.hex;
-              hexDisplay.textContent = colorEntry.hex.toUpperCase();
-              await onColorChange(colorEntry.hex);
-              closePopover();
-            };
-            swatch.onmouseenter = () => {
-              swatch.style.transform = "scale(1.08)";
-              swatch.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
-            };
-            swatch.onmouseleave = () => {
-              swatch.style.transform = "scale(1)";
-              swatch.style.boxShadow = "none";
-            };
-          });
         });
-        const clickHandler = (e2) => {
-          if (popover && !popover.contains(e2.target) && !paletteBtn.contains(e2.target)) {
-            closePopover();
-            document.removeEventListener("click", clickHandler);
+      }
+      async renderCalendar(container) {
+        const year = this.plugin.settings.currentYear;
+        const header = container.createDiv({ cls: "calendar-header" });
+        header.createDiv({ cls: "header-spacer" });
+        const centerSection = header.createDiv({ cls: "header-center" });
+        const prevBtn = centerSection.createEl("button", { text: "\u2190", cls: "year-nav-btn" });
+        const yearlyEnabled = this.plugin.settings.periodicNotes.yearly.enabled;
+        if (yearlyEnabled) {
+          const yearLink = centerSection.createEl("a", { text: `${year}`, cls: "year-title year-title-link" });
+          const yearlyColor = this.plugin.settings.periodicNotes.yearly.color;
+          if (yearlyColor) {
+            yearLink.style.color = yearlyColor;
+          }
+          yearLink.onclick = async (e) => {
+            e.preventDefault();
+            await this.openOrCreateYearlyNote(year);
+          };
+        } else {
+          centerSection.createEl("span", { text: `${year}`, cls: "year-title" });
+        }
+        const nextBtn = centerSection.createEl("button", { text: "\u2192", cls: "year-nav-btn" });
+        const rightSection = header.createDiv({ cls: "header-right" });
+        if (this.plugin.settings.quickNoteCreation.enabled && this.plugin.settings.quickNoteCreation.showAddNoteButton) {
+          const addNoteBtn = rightSection.createEl("button", { cls: "add-note-btn" });
+          addNoteBtn.setAttribute("aria-label", "Add note");
+          const icon = addNoteBtn.createSpan({ cls: "add-note-icon" });
+          (0, import_obsidian7.setIcon)(icon, "calendar-plus");
+          addNoteBtn.createSpan({ text: "Add Note", cls: "add-note-text" });
+          addNoteBtn.onclick = async () => {
+            await this.openQuickNoteModal(null, null);
+          };
+        }
+        const settingsBtn = rightSection.createEl("button", { cls: "open-settings-btn" });
+        settingsBtn.setAttribute("aria-label", "Open LinearCalendar settings");
+        const settingsIcon = settingsBtn.createSpan();
+        (0, import_obsidian7.setIcon)(settingsIcon, "settings");
+        settingsBtn.onclick = () => {
+          this.app.setting.open();
+          this.app.setting.openTabById("linear-calendar");
+        };
+        prevBtn.onclick = async () => {
+          this.plugin.settings.currentYear--;
+          await this.plugin.saveSettings();
+          container.empty();
+          await this.renderCalendar(container);
+        };
+        nextBtn.onclick = async () => {
+          this.plugin.settings.currentYear++;
+          await this.plugin.saveSettings();
+          container.empty();
+          await this.renderCalendar(container);
+        };
+        const notesWithDates = await this.getNotesWithDates();
+        const multiDayEntries = this.processMultiDayEntries(notesWithDates);
+        const bannerCtx = { isBratUser: this.plugin.isBratUser };
+        for (const banner of BANNERS) {
+          if (banner.shouldShow(this.plugin.settings, bannerCtx)) {
+            this.renderBanner(container, banner);
+          }
+        }
+        if (this.plugin.settings.colorCategories.enabled && this.plugin.settings.colorCategories.showCategoryIndex) {
+          this.renderCategoryIndexRow(container);
+        }
+        const calendarWrapper = container.createDiv({ cls: "calendar-wrapper" });
+        const exp = this.plugin.settings.experimental;
+        if (exp.multilineNotes) {
+          calendarWrapper.addClass("exp-multiline");
+        }
+        if (exp.verticalText) {
+          calendarWrapper.addClass("exp-vertical");
+        }
+        if (exp.compactFontSize) {
+          calendarWrapper.addClass("exp-compact");
+        }
+        if (exp.condensedLetters) {
+          calendarWrapper.addClass("exp-condensed");
+        }
+        if (this.plugin.settings.calendarWidth === "scrollable") {
+          calendarWrapper.addClass("calendar-scrollable");
+          calendarWrapper.style.overflowX = "auto";
+        } else {
+          calendarWrapper.removeClass("calendar-scrollable");
+          calendarWrapper.style.overflowX = "";
+        }
+        const calendarTable = calendarWrapper.createEl("table", { cls: "linear-calendar" });
+        if (this.plugin.settings.showCellBorders) {
+          calendarTable.addClass("show-cell-borders");
+        }
+        if (this.plugin.settings.showWeekSpanBorders) {
+          calendarTable.addClass("show-week-span-borders");
+        }
+        if (this.plugin.settings.calendarWidth === "scrollable") {
+          calendarTable.style.minWidth = "max-content";
+          calendarTable.style.setProperty("--cell-min-width", `${this.plugin.settings.cellMinWidth}px`);
+        } else {
+          calendarTable.style.minWidth = "";
+          calendarTable.style.removeProperty("--cell-min-width");
+        }
+        const handleMouseUp = async (e) => {
+          if (this.isDragging && this.dragStartDate) {
+            e.preventDefault();
+            const endDate = this.dragEndDate || this.dragStartDate;
+            const [start, end] = this.dragStartDate <= endDate ? [this.dragStartDate, endDate] : [endDate, this.dragStartDate];
+            this.clearDragSelection();
+            if (this.plugin.settings.quickNoteCreation.enabled) {
+              await this.openQuickNoteModal(start, start.getTime() === end.getTime() ? null : end);
+            }
           }
         };
-        setTimeout(() => {
-          document.addEventListener("click", clickHandler);
-        }, 0);
-        const keyHandler = (e2) => {
-          if (e2.key === "Escape" && popover) {
-            closePopover();
-            document.removeEventListener("keydown", keyHandler);
-          }
-        };
-        document.addEventListener("keydown", keyHandler);
-      };
-    }
-  }
-};
-
-// src/SettingsTab.ts
-var CalendarSettingTab = class extends import_obsidian5.PluginSettingTab {
-  constructor(app, plugin) {
-    super(app, plugin);
-    this.expandedCategories = /* @__PURE__ */ new Set();
-    this.isPalettesExpanded = false;
-    this.paletteEditModes = /* @__PURE__ */ new Map();
-    this.activeTab = "basic";
-    // Icon displayed in the settings sidebar
-    this.icon = "calendar-range";
-    this.plugin = plugin;
-  }
-  /**
-   * Create a checkbox with label that only toggles when the checkbox itself is clicked.
-   * This prevents accidental toggling when clicking the label text.
-   */
-  createCheckboxWithLabel(container, text, checked, onChange) {
-    const wrapper = container.createDiv();
-    wrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
-    const checkbox = wrapper.createEl("input", { type: "checkbox" });
-    checkbox.checked = checked;
-    checkbox.onchange = async (e) => {
-      await onChange(e.target.checked);
-    };
-    const label = wrapper.createEl("span", { text });
-    label.style.cssText = "font-weight: 500; cursor: default;";
-    return checkbox;
-  }
-  /**
-   * Get the template folder path based on settings.
-   * Returns the Obsidian templates folder or the custom folder.
-   */
-  getTemplateFolderPath() {
-    var _a, _b, _c, _d, _e, _f, _g;
-    const settings = this.plugin.settings.periodicNotes;
-    if (settings.templateFolderSource === "custom") {
-      return settings.templateCustomFolder || void 0;
-    }
-    const templatesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["templates"];
-    if ((templatesPlugin == null ? void 0 : templatesPlugin.enabled) && ((_d = (_c = templatesPlugin == null ? void 0 : templatesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder)) {
-      return templatesPlugin.instance.options.folder;
-    }
-    const templaterPlugin = (_f = (_e = this.app.plugins) == null ? void 0 : _e.plugins) == null ? void 0 : _f["templater-obsidian"];
-    if ((_g = templaterPlugin == null ? void 0 : templaterPlugin.settings) == null ? void 0 : _g.templates_folder) {
-      return templaterPlugin.settings.templates_folder;
-    }
-    return void 0;
-  }
-  /**
-   * IMPORTANT: This helper method is used in multiple places (Categories settings AND CategoryEditModal).
-   * When making changes to this method, always evaluate if the change should apply to both locations.
-   * Current usage locations:
-   * 1. Categories section - within each category's collapsible content (line ~1618)
-   * 2. CategoryEditModal conditions section (line ~2461)
-   */
-  renderConditionsInfoIcon(container) {
-    const infoIcon = container.createEl("span");
-    (0, import_obsidian5.setIcon)(infoIcon, "info");
-    infoIcon.style.cssText = "cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;";
-    infoIcon.title = "Click to see examples";
-    let popover = null;
-    const closePopover = () => {
-      if (popover) {
-        popover.remove();
-        popover = null;
-      }
-    };
-    infoIcon.onclick = (e) => {
-      e.preventDefault();
-      if (popover) {
-        closePopover();
-        return;
-      }
-      popover = document.body.createDiv();
-      popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px;";
-      const closeBtn = popover.createEl("button");
-      closeBtn.textContent = "\xD7";
-      closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
-      closeBtn.title = "Close";
-      closeBtn.onmouseenter = () => {
-        closeBtn.style.background = "var(--background-modifier-hover)";
-      };
-      closeBtn.onmouseleave = () => {
-        closeBtn.style.background = "transparent";
-      };
-      closeBtn.onclick = (e2) => {
-        e2.preventDefault();
-        closePopover();
-      };
-      popover.createEl("div", {
-        text: "Examples:",
-        attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--text-normal); padding-right: 20px;" }
-      });
-      popover.createEl("div", {
-        text: '\u2022 Property "category" is "school"',
-        attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
-      });
-      popover.createEl("div", {
-        text: '\u2022 File tags has tag "holidays"',
-        attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
-      });
-      popover.createEl("div", {
-        text: '\u2022 File name contains "meeting"',
-        attr: { style: "margin-left: 8px; color: var(--text-muted); font-size: 0.9em;" }
-      });
-      const iconRect = infoIcon.getBoundingClientRect();
-      popover.style.top = iconRect.bottom + 6 + "px";
-      popover.style.left = iconRect.left + "px";
-      setTimeout(() => {
-        if (popover) {
-          const popoverRect = popover.getBoundingClientRect();
-          if (popoverRect.right > window.innerWidth) {
-            popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
-          }
-          if (popoverRect.bottom > window.innerHeight) {
-            popover.style.top = iconRect.top - popoverRect.height - 6 + "px";
+        if (this.mouseUpHandler) {
+          document.removeEventListener("mouseup", this.mouseUpHandler);
+        }
+        this.mouseUpHandler = handleMouseUp;
+        document.addEventListener("mouseup", handleMouseUp);
+        const maxDayCells = 37;
+        const thead = calendarTable.createEl("thead");
+        const headerRow = thead.createEl("tr");
+        const enabledGroups = this.plugin.settings.periodicNotes.customPeriodGroups.filter((g) => g.enabled);
+        for (const group of enabledGroups) {
+          const th = headerRow.createEl("th", { text: group.name, cls: "custom-period-header-cell" });
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.font = "0.8em var(--font-interface)";
+            const textWidth = ctx.measureText(group.name).width;
+            th.style.width = `${Math.ceil(textWidth) + 16}px`;
           }
         }
-      }, 0);
-      const closeHandler = (e2) => {
-        if (popover && !popover.contains(e2.target) && !infoIcon.contains(e2.target)) {
-          closePopover();
-          document.removeEventListener("click", closeHandler);
+        const showQuarterColumn = this.plugin.settings.periodicNotes.quarterly.enabled;
+        if (showQuarterColumn) {
+          headerRow.createEl("th", { text: "Qtr", cls: "quarter-header-cell" });
         }
-      };
-      setTimeout(() => {
-        document.addEventListener("click", closeHandler);
-      }, 0);
-      const escHandler = (e2) => {
-        if (e2.key === "Escape") {
-          closePopover();
-          document.removeEventListener("keydown", escHandler);
-        }
-      };
-      document.addEventListener("keydown", escHandler);
-    };
-  }
-  display() {
-    const { containerEl } = this;
-    const scrollTop = containerEl.scrollTop;
-    containerEl.empty();
-    containerEl.createEl("h2", { text: "Linear Calendar Settings" });
-    this.renderDevelopmentNotice(containerEl);
-    this.renderTabs(containerEl);
-    const contentEl = containerEl.createDiv();
-    contentEl.style.cssText = "margin-top: 20px;";
-    if (this.activeTab === "basic") {
-      this.renderCalendarAppearanceSection(contentEl);
-      this.renderDivider(contentEl);
-      this.renderDateExtractionSection(contentEl);
-      this.renderDivider(contentEl);
-      this.renderFiltersSection(contentEl);
-    } else if (this.activeTab === "categories") {
-      this.renderColorCategoriesSection(contentEl);
-    } else if (this.activeTab === "daily-notes") {
-      this.renderDailyNotesSection(contentEl);
-    } else if (this.activeTab === "periodic-notes") {
-      this.renderPeriodicNotesSection(contentEl);
-    } else if (this.activeTab === "quicknotes") {
-      this.renderQuickNoteCreationSettings(contentEl);
-    } else if (this.activeTab === "experimental") {
-      this.renderExperimentalSection(contentEl);
-    }
-    setTimeout(() => {
-      containerEl.scrollTop = scrollTop;
-    }, 0);
-  }
-  renderTabs(containerEl) {
-    const tabsContainer = containerEl.createDiv();
-    tabsContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid var(--background-modifier-border); margin-top: 20px; padding-bottom: 8px;";
-    const tabs = [
-      { id: "basic", label: "Basic Settings" },
-      { id: "categories", label: "Categories (Colors & Icons)" },
-      { id: "daily-notes", label: "Daily Notes" },
-      { id: "periodic-notes", label: "Periodic Notes" },
-      { id: "quicknotes", label: "Quick Notes" },
-      { id: "experimental", label: "Experimental" }
-    ];
-    tabs.forEach((tab) => {
-      const tabBtn = tabsContainer.createEl("button");
-      const isActive = this.activeTab === tab.id;
-      tabBtn.textContent = tab.label;
-      tabBtn.style.cssText = `
-                padding: 10px 16px;
-                background: ${isActive ? "var(--background-primary)" : "var(--background-secondary)"};
-                border: none;
-                border-bottom: 2px solid ${isActive ? "var(--interactive-accent)" : "transparent"};
-                cursor: pointer;
-                font-size: 0.95em;
-                font-weight: ${isActive ? "600" : "400"};
-                color: ${isActive ? "var(--text-normal)" : "var(--text-muted)"};
-                transition: all 0.2s;
-                margin-bottom: -2px;
-            `;
-      tabBtn.addEventListener("click", () => {
-        this.activeTab = tab.id;
-        this.display();
-      });
-      tabBtn.addEventListener("mouseenter", () => {
-        if (!isActive) {
-          tabBtn.style.background = "var(--background-modifier-hover)";
-          tabBtn.style.color = "var(--text-normal)";
-        }
-      });
-      tabBtn.addEventListener("mouseleave", () => {
-        if (!isActive) {
-          tabBtn.style.background = "var(--background-secondary)";
-          tabBtn.style.color = "var(--text-muted)";
-        }
-      });
-    });
-  }
-  renderDevelopmentNotice(containerEl) {
-    const noticeEl = containerEl.createDiv();
-    noticeEl.style.cssText = "background: var(--background-secondary); border-left: 4px solid var(--interactive-accent); padding: 15px 20px; margin: 15px 0 12px 0; border-radius: 3px;";
-    const titleEl = noticeEl.createEl("div");
-    titleEl.style.cssText = "font-weight: 600; margin-bottom: 8px; color: var(--text-normal);";
-    titleEl.textContent = "\u26A0\uFE0F Early Development";
-    const textEl = noticeEl.createEl("div");
-    textEl.style.cssText = "font-size: 0.95em; line-height: 1.5; color: var(--text-muted);";
-    textEl.innerHTML = `
-            This plugin is still in development and may undergo significant changes. The core functionality\u2014how notes are recognized and dates are extracted\u2014will remain stable. If you use properties or dates in filenames, these will continue to work.<br><br>
-            New features are actively being developed. If you encounter any issues or have feedback, please reach out via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or via <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
-        `;
-    const feedbackBox = containerEl.createDiv();
-    feedbackBox.style.cssText = "background: var(--background-primary); border: 2px solid var(--interactive-accent); padding: 15px 20px; margin: 0 0 20px 0; border-radius: 6px;";
-    const feedbackTitle = feedbackBox.createEl("div");
-    feedbackTitle.style.cssText = "font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;";
-    feedbackTitle.textContent = "\u{1F4AC} Feedback wanted \u2013 Version 0.4.0+";
-    const feedbackList = feedbackBox.createEl("ul");
-    feedbackList.style.cssText = "margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
-    feedbackList.innerHTML = `
-            <li>Do the periodic notes work and behave as expected?</li>
-            <li>Is it clear how to edit the calendar's look?</li>
-            <li>Did switching from an older version to the new one go smoothly?</li>
-            <li>Is there anything weird, annoying, unexpected happening?</li>
-            <li>Is anything hard to understand or unclear how to configure?</li>
-        `;
-    const olderVersionsPara = feedbackBox.createEl("p");
-    olderVersionsPara.style.cssText = "margin: 12px 0 4px 0; color: var(--text-normal); font-size: 0.95em; font-weight: 500;";
-    olderVersionsPara.textContent = "Older versions:";
-    const olderVersionsList = feedbackBox.createEl("ul");
-    olderVersionsList.style.cssText = "margin: 4px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;";
-    olderVersionsList.innerHTML = `
-            <li>Does the QuickAdd feature work as you would like?</li>
-            <li>Are the color categories working as you would like?</li>
-        `;
-    const feedbackFooter = feedbackBox.createEl("div");
-    feedbackFooter.style.cssText = "font-size: 0.95em; color: var(--text-muted); margin-top: 8px;";
-    const footerText = feedbackFooter.createEl("div");
-    footerText.style.cssText = "font-style: italic; margin-bottom: 6px;";
-    footerText.textContent = "Help me improve the plugin! It means a lot to me \u2728\u{1F988}";
-    const footerLinks = feedbackFooter.createEl("div");
-    footerLinks.style.cssText = "font-size: 0.9em;";
-    footerLinks.innerHTML = `
-            Share feedback via <a href="https://github.com/HomefulHobo/linear-calendar-plugin-obsidian/" style="color: var(--interactive-accent);">GitHub</a> or <a href="https://www.homefulhobo.com/contact/" style="color: var(--interactive-accent);">e-mail</a>.
-        `;
-  }
-  renderDivider(containerEl) {
-    const divider = containerEl.createEl("hr");
-    divider.style.cssText = "margin: 30px 0; border: none; border-top: 1px solid var(--background-modifier-border);";
-  }
-  renderCalendarAppearanceSection(containerEl) {
-    containerEl.createEl("h3", { text: "Calendar Appearance" });
-    new import_obsidian5.Setting(containerEl).setName("Calendar width").setDesc("Choose whether the calendar fits the screen width or becomes scrollable with wider cells").addDropdown((dropdown) => {
-      dropdown.addOption("fit-screen", "Fit to screen width").addOption("scrollable", "Scrollable (wider cells)").setValue(this.plugin.settings.calendarWidth).onChange(async (value) => {
-        this.plugin.settings.calendarWidth = value;
-        await this.plugin.saveSettings();
-        this.display();
-      });
-    });
-    if (this.plugin.settings.calendarWidth === "scrollable") {
-      new import_obsidian5.Setting(containerEl).setName("Minimum cell width").setDesc("Minimum width for each day cell in pixels (default: 30)").addText((text) => text.setPlaceholder("30").setValue(String(this.plugin.settings.cellMinWidth)).onChange(async (value) => {
-        const numValue = parseInt(value);
-        if (!isNaN(numValue) && numValue >= 20 && numValue <= 200) {
-          this.plugin.settings.cellMinWidth = numValue;
-          await this.plugin.saveSettings();
-        }
-      }));
-    }
-    new import_obsidian5.Setting(containerEl).setName("Column alignment").setDesc("Choose how to align the calendar columns: by weekday or by date (all 1st days align, all 2nd days align, etc.)").addDropdown((dropdown) => {
-      dropdown.addOption("weekday", "Align by weekday").addOption("date", "Align by date").setValue(this.plugin.settings.columnAlignment).onChange(async (value) => {
-        this.plugin.settings.columnAlignment = value;
-        await this.plugin.saveSettings();
-        this.display();
-      });
-    });
-    if (this.plugin.settings.columnAlignment === "weekday") {
-      new import_obsidian5.Setting(containerEl).setName("Week starts on").setDesc("Choose which day the week starts on").addDropdown((dropdown) => {
-        dropdown.addOption("0", "Sunday").addOption("1", "Monday").addOption("2", "Tuesday").addOption("3", "Wednesday").addOption("4", "Thursday").addOption("5", "Friday").addOption("6", "Saturday").setValue(String(this.plugin.settings.weekStartDay)).onChange(async (value) => {
-          this.plugin.settings.weekStartDay = parseInt(value);
-          await this.plugin.saveSettings();
-        });
-      });
-    }
-    const weekdayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const highlightedSetting = new import_obsidian5.Setting(containerEl).setName("Highlighted weekdays").setDesc("Choose which weekdays to visually highlight (typically weekends)");
-    const checkboxContainer = highlightedSetting.controlEl.createDiv();
-    checkboxContainer.style.cssText = "display: flex; flex-wrap: wrap; gap: 8px;";
-    weekdayNames.forEach((name, index) => {
-      const label = checkboxContainer.createEl("label");
-      label.style.cssText = "display: flex; align-items: center; gap: 4px; cursor: pointer; font-size: 0.9em;";
-      const checkbox = label.createEl("input", { type: "checkbox" });
-      checkbox.checked = this.plugin.settings.highlightedWeekdays.includes(index);
-      checkbox.onchange = async () => {
-        const current = this.plugin.settings.highlightedWeekdays;
-        if (checkbox.checked) {
-          if (!current.includes(index)) {
-            current.push(index);
-            current.sort((a, b) => a - b);
+        headerRow.createEl("th", { cls: "month-label-cell" });
+        if (this.plugin.settings.columnAlignment === "date") {
+          for (let i = 0; i < 31; i++) {
+            headerRow.createEl("th", {
+              text: String(i + 1).padStart(2, "0"),
+              cls: "weekday-header"
+            });
           }
         } else {
-          const idx = current.indexOf(index);
-          if (idx > -1) current.splice(idx, 1);
-        }
-        await this.plugin.saveSettings();
-      };
-      label.createEl("span", { text: name.slice(0, 3) });
-    });
-    new import_obsidian5.Setting(containerEl).setName("Show cell borders").setDesc("Display thin borders around day cells and week span cells").addToggle((toggle) => toggle.setValue(this.plugin.settings.showCellBorders).onChange(async (value) => {
-      this.plugin.settings.showCellBorders = value;
-      await this.plugin.saveSettings();
-    }));
-  }
-  renderDateExtractionSection(containerEl) {
-    containerEl.createEl("h3", { text: "Date Extraction" });
-    const desc = containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Configure how dates are extracted from your notes to display them in the calendar."
-    });
-    desc.style.marginTop = "-10px";
-    desc.style.marginBottom = "15px";
-    const examplesBox = containerEl.createDiv();
-    examplesBox.style.cssText = "background: var(--background-primary); border-left: 3px solid var(--interactive-accent); padding: 12px 15px; margin-bottom: 20px; border-radius: 3px;";
-    examplesBox.createEl("div", {
-      text: "\u{1F4A1} Example Configurations",
-      attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--interactive-accent);" }
-    });
-    const examplesList = examplesBox.createEl("ul");
-    examplesList.style.cssText = "margin: 0; padding-left: 20px; font-size: 0.9em; line-height: 1.6;";
-    const examples = [
-      "Use <code>date</code> and <code>date_end</code> properties",
-      "Use filename like <code>2024-01-15 \u2013 2024-01-20 Event.md</code> for date ranges",
-      "Mix sources: filename for start date + <code>date_end</code> property for end date",
-      "Add multiple property names to check (e.g., <code>date</code>, <code>lincal_date</code>, <code>scheduled</code>)"
-    ];
-    examples.forEach((example) => {
-      const li = examplesList.createEl("li");
-      li.innerHTML = example;
-      li.style.marginBottom = "4px";
-    });
-    const config = this.plugin.settings.dateExtraction;
-    const startSection = containerEl.createDiv();
-    startSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 20px;";
-    startSection.createEl("h4", { text: "Start Date", attr: { style: "margin-top: 0;" } });
-    const startPropsContainer = startSection.createDiv();
-    startPropsContainer.style.cssText = "margin-bottom: 15px;";
-    const startPropsListContainer = document.createElement("div");
-    startPropsListContainer.style.cssText = "margin-left: 28px;";
-    if (config.startFromProperties.length === 0) {
-      startPropsListContainer.style.display = "none";
-    }
-    this.createCheckboxWithLabel(
-      startPropsContainer,
-      "From properties",
-      config.startFromProperties.length > 0,
-      async (checked) => {
-        if (checked) {
-          if (config.startFromProperties.length === 0) {
-            config.startFromProperties.push("date");
+          const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+          const startDay = this.plugin.settings.weekStartDay;
+          for (let i = 0; i < maxDayCells; i++) {
+            const dayIndex = (i + startDay) % 7;
+            headerRow.createEl("th", {
+              text: weekdays[dayIndex],
+              cls: "weekday-header"
+            });
           }
-          startPropsListContainer.style.display = "block";
+        }
+        headerRow.createEl("th", { cls: "month-label-cell-right" });
+        const tbody = calendarTable.createEl("tbody");
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec"
+        ];
+        const cellsPerRow = this.plugin.settings.columnAlignment === "date" ? 31 : maxDayCells;
+        for (let month = 0; month < 12; month++) {
+          await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, cellsPerRow, showQuarterColumn, enabledGroups);
+        }
+        const footerRow = calendarTable.createEl("tfoot").createEl("tr");
+        for (const group of enabledGroups) {
+          footerRow.createEl("td", { text: group.name, cls: "custom-period-header-cell" });
+        }
+        if (showQuarterColumn) {
+          footerRow.createEl("td", { text: "Qtr", cls: "quarter-header-cell" });
+        }
+        footerRow.createEl("td", { cls: "month-label-cell" });
+        if (this.plugin.settings.columnAlignment === "date") {
+          for (let i = 0; i < 31; i++) {
+            footerRow.createEl("td", {
+              text: String(i + 1).padStart(2, "0"),
+              cls: "weekday-header"
+            });
+          }
         } else {
-          config.startFromProperties = [];
-          startPropsListContainer.style.display = "none";
+          const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+          const startDay = this.plugin.settings.weekStartDay;
+          for (let i = 0; i < maxDayCells; i++) {
+            const dayIndex = (i + startDay) % 7;
+            footerRow.createEl("td", {
+              text: weekdays[dayIndex],
+              cls: "weekday-header"
+            });
+          }
         }
-        await this.plugin.saveSettings();
-        renderStartPropsList();
+        footerRow.createEl("td", { cls: "month-label-cell-right" });
       }
-    );
-    startPropsContainer.appendChild(startPropsListContainer);
-    const renderStartPropsList = () => {
-      startPropsListContainer.empty();
-      if (config.startFromProperties.length > 0) {
-        startPropsListContainer.createEl("div", {
-          text: "Properties are checked in order from top to bottom. Drag to reorder.",
-          attr: { style: "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-style: italic;" }
-        });
-      }
-      let draggedIndex = null;
-      config.startFromProperties.forEach((prop, index) => {
-        const propRow = startPropsListContainer.createDiv();
-        propRow.style.cssText = "display: flex; gap: 5px; margin-bottom: 5px; align-items: center; cursor: grab;";
-        propRow.draggable = true;
-        propRow.setAttribute("data-index", index.toString());
-        const dragHandle = propRow.createEl("span", { text: "\u22EE\u22EE" });
-        dragHandle.style.cssText = "cursor: grab; color: var(--text-muted); user-select: none; padding: 0 4px;";
-        const propInput = propRow.createEl("input", {
-          type: "text",
-          value: prop,
-          attr: { placeholder: "Property name" }
-        });
-        propInput.style.cssText = "flex: 1; padding: 4px 8px;";
-        propInput.onchange = async (e) => {
-          config.startFromProperties[index] = e.target.value;
-          await this.plugin.saveSettings();
-        };
-        new PropertySuggest(this.app, propInput);
-        const removeBtn = propRow.createEl("button", { text: "\xD7" });
-        removeBtn.style.cssText = "padding: 2px 8px; cursor: pointer;";
-        removeBtn.onclick = async () => {
-          config.startFromProperties.splice(index, 1);
-          await this.plugin.saveSettings();
-          renderStartPropsList();
-        };
-        propRow.addEventListener("dragstart", () => {
-          draggedIndex = index;
-          propRow.style.opacity = "0.4";
-          propRow.style.cursor = "grabbing";
-        });
-        propRow.addEventListener("dragend", () => {
-          propRow.style.opacity = "1";
-          propRow.style.cursor = "grab";
-        });
-        propRow.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          if (draggedIndex !== null && draggedIndex !== index) {
-            propRow.style.borderTop = "2px solid var(--interactive-accent)";
-          }
-        });
-        propRow.addEventListener("dragleave", () => {
-          propRow.style.borderTop = "";
-        });
-        propRow.addEventListener("drop", async (e) => {
-          e.preventDefault();
-          propRow.style.borderTop = "";
-          if (draggedIndex !== null && draggedIndex !== index) {
-            const draggedItem = config.startFromProperties[draggedIndex];
-            config.startFromProperties.splice(draggedIndex, 1);
-            const newIndex = draggedIndex < index ? index - 1 : index;
-            config.startFromProperties.splice(newIndex, 0, draggedItem);
-            await this.plugin.saveSettings();
-            renderStartPropsList();
-          }
-          draggedIndex = null;
-        });
-      });
-      const addBtn = startPropsListContainer.createEl("button", { text: "+ Add property" });
-      addBtn.style.cssText = "padding: 4px 8px; margin-top: 5px;";
-      addBtn.onclick = async () => {
-        config.startFromProperties.push("");
-        await this.plugin.saveSettings();
-        renderStartPropsList();
-      };
-    };
-    renderStartPropsList();
-    this.createCheckboxWithLabel(
-      startSection,
-      "From filename (first YYYY-MM-DD pattern)",
-      config.startFromFilename,
-      async (checked) => {
-        config.startFromFilename = checked;
-        await this.plugin.saveSettings();
-        updatePriorityVisibility();
-      }
-    );
-    const startPriorityContainer = startSection.createDiv();
-    startPriorityContainer.style.cssText = "margin-top: 10px; padding: 10px; background: var(--background-primary); border-radius: 3px;";
-    const updatePriorityVisibility = () => {
-      const bothEnabled = config.startFromProperties.length > 0 && config.startFromFilename;
-      startPriorityContainer.style.display = bothEnabled ? "block" : "none";
-    };
-    startPriorityContainer.createEl("div", {
-      text: "When both are available, prioritize:",
-      attr: { style: "margin-bottom: 8px; font-size: 0.9em; color: var(--text-muted);" }
-    });
-    const priorityOptions = startPriorityContainer.createDiv();
-    priorityOptions.style.cssText = "display: flex; gap: 15px;";
-    const propRadioLabel = priorityOptions.createEl("label");
-    propRadioLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-    const propRadio = propRadioLabel.createEl("input", { type: "radio", attr: { name: "start-priority" } });
-    propRadio.checked = config.startPriority === "property";
-    propRadioLabel.createEl("span", { text: "Property" });
-    propRadio.onchange = async () => {
-      config.startPriority = "property";
-      await this.plugin.saveSettings();
-    };
-    const filenameRadioLabel = priorityOptions.createEl("label");
-    filenameRadioLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-    const filenameRadio = filenameRadioLabel.createEl("input", { type: "radio", attr: { name: "start-priority" } });
-    filenameRadio.checked = config.startPriority === "filename";
-    filenameRadioLabel.createEl("span", { text: "Filename" });
-    filenameRadio.onchange = async () => {
-      config.startPriority = "filename";
-      await this.plugin.saveSettings();
-    };
-    updatePriorityVisibility();
-    const endSection = containerEl.createDiv();
-    endSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
-    endSection.createEl("h4", { text: "End Date (for multi-day events)", attr: { style: "margin-top: 0;" } });
-    const endPropsContainer = endSection.createDiv();
-    endPropsContainer.style.cssText = "margin-bottom: 15px;";
-    const endPropsListContainer = document.createElement("div");
-    endPropsListContainer.style.cssText = "margin-left: 28px;";
-    if (config.endFromProperties.length === 0) {
-      endPropsListContainer.style.display = "none";
-    }
-    const renderEndPropsList = () => {
-      endPropsListContainer.empty();
-      if (config.endFromProperties.length > 0) {
-        endPropsListContainer.createEl("div", {
-          text: "Properties are checked in order from top to bottom. Drag to reorder.",
-          attr: { style: "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px; font-style: italic;" }
-        });
-      }
-      let draggedIndex = null;
-      config.endFromProperties.forEach((prop, index) => {
-        const propRow = endPropsListContainer.createDiv();
-        propRow.style.cssText = "display: flex; gap: 5px; margin-bottom: 5px; align-items: center; cursor: grab;";
-        propRow.draggable = true;
-        propRow.setAttribute("data-index", index.toString());
-        const dragHandle = propRow.createEl("span", { text: "\u22EE\u22EE" });
-        dragHandle.style.cssText = "cursor: grab; color: var(--text-muted); user-select: none; padding: 0 4px;";
-        const propInput = propRow.createEl("input", {
-          type: "text",
-          value: prop,
-          attr: { placeholder: "Property name" }
-        });
-        propInput.style.cssText = "flex: 1; padding: 4px 8px;";
-        propInput.onchange = async (e) => {
-          config.endFromProperties[index] = e.target.value;
-          await this.plugin.saveSettings();
-        };
-        new PropertySuggest(this.app, propInput);
-        const removeBtn = propRow.createEl("button", { text: "\xD7" });
-        removeBtn.style.cssText = "padding: 2px 8px; cursor: pointer;";
-        removeBtn.onclick = async () => {
-          config.endFromProperties.splice(index, 1);
-          await this.plugin.saveSettings();
-          renderEndPropsList();
-        };
-        propRow.addEventListener("dragstart", () => {
-          draggedIndex = index;
-          propRow.style.opacity = "0.4";
-          propRow.style.cursor = "grabbing";
-        });
-        propRow.addEventListener("dragend", () => {
-          propRow.style.opacity = "1";
-          propRow.style.cursor = "grab";
-        });
-        propRow.addEventListener("dragover", (e) => {
-          e.preventDefault();
-          if (draggedIndex !== null && draggedIndex !== index) {
-            propRow.style.borderTop = "2px solid var(--interactive-accent)";
-          }
-        });
-        propRow.addEventListener("dragleave", () => {
-          propRow.style.borderTop = "";
-        });
-        propRow.addEventListener("drop", async (e) => {
-          e.preventDefault();
-          propRow.style.borderTop = "";
-          if (draggedIndex !== null && draggedIndex !== index) {
-            const draggedItem = config.endFromProperties[draggedIndex];
-            config.endFromProperties.splice(draggedIndex, 1);
-            const newIndex = draggedIndex < index ? index - 1 : index;
-            config.endFromProperties.splice(newIndex, 0, draggedItem);
-            await this.plugin.saveSettings();
-            renderEndPropsList();
-          }
-          draggedIndex = null;
-        });
-      });
-      const addBtn = endPropsListContainer.createEl("button", { text: "+ Add property" });
-      addBtn.style.cssText = "padding: 4px 8px; margin-top: 5px;";
-      addBtn.onclick = async () => {
-        config.endFromProperties.push("");
-        await this.plugin.saveSettings();
-        renderEndPropsList();
-      };
-    };
-    this.createCheckboxWithLabel(
-      endPropsContainer,
-      "From properties",
-      config.endFromProperties.length > 0,
-      async (checked) => {
-        if (checked) {
-          if (config.endFromProperties.length === 0) {
-            config.endFromProperties.push("date_end");
-          }
-          endPropsListContainer.style.display = "block";
-        } else {
-          config.endFromProperties = [];
-          endPropsListContainer.style.display = "none";
-        }
-        await this.plugin.saveSettings();
-        renderEndPropsList();
-        updateEndPriorityVisibility();
-      }
-    );
-    endPropsContainer.appendChild(endPropsListContainer);
-    renderEndPropsList();
-    this.createCheckboxWithLabel(
-      endSection,
-      "From filename (second YYYY-MM-DD pattern)",
-      config.endFromFilename,
-      async (checked) => {
-        config.endFromFilename = checked;
-        await this.plugin.saveSettings();
-        updateEndPriorityVisibility();
-      }
-    );
-    const endPriorityContainer = endSection.createDiv();
-    endPriorityContainer.style.cssText = "margin-top: 10px; padding: 10px; background: var(--background-primary); border-radius: 3px;";
-    const updateEndPriorityVisibility = () => {
-      const bothEnabled = config.endFromProperties.length > 0 && config.endFromFilename;
-      endPriorityContainer.style.display = bothEnabled ? "block" : "none";
-    };
-    endPriorityContainer.createEl("div", {
-      text: "When both are available, prioritize:",
-      attr: { style: "margin-bottom: 8px; font-size: 0.9em; color: var(--text-muted);" }
-    });
-    const endPriorityOptions = endPriorityContainer.createDiv();
-    endPriorityOptions.style.cssText = "display: flex; gap: 15px;";
-    const endPropRadioLabel = endPriorityOptions.createEl("label");
-    endPropRadioLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-    const endPropRadio = endPropRadioLabel.createEl("input", { type: "radio", attr: { name: "end-priority" } });
-    endPropRadio.checked = config.endPriority === "property";
-    endPropRadioLabel.createEl("span", { text: "Property" });
-    endPropRadio.onchange = async () => {
-      config.endPriority = "property";
-      await this.plugin.saveSettings();
-    };
-    const endFilenameRadioLabel = endPriorityOptions.createEl("label");
-    endFilenameRadioLabel.style.cssText = "display: flex; align-items: center; gap: 5px;";
-    const endFilenameRadio = endFilenameRadioLabel.createEl("input", { type: "radio", attr: { name: "end-priority" } });
-    endFilenameRadio.checked = config.endPriority === "filename";
-    endFilenameRadioLabel.createEl("span", { text: "Filename" });
-    endFilenameRadio.onchange = async () => {
-      config.endPriority = "filename";
-      await this.plugin.saveSettings();
-    };
-    updateEndPriorityVisibility();
-  }
-  renderFiltersSection(containerEl) {
-    containerEl.createEl("h3", { text: "Filters (Optional)" });
-    const desc = containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "By default, all notes with valid dates are shown. Add filters to include or exclude specific notes."
-    });
-    desc.style.marginTop = "-10px";
-    desc.style.marginBottom = "15px";
-    const filterModeContainer = containerEl.createDiv();
-    filterModeContainer.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
-    filterModeContainer.createEl("div", {
-      text: "Filter mode:",
-      attr: { style: "margin-bottom: 10px; font-weight: 500;" }
-    });
-    const modeOptions = filterModeContainer.createDiv();
-    modeOptions.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
-    const createModeOption = (value, label, description) => {
-      const optionLabel = modeOptions.createEl("label");
-      optionLabel.style.cssText = "display: flex; align-items: flex-start; gap: 8px; cursor: pointer;";
-      const radio = optionLabel.createEl("input", {
-        type: "radio",
-        attr: { name: "filter-mode" }
-      });
-      radio.checked = this.plugin.settings.filterMode === value;
-      radio.style.cssText = "margin-top: 3px;";
-      const textContainer = optionLabel.createDiv();
-      textContainer.createEl("div", { text: label, attr: { style: "font-weight: 500;" } });
-      textContainer.createEl("div", {
-        text: description,
-        attr: { style: "font-size: 0.9em; color: var(--text-muted);" }
-      });
-      radio.onchange = async () => {
-        this.plugin.settings.filterMode = value;
-        await this.plugin.saveSettings();
-        this.display();
-      };
-    };
-    createModeOption("none", "Show all notes", "Display every note that has a valid date");
-    createModeOption("include", "Only include notes that match", "Only show notes that meet all the conditions below");
-    createModeOption("exclude", "Exclude notes that match", "Hide notes that meet all the conditions below");
-    if (this.plugin.settings.filterMode !== "none") {
-      const conditionsContainer = containerEl.createDiv();
-      conditionsContainer.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
-      conditionsContainer.createEl("h4", {
-        text: "Conditions",
-        attr: { style: "margin-top: 0; margin-bottom: 10px;" }
-      });
-      if (this.plugin.settings.filterConditions.length === 0) {
-        conditionsContainer.createEl("p", {
-          text: 'No conditions added yet. Click "+ Add condition" to get started.',
-          attr: { style: "color: var(--text-muted); font-style: italic;" }
-        });
-      } else {
-        this.plugin.settings.filterConditions.forEach((condition, index) => {
-          this.renderCondition(conditionsContainer, condition, index);
-        });
-      }
-      const addCondBtn = conditionsContainer.createEl("button", { text: "+ Add condition" });
-      addCondBtn.style.cssText = "padding: 6px 12px; margin-top: 10px;";
-      addCondBtn.onclick = async () => {
-        this.plugin.settings.filterConditions.push({
-          property: "file.folder",
-          operator: "is",
-          value: ""
-        });
-        await this.plugin.saveSettings();
-        this.display();
-      };
-    }
-  }
-  renderCondition(container, condition, condIndex) {
-    ConditionRenderer.render(container, condition, condIndex, this.plugin.settings.filterConditions, this.app, {
-      onSave: async () => {
-        await this.plugin.saveSettings();
-      },
-      onRefresh: () => {
-        this.display();
-      }
-    });
-  }
-  renderDailyNotesSection(containerEl) {
-    containerEl.createEl("h3", { text: "Daily Notes" });
-    const desc = containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Daily notes are always accessible via the day numbers in the calendar. You can click any day number to open or create a daily note."
-    });
-    desc.style.marginTop = "-10px";
-    desc.style.marginBottom = "15px";
-    const formatSetting = new import_obsidian5.Setting(containerEl).setName("Daily note format").addText((text) => text.setPlaceholder("YYYY-MM-DD").setValue(this.plugin.settings.dailyNoteFormat).onChange(async (value) => {
-      this.plugin.settings.dailyNoteFormat = value;
-      await this.plugin.saveSettings();
-      this.updateFormatPreview(previewEl, value || "YYYY-MM-DD");
-    }));
-    const formatDescEl = formatSetting.descEl;
-    formatDescEl.innerHTML = `Filename format for daily notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
-    const previewEl = formatDescEl.createDiv();
-    previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
-    this.updateFormatPreview(previewEl, this.plugin.settings.dailyNoteFormat);
-    new import_obsidian5.Setting(containerEl).setName("Daily notes folder mode").setDesc("Choose where to look for and create daily notes").addDropdown((dropdown) => {
-      dropdown.addOption("obsidian", `Use native Daily Notes plugin's "New file location"`).addOption("custom", "Use custom folder").setValue(this.plugin.settings.dailyNoteFolderMode).onChange(async (value) => {
-        this.plugin.settings.dailyNoteFolderMode = value;
-        await this.plugin.saveSettings();
-        this.display();
-      });
-    });
-    if (this.plugin.settings.dailyNoteFolderMode === "custom") {
-      new import_obsidian5.Setting(containerEl).setName("Custom daily notes folder").setDesc("Folder path for daily notes. Searches subfolders too.").addText((text) => {
-        text.setPlaceholder("Daily Notes").setValue(this.plugin.settings.dailyNoteCustomFolder).onChange(async (value) => {
-          const cleaned = value.replace(/^\/+|\/+$/g, "");
-          this.plugin.settings.dailyNoteCustomFolder = cleaned;
-          await this.plugin.saveSettings();
-        });
-        new FolderSuggest(this.app, text.inputEl);
-      });
-    }
-    const displaySection = containerEl.createDiv();
-    displaySection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-top: 15px;";
-    displaySection.createEl("h4", { text: "Display Options", attr: { style: "margin-top: 0;" } });
-    new import_obsidian5.Setting(displaySection).setName("Show daily notes in calendar cells").setDesc("Display daily notes as separate note cells in addition to the day number links").addToggle((toggle) => toggle.setValue(this.plugin.settings.showDailyNotesInCells).onChange(async (value) => {
-      this.plugin.settings.showDailyNotesInCells = value;
-      await this.plugin.saveSettings();
-    }));
-    const dateTextSection = containerEl.createDiv();
-    dateTextSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-top: 15px;";
-    dateTextSection.createEl("h4", { text: "Notes with Date and Text in Title", attr: { style: "margin-top: 0;" } });
-    new import_obsidian5.Setting(dateTextSection).setName("Show notes with date and text").setDesc('Display notes that have both a date and additional text in their filename (e.g., "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.showNotesWithDateAndText).onChange(async (value) => {
-      this.plugin.settings.showNotesWithDateAndText = value;
-      await this.plugin.saveSettings();
-    }));
-    const hideSecondDateSetting = new import_obsidian5.Setting(dateTextSection).setName("Hide second date portion (for multi-day notes)").setDesc('Also hide the second date in multi-day note titles (e.g., show "Trip" instead of "to 2024-01-17 Trip"). Note: enabling this will also hide whatever appears between the two dates (e.g., "to" or "\u2013").').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideSecondDateInTitle).onChange(async (value) => {
-      this.plugin.settings.hideSecondDateInTitle = value;
-      await this.plugin.saveSettings();
-    }));
-    hideSecondDateSetting.settingEl.style.cssText = `
-            margin-left: 24px;
-            border-left: 2px solid var(--background-modifier-border);
-            padding-left: 12px;
-            display: ${this.plugin.settings.hideDateInTitle ? "flex" : "none"};
-        `;
-    new import_obsidian5.Setting(dateTextSection).setName("Hide date portion in titles").setDesc('When displaying notes in the calendar, hide the date portion of the title and only show the text (e.g., show "Meeting Notes" instead of "2024-01-15 Meeting Notes")').addToggle((toggle) => toggle.setValue(this.plugin.settings.hideDateInTitle).onChange(async (value) => {
-      this.plugin.settings.hideDateInTitle = value;
-      hideSecondDateSetting.settingEl.style.display = value ? "flex" : "none";
-      await this.plugin.saveSettings();
-    }));
-    dateTextSection.insertBefore(hideSecondDateSetting.settingEl, null);
-  }
-  renderPeriodicNotesSection(containerEl) {
-    const settings = this.plugin.settings.periodicNotes;
-    containerEl.createEl("h3", { text: "Periodic Notes" });
-    const desc = containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Configure weekly, monthly, quarterly, yearly, and custom period notes. Compatible with the Periodic Notes plugin."
-    });
-    desc.style.marginTop = "-10px";
-    desc.style.marginBottom = "15px";
-    const generalSection = containerEl.createDiv();
-    generalSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
-    generalSection.createEl("h4", { text: "General", attr: { style: "margin-top: 0;" } });
-    const periodicNotesSetting = new import_obsidian5.Setting(generalSection).setName("Use Periodic Notes plugin settings (enable only if you know what you are doing)").addToggle((toggle) => toggle.setValue(settings.usePeriodicNotesPlugin).onChange(async (value) => {
-      settings.usePeriodicNotesPlugin = value;
-      await this.plugin.saveSettings();
-      this.display();
-    }));
-    periodicNotesSetting.descEl.innerHTML = `If the <a href="https://github.com/liamcain/obsidian-periodic-notes" style="color: var(--text-accent);">Periodic Notes plugin</a> is installed and a note type is enabled there, prioritize its settings over the ones below.`;
-    new import_obsidian5.Setting(generalSection).setName("Template folder source").setDesc("Where to look for template files").addDropdown((dropdown) => {
-      dropdown.addOption("obsidian", "Use Obsidian's template folder").addOption("custom", "Custom folder").setValue(settings.templateFolderSource).onChange(async (value) => {
-        settings.templateFolderSource = value;
-        await this.plugin.saveSettings();
-        this.display();
-      });
-    });
-    if (settings.templateFolderSource === "custom") {
-      new import_obsidian5.Setting(generalSection).setName("Custom template folder").setDesc("Folder to search for template files").addText((text) => {
-        text.setPlaceholder("templates").setValue(settings.templateCustomFolder).onChange(async (value) => {
-          const cleaned = value.replace(/^\/+|\/+$/g, "");
-          settings.templateCustomFolder = cleaned;
-          await this.plugin.saveSettings();
-        });
-        new FolderSuggest(this.app, text.inputEl);
-      });
-    }
-    const weekStartNote = generalSection.createEl("p", {
-      cls: "setting-item-description"
-    });
-    weekStartNote.innerHTML = `Week start day is configured in <strong>Basic Settings</strong> \u2192 <strong>Week starts on</strong>.`;
-    weekStartNote.style.cssText = "margin-top: 10px; color: var(--text-muted); font-size: 0.9em;";
-    this.renderPeriodicNoteTypeSection(containerEl, "weekly", "Weekly Notes", settings.weekly, "gggg-[W]ww");
-    this.renderPeriodicNoteTypeSection(containerEl, "monthly", "Monthly Notes", settings.monthly, "YYYY-MM");
-    this.renderPeriodicNoteTypeSection(containerEl, "quarterly", "Quarterly Notes", settings.quarterly, "YYYY-[Q]Q");
-    this.renderPeriodicNoteTypeSection(containerEl, "yearly", "Yearly Notes", settings.yearly, "YYYY");
-    this.renderCustomPeriodsSection(containerEl);
-  }
-  renderPeriodicNoteTypeSection(containerEl, type, title, config, defaultFormat) {
-    var _a, _b, _c, _d;
-    const settings = this.plugin.settings.periodicNotes;
-    const section = containerEl.createDiv();
-    section.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
-    section.createEl("h4", { text: title, attr: { style: "margin-top: 0;" } });
-    const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
-    const periodicNotesTypeEnabled = (_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c[type]) == null ? void 0 : _d.enabled;
-    const usePluginSettings = settings.usePeriodicNotesPlugin && periodicNotesTypeEnabled;
-    new import_obsidian5.Setting(section).setName(`Enable ${type} notes`).setDesc(`Create ${type} notes when clicking ${type === "weekly" ? "week numbers" : type === "quarterly" ? "quarter indicators" : type === "monthly" ? "month names" : "year header"}`).addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
-      config.enabled = value;
-      await this.plugin.saveSettings();
-      this.display();
-    }));
-    if (type === "weekly" && config.enabled) {
-      new import_obsidian5.Setting(section).setName("Week number display").setDesc("How to show week numbers in the calendar").addDropdown((dropdown) => {
-        dropdown.addOption("none", "Hidden").addOption("above-day", "Badge below day number").addOption("extra-column", "Divider before first day of week").addOption("header-row", "Row above month with week spans").setValue(settings.weekNumberDisplay).onChange(async (value) => {
-          settings.weekNumberDisplay = value;
-          await this.plugin.saveSettings();
-          this.display();
-        });
-      });
-      if (settings.weekNumberDisplay === "header-row") {
-        const headerRowSettings = section.createDiv();
-        headerRowSettings.style.cssText = "margin-left: 20px; padding-left: 15px; border-left: 2px solid var(--background-modifier-border); margin-top: 10px; margin-bottom: 10px;";
-        this.renderWeekBorderColorSetting(headerRowSettings);
-        new import_obsidian5.Setting(headerRowSettings).setName("Show week span borders").setDesc("Display thin borders on the bottom of week span cells").addToggle((toggle) => toggle.setValue(this.plugin.settings.showWeekSpanBorders).onChange(async (value) => {
-          this.plugin.settings.showWeekSpanBorders = value;
-          await this.plugin.saveSettings();
-        }));
-        const tipNote = headerRowSettings.createDiv();
-        tipNote.style.cssText = "background: var(--background-primary); padding: 10px 12px; border-radius: 4px; border-left: 3px solid var(--text-muted); margin-top: 10px; font-size: 0.85em; color: var(--text-muted);";
-        tipNote.innerHTML = `<strong>Tip:</strong> Try turning off cell borders in <code style="background: var(--background-modifier-border); padding: 2px 5px; border-radius: 3px; font-size: 0.9em;">Basic Settings \u2192 Calendar Appearance \u2192 Show cell borders</code> when using week rows. This calms down the look and improves readability.`;
-      }
-    }
-    if (!config.enabled) return;
-    if (usePluginSettings) {
-      const notice = section.createDiv();
-      notice.style.cssText = "background: var(--background-primary); padding: 12px; border-radius: 4px; border-left: 3px solid var(--text-accent); margin-top: 10px;";
-      notice.innerHTML = `Using settings from the <a href="https://github.com/liamcain/obsidian-periodic-notes" style="color: var(--text-accent);">Periodic Notes plugin</a>. Disable "Use Periodic Notes plugin settings" above to customize here.`;
-      notice.style.fontSize = "0.9em";
-      notice.style.color = "var(--text-muted)";
-      return;
-    }
-    const folderSetting = new import_obsidian5.Setting(section).setName("Folder").addText((text) => {
-      text.setPlaceholder("Leave empty for vault root").setValue(config.folder).onChange(async (value) => {
-        const cleaned = value.replace(/^\/+|\/+$/g, "");
-        config.folder = cleaned;
-        await this.plugin.saveSettings();
-      });
-      new FolderSuggest(this.app, text.inputEl);
-    });
-    folderSetting.controlEl.style.cssText = "display: flex; flex-direction: column; align-items: flex-end; gap: 4px;";
-    const subfolderLabel = folderSetting.controlEl.createEl("label");
-    subfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
-    const subfolderCheckbox = subfolderLabel.createEl("input", { type: "checkbox" });
-    subfolderCheckbox.checked = config.includeSubfolders;
-    subfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
-    subfolderLabel.appendText("Include sub-folders");
-    subfolderCheckbox.addEventListener("change", async () => {
-      config.includeSubfolders = subfolderCheckbox.checked;
-      await this.plugin.saveSettings();
-    });
-    const formatSetting = new import_obsidian5.Setting(section).setName("Format").addText((text) => {
-      text.setPlaceholder(defaultFormat).setValue(config.format).onChange(async (value) => {
-        config.format = value || defaultFormat;
-        await this.plugin.saveSettings();
-        this.updateFormatPreview(previewEl, config.format || defaultFormat);
-      });
-    });
-    const formatDescEl = formatSetting.descEl;
-    formatDescEl.innerHTML = `Filename format for ${type} notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
-    const previewEl = formatDescEl.createDiv();
-    previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
-    this.updateFormatPreview(previewEl, config.format || defaultFormat);
-    new import_obsidian5.Setting(section).setName("Template").setDesc(`Template file to use when creating ${type} notes`).addText((text) => {
-      text.setPlaceholder("templates/weekly").setValue(config.template).onChange(async (value) => {
-        config.template = value;
-        await this.plugin.saveSettings();
-      });
-      new FileSuggest(this.app, text.inputEl, this.getTemplateFolderPath());
-    });
-    const colorSetting = new import_obsidian5.Setting(section).setName("Color (optional)").setDesc(`Visual indicator color for ${type} notes in the calendar`);
-    const colorContainer = colorSetting.controlEl.createDiv();
-    colorContainer.style.cssText = "display: flex; align-items: center; gap: 8px;";
-    const colorCheckbox = colorContainer.createEl("input", { type: "checkbox" });
-    colorCheckbox.checked = !!config.color;
-    const colorPickerWrapper = colorContainer.createDiv();
-    if (config.color) {
-      this.renderColorPicker(colorPickerWrapper, config.color, async (newColor) => {
-        config.color = newColor;
-        await this.plugin.saveSettings();
-      });
-    } else {
-      colorPickerWrapper.createEl("span", { text: "Using theme accent" }).style.cssText = "color: var(--text-muted); font-size: 0.85em;";
-    }
-    colorCheckbox.onchange = async () => {
-      if (colorCheckbox.checked) {
-        config.color = "#6c849d";
-      } else {
-        config.color = void 0;
-      }
-      await this.plugin.saveSettings();
-      this.display();
-    };
-  }
-  /**
-   * Render the week border color setting with mode options and color picker
-   */
-  renderWeekBorderColorSetting(container) {
-    const settings = this.plugin.settings.periodicNotes;
-    const borderConfig = settings.weekBorderColor;
-    let colorWrapper = null;
-    const borderSetting = new import_obsidian5.Setting(container).setName("Week divider color").setDesc("Color for the divider between weeks in the header row and day cells").addDropdown((dropdown) => {
-      dropdown.addOption("neutral", "Neutral (theme border)").addOption("accent", "Theme accent").addOption("custom", "Custom color").setValue(borderConfig.mode).onChange(async (value) => {
-        borderConfig.mode = value;
-        await this.plugin.saveSettings();
-        renderColorControl();
-      });
-    });
-    colorWrapper = borderSetting.controlEl.createDiv();
-    colorWrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-left: 8px;";
-    const renderColorControl = () => {
-      if (!colorWrapper) return;
-      colorWrapper.empty();
-      if (borderConfig.mode === "custom") {
-        const currentColor = borderConfig.customColor || "#6c849d";
-        this.renderColorPicker(colorWrapper, currentColor, async (newColor) => {
-          borderConfig.customColor = newColor;
-          await this.plugin.saveSettings();
-        });
-      }
-    };
-    renderColorControl();
-  }
-  updateFormatPreview(previewEl, format) {
-    const moment = window.moment;
-    try {
-      const preview = moment().format(format);
-      previewEl.textContent = `Preview: ${preview}`;
-    } catch (e) {
-      previewEl.textContent = "Preview: (invalid format)";
-    }
-  }
-  renderCustomPeriodsSection(containerEl) {
-    const settings = this.plugin.settings.periodicNotes;
-    const section = containerEl.createDiv();
-    section.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin-bottom: 15px;";
-    section.createEl("h4", { text: "Custom Period Groups", attr: { style: "margin-top: 0;" } });
-    const desc = section.createEl("p", {
-      cls: "setting-item-description",
-      text: "Create groups of custom periods (e.g., Semesters, Seasons). Each enabled group gets its own column in the calendar. Periods within a group cannot have overlapping months and must use consecutive months."
-    });
-    desc.style.marginBottom = "15px";
-    const addBtn = section.createEl("button", { text: "+ Add Group" });
-    addBtn.style.cssText = "margin-bottom: 15px; padding: 6px 12px; cursor: pointer;";
-    addBtn.onclick = async () => {
-      const newGroup = {
-        id: Date.now().toString(),
-        name: "New Group",
-        enabled: true,
-        folder: "",
-        template: "",
-        color: void 0,
-        periods: []
-      };
-      settings.customPeriodGroups.push(newGroup);
-      await this.plugin.saveSettings();
-      this.display();
-    };
-    if (settings.customPeriodGroups.length === 0) {
-      const emptyMsg = section.createDiv();
-      emptyMsg.style.cssText = "color: var(--text-muted); font-style: italic;";
-      emptyMsg.textContent = 'No custom period groups defined. Click "Add Group" to create one.';
-    } else {
-      const groupsList = section.createDiv();
-      groupsList.style.cssText = "display: flex; flex-direction: column; gap: 12px;";
-      settings.customPeriodGroups.forEach((group, groupIndex) => {
+      async getNotesWithDates() {
         var _a;
-        const groupEl = groupsList.createDiv();
-        groupEl.style.cssText = "padding: 12px; background: var(--background-primary); border-radius: 4px; border: 1px solid var(--background-modifier-border);";
-        const groupHeader = groupEl.createDiv();
-        groupHeader.style.cssText = "display: flex; align-items: center; gap: 10px; margin-bottom: 10px;";
-        const toggleContainer = groupHeader.createDiv();
-        const toggle = toggleContainer.createEl("input", { type: "checkbox" });
-        toggle.checked = group.enabled;
-        toggle.style.cssText = "cursor: pointer;";
-        toggle.onchange = async () => {
-          group.enabled = toggle.checked;
-          await this.plugin.saveSettings();
-        };
-        const nameInput = groupHeader.createEl("input", {
-          type: "text",
-          value: group.name,
-          attr: { placeholder: "Group name" }
-        });
-        nameInput.style.cssText = "flex: 1; padding: 4px 8px; font-weight: 500;";
-        nameInput.onchange = async () => {
-          group.name = nameInput.value;
-          await this.plugin.saveSettings();
-        };
-        const deleteGroupBtn = groupHeader.createEl("button", { text: "\xD7" });
-        deleteGroupBtn.style.cssText = "padding: 4px 8px; cursor: pointer; font-size: 1.2em; background: transparent; border: 1px solid var(--background-modifier-border);";
-        deleteGroupBtn.title = "Delete group";
-        deleteGroupBtn.onclick = async () => {
-          settings.customPeriodGroups.splice(groupIndex, 1);
-          await this.plugin.saveSettings();
-          this.display();
-        };
-        const groupDefaultsSection = groupEl.createDiv();
-        groupDefaultsSection.style.cssText = "padding: 10px; margin: 10px 0; background: var(--background-secondary); border-radius: 4px;";
-        const groupDefaultsLabel = groupDefaultsSection.createDiv();
-        groupDefaultsLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px;";
-        groupDefaultsLabel.textContent = "Default settings for all periods in this group:";
-        const folderRow = groupDefaultsSection.createDiv();
-        folderRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
-        folderRow.createEl("span", { text: "Folder:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
-        const folderInput = folderRow.createEl("input", {
-          type: "text",
-          value: group.folder || "",
-          attr: { placeholder: "Leave empty for vault root" }
-        });
-        folderInput.style.cssText = "flex: 1; padding: 4px 8px; font-size: 0.85em;";
-        folderInput.onchange = async () => {
-          group.folder = folderInput.value.replace(/^\/+|\/+$/g, "");
-          await this.plugin.saveSettings();
-        };
-        new FolderSuggest(this.app, folderInput);
-        const groupSubfolderRow = groupDefaultsSection.createDiv();
-        groupSubfolderRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
-        const groupSubfolderPlaceholder = groupSubfolderRow.createEl("span");
-        groupSubfolderPlaceholder.style.cssText = "min-width: 60px; flex-shrink: 0;";
-        const groupSubfolderLabel = groupSubfolderRow.createEl("label");
-        groupSubfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
-        const groupSubfolderCheckbox = groupSubfolderLabel.createEl("input", { type: "checkbox" });
-        groupSubfolderCheckbox.checked = (_a = group.includeSubfolders) != null ? _a : true;
-        groupSubfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
-        groupSubfolderLabel.appendText("Include sub-folders");
-        groupSubfolderCheckbox.addEventListener("change", async () => {
-          group.includeSubfolders = groupSubfolderCheckbox.checked;
-          await this.plugin.saveSettings();
-        });
-        const templateRow = groupDefaultsSection.createDiv();
-        templateRow.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 6px;";
-        templateRow.createEl("span", { text: "Template:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
-        const templateInput = templateRow.createEl("input", {
-          type: "text",
-          value: group.template || "",
-          attr: { placeholder: "templates/period" }
-        });
-        templateInput.style.cssText = "flex: 1; padding: 4px 8px; font-size: 0.85em;";
-        templateInput.onchange = async () => {
-          group.template = templateInput.value;
-          await this.plugin.saveSettings();
-        };
-        new FileSuggest(this.app, templateInput, this.getTemplateFolderPath());
-        const colorRow = groupDefaultsSection.createDiv();
-        colorRow.style.cssText = "display: flex; align-items: center; gap: 8px; flex-wrap: wrap;";
-        colorRow.createEl("span", { text: "Color:" }).style.cssText = "font-size: 0.85em; min-width: 60px;";
-        const colorCheckbox = colorRow.createEl("input", { type: "checkbox" });
-        colorCheckbox.checked = !!group.color;
-        colorCheckbox.style.cssText = "margin-right: 4px;";
-        const colorPickerWrapper = colorRow.createDiv();
-        colorPickerWrapper.style.cssText = group.color ? "display: flex; align-items: center; gap: 8px;" : "display: none;";
-        if (group.color) {
-          this.renderColorPicker(
-            colorPickerWrapper,
-            group.color,
-            async (newColor) => {
-              group.color = newColor;
-              await this.plugin.saveSettings();
-            }
-          );
-        }
-        const colorCheckLabel = colorRow.createEl("span", { text: group.color ? "" : "Enable group color" });
-        colorCheckLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted);";
-        colorCheckbox.onchange = async () => {
-          if (colorCheckbox.checked) {
-            group.color = "#4a90d9";
-          } else {
-            group.color = void 0;
+        const notesMap = /* @__PURE__ */ new Map();
+        const files = this.app.vault.getMarkdownFiles();
+        for (const file of files) {
+          if (!this.filePassesFilter(file)) {
+            continue;
           }
-          await this.plugin.saveSettings();
-          this.display();
-        };
-        const periodsContainer = groupEl.createDiv();
-        periodsContainer.style.cssText = "margin-left: 20px;";
-        if (group.periods.length === 0) {
-          const emptyPeriodsMsg = periodsContainer.createDiv();
-          emptyPeriodsMsg.style.cssText = "color: var(--text-muted); font-style: italic; font-size: 0.9em; margin-bottom: 8px;";
-          emptyPeriodsMsg.textContent = "No periods in this group.";
-        } else {
-          const periodsList = periodsContainer.createDiv();
-          periodsList.style.cssText = "display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;";
-          group.periods.forEach((period, periodIndex) => {
-            const periodEl = periodsList.createDiv();
-            periodEl.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--background-secondary); border-radius: 3px;";
-            const effectiveColor = period.useGroupSettings ? group.color : period.color;
-            if (effectiveColor) {
-              const colorDot = periodEl.createDiv();
-              colorDot.style.cssText = `width: 10px; height: 10px; border-radius: 50%; background: ${effectiveColor}; flex-shrink: 0;`;
-              if (period.useGroupSettings && group.color) {
-                colorDot.title = "Using group color";
-              }
+          const dateInfo = await this.extractDateFromFile(file);
+          if (dateInfo.startDate && !isNaN(dateInfo.startDate.getTime())) {
+            const key = this.dateToKey(dateInfo.startDate);
+            if (!notesMap.has(key)) {
+              notesMap.set(key, []);
             }
-            const infoEl = periodEl.createDiv();
-            infoEl.style.cssText = "flex: 1;";
-            const nameRow = infoEl.createDiv();
-            nameRow.style.cssText = "display: flex; align-items: center; gap: 6px;";
-            const nameEl = nameRow.createEl("span");
-            nameEl.style.cssText = "font-weight: 500; font-size: 0.9em;";
-            nameEl.textContent = period.name;
-            if (period.useGroupSettings === false) {
-              const customBadge = nameRow.createEl("span", { text: "Custom" });
-              customBadge.style.cssText = "font-size: 0.7em; padding: 1px 5px; background: var(--interactive-accent); color: var(--text-on-accent); border-radius: 8px;";
-              customBadge.title = "Using custom folder, template, or color instead of group defaults";
-            }
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const monthsText = period.months.map((m) => monthNames[m - 1]).join("-");
-            const detailsEl = infoEl.createDiv();
-            detailsEl.style.cssText = "font-size: 0.8em; color: var(--text-muted);";
-            detailsEl.innerHTML = `<code style="font-size: 0.95em; background: var(--background-modifier-border); padding: 0 4px; border-radius: 2px;">${period.format}</code> \xB7 ${monthsText}`;
-            const editBtn = periodEl.createEl("button", { text: "Edit" });
-            editBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 0.85em;";
-            editBtn.onclick = () => {
-              new CustomPeriodEditModal(
-                this.app,
-                this.plugin,
-                period,
-                group,
-                async () => {
-                  await this.plugin.saveSettings();
-                  this.display();
-                },
-                async () => {
-                  group.periods.splice(periodIndex, 1);
-                  await this.plugin.saveSettings();
-                  this.display();
-                }
-              ).open();
+            const noteInfo = {
+              file,
+              startDate: dateInfo.startDate,
+              endDate: dateInfo.endDate,
+              isMultiDay: !!dateInfo.endDate
             };
-            const deletePeriodBtn = periodEl.createEl("button", { text: "\xD7" });
-            deletePeriodBtn.style.cssText = "padding: 2px 6px; cursor: pointer; font-size: 1em; background: transparent; border: 1px solid var(--background-modifier-border);";
-            deletePeriodBtn.title = "Delete period";
-            deletePeriodBtn.onclick = async () => {
-              group.periods.splice(periodIndex, 1);
-              await this.plugin.saveSettings();
-              this.display();
-            };
-          });
+            (_a = notesMap.get(key)) == null ? void 0 : _a.push(noteInfo);
+          }
         }
-        const addPeriodBtn = periodsContainer.createEl("button", { text: "+ Add Period" });
-        addPeriodBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 0.9em;";
-        addPeriodBtn.onclick = () => {
-          const usedMonths = /* @__PURE__ */ new Set();
-          group.periods.forEach((p) => p.months.forEach((m) => usedMonths.add(m)));
-          const availableMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].filter((m) => !usedMonths.has(m));
-          const defaultMonths = availableMonths.slice(0, 3);
-          const newPeriod = {
-            id: Date.now().toString(),
-            name: "New Period",
-            format: "YYYY-[P" + (group.periods.length + 1) + "]",
-            months: defaultMonths.length > 0 ? defaultMonths : [1],
-            yearBasis: "majority",
-            useGroupSettings: true,
-            // Use group defaults by default
-            folder: "",
-            template: "",
-            color: void 0
-          };
-          group.periods.push(newPeriod);
-          this.plugin.saveSettings();
-          new CustomPeriodEditModal(
-            this.app,
-            this.plugin,
-            newPeriod,
-            group,
-            async () => {
-              await this.plugin.saveSettings();
-              this.display();
-            },
-            async () => {
-              const idx = group.periods.findIndex((p) => p.id === newPeriod.id);
-              if (idx !== -1) {
-                group.periods.splice(idx, 1);
-                await this.plugin.saveSettings();
-                this.display();
+        if (this.plugin.settings.recurringEvents.enabled) {
+          const recurringEntries = this.expandRecurringEntries(notesMap);
+          for (const [key, entries] of recurringEntries) {
+            if (!notesMap.has(key)) {
+              notesMap.set(key, []);
+            }
+            notesMap.get(key).push(...entries);
+          }
+        }
+        return notesMap;
+      }
+      expandRecurringEntries(existingMap) {
+        var _a, _b;
+        const result = /* @__PURE__ */ new Map();
+        const config = this.plugin.settings.recurringEvents;
+        const year = this.plugin.settings.currentYear;
+        const yearStartUtc = new Date(Date.UTC(year, 0, 1));
+        const yearEndUtc = new Date(Date.UTC(year, 11, 31, 23, 59, 59));
+        const files = this.app.vault.getMarkdownFiles();
+        for (const file of files) {
+          const fm = (_a = this.app.metadataCache.getFileCache(file)) == null ? void 0 : _a.frontmatter;
+          for (const rule of config.propertyRules) {
+            const rawValue = fm == null ? void 0 : fm[rule.propertyName];
+            if (rawValue === void 0 || rawValue === null || rawValue === "") continue;
+            let valueStr;
+            if (rawValue instanceof Date) {
+              const y = rawValue.getFullYear();
+              const mo = String(rawValue.getMonth() + 1).padStart(2, "0");
+              const dy = String(rawValue.getDate()).padStart(2, "0");
+              valueStr = `${y}-${mo}-${dy}`;
+            } else {
+              valueStr = String(rawValue).trim();
+            }
+            if (rule.endPropertyName) {
+              const endRaw = fm == null ? void 0 : fm[rule.endPropertyName];
+              if (endRaw) {
+                const endStr = endRaw instanceof Date ? `${endRaw.getFullYear()}-${String(endRaw.getMonth() + 1).padStart(2, "0")}-${String(endRaw.getDate()).padStart(2, "0")}` : String(endRaw);
+                const endDate = this.parseLocalDate(endStr);
+                if (endDate && endDate < /* @__PURE__ */ new Date()) continue;
               }
             }
-          ).open();
-        };
-      });
-    }
-  }
-  renderQuickNoteCreationSettings(containerEl) {
-    const config = this.plugin.settings.quickNoteCreation;
-    containerEl.createEl("h3", { text: "Quick Note Creation" });
-    const desc = containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Create notes directly from the calendar by Cmd/Ctrl+clicking on day numbers. Click and drag to select a date range for multi-day notes."
-    });
-    desc.style.marginTop = "-10px";
-    desc.style.marginBottom = "15px";
-    new import_obsidian5.Setting(containerEl).setName("Enable quick note creation").setDesc("Create notes directly from the calendar with Cmd/Ctrl+Click").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
-      config.enabled = value;
-      await this.plugin.saveSettings();
-      this.display();
-    }));
-    if (!config.enabled) return;
-    new import_obsidian5.Setting(containerEl).setName('Show "Add Note" button').setDesc('Display an "Add Note" button in the calendar header for easy access').addToggle((toggle) => toggle.setValue(config.showAddNoteButton).onChange(async (value) => {
-      config.showAddNoteButton = value;
-      await this.plugin.saveSettings();
-      const leaves = this.plugin.app.workspace.getLeavesOfType("linear-calendar");
-      for (const leaf of leaves) {
-        if (leaf.view instanceof LinearCalendarView) {
-          await leaf.view.reload();
-        }
-      }
-    }));
-    this.renderDivider(containerEl);
-    new import_obsidian5.Setting(containerEl).setName("Default save location").setDesc("Where new notes should be saved by default").addDropdown((dropdown) => dropdown.addOption("default", "Same as new notes").addOption("dailynotes", "Same as daily notes").addOption("custom", "Custom folder").setValue(config.defaultFolder).onChange(async (value) => {
-      config.defaultFolder = value;
-      await this.plugin.saveSettings();
-      this.display();
-    }));
-    if (config.defaultFolder === "custom") {
-      new import_obsidian5.Setting(containerEl).setName("Custom folder path").setDesc("Path where quick notes should be saved").addText((text) => {
-        text.setPlaceholder("folder/subfolder").setValue(config.customFolder).onChange(async (value) => {
-          const cleaned = value.replace(/^\/+|\/+$/g, "");
-          config.customFolder = cleaned;
-          await this.plugin.saveSettings();
-        });
-        new FolderSuggest(this.app, text.inputEl);
-      });
-    }
-    this.renderDivider(containerEl);
-    containerEl.createEl("h4", { text: "Default Properties" });
-    new import_obsidian5.Setting(containerEl).setName("Start date property").setDesc("Default property name for start date").addText((text) => {
-      text.setValue(config.defaultStartDateProperty).onChange(async (value) => {
-        config.defaultStartDateProperty = value;
-        await this.plugin.saveSettings();
-      });
-      new PropertySuggest(this.app, text.inputEl);
-    });
-    new import_obsidian5.Setting(containerEl).setName("End date property").setDesc("Default property name for end date").addText((text) => {
-      text.setValue(config.defaultEndDateProperty).onChange(async (value) => {
-        config.defaultEndDateProperty = value;
-        await this.plugin.saveSettings();
-      });
-      new PropertySuggest(this.app, text.inputEl);
-    });
-    new import_obsidian5.Setting(containerEl).setName("Category property").setDesc("Default property name for category").addText((text) => {
-      text.setValue(config.defaultCategoryProperty).onChange(async (value) => {
-        config.defaultCategoryProperty = value;
-        await this.plugin.saveSettings();
-      });
-      new PropertySuggest(this.app, text.inputEl);
-    });
-    this.renderDivider(containerEl);
-    containerEl.createEl("h4", { text: "Default Metadata" });
-    const metadataDesc = containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Default metadata that will be pre-filled when creating a new note"
-    });
-    metadataDesc.style.marginBottom = "15px";
-    config.defaultMetadata.forEach((entry, index) => {
-      this.renderDefaultMetadataRow(containerEl, entry, index);
-    });
-    const addBtn = containerEl.createEl("button", { text: "+ Add Default Metadata" });
-    addBtn.style.cssText = "margin-top: 10px; padding: 6px 12px; cursor: pointer;";
-    addBtn.onclick = async () => {
-      config.defaultMetadata.push({ key: "", value: "" });
-      await this.plugin.saveSettings();
-      this.display();
-    };
-  }
-  renderDefaultMetadataRow(container, entry, index) {
-    const config = this.plugin.settings.quickNoteCreation;
-    MetadataRowRenderer.render(container, {
-      entry,
-      onKeyChange: async (key) => {
-        config.defaultMetadata[index].key = key;
-        await this.plugin.saveSettings();
-      },
-      onValueChange: async (value) => {
-        config.defaultMetadata[index].value = value;
-        await this.plugin.saveSettings();
-      },
-      onDelete: async () => {
-        config.defaultMetadata.splice(index, 1);
-        await this.plugin.saveSettings();
-        this.display();
-      },
-      onRefresh: () => {
-        this.display();
-      },
-      app: this.app
-    });
-  }
-  renderExperimentalSection(containerEl) {
-    const headerContainer = containerEl.createDiv();
-    headerContainer.style.cssText = "display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;";
-    headerContainer.createEl("h3", { text: "Note Title Display" });
-    const badge = headerContainer.createEl("span");
-    badge.textContent = "Experimental";
-    badge.style.cssText = "background: var(--interactive-accent); color: var(--text-on-accent); padding: 3px 8px; border-radius: 3px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;";
-    const desc = containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Test different ways to display note titles in calendar cells. These features are experimental and may change."
-    });
-    desc.style.marginTop = "-10px";
-    desc.style.marginBottom = "15px";
-    const exp = this.plugin.settings.experimental;
-    const expSection = containerEl.createDiv();
-    expSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
-    new import_obsidian5.Setting(expSection).setName("Multi-line note names").setDesc("Allow note names to wrap to multiple lines instead of truncating. Best for wider cells.").addToggle((toggle) => toggle.setValue(exp.multilineNotes).onChange(async (value) => {
-      exp.multilineNotes = value;
-      if (value) {
-        exp.verticalText = false;
-      }
-      await this.plugin.saveSettings();
-      this.display();
-    }));
-    new import_obsidian5.Setting(expSection).setName("Vertical text rotation").setDesc("Rotate note names 90 degrees vertically. Creative use of vertical space.").addToggle((toggle) => toggle.setValue(exp.verticalText).onChange(async (value) => {
-      exp.verticalText = value;
-      if (value) {
-        exp.multilineNotes = false;
-      }
-      await this.plugin.saveSettings();
-      this.display();
-    }));
-    new import_obsidian5.Setting(expSection).setName("Compact font size").setDesc("Use smaller font size (0.75em) for note names to fit more text.").addToggle((toggle) => toggle.setValue(exp.compactFontSize).onChange(async (value) => {
-      exp.compactFontSize = value;
-      await this.plugin.saveSettings();
-    }));
-    new import_obsidian5.Setting(expSection).setName("Condensed letter spacing").setDesc("Reduce spacing between letters to fit more text in the same space.").addToggle((toggle) => toggle.setValue(exp.condensedLetters).onChange(async (value) => {
-      exp.condensedLetters = value;
-      await this.plugin.saveSettings();
-    }));
-    containerEl.createEl("h3", { text: "Welcome Banners", attr: { style: "margin-top: 25px;" } });
-    const bannerDesc = containerEl.createEl("p", {
-      cls: "setting-item-description",
-      text: "Show welcome banners again to see tips and instructions."
-    });
-    bannerDesc.style.marginTop = "-10px";
-    bannerDesc.style.marginBottom = "15px";
-    const bannerSection = containerEl.createDiv();
-    bannerSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px;";
-    const bannerCtx = { isBratUser: this.plugin.isBratUser };
-    for (const banner of BANNERS) {
-      if (banner.settingsVisible && !banner.settingsVisible(bannerCtx)) continue;
-      new import_obsidian5.Setting(bannerSection).setName(banner.settingsName).setDesc(banner.settingsDesc).addButton((button) => button.setButtonText("Show again").onClick(async () => {
-        banner.reset(this.plugin.settings);
-        await this.plugin.saveSettings();
-        new import_obsidian5.Notice(`${banner.settingsName} will show on next calendar view`);
-      }));
-    }
-  }
-  renderColorCategoriesSection(containerEl) {
-    const config = this.plugin.settings.colorCategories;
-    containerEl.createEl("h3", { text: "Color Categories" });
-    const descEl = containerEl.createDiv();
-    descEl.style.cssText = "color: var(--text-muted); margin-bottom: 15px;";
-    descEl.innerHTML = "Visually organize notes with colors and icons based on conditions. Categories are checked in order, first match wins.";
-    new import_obsidian5.Setting(containerEl).setName("Enable color categories").setDesc("Turn the color categories feature on or off.").addToggle((toggle) => toggle.setValue(config.enabled).onChange(async (value) => {
-      config.enabled = value;
-      await this.plugin.saveSettings();
-      this.display();
-    }));
-    if (!config.enabled) {
-      const disabledMsg = containerEl.createDiv();
-      disabledMsg.style.cssText = "color: var(--text-muted); font-style: italic; padding: 20px; text-align: center;";
-      disabledMsg.textContent = "Color categories are currently disabled.";
-      return;
-    }
-    const settingsSection = containerEl.createDiv();
-    settingsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 6px; margin-bottom: 20px;";
-    const settingsHeader = settingsSection.createEl("h4", { text: "Category Settings" });
-    settingsHeader.style.cssText = "margin-top: 0; margin-bottom: 12px; font-size: 1em; color: var(--text-normal);";
-    new import_obsidian5.Setting(settingsSection).setName("Show category index").setDesc("Display a row at the top of the calendar showing all categories as clickable chips.").addToggle((toggle) => toggle.setValue(config.showCategoryIndex).onChange(async (value) => {
-      config.showCategoryIndex = value;
-      await this.plugin.saveSettings();
-    }));
-    new import_obsidian5.Setting(settingsSection).setName("Show icons in calendar").setDesc("Display category icons before note titles in the calendar. Turn off to show only colors.").addToggle((toggle) => toggle.setValue(config.showIconsInCalendar).onChange(async (value) => {
-      config.showIconsInCalendar = value;
-      await this.plugin.saveSettings();
-    }));
-    const defaultColorSetting = new import_obsidian5.Setting(settingsSection).setName("Default color").setDesc("Color for notes that don't match any category.");
-    const defaultColorContainer = defaultColorSetting.controlEl.createDiv();
-    defaultColorContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
-    if (config.defaultCategoryColor !== null) {
-      this.renderColorPicker(
-        defaultColorContainer,
-        config.defaultCategoryColor || "#6366f1",
-        async (newColor) => {
-          config.defaultCategoryColor = newColor;
-          await this.plugin.saveSettings();
-        }
-      );
-    } else {
-      const themeAccentNote = defaultColorContainer.createDiv();
-      themeAccentNote.textContent = "Using theme accent color";
-      themeAccentNote.style.cssText = "color: var(--text-muted); font-size: 0.9em; font-style: italic;";
-    }
-    const toggleRow = defaultColorContainer.createDiv();
-    toggleRow.style.cssText = "margin-top: 4px;";
-    const toggleBtn = toggleRow.createEl("button");
-    toggleBtn.textContent = config.defaultCategoryColor === null ? "Use custom color" : "Use theme accent";
-    toggleBtn.style.cssText = "padding: 4px 12px; cursor: pointer; font-size: 0.9em;";
-    toggleBtn.onclick = async () => {
-      if (config.defaultCategoryColor === null) {
-        config.defaultCategoryColor = "#6366f1";
-      } else {
-        config.defaultCategoryColor = null;
-      }
-      await this.plugin.saveSettings();
-      this.display();
-    };
-    this.renderColorPalettes(containerEl);
-    const separator = containerEl.createDiv();
-    separator.style.cssText = "height: 1px; background: var(--background-modifier-border); margin: 30px 0 25px 0;";
-    const categoriesHeader = containerEl.createDiv();
-    categoriesHeader.style.cssText = "margin-bottom: 15px;";
-    const categoryTitle = categoriesHeader.createEl("h4", { text: "Your Categories" });
-    categoryTitle.style.cssText = "margin: 0 0 6px 0; font-size: 1.1em; color: var(--text-normal);";
-    const categoryDesc = categoriesHeader.createDiv();
-    categoryDesc.style.cssText = "color: var(--text-muted); font-size: 0.95em;";
-    categoryDesc.innerHTML = `Create and organize your color categories.
-<ul style="margin: 8px 0 0 0; padding-left: 20px; line-height: 1.7;">
-  <li>Categories <strong>apply to all notes accessible to the plugin</strong> \u2013 as configured in "Basic Settings".</li>
-  <li>Create <strong>conditions that determine which notes match</strong>.</li>
-  <li><strong>First-match principle</strong>: categories (with their conditions) are evaluated top to bottom, and the first match wins. Drag more specific categories above more general ones to make sure they take priority.</li>
-  <li><strong>What you see is what you get</strong>: if a note in the calendar has the color/icon of a category, the system has matched it to that category.</li>
-</ul>`;
-    const categoriesContainer = containerEl.createDiv();
-    categoriesContainer.style.cssText = "background: var(--background-primary); border: 2px solid var(--background-modifier-border); border-radius: 8px; padding: 12px; margin-top: 12px;";
-    if (config.categories.length > 0) {
-      const hintEl = categoriesContainer.createDiv();
-      hintEl.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-bottom: 12px; padding: 6px 10px; background: var(--background-secondary); border-radius: 4px;";
-      hintEl.textContent = "\u22EE\u22EE Drag to reorder priority \u2014 first match wins";
-    } else {
-      const emptyState = categoriesContainer.createDiv();
-      emptyState.style.cssText = "color: var(--text-muted); font-style: italic; text-align: center; padding: 30px 20px;";
-      emptyState.textContent = 'No categories yet. Click "+ Add category" below to create your first one.';
-    }
-    this.renderCategoriesList(categoriesContainer);
-    const addBtn = containerEl.createEl("button", { text: "+ Add category" });
-    addBtn.style.cssText = "margin-top: 12px; padding: 8px 16px; cursor: pointer; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 4px; font-weight: 500;";
-    addBtn.onmouseenter = () => {
-      addBtn.style.opacity = "0.9";
-    };
-    addBtn.onmouseleave = () => {
-      addBtn.style.opacity = "1";
-    };
-    addBtn.onclick = async () => {
-      const newCategory = {
-        id: Date.now().toString(),
-        name: "New Category",
-        color: "#6366f1",
-        iconType: null,
-        iconValue: "",
-        conditions: [],
-        matchMode: "all",
-        enabled: true
-      };
-      config.categories.push(newCategory);
-      await this.plugin.saveSettings();
-      this.display();
-    };
-  }
-  renderCategoriesList(container) {
-    const config = this.plugin.settings.colorCategories;
-    let draggedIndex = null;
-    config.categories.forEach((category, index) => {
-      this.renderCategoryItem(container, category, index, {
-        onDragStart: () => {
-          draggedIndex = index;
-        },
-        onDragEnd: () => {
-          draggedIndex = null;
-        },
-        onDragOver: (targetIndex) => {
-          if (draggedIndex !== null && draggedIndex !== targetIndex) {
-            const [removed] = config.categories.splice(draggedIndex, 1);
-            config.categories.splice(targetIndex, 0, removed);
-            draggedIndex = targetIndex;
-            this.plugin.saveSettings();
-            this.display();
-          }
-        }
-      });
-    });
-  }
-  renderCategoryItem(container, category, index, dragHandlers) {
-    const config = this.plugin.settings.colorCategories;
-    const itemEl = container.createDiv({ cls: "category-list-item" + (category.enabled ? "" : " is-disabled") });
-    itemEl.style.cssText = "margin-bottom: 12px; border: 1px solid var(--background-modifier-border); border-radius: 5px; background: var(--background-secondary);";
-    itemEl.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      itemEl.style.border = "2px solid var(--interactive-accent)";
-    });
-    itemEl.addEventListener("dragleave", () => {
-      itemEl.style.border = "1px solid var(--background-modifier-border)";
-    });
-    itemEl.addEventListener("drop", (e) => {
-      e.preventDefault();
-      itemEl.style.border = "1px solid var(--background-modifier-border)";
-      dragHandlers.onDragOver(index);
-    });
-    const isExpanded = this.expandedCategories.has(category.id);
-    const header = itemEl.createDiv();
-    header.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer;";
-    const dragHandle = header.createEl("span", { text: "\u22EE\u22EE" });
-    dragHandle.style.cssText = "cursor: grab; opacity: 0.5; user-select: none;";
-    dragHandle.draggable = true;
-    dragHandle.addEventListener("dragstart", (e) => {
-      var _a;
-      dragHandle.style.cursor = "grabbing";
-      itemEl.style.opacity = "0.5";
-      dragHandlers.onDragStart();
-      (_a = e.dataTransfer) == null ? void 0 : _a.setData("text/plain", "");
-    });
-    dragHandle.addEventListener("dragend", () => {
-      dragHandle.style.cursor = "grab";
-      itemEl.style.opacity = "1";
-      itemEl.style.border = "1px solid var(--background-modifier-border)";
-      dragHandlers.onDragEnd();
-    });
-    const chevron = header.createEl("span", { text: "\u203A" });
-    chevron.style.cssText = "transition: transform 0.2s; font-size: 1.2em; user-select: none;";
-    if (isExpanded) {
-      chevron.style.transform = "rotate(90deg)";
-    }
-    const capsule = header.createEl("div");
-    capsule.style.cssText = `display: flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; background: ${category.color}; color: #ffffff; flex: 1;`;
-    capsule.dataset.categoryId = category.id;
-    const iconPreview = capsule.createEl("span", { cls: "category-header-icon" });
-    iconPreview.style.cssText = "flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;";
-    if (category.iconType && category.iconValue) {
-      if (category.iconType === "emoji") {
-        iconPreview.textContent = category.iconValue;
-      } else {
-        (0, import_obsidian5.setIcon)(iconPreview, category.iconValue);
-        iconPreview.style.color = "#ffffff";
-      }
-    }
-    const nameSpan = capsule.createEl("span", { text: category.name });
-    nameSpan.style.cssText = "font-weight: 500;";
-    const countSpan = header.createEl("span", {
-      text: category.conditions.length === 1 ? "1 condition" : `${category.conditions.length} conditions`
-    });
-    countSpan.style.cssText = "font-size: 0.85em; color: var(--text-muted);";
-    const disableBtn = header.createEl("button", { cls: "category-disable-btn" });
-    (0, import_obsidian5.setIcon)(disableBtn, "ban");
-    if (!category.enabled) disableBtn.addClass("is-disabled");
-    disableBtn.setAttribute("data-tooltip", category.enabled ? "Disable" : "Enable");
-    disableBtn.onclick = async (e) => {
-      e.stopPropagation();
-      if (category.enabled) {
-        const confirmed = confirm("Disable Category \u2014 it acts like deletion but is recoverable here. Proceed?");
-        if (!confirmed) return;
-      }
-      category.enabled = !category.enabled;
-      disableBtn.setAttribute("data-tooltip", category.enabled ? "Disable" : "Enable");
-      category.enabled ? disableBtn.removeClass("is-disabled") : disableBtn.addClass("is-disabled");
-      category.enabled ? itemEl.removeClass("is-disabled") : itemEl.addClass("is-disabled");
-      await this.plugin.saveSettings();
-    };
-    const eyeBtn = header.createEl("button", { cls: "category-visibility-btn" });
-    (0, import_obsidian5.setIcon)(eyeBtn, category.hidden ? "eye-off" : "eye");
-    eyeBtn.setAttribute("data-tooltip", category.hidden ? "Show" : "Hide");
-    eyeBtn.onclick = async (e) => {
-      e.stopPropagation();
-      category.hidden = !category.hidden;
-      (0, import_obsidian5.setIcon)(eyeBtn, category.hidden ? "eye-off" : "eye");
-      eyeBtn.setAttribute("data-tooltip", category.hidden ? "Show" : "Hide");
-      await this.plugin.saveSettings();
-    };
-    const deleteBtn = header.createEl("button", { cls: "category-disable-btn" });
-    (0, import_obsidian5.setIcon)(deleteBtn, "trash");
-    deleteBtn.setAttribute("data-tooltip", "Delete");
-    deleteBtn.onclick = async (e) => {
-      e.stopPropagation();
-      const confirmed = confirm(`Delete category "${category.name}"? This cannot be undone.`);
-      if (!confirmed) return;
-      config.categories.splice(index, 1);
-      await this.plugin.saveSettings();
-      this.display();
-    };
-    header.onclick = (e) => {
-      if (e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
-        if (isExpanded) {
-          this.expandedCategories.delete(category.id);
-        } else {
-          this.expandedCategories.add(category.id);
-        }
-        this.display();
-      }
-    };
-    if (isExpanded) {
-      const content = itemEl.createDiv();
-      content.style.cssText = "padding: 15px; border-top: 1px solid var(--background-modifier-border);";
-      const nameLabel = content.createEl("label");
-      nameLabel.style.cssText = "display: block; margin-bottom: 10px;";
-      nameLabel.createEl("div", { text: "Category name:", cls: "setting-item-name" });
-      const nameInput = nameLabel.createEl("input", { type: "text", value: category.name });
-      nameInput.style.cssText = "width: 100%; padding: 6px; margin-top: 5px;";
-      nameInput.onchange = async () => {
-        category.name = nameInput.value;
-        await this.plugin.saveSettings();
-        this.display();
-      };
-      const colorSection = content.createDiv();
-      colorSection.style.cssText = "margin-bottom: 15px;";
-      colorSection.createEl("div", { text: "Color:", cls: "setting-item-name" });
-      const colorPickerWrapper = colorSection.createDiv();
-      colorPickerWrapper.style.cssText = "margin-top: 8px;";
-      this.renderColorPicker(
-        colorPickerWrapper,
-        category.color,
-        async (newColor) => {
-          category.color = newColor;
-          await this.plugin.saveSettings();
-          this.display();
-        }
-      );
-      this.createCheckboxWithLabel(
-        content,
-        "Use icon",
-        category.iconType !== null,
-        async (checked) => {
-          if (checked) {
-            category.iconType = "emoji";
-            category.iconValue = "\u2B50";
-          } else {
-            category.iconType = null;
-            category.iconValue = "";
-          }
-          await this.plugin.saveSettings();
-          this.display();
-        }
-      );
-      if (category.iconType !== null) {
-        const iconSettings = content.createDiv();
-        iconSettings.style.cssText = "margin-left: 25px; margin-bottom: 15px;";
-        const iconLabel = iconSettings.createEl("div");
-        iconLabel.style.cssText = "margin-bottom: 8px; color: var(--text-muted); font-size: 0.9em;";
-        iconLabel.textContent = "Search for emoji or Lucide icon:";
-        const iconInputContainer = iconSettings.createDiv();
-        iconInputContainer.style.cssText = "display: flex; gap: 10px; align-items: center;";
-        const iconPreviewEl = iconInputContainer.createEl("div");
-        iconPreviewEl.style.cssText = "width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--background-modifier-border); border-radius: 3px; font-size: 1.2em; flex-shrink: 0;";
-        if (category.iconValue) {
-          if (category.iconType === "emoji") {
-            iconPreviewEl.textContent = category.iconValue;
-          } else {
-            (0, import_obsidian5.setIcon)(iconPreviewEl, category.iconValue);
-          }
-        }
-        const iconInput = iconInputContainer.createEl("input", {
-          type: "text",
-          value: category.iconValue,
-          attr: { placeholder: "Type to search icons..." }
-        });
-        iconInput.style.cssText = "flex: 1; padding: 6px;";
-        if (category.iconType) {
-          iconInput.dataset.iconType = category.iconType;
-        }
-        const saveIconValue = async () => {
-          category.iconValue = iconInput.value;
-          if (iconInput.dataset.iconType) {
-            category.iconType = iconInput.dataset.iconType;
-          }
-          await this.plugin.saveSettings();
-          const capsule2 = document.querySelector(`[data-category-id="${category.id}"]`);
-          if (capsule2) {
-            const headerIcon = capsule2.querySelector(".category-header-icon");
-            if (headerIcon) {
-              headerIcon.empty();
-              if (category.iconType && category.iconValue) {
-                if (category.iconType === "emoji") {
-                  headerIcon.textContent = category.iconValue;
-                } else {
-                  (0, import_obsidian5.setIcon)(headerIcon, category.iconValue);
-                  headerIcon.style.color = "#ffffff";
+            let rruleStr = null;
+            let startYear = null;
+            let dtstart = null;
+            const fmt = (_b = rule.dateFormat) != null ? _b : valueStr.startsWith("FREQ=") ? "rrule" : "iso_date";
+            if (fmt === "rrule") {
+              if (!valueStr.startsWith("FREQ=")) continue;
+              rruleStr = valueStr;
+              if (!valueStr.includes("DTSTART")) {
+                if (rule.startPropertyName) {
+                  const startRaw = fm == null ? void 0 : fm[rule.startPropertyName];
+                  if (startRaw) {
+                    const startStr = startRaw instanceof Date ? `${startRaw.getFullYear()}-${String(startRaw.getMonth() + 1).padStart(2, "0")}-${String(startRaw.getDate()).padStart(2, "0")}` : String(startRaw);
+                    const startMatch = startStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                    if (startMatch) {
+                      startYear = parseInt(startMatch[1], 10);
+                      dtstart = new Date(Date.UTC(startYear, parseInt(startMatch[2], 10) - 1, parseInt(startMatch[3], 10)));
+                    }
+                  }
                 }
+                if (!dtstart) dtstart = new Date(Date.UTC(1970, 0, 1));
+              }
+            } else {
+              const fullIsoMatch = valueStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+              if (!fullIsoMatch) continue;
+              startYear = parseInt(fullIsoMatch[1], 10);
+              const m = parseInt(fullIsoMatch[2], 10);
+              const d = parseInt(fullIsoMatch[3], 10);
+              if (rule.frequency === "yearly") {
+                rruleStr = `FREQ=YEARLY;BYMONTH=${m};BYMONTHDAY=${d}`;
+                dtstart = new Date(Date.UTC(startYear, m - 1, d));
+              } else if (rule.frequency === "monthly") {
+                rruleStr = `FREQ=MONTHLY;BYMONTHDAY=${d}`;
+                dtstart = new Date(Date.UTC(startYear, m - 1, d));
+              } else if (rule.frequency === "weekly") {
+                const weekdays = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+                const wday = weekdays[new Date(startYear, m - 1, d).getDay()];
+                rruleStr = `FREQ=WEEKLY;BYDAY=${wday}`;
+                dtstart = new Date(Date.UTC(startYear, m - 1, d));
               }
             }
-          }
-        };
-        iconInput.addEventListener("input", saveIconValue);
-        new IconSuggest(iconInput, iconPreviewEl);
-      }
-      const conditionsHeader = content.createDiv();
-      conditionsHeader.style.cssText = "display: flex; align-items: center; gap: 8px; margin-top: 15px; margin-bottom: 10px;";
-      conditionsHeader.createEl("div", {
-        text: "Conditions:",
-        attr: { style: "font-weight: 500; margin: 0;" }
-      });
-      this.renderConditionsInfoIcon(conditionsHeader);
-      if (category.conditions.length > 1) {
-        const matchModeToggle = content.createDiv();
-        matchModeToggle.style.cssText = "display: flex; align-items: center; gap: 8px; font-size: 0.9em; margin-bottom: 10px;";
-        const matchModeLabel = matchModeToggle.createEl("span", { text: "Match:" });
-        matchModeLabel.style.cssText = "color: var(--text-muted);";
-        const matchModeSelect = matchModeToggle.createEl("select");
-        matchModeSelect.style.cssText = "padding: 3px 6px;";
-        matchModeSelect.createEl("option", { text: "All (AND)", value: "all" });
-        matchModeSelect.createEl("option", { text: "Any (OR)", value: "any" });
-        matchModeSelect.value = category.matchMode || "all";
-        matchModeSelect.onchange = async () => {
-          category.matchMode = matchModeSelect.value;
-          await this.plugin.saveSettings();
-        };
-      }
-      const conditionsContainer = content.createDiv();
-      conditionsContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
-      if (category.conditions.length === 0) {
-        const emptyMsg = conditionsContainer.createDiv();
-        emptyMsg.style.cssText = "color: var(--text-muted); font-style: italic; padding: 10px;";
-        emptyMsg.textContent = "No conditions yet. Add at least one condition for this category to match notes.";
-      } else {
-        category.conditions.forEach((condition, condIndex) => {
-          this.renderCategoryCondition(conditionsContainer, category, condition, condIndex);
-        });
-      }
-      const addCondBtn = content.createEl("button", { text: "+ Add condition" });
-      addCondBtn.style.cssText = "margin-top: 8px; padding: 4px 12px; cursor: pointer;";
-      addCondBtn.onclick = async () => {
-        category.conditions.push({
-          property: "file.name",
-          operator: "contains",
-          value: ""
-        });
-        await this.plugin.saveSettings();
-        this.display();
-      };
-    }
-  }
-  renderCategoryCondition(container, category, condition, condIndex) {
-    ConditionRenderer.render(container, condition, condIndex, category.conditions, this.app, {
-      onSave: async () => {
-        await this.plugin.saveSettings();
-      },
-      onRefresh: () => {
-        this.display();
-      }
-    });
-  }
-  renderColorPalettes(containerEl) {
-    const config = this.plugin.settings.colorCategories;
-    const palettesSectionContainer = containerEl.createDiv();
-    palettesSectionContainer.style.cssText = "margin-top: 20px; border: 1px solid var(--background-modifier-border); border-radius: 4px; overflow: hidden;";
-    const palettesHeader = palettesSectionContainer.createDiv();
-    palettesHeader.style.cssText = "padding: 12px; background: var(--background-secondary); cursor: pointer; display: flex; align-items: center; gap: 8px; user-select: none;";
-    const chevron = palettesHeader.createEl("span", { text: "\u203A" });
-    chevron.style.cssText = "font-size: 1.2em; transition: transform 0.2s; display: inline-block;";
-    const icon = palettesHeader.createEl("span");
-    icon.style.cssText = "display: flex; align-items: center; margin-right: 4px;";
-    (0, import_obsidian5.setIcon)(icon, "palette");
-    palettesHeader.createEl("strong", { text: "Color Palettes" });
-    const headerDesc = palettesHeader.createEl("span", { text: "(optional - create reusable color sets)" });
-    headerDesc.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-left: 8px;";
-    const palettesContent = palettesSectionContainer.createDiv();
-    palettesContent.style.cssText = "padding: 15px; display: none;";
-    palettesHeader.onclick = () => {
-      this.isPalettesExpanded = !this.isPalettesExpanded;
-      palettesContent.style.display = this.isPalettesExpanded ? "block" : "none";
-      chevron.style.transform = this.isPalettesExpanded ? "rotate(90deg)" : "rotate(0deg)";
-    };
-    if (this.isPalettesExpanded) {
-      palettesContent.style.display = "block";
-      chevron.style.transform = "rotate(90deg)";
-    }
-    const desc = palettesContent.createDiv();
-    desc.style.cssText = "color: var(--text-muted); font-size: 0.9em; margin-bottom: 15px;";
-    desc.textContent = "Create custom color palettes to quickly assign colors to categories. Palettes can be shared by copying/pasting the palette text when viewed in source mode.";
-    config.colorPalettes.forEach((palette, index) => {
-      this.renderPalette(palettesContent, palette, index);
-    });
-    const addPaletteBtn = palettesContent.createEl("button", { text: "+ Add Palette" });
-    addPaletteBtn.style.cssText = "padding: 6px 16px; cursor: pointer; margin-top: 10px;";
-    addPaletteBtn.onclick = async () => {
-      const newPalette = {
-        name: "New Palette",
-        colors: [
-          { name: "Red", hex: "#ef4444" },
-          { name: "Blue", hex: "#3b82f6" },
-          { name: "Green", hex: "#10b981" }
-        ]
-      };
-      config.colorPalettes.push(newPalette);
-      await this.plugin.saveSettings();
-      this.display();
-    };
-  }
-  renderPalette(container, palette, paletteIndex) {
-    const config = this.plugin.settings.colorCategories;
-    const paletteEl = container.createDiv();
-    paletteEl.style.cssText = "border: 1px solid var(--background-modifier-border); border-radius: 4px; padding: 12px; margin-bottom: 12px; background: var(--background-primary);";
-    const paletteHeader = paletteEl.createDiv();
-    paletteHeader.style.cssText = "display: flex; align-items: center; gap: 10px; margin-bottom: 12px;";
-    const nameInput = paletteHeader.createEl("input", {
-      type: "text",
-      value: palette.name,
-      attr: { placeholder: "Palette name" }
-    });
-    nameInput.style.cssText = "flex: 1; padding: 4px 8px; font-weight: 500;";
-    nameInput.oninput = async () => {
-      palette.name = nameInput.value;
-      await this.plugin.saveSettings();
-    };
-    const currentMode = this.paletteEditModes.get(paletteIndex) || "visual";
-    const modeToggleBtn = paletteHeader.createEl("button");
-    modeToggleBtn.textContent = currentMode === "visual" ? "Source" : "Visual";
-    modeToggleBtn.style.cssText = "padding: 4px 10px; cursor: pointer; font-size: 0.85em;";
-    modeToggleBtn.title = currentMode === "visual" ? "Switch to source mode" : "Switch to visual mode";
-    const deleteBtn = paletteHeader.createEl("button", { text: "\xD7" });
-    deleteBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.2em; background: var(--background-modifier-error); color: var(--text-on-accent);";
-    deleteBtn.onclick = async () => {
-      config.colorPalettes.splice(paletteIndex, 1);
-      this.paletteEditModes.delete(paletteIndex);
-      await this.plugin.saveSettings();
-      this.display();
-    };
-    const editorContainer = paletteEl.createDiv();
-    const renderEditor = () => {
-      editorContainer.empty();
-      const mode = this.paletteEditModes.get(paletteIndex) || "visual";
-      if (mode === "visual") {
-        const colorsContainer = editorContainer.createDiv();
-        colorsContainer.style.cssText = "display: flex; flex-direction: column; gap: 8px;";
-        palette.colors.forEach((color, colorIndex) => {
-          const colorRow = colorsContainer.createDiv();
-          colorRow.style.cssText = "display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--background-secondary); border-radius: 4px;";
-          const colorPicker = colorRow.createEl("input", { type: "color", value: color.hex });
-          colorPicker.style.cssText = "width: 50px; height: 32px; cursor: pointer; border-radius: 4px;";
-          colorPicker.onchange = async (e) => {
-            color.hex = e.target.value.toLowerCase();
-            await this.plugin.saveSettings();
-          };
-          const hexDisplay = colorRow.createEl("code");
-          hexDisplay.textContent = color.hex.toUpperCase();
-          hexDisplay.style.cssText = "color: var(--text-muted); font-size: 0.85em; min-width: 70px;";
-          colorPicker.oninput = () => {
-            hexDisplay.textContent = colorPicker.value.toUpperCase();
-          };
-          const nameInput2 = colorRow.createEl("input", {
-            type: "text",
-            value: color.name,
-            attr: { placeholder: "Color name" }
-          });
-          nameInput2.style.cssText = "flex: 1; padding: 4px 8px;";
-          nameInput2.oninput = async () => {
-            color.name = nameInput2.value;
-            await this.plugin.saveSettings();
-          };
-          const deleteColorBtn = colorRow.createEl("button", { text: "\xD7" });
-          deleteColorBtn.style.cssText = "padding: 2px 8px; cursor: pointer; font-size: 1.1em;";
-          deleteColorBtn.onclick = async () => {
-            palette.colors.splice(colorIndex, 1);
-            await this.plugin.saveSettings();
-            renderEditor();
-          };
-        });
-        const addColorBtn = editorContainer.createEl("button", { text: "+ Add Color" });
-        addColorBtn.style.cssText = "padding: 6px 12px; cursor: pointer; margin-top: 8px; font-size: 0.9em;";
-        addColorBtn.onclick = async () => {
-          palette.colors.push({ name: "New Color", hex: "#3b82f6" });
-          await this.plugin.saveSettings();
-          renderEditor();
-        };
-      } else {
-        const sourceLabel = editorContainer.createDiv();
-        sourceLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-bottom: 6px;";
-        sourceLabel.textContent = "Text format (ColorName: #hexcode, one per line):";
-        const paletteText = editorContainer.createEl("textarea");
-        paletteText.style.cssText = "width: 100%; min-height: 120px; font-family: monospace; font-size: 0.85em; padding: 8px; resize: vertical;";
-        paletteText.value = this.paletteTOText(palette);
-        let typingTimer;
-        paletteText.oninput = () => {
-          clearTimeout(typingTimer);
-          typingTimer = setTimeout(async () => {
-            const parsed = this.textToPalette(paletteText.value, palette.name);
-            if (parsed) {
-              palette.colors = parsed.colors;
-              await this.plugin.saveSettings();
+            if (!rruleStr) continue;
+            let occurrences;
+            try {
+              let rule_obj;
+              if (dtstart) {
+                const opts = RRule.parseString(rruleStr);
+                opts.dtstart = dtstart;
+                rule_obj = new RRule(opts);
+              } else {
+                rule_obj = RRule.fromString(rruleStr);
+              }
+              occurrences = rule_obj.between(yearStartUtc, yearEndUtc, true);
+            } catch (e) {
+              continue;
             }
-          }, 500);
-        };
+            for (const occurrence of occurrences) {
+              const occDate = new Date(occurrence.getUTCFullYear(), occurrence.getUTCMonth(), occurrence.getUTCDate());
+              const key = this.dateToKey(occDate);
+              const existing = existingMap.get(key);
+              if (existing == null ? void 0 : existing.some((n) => n.file.path === file.path)) continue;
+              const label = this.buildRecurringLabel(file, rule, startYear, occDate);
+              const noteInfo = {
+                file,
+                startDate: occDate,
+                endDate: null,
+                isMultiDay: false,
+                isRecurring: true,
+                recurringLabel: label
+              };
+              if (!result.has(key)) result.set(key, []);
+              result.get(key).push(noteInfo);
+            }
+          }
+        }
+        return result;
       }
-    };
-    modeToggleBtn.onclick = () => {
-      const currentMode2 = this.paletteEditModes.get(paletteIndex) || "visual";
-      const newMode = currentMode2 === "visual" ? "source" : "visual";
-      this.paletteEditModes.set(paletteIndex, newMode);
-      modeToggleBtn.textContent = newMode === "visual" ? "Source" : "Visual";
-      modeToggleBtn.title = newMode === "visual" ? "Switch to source mode" : "Switch to visual mode";
-      renderEditor();
-    };
-    renderEditor();
-  }
-  paletteTOText(palette) {
-    return palette.colors.map((c) => `${c.name}: ${c.hex}`).join("\n");
-  }
-  textToPalette(text, fallbackName) {
-    const lines = text.split("\n").filter((l) => l.trim());
-    const colors = [];
-    for (const line of lines) {
-      const match = line.match(/^(.+?):\s*(#[0-9a-fA-F]{6})$/);
-      if (match) {
-        colors.push({ name: match[1].trim(), hex: match[2].toLowerCase() });
-      } else {
+      buildRecurringLabel(file, rule, startYear, occDate) {
+        const { titleDisplay, titleSeparator, propertyName } = rule;
+        const sep = titleSeparator != null ? titleSeparator : "\u2013";
+        const base = file.basename;
+        if (titleDisplay === "title") return base;
+        const propLabel = propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
+        const join = (parts) => sep ? parts.join(` ${sep} `) : parts.join(" ");
+        if (titleDisplay === "title_property") {
+          return join([base, propLabel]);
+        }
+        if (startYear !== null) {
+          const years = occDate.getFullYear() - startYear;
+          return join([base, `${propLabel} (${years})`]);
+        }
+        return join([base, propLabel]);
+      }
+      filePassesFilter(file) {
+        const { filterMode, filterConditions } = this.plugin.settings;
+        if (filterMode === "none" || filterConditions.length === 0) {
+          return true;
+        }
+        const matchesConditions = filterConditions.every(
+          (condition) => this.evaluateCondition(file, condition)
+        );
+        return filterMode === "include" ? matchesConditions : !matchesConditions;
+      }
+      evaluateCondition(file, condition) {
+        var _a, _b, _c, _d, _e, _f, _g, _h;
+        const { property, operator, value, includeSubfolders } = condition;
+        let actualValue;
+        if (property === "file.name") {
+          actualValue = file.name;
+        } else if (property === "file.basename") {
+          actualValue = file.basename;
+        } else if (property === "file.folder") {
+          actualValue = ((_a = file.parent) == null ? void 0 : _a.path) || "";
+        } else if (property === "file.path") {
+          actualValue = file.path;
+        } else if (property === "file.ext") {
+          actualValue = file.extension;
+        } else if (property === "file.tags") {
+          const cache = this.app.metadataCache.getFileCache(file);
+          const tags = ((_b = cache == null ? void 0 : cache.tags) == null ? void 0 : _b.map((t) => t.tag.substring(1))) || [];
+          const frontmatterTags = ((_c = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _c.tags) || [];
+          actualValue = [...tags, ...frontmatterTags];
+        } else if (property.startsWith("property:")) {
+          const propertyName = property.substring(9);
+          const cache = this.app.metadataCache.getFileCache(file);
+          actualValue = (_d = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _d[propertyName];
+        } else {
+          const cache = this.app.metadataCache.getFileCache(file);
+          actualValue = (_e = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _e[property];
+        }
+        switch (operator) {
+          case "is":
+            if (property === "file.folder" && includeSubfolders) {
+              const folderPath = value ? value + "/" : "";
+              return file.path.startsWith(folderPath) || ((_f = file.parent) == null ? void 0 : _f.path) === value;
+            }
+            return actualValue === value;
+          case "isNot":
+            return actualValue !== value;
+          case "contains":
+            if (typeof actualValue === "string") {
+              return actualValue.toLowerCase().includes(value.toLowerCase());
+            }
+            if (Array.isArray(actualValue)) {
+              return actualValue.some(
+                (item) => String(item).toLowerCase().includes(value.toLowerCase())
+              );
+            }
+            return false;
+          case "doesNotContain":
+            if (typeof actualValue === "string") {
+              return !actualValue.toLowerCase().includes(value.toLowerCase());
+            }
+            if (Array.isArray(actualValue)) {
+              return !actualValue.some(
+                (item) => String(item).toLowerCase().includes(value.toLowerCase())
+              );
+            }
+            return true;
+          case "startsWith":
+            if (typeof actualValue === "string") {
+              return actualValue.toLowerCase().startsWith(value.toLowerCase());
+            }
+            return false;
+          case "endsWith":
+            if (typeof actualValue === "string") {
+              return actualValue.toLowerCase().endsWith(value.toLowerCase());
+            }
+            return false;
+          case "matches":
+            try {
+              const regex = new RegExp(value);
+              return regex.test(actualValue);
+            } catch (e) {
+              return false;
+            }
+          case "exists":
+            return actualValue !== void 0 && actualValue !== null;
+          case "doesNotExist":
+            return actualValue === void 0 || actualValue === null;
+          case "hasTag":
+            const cache = this.app.metadataCache.getFileCache(file);
+            const tags = ((_g = cache == null ? void 0 : cache.tags) == null ? void 0 : _g.map((t) => t.tag.substring(1))) || [];
+            const frontmatterTags = ((_h = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _h.tags) || [];
+            const allTags = [...tags, ...frontmatterTags];
+            return allTags.some((tag) => tag.toLowerCase() === value.toLowerCase());
+          case "matchesDatePattern":
+            const dateFormat = condition.value || "YYYY-MM-DD";
+            const pattern = this.formatToRegexPattern(dateFormat);
+            const datePattern = new RegExp(`^(${pattern})`);
+            const match = file.basename.match(datePattern);
+            if (!match) return false;
+            if (condition.requireAdditionalText) {
+              return file.basename.length > match[0].length;
+            }
+            return true;
+          default:
+            return false;
+        }
+      }
+      /**
+       * Get the color category that matches a file.
+       * Returns the first enabled category where all conditions match.
+       * Returns null if no category matches.
+       */
+      getCategoryForFile(file) {
+        const config = this.plugin.settings.colorCategories;
+        for (const category of config.categories) {
+          if (!category.enabled) continue;
+          if (category.conditions.length === 0) continue;
+          const matchMode = category.matchMode || "all";
+          const matches = matchMode === "all" ? category.conditions.every((c) => this.evaluateCondition(file, c)) : category.conditions.some((c) => this.evaluateCondition(file, c));
+          if (matches) return category;
+        }
         return null;
       }
-    }
-    if (colors.length === 0) return null;
-    return { name: fallbackName, colors };
-  }
-  /**
-   * Render a color picker with optional palette selection popover
-   */
-  renderColorPicker(container, currentColor, onColorChange) {
-    const config = this.plugin.settings.colorCategories;
-    ColorPickerRenderer.render({
-      container,
-      currentColor,
-      palettes: config.colorPalettes || [],
-      onColorChange
-    });
-  }
-};
-var CategoryEditModal = class extends import_obsidian5.Modal {
-  constructor(app, plugin, category, onSave) {
-    super(app);
-    this.plugin = plugin;
-    this.category = category;
-    this.onSave = onSave;
-  }
-  /**
-   * Helper to create a checkbox with label in a consistent format.
-   * The checkbox is placed inside a wrapper div, NOT inside a <label> element.
-   * This prevents accidental toggling when clicking the label text.
-   */
-  createCheckboxWithLabel(container, text, checked, onChange) {
-    const wrapper = container.createDiv();
-    wrapper.style.cssText = "display: flex; align-items: center; gap: 8px; margin-bottom: 8px;";
-    const checkbox = wrapper.createEl("input", { type: "checkbox" });
-    checkbox.checked = checked;
-    checkbox.onchange = async (e) => {
-      await onChange(e.target.checked);
-    };
-    wrapper.createEl("span", { text });
-    return checkbox;
-  }
-  /**
-   * IMPORTANT: This method is duplicated from CalendarSettingTab.renderConditionsInfoIcon().
-   * When making changes here, apply the same changes to CalendarSettingTab.renderConditionsInfoIcon().
-   * This ensures both main settings and modal have consistent info icon behavior.
-   */
-  renderConditionsInfoIcon(container) {
-    const infoIcon = container.createEl("span");
-    (0, import_obsidian5.setIcon)(infoIcon, "info");
-    infoIcon.style.cssText = "cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px;";
-    infoIcon.title = "Click to see examples";
-    let popover = null;
-    const closePopover = () => {
-      if (popover) {
-        popover.remove();
-        popover = null;
+      isCategoryHidden(file) {
+        const category = this.getCategoryForFile(file);
+        return (category == null ? void 0 : category.hidden) === true;
       }
-    };
-    infoIcon.onclick = (e) => {
-      e.preventDefault();
-      if (popover) {
-        closePopover();
-        return;
+      /**
+       * Get the color to use for a file.
+       * Uses category color if file matches a category, otherwise uses default color.
+       */
+      getColorForFile(file) {
+        if (!this.plugin.settings.colorCategories.enabled) {
+          return "var(--interactive-accent)";
+        }
+        const category = this.getCategoryForFile(file);
+        if (category) return category.color;
+        const defaultColor = this.plugin.settings.colorCategories.defaultCategoryColor;
+        return defaultColor || "var(--interactive-accent)";
       }
-      popover = document.body.createDiv();
-      popover.style.cssText = "position: fixed; z-index: 1000; background: var(--background-primary); border: 1px solid var(--background-modifier-border); border-radius: 6px; padding: 12px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); max-width: 280px;";
-      const closeBtn = popover.createEl("button");
-      closeBtn.textContent = "\xD7";
-      closeBtn.style.cssText = "position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: none; background: transparent; cursor: pointer; font-size: 1.4em; line-height: 1; padding: 0; color: var(--text-muted); border-radius: 3px;";
-      closeBtn.title = "Close";
-      closeBtn.onmouseenter = () => {
-        closeBtn.style.background = "var(--background-modifier-hover)";
-      };
-      closeBtn.onmouseleave = () => {
-        closeBtn.style.background = "transparent";
-      };
-      closeBtn.onclick = (e2) => {
-        e2.preventDefault();
-        closePopover();
-      };
-      popover.createEl("div", {
-        text: "Examples:",
-        attr: { style: "font-weight: 600; margin-bottom: 8px; color: var(--text-normal); padding-right: 20px;" }
-      });
-      popover.createEl("div", {
-        text: '\u2022 Property "category" is "school"',
-        attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
-      });
-      popover.createEl("div", {
-        text: '\u2022 File tags has tag "holidays"',
-        attr: { style: "margin-left: 8px; color: var(--text-muted); margin-bottom: 4px; font-size: 0.9em;" }
-      });
-      popover.createEl("div", {
-        text: '\u2022 File name contains "meeting"',
-        attr: { style: "margin-left: 8px; color: var(--text-muted); font-size: 0.9em;" }
-      });
-      const iconRect = infoIcon.getBoundingClientRect();
-      popover.style.top = iconRect.bottom + 6 + "px";
-      popover.style.left = iconRect.left + "px";
-      setTimeout(() => {
-        if (popover) {
-          const popoverRect = popover.getBoundingClientRect();
-          if (popoverRect.right > window.innerWidth) {
-            popover.style.left = window.innerWidth - popoverRect.width - 10 + "px";
-          }
-          if (popoverRect.bottom > window.innerHeight) {
-            popover.style.top = iconRect.top - popoverRect.height - 6 + "px";
+      /**
+       * Get the icon to display for a file.
+       * Returns null if global setting is off, or if file doesn't match a category with an icon.
+       */
+      getIconForFile(file) {
+        if (!this.plugin.settings.colorCategories.enabled) {
+          return null;
+        }
+        if (!this.plugin.settings.colorCategories.showIconsInCalendar) {
+          return null;
+        }
+        const category = this.getCategoryForFile(file);
+        if (!category || !category.iconType) return null;
+        return { type: category.iconType, value: category.iconValue };
+      }
+      /**
+       * Parse a date string (YYYY-MM-DD) as a local date, not UTC.
+       * This prevents timezone issues where dates shift to the previous day.
+       */
+      parseLocalDate(dateStr) {
+        const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (!match) return null;
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        const date = new Date(year, month, day);
+        return isNaN(date.getTime()) ? null : date;
+      }
+      async extractDateFromFile(file) {
+        var _a, _b;
+        const config = this.plugin.settings.dateExtraction;
+        const result = {
+          startDate: null,
+          endDate: null
+        };
+        const startSources = [];
+        if (config.startFromProperties.length > 0) {
+          for (const propName of config.startFromProperties) {
+            const cache = this.app.metadataCache.getFileCache(file);
+            const dateStr = (_a = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _a[propName];
+            if (dateStr) {
+              const date = this.parseLocalDate(dateStr);
+              if (date && !isNaN(date.getTime())) {
+                startSources.push({ type: "property", date });
+                break;
+              }
+            }
           }
         }
-      }, 0);
-      const closeHandler = (e2) => {
-        if (popover && !popover.contains(e2.target) && !infoIcon.contains(e2.target)) {
-          closePopover();
-          document.removeEventListener("click", closeHandler);
+        if (config.startFromFilename) {
+          const datePattern = /^(\d{4}-\d{2}-\d{2})/;
+          const match = file.basename.match(datePattern);
+          if (match) {
+            const date = this.parseLocalDate(match[1]);
+            if (date && !isNaN(date.getTime())) {
+              startSources.push({ type: "filename", date });
+            }
+          }
         }
-      };
-      setTimeout(() => {
-        document.addEventListener("click", closeHandler);
-      }, 0);
-      const escHandler = (e2) => {
-        if (e2.key === "Escape") {
-          closePopover();
-          document.removeEventListener("keydown", escHandler);
-        }
-      };
-      document.addEventListener("keydown", escHandler);
-    };
-  }
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.empty();
-    contentEl.createEl("h2", { text: "Edit Category" });
-    new import_obsidian5.Setting(contentEl).setName("Category name").addText((text) => text.setValue(this.category.name).onChange(async (value) => {
-      this.category.name = value;
-      await this.plugin.saveSettings();
-      this.onSave();
-    }));
-    contentEl.createEl("div", {
-      attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
-    });
-    const colorSetting = new import_obsidian5.Setting(contentEl).setName("Color").setDesc("Choose a color for this category");
-    this.renderColorPickerInModal(colorSetting.controlEl);
-    contentEl.createEl("div", {
-      attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 16px 0;" }
-    });
-    const useIconSetting = contentEl.createDiv();
-    useIconSetting.style.cssText = "display: flex; flex-direction: column; gap: 4px; padding: 12px 0;";
-    const useIconHeader = useIconSetting.createDiv();
-    useIconHeader.style.cssText = "display: flex; flex-direction: column; gap: 4px;";
-    this.createCheckboxWithLabel(
-      useIconHeader,
-      "Use icon",
-      this.category.iconType !== null,
-      async (checked) => {
-        if (checked) {
-          this.category.iconType = "emoji";
-          this.category.iconValue = "\u2B50";
-        } else {
-          this.category.iconType = null;
-          this.category.iconValue = "";
-        }
-        await this.plugin.saveSettings();
-        this.onSave();
-        this.onOpen();
-      }
-    );
-    const useIconDesc = useIconSetting.createEl("div");
-    useIconDesc.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-left: 24px;";
-    useIconDesc.textContent = "Add an emoji or Lucide icon to this category";
-    if (this.category.iconType !== null) {
-      const iconSetting = new import_obsidian5.Setting(contentEl).setName("Icon").setDesc("Search for emoji or Lucide icon");
-      const inputContainer = iconSetting.controlEl.createDiv();
-      inputContainer.style.cssText = "display: flex; gap: 10px; align-items: center; width: 100%;";
-      const iconInput = inputContainer.createEl("input", {
-        type: "text",
-        value: this.category.iconValue,
-        attr: { placeholder: "Type to search icons..." }
-      });
-      iconInput.style.cssText = "flex: 1; padding: 6px;";
-      if (this.category.iconType) {
-        iconInput.dataset.iconType = this.category.iconType;
-      }
-      const saveIconValue = async () => {
-        this.category.iconValue = iconInput.value;
-        if (iconInput.dataset.iconType) {
-          this.category.iconType = iconInput.dataset.iconType;
-        }
-        await this.plugin.saveSettings();
-        this.onSave();
-      };
-      iconInput.addEventListener("input", saveIconValue);
-      const iconPreviewEl = inputContainer.createEl("div");
-      iconPreviewEl.style.cssText = "width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--background-modifier-border); border-radius: 3px; font-size: 1.2em;";
-      if (this.category.iconValue) {
-        if (this.category.iconType === "emoji") {
-          iconPreviewEl.textContent = this.category.iconValue;
-        } else {
-          (0, import_obsidian5.setIcon)(iconPreviewEl, this.category.iconValue);
-        }
-      }
-      new IconSuggest(iconInput, iconPreviewEl);
-    }
-    contentEl.createEl("div", {
-      attr: { style: "border-top: 1px solid var(--background-modifier-border); margin: 20px 0;" }
-    });
-    const conditionsHeader = contentEl.createDiv();
-    conditionsHeader.style.cssText = "display: flex; align-items: center; gap: 8px; margin-top: 0; margin-bottom: 10px;";
-    conditionsHeader.createEl("h3", { text: "Conditions", attr: { style: "margin: 0;" } });
-    this.renderConditionsInfoIcon(conditionsHeader);
-    new import_obsidian5.Setting(contentEl).setName("Match mode").setDesc("Choose how conditions should be evaluated").addDropdown((dropdown) => dropdown.addOption("all", "AND - All conditions must match").addOption("any", "OR - Any condition can match").setValue(this.category.matchMode).onChange(async (value) => {
-      this.category.matchMode = value;
-      await this.plugin.saveSettings();
-      this.onSave();
-    }));
-    const conditionsContainer = contentEl.createDiv();
-    conditionsContainer.style.cssText = "max-height: 300px; overflow-y: auto;";
-    if (this.category.conditions.length === 0) {
-      conditionsContainer.createEl("div", {
-        text: "No conditions yet. Add at least one condition for this category to match notes.",
-        attr: { style: "color: var(--text-muted); font-style: italic; padding: 10px;" }
-      });
-    } else {
-      this.category.conditions.forEach((condition, index) => {
-        this.renderCondition(conditionsContainer, condition, index);
-      });
-    }
-    new import_obsidian5.Setting(contentEl).addButton((btn) => btn.setButtonText("+ Add condition").onClick(async () => {
-      this.category.conditions.push({
-        property: "file.name",
-        operator: "contains",
-        value: ""
-      });
-      await this.plugin.saveSettings();
-      this.onSave();
-      this.onOpen();
-    }));
-    const footer = contentEl.createDiv();
-    footer.style.cssText = "display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--background-modifier-border); padding-top: 10px; margin-top: 20px;";
-    const leftBtns = footer.createDiv();
-    leftBtns.style.cssText = "display: flex; gap: 8px; align-items: center;";
-    const deleteBtn = leftBtns.createEl("button", { cls: "category-disable-btn is-modal" });
-    (0, import_obsidian5.setIcon)(deleteBtn, "trash");
-    deleteBtn.setAttribute("data-tooltip", "Delete category");
-    deleteBtn.onclick = async () => {
-      const confirmed = confirm(`Are you sure you want to delete the category "${this.category.name}"?`);
-      if (confirmed) {
-        const config = this.plugin.settings.colorCategories;
-        const index = config.categories.indexOf(this.category);
-        if (index > -1) {
-          config.categories.splice(index, 1);
-          await this.plugin.saveSettings();
-          this.onSave();
-          this.close();
-        }
-      }
-    };
-    const disableBtn = leftBtns.createEl("button", { cls: "category-disable-btn is-modal" });
-    (0, import_obsidian5.setIcon)(disableBtn, "ban");
-    if (!this.category.enabled) disableBtn.addClass("is-disabled");
-    disableBtn.setAttribute("data-tooltip", this.category.enabled ? "Disable \u2014 acts like deletion but is recoverable in settings" : "Enable");
-    disableBtn.onclick = async () => {
-      if (this.category.enabled) {
-        const confirmed = confirm("Disable Category \u2014 it acts like deletion but is recoverable in settings. Proceed?");
-        if (!confirmed) return;
-      }
-      this.category.enabled = !this.category.enabled;
-      await this.plugin.saveSettings();
-      this.onSave();
-      this.close();
-    };
-    const closeBtn = footer.createEl("button", { text: "Close" });
-    closeBtn.addClass("mod-cta");
-    closeBtn.onclick = () => this.close();
-  }
-  renderCondition(container, condition, condIndex) {
-    ConditionRenderer.render(container, condition, condIndex, this.category.conditions, this.app, {
-      onSave: async () => {
-        await this.plugin.saveSettings();
-        this.onSave();
-      },
-      onRefresh: () => {
-        this.onOpen();
-      }
-    });
-  }
-  renderColorPickerInModal(container) {
-    const config = this.plugin.settings.colorCategories;
-    ColorPickerRenderer.render({
-      container,
-      currentColor: this.category.color,
-      palettes: config.colorPalettes || [],
-      onColorChange: async (newColor) => {
-        this.category.color = newColor;
-        await this.plugin.saveSettings();
-        this.onSave();
-      }
-    });
-  }
-  onClose() {
-    const { contentEl } = this;
-    contentEl.empty();
-  }
-};
-var CustomPeriodEditModal = class extends import_obsidian5.Modal {
-  constructor(app, plugin, period, group, onSave, onDelete) {
-    super(app);
-    this.plugin = plugin;
-    this.period = period;
-    this.group = group;
-    this.onSave = onSave;
-    this.onDelete = onDelete;
-  }
-  /**
-   * Get the template folder path based on settings.
-   */
-  getTemplateFolderPath() {
-    var _a, _b, _c, _d, _e, _f, _g;
-    const settings = this.plugin.settings.periodicNotes;
-    if (settings.templateFolderSource === "custom") {
-      return settings.templateCustomFolder || void 0;
-    }
-    const templatesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["templates"];
-    if ((templatesPlugin == null ? void 0 : templatesPlugin.enabled) && ((_d = (_c = templatesPlugin == null ? void 0 : templatesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder)) {
-      return templatesPlugin.instance.options.folder;
-    }
-    const templaterPlugin = (_f = (_e = this.app.plugins) == null ? void 0 : _e.plugins) == null ? void 0 : _f["templater-obsidian"];
-    if ((_g = templaterPlugin == null ? void 0 : templaterPlugin.settings) == null ? void 0 : _g.templates_folder) {
-      return templaterPlugin.settings.templates_folder;
-    }
-    return void 0;
-  }
-  /**
-   * Get months that are used by other periods in this group (not available for selection)
-   */
-  getUnavailableMonths() {
-    const unavailable = /* @__PURE__ */ new Set();
-    for (const p of this.group.periods) {
-      if (p.id !== this.period.id) {
-        p.months.forEach((m) => unavailable.add(m));
-      }
-    }
-    return unavailable;
-  }
-  /**
-   * Check if months array is consecutive (allowing year wrap like [11,12,1,2])
-   */
-  areMonthsConsecutive(months) {
-    if (months.length <= 1) return true;
-    const sorted = [...months].sort((a, b) => a - b);
-    let isConsecutiveNormal = true;
-    for (let i = 1; i < sorted.length; i++) {
-      if (sorted[i] - sorted[i - 1] !== 1) {
-        isConsecutiveNormal = false;
-        break;
-      }
-    }
-    if (isConsecutiveNormal) return true;
-    const hasDecember = sorted.includes(12);
-    const hasJanuary = sorted.includes(1);
-    if (!hasDecember || !hasJanuary) return false;
-    const highMonths = sorted.filter((m) => m >= 7);
-    const lowMonths = sorted.filter((m) => m <= 6);
-    for (let i = 1; i < highMonths.length; i++) {
-      if (highMonths[i] - highMonths[i - 1] !== 1) return false;
-    }
-    if (highMonths.length > 0 && highMonths[highMonths.length - 1] !== 12) return false;
-    for (let i = 1; i < lowMonths.length; i++) {
-      if (lowMonths[i] - lowMonths[i - 1] !== 1) return false;
-    }
-    if (lowMonths.length > 0 && lowMonths[0] !== 1) return false;
-    return true;
-  }
-  onOpen() {
-    var _a;
-    const { contentEl } = this;
-    contentEl.empty();
-    contentEl.createEl("h2", { text: "Edit Custom Period" });
-    new import_obsidian5.Setting(contentEl).setName("Name").setDesc('Display name for this period (e.g., "Semester 1", "Winter")').addText((text) => text.setPlaceholder("Period name").setValue(this.period.name).onChange(async (value) => {
-      this.period.name = value;
-      await this.plugin.saveSettings();
-      this.onSave();
-    }));
-    const monthsSection = contentEl.createDiv();
-    monthsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin: 15px 0;";
-    const monthsHeader = monthsSection.createDiv();
-    monthsHeader.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;";
-    monthsHeader.createEl("h4", { text: "Months", attr: { style: "margin: 0;" } });
-    const unavailableMonths = this.getUnavailableMonths();
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const monthsGrid = monthsSection.createDiv();
-    monthsGrid.style.cssText = "display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;";
-    monthNames.forEach((name, index) => {
-      const monthNum = index + 1;
-      const isSelected = this.period.months.includes(monthNum);
-      const isUnavailable = unavailableMonths.has(monthNum);
-      const monthBtn = monthsGrid.createEl("button");
-      monthBtn.textContent = name;
-      if (isUnavailable) {
-        monthBtn.style.cssText = `
-                    padding: 8px 12px;
-                    border: 2px solid var(--background-modifier-border);
-                    background: var(--background-modifier-border);
-                    color: var(--text-muted);
-                    border-radius: 4px;
-                    cursor: not-allowed;
-                    font-weight: 400;
-                    opacity: 0.5;
-                `;
-        monthBtn.title = "Used by another period in this group";
-      } else {
-        monthBtn.style.cssText = `
-                    padding: 8px 12px;
-                    border: 2px solid ${isSelected ? "var(--interactive-accent)" : "var(--background-modifier-border)"};
-                    background: ${isSelected ? "var(--interactive-accent)" : "var(--background-primary)"};
-                    color: ${isSelected ? "var(--text-on-accent)" : "var(--text-normal)"};
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-weight: ${isSelected ? "600" : "400"};
-                    transition: all 0.15s;
-                `;
-        monthBtn.onclick = async () => {
-          let newMonths;
-          if (isSelected) {
-            newMonths = this.period.months.filter((m) => m !== monthNum);
+        if (startSources.length > 0) {
+          if (startSources.length === 1) {
+            result.startDate = startSources[0].date;
           } else {
-            newMonths = [...this.period.months, monthNum];
+            const prioritySource = startSources.find((s) => s.type === config.startPriority);
+            result.startDate = (prioritySource == null ? void 0 : prioritySource.date) || startSources[0].date;
           }
-          if (!this.areMonthsConsecutive(newMonths)) {
+        }
+        const endSources = [];
+        if (config.endFromProperties.length > 0) {
+          for (const propName of config.endFromProperties) {
+            const cache = this.app.metadataCache.getFileCache(file);
+            const dateStr = (_b = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _b[propName];
+            if (dateStr) {
+              const date = this.parseLocalDate(dateStr);
+              if (date && !isNaN(date.getTime())) {
+                endSources.push({ type: "property", date });
+                break;
+              }
+            }
           }
-          this.period.months = newMonths.sort((a, b) => a - b);
-          await this.plugin.saveSettings();
-          this.onSave();
-          this.onOpen();
-        };
-      }
-    });
-    const validationEl = monthsSection.createDiv();
-    validationEl.style.cssText = "margin-top: 10px; font-size: 0.85em;";
-    if (this.period.months.length === 0) {
-      validationEl.style.color = "var(--text-error)";
-      validationEl.textContent = "\u26A0 Please select at least one month.";
-    } else if (!this.areMonthsConsecutive(this.period.months)) {
-      validationEl.style.color = "var(--text-error)";
-      validationEl.textContent = "\u26A0 Months must be consecutive. Remove gaps between selected months.";
-    } else {
-      validationEl.style.color = "var(--text-muted)";
-      validationEl.textContent = "Tip: Months can wrap across year boundary (e.g., Nov-Dec-Jan-Feb for Winter).";
-    }
-    new import_obsidian5.Setting(contentEl).setName("Year basis").setDesc("Which year to use when the period spans across year boundary").addDropdown((dropdown) => dropdown.addOption("start", "Use year of first month").addOption("end", "Use year of last month").addOption("majority", "Use year where most months fall").setValue(this.period.yearBasis).onChange(async (value) => {
-      this.period.yearBasis = value;
-      await this.plugin.saveSettings();
-      this.onSave();
-    }));
-    const formatSetting = new import_obsidian5.Setting(contentEl).setName("Format").addText((text) => text.setPlaceholder("YYYY-[S1]").setValue(this.period.format).onChange(async (value) => {
-      this.period.format = value;
-      await this.plugin.saveSettings();
-      this.onSave();
-      this.updateFormatPreview(previewEl);
-    }));
-    formatSetting.descEl.innerHTML = `Filename format for period notes. <a href="https://momentjs.com/docs/#/displaying/format/" style="color: var(--text-accent);">Format reference</a>`;
-    const previewEl = formatSetting.descEl.createDiv();
-    previewEl.style.cssText = "margin-top: 4px; color: var(--text-muted); font-size: 0.85em;";
-    this.updateFormatPreview(previewEl);
-    const useGroupSettingsSection = contentEl.createDiv();
-    useGroupSettingsSection.style.cssText = "background: var(--background-secondary); padding: 15px; border-radius: 5px; margin: 15px 0;";
-    new import_obsidian5.Setting(useGroupSettingsSection).setName("Use group defaults").setDesc(`Use the group's folder, template, and color settings`).addToggle((toggle) => toggle.setValue(this.period.useGroupSettings !== false).onChange(async (value) => {
-      this.period.useGroupSettings = value;
-      await this.plugin.saveSettings();
-      this.onSave();
-      this.onOpen();
-    }));
-    if (this.period.useGroupSettings !== false) {
-      const groupInfoEl = useGroupSettingsSection.createDiv();
-      groupInfoEl.style.cssText = "font-size: 0.85em; color: var(--text-muted); padding: 8px; background: var(--background-primary); border-radius: 4px; margin-top: 8px;";
-      groupInfoEl.innerHTML = `
-                <div style="margin-bottom: 4px;"><strong>Group "${this.group.name}" defaults:</strong></div>
-                <div>Folder: ${this.group.folder || "(vault root)"}</div>
-                <div>Template: ${this.group.template || "(none)"}</div>
-                <div>Color: ${this.group.color ? `<span style="display:inline-block; width:12px; height:12px; background:${this.group.color}; border-radius:2px; vertical-align:middle;"></span> ${this.group.color}` : "(none)"}</div>
-            `;
-    } else {
-      const individualSettingsLabel = useGroupSettingsSection.createDiv();
-      individualSettingsLabel.style.cssText = "font-size: 0.85em; color: var(--text-muted); margin-top: 8px; margin-bottom: 4px;";
-      individualSettingsLabel.textContent = "Custom settings for this period:";
-      const periodFolderSetting = new import_obsidian5.Setting(useGroupSettingsSection).setName("Folder").addText((text) => {
-        text.setPlaceholder("Leave empty for vault root").setValue(this.period.folder).onChange(async (value) => {
-          const cleaned = value.replace(/^\/+|\/+$/g, "");
-          this.period.folder = cleaned;
-          await this.plugin.saveSettings();
-          this.onSave();
-        });
-        new FolderSuggest(this.app, text.inputEl);
-      });
-      periodFolderSetting.controlEl.style.cssText = "display: flex; flex-direction: column; align-items: flex-end; gap: 4px;";
-      const periodSubfolderLabel = periodFolderSetting.controlEl.createEl("label");
-      periodSubfolderLabel.style.cssText = "display: flex; align-items: center; gap: 5px; cursor: pointer; font-size: 0.85em; color: var(--text-muted);";
-      const periodSubfolderCheckbox = periodSubfolderLabel.createEl("input", { type: "checkbox" });
-      periodSubfolderCheckbox.checked = (_a = this.period.includeSubfolders) != null ? _a : true;
-      periodSubfolderCheckbox.style.cssText = "margin: 0; cursor: pointer;";
-      periodSubfolderLabel.appendText("Include sub-folders");
-      periodSubfolderCheckbox.addEventListener("change", async () => {
-        this.period.includeSubfolders = periodSubfolderCheckbox.checked;
-        await this.plugin.saveSettings();
-        this.onSave();
-      });
-      new import_obsidian5.Setting(useGroupSettingsSection).setName("Template").setDesc("Template file to use when creating notes for this period").addText((text) => {
-        text.setPlaceholder("templates/semester").setValue(this.period.template).onChange(async (value) => {
-          this.period.template = value;
-          await this.plugin.saveSettings();
-          this.onSave();
-        });
-        new FileSuggest(this.app, text.inputEl, this.getTemplateFolderPath());
-      });
-      const colorSetting = new import_obsidian5.Setting(useGroupSettingsSection).setName("Color (optional)").setDesc("Visual indicator color for this period in the calendar");
-      const colorContainer = colorSetting.controlEl.createDiv();
-      colorContainer.style.cssText = "display: flex; align-items: center; gap: 8px; flex-wrap: wrap;";
-      const colorEnabled = colorContainer.createEl("input", { type: "checkbox" });
-      colorEnabled.checked = !!this.period.color;
-      const colorPickerWrapper = colorContainer.createDiv();
-      colorPickerWrapper.style.cssText = this.period.color ? "display: flex; align-items: center;" : "display: none;";
-      if (this.period.color) {
-        const config = this.plugin.settings.colorCategories;
-        ColorPickerRenderer.render({
-          container: colorPickerWrapper,
-          currentColor: this.period.color,
-          palettes: config.colorPalettes || [],
-          onColorChange: async (newColor) => {
-            this.period.color = newColor;
-            await this.plugin.saveSettings();
-            this.onSave();
+        }
+        if (config.endFromFilename) {
+          const datePattern = /\d{4}-\d{2}-\d{2}/g;
+          const matches = file.basename.match(datePattern);
+          if (matches && matches.length >= 2) {
+            const date = this.parseLocalDate(matches[1]);
+            if (date && !isNaN(date.getTime())) {
+              endSources.push({ type: "filename", date });
+            }
           }
+        }
+        if (endSources.length > 0) {
+          if (endSources.length === 1) {
+            result.endDate = endSources[0].date;
+          } else {
+            const prioritySource = endSources.find((s) => s.type === config.endPriority);
+            result.endDate = (prioritySource == null ? void 0 : prioritySource.date) || endSources[0].date;
+          }
+        }
+        return result;
+      }
+      processMultiDayEntries(notesMap) {
+        const multiDayMap = /* @__PURE__ */ new Map();
+        notesMap.forEach((notes) => {
+          notes.forEach((noteInfo) => {
+            if (noteInfo.isMultiDay && noteInfo.endDate && !isNaN(noteInfo.endDate.getTime())) {
+              let currentDate = new Date(noteInfo.startDate);
+              const endDate = new Date(noteInfo.endDate);
+              let monthCount = 0;
+              const maxMonths = 24;
+              while (currentDate <= endDate && monthCount < maxMonths) {
+                const currentMonth = currentDate.getMonth();
+                const currentYear = currentDate.getFullYear();
+                const entryId = `${noteInfo.file.path}-${currentYear}-${currentMonth}`;
+                if (!multiDayMap.has(entryId)) {
+                  const segmentStartDay = currentDate.getDate();
+                  const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                  let segmentEndDay;
+                  if (endDate.getFullYear() === currentYear && endDate.getMonth() === currentMonth) {
+                    segmentEndDay = endDate.getDate();
+                  } else {
+                    segmentEndDay = lastDayOfMonth;
+                  }
+                  multiDayMap.set(entryId, {
+                    file: noteInfo.file,
+                    startDate: new Date(currentYear, currentMonth, segmentStartDay),
+                    endDate: new Date(currentYear, currentMonth, segmentEndDay),
+                    month: currentMonth,
+                    year: currentYear
+                  });
+                }
+                currentDate = new Date(currentYear, currentMonth + 1, 1);
+                monthCount++;
+              }
+            }
+          });
         });
+        return multiDayMap;
       }
-      const colorLabel = colorContainer.createSpan({ text: this.period.color ? "" : "Enable color" });
-      colorLabel.style.cssText = "font-size: 0.9em; color: var(--text-muted);";
-      colorEnabled.onchange = async () => {
-        if (colorEnabled.checked) {
-          this.period.color = "#4a90d9";
-        } else {
-          this.period.color = void 0;
-        }
-        await this.plugin.saveSettings();
-        this.onSave();
-        this.onOpen();
-      };
-    }
-    const footer = contentEl.createDiv();
-    footer.style.cssText = "display: flex; justify-content: space-between; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--background-modifier-border);";
-    const deleteBtn = footer.createEl("button", { text: "Delete Period" });
-    deleteBtn.style.cssText = "padding: 8px 16px; cursor: pointer; color: var(--text-error); background: transparent; border: 1px solid var(--text-error); border-radius: 4px;";
-    deleteBtn.onclick = async () => {
-      const confirmed = confirm(`Are you sure you want to delete "${this.period.name}"?`);
-      if (confirmed) {
-        await this.onDelete();
-        this.close();
+      dateToKey(date) {
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
       }
-    };
-    const closeBtn = footer.createEl("button", { text: "Close", cls: "mod-cta" });
-    closeBtn.style.cssText = "padding: 8px 16px; cursor: pointer;";
-    closeBtn.onclick = () => this.close();
-  }
-  updateFormatPreview(previewEl) {
-    const moment = window.moment;
-    try {
-      const preview = moment().format(this.period.format || "YYYY-[P1]");
-      previewEl.textContent = `Preview: ${preview}`;
-    } catch (e) {
-      previewEl.textContent = "Preview: (invalid format)";
-    }
-  }
-  onClose() {
-    const { contentEl } = this;
-    contentEl.empty();
-  }
-};
-
-// src/CalendarView.ts
-var LinearCalendarView = class extends import_obsidian7.ItemView {
-  constructor(leaf, plugin) {
-    super(leaf);
-    this.resizeObserver = null;
-    this.tooltip = null;
-    this.dragStartDate = null;
-    this.dragEndDate = null;
-    this.isDragging = false;
-    this.mouseUpHandler = null;
-    this.plugin = plugin;
-  }
-  getViewType() {
-    return VIEW_TYPE_CALENDAR;
-  }
-  getDisplayText() {
-    return "Linear Calendar";
-  }
-  getIcon() {
-    return "calendar-range";
-  }
-  async onOpen() {
-    const container = this.containerEl.children[1];
-    container.empty();
-    container.addClass("linear-calendar-container");
-    await this.renderCalendar(container);
-    this.resizeObserver = new ResizeObserver(() => {
-      this.updateMultiDayBarWidths(container);
-    });
-    this.resizeObserver.observe(container);
-    this.registerEvent(
-      this.app.workspace.on("active-leaf-change", (leaf) => {
-        if (leaf && leaf.view === this) {
-          this.reload();
-        }
-      })
-    );
-  }
-  async reload() {
-    const container = this.containerEl.children[1];
-    if (container) {
-      container.empty();
-      await this.renderCalendar(container);
-    }
-  }
-  updateMultiDayBarWidths(container) {
-    const bars = container.querySelectorAll(".multi-day-bar[data-span]");
-    bars.forEach((bar) => {
-      const span = parseInt(bar.dataset.span || "0");
-      const parentCell = bar.parentElement;
-      if (parentCell && parentCell.parentElement) {
-        const row = parentCell.parentElement;
-        const cells = Array.from(row.querySelectorAll(".day-cell"));
-        const startIndex = cells.indexOf(parentCell);
-        if (startIndex >= 0 && startIndex + span - 1 < cells.length) {
-          const lastCell = cells[startIndex + span - 1];
-          const firstCellRect = parentCell.getBoundingClientRect();
-          const lastCellRect = lastCell.getBoundingClientRect();
-          const totalWidth = lastCellRect.right - firstCellRect.left - 6;
-          bar.style.width = `${totalWidth}px`;
-        }
+      /**
+       * Converts a date format string to a regex pattern.
+       * Supports common Moment.js tokens: YYYY, MM, DD, ww, gggg, Q, etc.
+       * Escapes special regex characters in the format string.
+       */
+      formatToRegexPattern(format) {
+        let pattern = format.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        pattern = pattern.replace(/YYYY/g, "\\d{4}").replace(/YY/g, "\\d{2}").replace(/MMMM/g, "\\w+").replace(/MMM/g, "\\w+").replace(/MM/g, "\\d{2}").replace(/M/g, "\\d{1,2}").replace(/DD/g, "\\d{2}").replace(/D/g, "\\d{1,2}").replace(/ww/g, "\\d{2}").replace(/w/g, "\\d{1,2}").replace(/gggg/g, "\\d{4}").replace(/Q/g, "\\d");
+        return pattern;
       }
-    });
-  }
-  async renderCalendar(container) {
-    const year = this.plugin.settings.currentYear;
-    const header = container.createDiv({ cls: "calendar-header" });
-    header.createDiv({ cls: "header-spacer" });
-    const centerSection = header.createDiv({ cls: "header-center" });
-    const prevBtn = centerSection.createEl("button", { text: "\u2190", cls: "year-nav-btn" });
-    const yearlyEnabled = this.plugin.settings.periodicNotes.yearly.enabled;
-    if (yearlyEnabled) {
-      const yearLink = centerSection.createEl("a", { text: `${year}`, cls: "year-title year-title-link" });
-      const yearlyColor = this.plugin.settings.periodicNotes.yearly.color;
-      if (yearlyColor) {
-        yearLink.style.color = yearlyColor;
+      isDailyNote(file) {
+        const format = this.plugin.settings.dailyNoteFormat;
+        const basename = file.basename;
+        const pattern = this.formatToRegexPattern(format);
+        const regex = new RegExp(`^${pattern}$`);
+        return regex.test(basename);
       }
-      yearLink.onclick = async (e) => {
-        e.preventDefault();
-        await this.openOrCreateYearlyNote(year);
-      };
-    } else {
-      centerSection.createEl("span", { text: `${year}`, cls: "year-title" });
-    }
-    const nextBtn = centerSection.createEl("button", { text: "\u2192", cls: "year-nav-btn" });
-    const rightSection = header.createDiv({ cls: "header-right" });
-    if (this.plugin.settings.quickNoteCreation.enabled && this.plugin.settings.quickNoteCreation.showAddNoteButton) {
-      const addNoteBtn = rightSection.createEl("button", { cls: "add-note-btn" });
-      addNoteBtn.setAttribute("aria-label", "Add note");
-      const icon = addNoteBtn.createSpan({ cls: "add-note-icon" });
-      (0, import_obsidian7.setIcon)(icon, "calendar-plus");
-      addNoteBtn.createSpan({ text: "Add Note", cls: "add-note-text" });
-      addNoteBtn.onclick = async () => {
-        await this.openQuickNoteModal(null, null);
-      };
-    }
-    const settingsBtn = rightSection.createEl("button", { cls: "open-settings-btn" });
-    settingsBtn.setAttribute("aria-label", "Open LinearCalendar settings");
-    const settingsIcon = settingsBtn.createSpan();
-    (0, import_obsidian7.setIcon)(settingsIcon, "settings");
-    settingsBtn.onclick = () => {
-      this.app.setting.open();
-      this.app.setting.openTabById("linear-calendar");
-    };
-    prevBtn.onclick = async () => {
-      this.plugin.settings.currentYear--;
-      await this.plugin.saveSettings();
-      container.empty();
-      await this.renderCalendar(container);
-    };
-    nextBtn.onclick = async () => {
-      this.plugin.settings.currentYear++;
-      await this.plugin.saveSettings();
-      container.empty();
-      await this.renderCalendar(container);
-    };
-    const notesWithDates = await this.getNotesWithDates();
-    const multiDayEntries = this.processMultiDayEntries(notesWithDates);
-    const bannerCtx = { isBratUser: this.plugin.isBratUser };
-    for (const banner of BANNERS) {
-      if (banner.shouldShow(this.plugin.settings, bannerCtx)) {
-        this.renderBanner(container, banner);
-      }
-    }
-    if (this.plugin.settings.colorCategories.enabled && this.plugin.settings.colorCategories.showCategoryIndex) {
-      this.renderCategoryIndexRow(container);
-    }
-    const calendarWrapper = container.createDiv({ cls: "calendar-wrapper" });
-    const exp = this.plugin.settings.experimental;
-    if (exp.multilineNotes) {
-      calendarWrapper.addClass("exp-multiline");
-    }
-    if (exp.verticalText) {
-      calendarWrapper.addClass("exp-vertical");
-    }
-    if (exp.compactFontSize) {
-      calendarWrapper.addClass("exp-compact");
-    }
-    if (exp.condensedLetters) {
-      calendarWrapper.addClass("exp-condensed");
-    }
-    if (this.plugin.settings.calendarWidth === "scrollable") {
-      calendarWrapper.addClass("calendar-scrollable");
-      calendarWrapper.style.overflowX = "auto";
-    } else {
-      calendarWrapper.removeClass("calendar-scrollable");
-      calendarWrapper.style.overflowX = "";
-    }
-    const calendarTable = calendarWrapper.createEl("table", { cls: "linear-calendar" });
-    if (this.plugin.settings.showCellBorders) {
-      calendarTable.addClass("show-cell-borders");
-    }
-    if (this.plugin.settings.showWeekSpanBorders) {
-      calendarTable.addClass("show-week-span-borders");
-    }
-    if (this.plugin.settings.calendarWidth === "scrollable") {
-      calendarTable.style.minWidth = "max-content";
-      calendarTable.style.setProperty("--cell-min-width", `${this.plugin.settings.cellMinWidth}px`);
-    } else {
-      calendarTable.style.minWidth = "";
-      calendarTable.style.removeProperty("--cell-min-width");
-    }
-    const handleMouseUp = async (e) => {
-      if (this.isDragging && this.dragStartDate) {
-        e.preventDefault();
-        const endDate = this.dragEndDate || this.dragStartDate;
-        const [start, end] = this.dragStartDate <= endDate ? [this.dragStartDate, endDate] : [endDate, this.dragStartDate];
-        this.clearDragSelection();
-        if (this.plugin.settings.quickNoteCreation.enabled) {
-          await this.openQuickNoteModal(start, start.getTime() === end.getTime() ? null : end);
-        }
-      }
-    };
-    if (this.mouseUpHandler) {
-      document.removeEventListener("mouseup", this.mouseUpHandler);
-    }
-    this.mouseUpHandler = handleMouseUp;
-    document.addEventListener("mouseup", handleMouseUp);
-    const maxDayCells = 37;
-    const thead = calendarTable.createEl("thead");
-    const headerRow = thead.createEl("tr");
-    const enabledGroups = this.plugin.settings.periodicNotes.customPeriodGroups.filter((g) => g.enabled);
-    for (const group of enabledGroups) {
-      const th = headerRow.createEl("th", { text: group.name, cls: "custom-period-header-cell" });
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.font = "0.8em var(--font-interface)";
-        const textWidth = ctx.measureText(group.name).width;
-        th.style.width = `${Math.ceil(textWidth) + 16}px`;
-      }
-    }
-    const showQuarterColumn = this.plugin.settings.periodicNotes.quarterly.enabled;
-    if (showQuarterColumn) {
-      headerRow.createEl("th", { text: "Qtr", cls: "quarter-header-cell" });
-    }
-    headerRow.createEl("th", { cls: "month-label-cell" });
-    if (this.plugin.settings.columnAlignment === "date") {
-      for (let i = 0; i < 31; i++) {
-        headerRow.createEl("th", {
-          text: String(i + 1).padStart(2, "0"),
-          cls: "weekday-header"
-        });
-      }
-    } else {
-      const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-      const startDay = this.plugin.settings.weekStartDay;
-      for (let i = 0; i < maxDayCells; i++) {
-        const dayIndex = (i + startDay) % 7;
-        headerRow.createEl("th", {
-          text: weekdays[dayIndex],
-          cls: "weekday-header"
-        });
-      }
-    }
-    headerRow.createEl("th", { cls: "month-label-cell-right" });
-    const tbody = calendarTable.createEl("tbody");
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    ];
-    const cellsPerRow = this.plugin.settings.columnAlignment === "date" ? 31 : maxDayCells;
-    for (let month = 0; month < 12; month++) {
-      await this.renderMonthRow(tbody, year, month, monthNames[month], notesWithDates, multiDayEntries, cellsPerRow, showQuarterColumn, enabledGroups);
-    }
-    const footerRow = calendarTable.createEl("tfoot").createEl("tr");
-    for (const group of enabledGroups) {
-      footerRow.createEl("td", { text: group.name, cls: "custom-period-header-cell" });
-    }
-    if (showQuarterColumn) {
-      footerRow.createEl("td", { text: "Qtr", cls: "quarter-header-cell" });
-    }
-    footerRow.createEl("td", { cls: "month-label-cell" });
-    if (this.plugin.settings.columnAlignment === "date") {
-      for (let i = 0; i < 31; i++) {
-        footerRow.createEl("td", {
-          text: String(i + 1).padStart(2, "0"),
-          cls: "weekday-header"
-        });
-      }
-    } else {
-      const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-      const startDay = this.plugin.settings.weekStartDay;
-      for (let i = 0; i < maxDayCells; i++) {
-        const dayIndex = (i + startDay) % 7;
-        footerRow.createEl("td", {
-          text: weekdays[dayIndex],
-          cls: "weekday-header"
-        });
-      }
-    }
-    footerRow.createEl("td", { cls: "month-label-cell-right" });
-  }
-  async getNotesWithDates() {
-    var _a;
-    const notesMap = /* @__PURE__ */ new Map();
-    const files = this.app.vault.getMarkdownFiles();
-    for (const file of files) {
-      if (!this.filePassesFilter(file)) {
-        continue;
-      }
-      const dateInfo = await this.extractDateFromFile(file);
-      if (dateInfo.startDate && !isNaN(dateInfo.startDate.getTime())) {
-        const key = this.dateToKey(dateInfo.startDate);
-        if (!notesMap.has(key)) {
-          notesMap.set(key, []);
-        }
-        const noteInfo = {
-          file,
-          startDate: dateInfo.startDate,
-          endDate: dateInfo.endDate,
-          isMultiDay: !!dateInfo.endDate
-        };
-        (_a = notesMap.get(key)) == null ? void 0 : _a.push(noteInfo);
-      }
-    }
-    return notesMap;
-  }
-  filePassesFilter(file) {
-    const { filterMode, filterConditions } = this.plugin.settings;
-    if (filterMode === "none" || filterConditions.length === 0) {
-      return true;
-    }
-    const matchesConditions = filterConditions.every(
-      (condition) => this.evaluateCondition(file, condition)
-    );
-    return filterMode === "include" ? matchesConditions : !matchesConditions;
-  }
-  evaluateCondition(file, condition) {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
-    const { property, operator, value, includeSubfolders } = condition;
-    let actualValue;
-    if (property === "file.name") {
-      actualValue = file.name;
-    } else if (property === "file.basename") {
-      actualValue = file.basename;
-    } else if (property === "file.folder") {
-      actualValue = ((_a = file.parent) == null ? void 0 : _a.path) || "";
-    } else if (property === "file.path") {
-      actualValue = file.path;
-    } else if (property === "file.ext") {
-      actualValue = file.extension;
-    } else if (property === "file.tags") {
-      const cache = this.app.metadataCache.getFileCache(file);
-      const tags = ((_b = cache == null ? void 0 : cache.tags) == null ? void 0 : _b.map((t) => t.tag.substring(1))) || [];
-      const frontmatterTags = ((_c = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _c.tags) || [];
-      actualValue = [...tags, ...frontmatterTags];
-    } else if (property.startsWith("property:")) {
-      const propertyName = property.substring(9);
-      const cache = this.app.metadataCache.getFileCache(file);
-      actualValue = (_d = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _d[propertyName];
-    } else {
-      const cache = this.app.metadataCache.getFileCache(file);
-      actualValue = (_e = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _e[property];
-    }
-    switch (operator) {
-      case "is":
-        if (property === "file.folder" && includeSubfolders) {
-          const folderPath = value ? value + "/" : "";
-          return file.path.startsWith(folderPath) || ((_f = file.parent) == null ? void 0 : _f.path) === value;
-        }
-        return actualValue === value;
-      case "isNot":
-        return actualValue !== value;
-      case "contains":
-        if (typeof actualValue === "string") {
-          return actualValue.toLowerCase().includes(value.toLowerCase());
-        }
-        if (Array.isArray(actualValue)) {
-          return actualValue.some(
-            (item) => String(item).toLowerCase().includes(value.toLowerCase())
-          );
-        }
-        return false;
-      case "doesNotContain":
-        if (typeof actualValue === "string") {
-          return !actualValue.toLowerCase().includes(value.toLowerCase());
-        }
-        if (Array.isArray(actualValue)) {
-          return !actualValue.some(
-            (item) => String(item).toLowerCase().includes(value.toLowerCase())
-          );
-        }
-        return true;
-      case "startsWith":
-        if (typeof actualValue === "string") {
-          return actualValue.toLowerCase().startsWith(value.toLowerCase());
-        }
-        return false;
-      case "endsWith":
-        if (typeof actualValue === "string") {
-          return actualValue.toLowerCase().endsWith(value.toLowerCase());
-        }
-        return false;
-      case "matches":
-        try {
-          const regex = new RegExp(value);
-          return regex.test(actualValue);
-        } catch (e) {
-          return false;
-        }
-      case "exists":
-        return actualValue !== void 0 && actualValue !== null;
-      case "doesNotExist":
-        return actualValue === void 0 || actualValue === null;
-      case "hasTag":
-        const cache = this.app.metadataCache.getFileCache(file);
-        const tags = ((_g = cache == null ? void 0 : cache.tags) == null ? void 0 : _g.map((t) => t.tag.substring(1))) || [];
-        const frontmatterTags = ((_h = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _h.tags) || [];
-        const allTags = [...tags, ...frontmatterTags];
-        return allTags.some((tag) => tag.toLowerCase() === value.toLowerCase());
-      case "matchesDatePattern":
-        const dateFormat = condition.value || "YYYY-MM-DD";
-        const pattern = this.formatToRegexPattern(dateFormat);
-        const datePattern = new RegExp(`^(${pattern})`);
+      hasDateAndText(file) {
+        const datePattern = /^\d{4}-\d{2}-\d{2}/;
         const match = file.basename.match(datePattern);
         if (!match) return false;
-        if (condition.requireAdditionalText) {
-          return file.basename.length > match[0].length;
+        return file.basename.length > match[0].length;
+      }
+      getDisplayName(file) {
+        if (!this.plugin.settings.hideDateInTitle) {
+          return file.basename;
+        }
+        const datePattern = /\d{4}-\d{2}-\d{2}/g;
+        const matches = file.basename.match(datePattern);
+        if (matches && matches.length > 1) {
+          if (!this.plugin.settings.hideSecondDateInTitle) {
+            const startDatePattern2 = /^\d{4}-\d{2}-\d{2}\s*/;
+            return file.basename.replace(startDatePattern2, "").trim() || file.basename;
+          }
+          const multiDatePattern = /^\d{4}-\d{2}-\d{2}\s*.*?\d{4}-\d{2}-\d{2}\s*/;
+          return file.basename.replace(multiDatePattern, "").trim() || file.basename;
+        }
+        const startDatePattern = /^\d{4}-\d{2}-\d{2}\s*/;
+        return file.basename.replace(startDatePattern, "").trim() || file.basename;
+      }
+      shouldShowNote(file) {
+        if (this.isCategoryHidden(file)) return false;
+        if (this.isDailyNote(file)) {
+          return this.plugin.settings.showDailyNotesInCells;
+        }
+        if (this.hasDateAndText(file)) {
+          return this.plugin.settings.showNotesWithDateAndText;
         }
         return true;
-      default:
-        return false;
-    }
-  }
-  /**
-   * Get the color category that matches a file.
-   * Returns the first enabled category where all conditions match.
-   * Returns null if no category matches.
-   */
-  getCategoryForFile(file) {
-    const config = this.plugin.settings.colorCategories;
-    for (const category of config.categories) {
-      if (!category.enabled) continue;
-      if (category.conditions.length === 0) continue;
-      const matchMode = category.matchMode || "all";
-      const matches = matchMode === "all" ? category.conditions.every((c) => this.evaluateCondition(file, c)) : category.conditions.some((c) => this.evaluateCondition(file, c));
-      if (matches) return category;
-    }
-    return null;
-  }
-  isCategoryHidden(file) {
-    const category = this.getCategoryForFile(file);
-    return (category == null ? void 0 : category.hidden) === true;
-  }
-  /**
-   * Get the color to use for a file.
-   * Uses category color if file matches a category, otherwise uses default color.
-   */
-  getColorForFile(file) {
-    if (!this.plugin.settings.colorCategories.enabled) {
-      return "var(--interactive-accent)";
-    }
-    const category = this.getCategoryForFile(file);
-    if (category) return category.color;
-    const defaultColor = this.plugin.settings.colorCategories.defaultCategoryColor;
-    return defaultColor || "var(--interactive-accent)";
-  }
-  /**
-   * Get the icon to display for a file.
-   * Returns null if global setting is off, or if file doesn't match a category with an icon.
-   */
-  getIconForFile(file) {
-    if (!this.plugin.settings.colorCategories.enabled) {
-      return null;
-    }
-    if (!this.plugin.settings.colorCategories.showIconsInCalendar) {
-      return null;
-    }
-    const category = this.getCategoryForFile(file);
-    if (!category || !category.iconType) return null;
-    return { type: category.iconType, value: category.iconValue };
-  }
-  /**
-   * Parse a date string (YYYY-MM-DD) as a local date, not UTC.
-   * This prevents timezone issues where dates shift to the previous day.
-   */
-  parseLocalDate(dateStr) {
-    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    if (!match) return null;
-    const year = parseInt(match[1], 10);
-    const month = parseInt(match[2], 10) - 1;
-    const day = parseInt(match[3], 10);
-    const date = new Date(year, month, day);
-    return isNaN(date.getTime()) ? null : date;
-  }
-  async extractDateFromFile(file) {
-    var _a, _b;
-    const config = this.plugin.settings.dateExtraction;
-    const result = {
-      startDate: null,
-      endDate: null
-    };
-    const startSources = [];
-    if (config.startFromProperties.length > 0) {
-      for (const propName of config.startFromProperties) {
-        const cache = this.app.metadataCache.getFileCache(file);
-        const dateStr = (_a = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _a[propName];
-        if (dateStr) {
-          const date = this.parseLocalDate(dateStr);
-          if (date && !isNaN(date.getTime())) {
-            startSources.push({ type: "property", date });
-            break;
+      }
+      getDailyNoteFolder() {
+        var _a, _b, _c, _d;
+        if (this.plugin.settings.dailyNoteFolderMode === "obsidian") {
+          const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
+          if (dailyNotesPlugin && dailyNotesPlugin.enabled) {
+            let folder = ((_d = (_c = dailyNotesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder) || "";
+            folder = folder.replace(/^\/+|\/+$/g, "");
+            return folder ? folder + "/" : "";
+          }
+          return "";
+        } else {
+          const folder = this.plugin.settings.dailyNoteCustomFolder;
+          return folder ? folder + "/" : "";
+        }
+      }
+      async findDailyNoteInFolder(filename, folderPath) {
+        const files = this.app.vault.getMarkdownFiles();
+        for (const file of files) {
+          if (file.path.startsWith(folderPath) && file.name === filename) {
+            return file;
           }
         }
+        return null;
       }
-    }
-    if (config.startFromFilename) {
-      const datePattern = /^(\d{4}-\d{2}-\d{2})/;
-      const match = file.basename.match(datePattern);
-      if (match) {
-        const date = this.parseLocalDate(match[1]);
-        if (date && !isNaN(date.getTime())) {
-          startSources.push({ type: "filename", date });
+      findPeriodicNoteInFolder(filename, folderPath, includeSubfolders) {
+        if (!includeSubfolders) {
+          return this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
         }
-      }
-    }
-    if (startSources.length > 0) {
-      if (startSources.length === 1) {
-        result.startDate = startSources[0].date;
-      } else {
-        const prioritySource = startSources.find((s) => s.type === config.startPriority);
-        result.startDate = (prioritySource == null ? void 0 : prioritySource.date) || startSources[0].date;
-      }
-    }
-    const endSources = [];
-    if (config.endFromProperties.length > 0) {
-      for (const propName of config.endFromProperties) {
-        const cache = this.app.metadataCache.getFileCache(file);
-        const dateStr = (_b = cache == null ? void 0 : cache.frontmatter) == null ? void 0 : _b[propName];
-        if (dateStr) {
-          const date = this.parseLocalDate(dateStr);
-          if (date && !isNaN(date.getTime())) {
-            endSources.push({ type: "property", date });
-            break;
+        const files = this.app.vault.getMarkdownFiles();
+        for (const file of files) {
+          if (file.name === `${filename}.md` && (folderPath === "" || file.path.startsWith(folderPath))) {
+            return file;
           }
         }
+        return null;
       }
-    }
-    if (config.endFromFilename) {
-      const datePattern = /\d{4}-\d{2}-\d{2}/g;
-      const matches = file.basename.match(datePattern);
-      if (matches && matches.length >= 2) {
-        const date = this.parseLocalDate(matches[1]);
-        if (date && !isNaN(date.getTime())) {
-          endSources.push({ type: "filename", date });
+      /**
+       * Get ISO week number (1-53) for a date.
+       * ISO week starts on Monday, week 1 is the week with the first Thursday.
+       */
+      getISOWeek(date) {
+        const tempDate = new Date(date.getTime());
+        tempDate.setHours(0, 0, 0, 0);
+        tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+        const yearStart = new Date(tempDate.getFullYear(), 0, 1);
+        const weekNo = Math.ceil(((tempDate.getTime() - yearStart.getTime()) / 864e5 + 1) / 7);
+        return weekNo;
+      }
+      /**
+       * Get the ISO week year (may differ from calendar year for dates in week 1 or 53).
+       */
+      getISOWeekYear(date) {
+        const tempDate = new Date(date.getTime());
+        tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
+        return tempDate.getFullYear();
+      }
+      /**
+       * Get quarter (1-4) for a date.
+       */
+      getQuarter(date) {
+        return Math.floor(date.getMonth() / 3) + 1;
+      }
+      /**
+       * Get month names.
+       */
+      getMonthName(date, short = false) {
+        const months = short ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        return months[date.getMonth()];
+      }
+      /**
+       * Format a date using Moment.js-style format tokens.
+       * Supports: YYYY, YY, MMMM, MMM, MM, M, DD, D, ww, w, gggg, Q
+       */
+      formatDate(date, format) {
+        const year = date.getFullYear();
+        const month = date.getMonth() + 1;
+        const day = date.getDate();
+        const week = this.getISOWeek(date);
+        const weekYear = this.getISOWeekYear(date);
+        const quarter = this.getQuarter(date);
+        return format.replace(/YYYY/g, String(year)).replace(/YY/g, String(year).slice(-2)).replace(/MMMM/g, this.getMonthName(date, false)).replace(/MMM/g, this.getMonthName(date, true)).replace(/MM/g, String(month).padStart(2, "0")).replace(/M/g, String(month)).replace(/DD/g, String(day).padStart(2, "0")).replace(/D/g, String(day)).replace(/ww/g, String(week).padStart(2, "0")).replace(/w/g, String(week)).replace(/gggg/g, String(weekYear)).replace(/Q/g, String(quarter));
+      }
+      formatDateForDailyNote(date) {
+        const format = this.plugin.settings.dailyNoteFormat;
+        return this.formatDate(date, format);
+      }
+      async openOrCreateDailyNote(date) {
+        const filename = this.formatDateForDailyNote(date);
+        const folderPath = this.getDailyNoteFolder();
+        const existingFile = await this.findDailyNoteInFolder(`${filename}.md`, folderPath);
+        if (existingFile) {
+          await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+          const fullPath = `${folderPath}${filename}.md`;
+          const templateContent = await this.getDailyNoteTemplateContent(date, filename);
+          const newFile = await this.app.vault.create(fullPath, templateContent);
+          await this.app.workspace.getLeaf(false).openFile(newFile);
         }
       }
-    }
-    if (endSources.length > 0) {
-      if (endSources.length === 1) {
-        result.endDate = endSources[0].date;
-      } else {
-        const prioritySource = endSources.find((s) => s.type === config.endPriority);
-        result.endDate = (prioritySource == null ? void 0 : prioritySource.date) || endSources[0].date;
-      }
-    }
-    return result;
-  }
-  processMultiDayEntries(notesMap) {
-    const multiDayMap = /* @__PURE__ */ new Map();
-    notesMap.forEach((notes) => {
-      notes.forEach((noteInfo) => {
-        if (noteInfo.isMultiDay && noteInfo.endDate && !isNaN(noteInfo.endDate.getTime())) {
-          let currentDate = new Date(noteInfo.startDate);
-          const endDate = new Date(noteInfo.endDate);
-          let monthCount = 0;
-          const maxMonths = 24;
-          while (currentDate <= endDate && monthCount < maxMonths) {
-            const currentMonth = currentDate.getMonth();
-            const currentYear = currentDate.getFullYear();
-            const entryId = `${noteInfo.file.path}-${currentYear}-${currentMonth}`;
-            if (!multiDayMap.has(entryId)) {
-              const segmentStartDay = currentDate.getDate();
-              const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-              let segmentEndDay;
-              if (endDate.getFullYear() === currentYear && endDate.getMonth() === currentMonth) {
-                segmentEndDay = endDate.getDate();
-              } else {
-                segmentEndDay = lastDayOfMonth;
-              }
-              multiDayMap.set(entryId, {
-                file: noteInfo.file,
-                startDate: new Date(currentYear, currentMonth, segmentStartDay),
-                endDate: new Date(currentYear, currentMonth, segmentEndDay),
-                month: currentMonth,
-                year: currentYear
-              });
+      async openOrCreateWeeklyNote(date) {
+        var _a, _b, _c, _d;
+        const settings = this.plugin.settings.periodicNotes;
+        const moment = window.moment;
+        const targetMoment = moment(date);
+        let folder = settings.weekly.folder;
+        let format = settings.weekly.format || "gggg-[W]ww";
+        let template = settings.weekly.template;
+        let includeSubfolders = settings.weekly.includeSubfolders;
+        if (settings.usePeriodicNotesPlugin) {
+          const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+          if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.weekly) == null ? void 0 : _d.enabled) {
+            folder = periodicNotesPlugin.settings.weekly.folder || folder;
+            format = periodicNotesPlugin.settings.weekly.format || format;
+            template = periodicNotesPlugin.settings.weekly.template || template;
+            includeSubfolders = true;
+          }
+        }
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : "";
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
+        if (existingFile instanceof import_obsidian7.TFile) {
+          await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+          if (folder) {
+            const folderExists = this.app.vault.getAbstractFileByPath(folder);
+            if (!folderExists) {
+              await this.app.vault.createFolder(folder);
             }
-            currentDate = new Date(currentYear, currentMonth + 1, 1);
-            monthCount++;
+          }
+          let content = "";
+          if (template) {
+            const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+            if (templateFile instanceof import_obsidian7.TFile) {
+              content = await this.app.vault.read(templateFile);
+              content = this.processWeeklyTemplateVariables(content, date, filename);
+            }
+          }
+          const fullPath = `${folderPath}${filename}.md`;
+          const newFile = await this.app.vault.create(fullPath, content);
+          await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+      }
+      processWeeklyTemplateVariables(content, date, filename) {
+        const moment = window.moment;
+        const targetMoment = moment(date);
+        const format = this.plugin.settings.periodicNotes.weekly.format || "gggg-[W]ww";
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.startOf("week").format(customFormat || format);
+        });
+        content = content.replace(/\{\{title\}\}/g, filename);
+        content = content.replace(/\{\{week\}\}/g, String(targetMoment.week()));
+        content = content.replace(/\{\{year\}\}/g, String(targetMoment.weekYear()));
+        const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+        days.forEach((dayName, dayIndex) => {
+          const regex = new RegExp(`\\{\\{${dayName}(?::([^}]+))?\\}\\}`, "g");
+          content = content.replace(regex, (_, customFormat) => {
+            return targetMoment.clone().startOf("week").add(dayIndex, "days").format(customFormat || "YYYY-MM-DD");
+          });
+        });
+        return content;
+      }
+      async openOrCreateQuarterlyNote(date) {
+        var _a, _b, _c, _d;
+        const settings = this.plugin.settings.periodicNotes;
+        const moment = window.moment;
+        const targetMoment = moment(date);
+        let folder = settings.quarterly.folder;
+        let format = settings.quarterly.format || "YYYY-[Q]Q";
+        let template = settings.quarterly.template;
+        let includeSubfolders = settings.quarterly.includeSubfolders;
+        if (settings.usePeriodicNotesPlugin) {
+          const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+          if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.quarterly) == null ? void 0 : _d.enabled) {
+            folder = periodicNotesPlugin.settings.quarterly.folder || folder;
+            format = periodicNotesPlugin.settings.quarterly.format || format;
+            template = periodicNotesPlugin.settings.quarterly.template || template;
+            includeSubfolders = true;
           }
         }
-      });
-    });
-    return multiDayMap;
-  }
-  dateToKey(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  }
-  /**
-   * Converts a date format string to a regex pattern.
-   * Supports common Moment.js tokens: YYYY, MM, DD, ww, gggg, Q, etc.
-   * Escapes special regex characters in the format string.
-   */
-  formatToRegexPattern(format) {
-    let pattern = format.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    pattern = pattern.replace(/YYYY/g, "\\d{4}").replace(/YY/g, "\\d{2}").replace(/MMMM/g, "\\w+").replace(/MMM/g, "\\w+").replace(/MM/g, "\\d{2}").replace(/M/g, "\\d{1,2}").replace(/DD/g, "\\d{2}").replace(/D/g, "\\d{1,2}").replace(/ww/g, "\\d{2}").replace(/w/g, "\\d{1,2}").replace(/gggg/g, "\\d{4}").replace(/Q/g, "\\d");
-    return pattern;
-  }
-  isDailyNote(file) {
-    const format = this.plugin.settings.dailyNoteFormat;
-    const basename = file.basename;
-    const pattern = this.formatToRegexPattern(format);
-    const regex = new RegExp(`^${pattern}$`);
-    return regex.test(basename);
-  }
-  hasDateAndText(file) {
-    const datePattern = /^\d{4}-\d{2}-\d{2}/;
-    const match = file.basename.match(datePattern);
-    if (!match) return false;
-    return file.basename.length > match[0].length;
-  }
-  getDisplayName(file) {
-    if (!this.plugin.settings.hideDateInTitle) {
-      return file.basename;
-    }
-    const datePattern = /\d{4}-\d{2}-\d{2}/g;
-    const matches = file.basename.match(datePattern);
-    if (matches && matches.length > 1) {
-      if (!this.plugin.settings.hideSecondDateInTitle) {
-        const startDatePattern2 = /^\d{4}-\d{2}-\d{2}\s*/;
-        return file.basename.replace(startDatePattern2, "").trim() || file.basename;
-      }
-      const multiDatePattern = /^\d{4}-\d{2}-\d{2}\s*.*?\d{4}-\d{2}-\d{2}\s*/;
-      return file.basename.replace(multiDatePattern, "").trim() || file.basename;
-    }
-    const startDatePattern = /^\d{4}-\d{2}-\d{2}\s*/;
-    return file.basename.replace(startDatePattern, "").trim() || file.basename;
-  }
-  shouldShowNote(file) {
-    if (this.isCategoryHidden(file)) return false;
-    if (this.isDailyNote(file)) {
-      return this.plugin.settings.showDailyNotesInCells;
-    }
-    if (this.hasDateAndText(file)) {
-      return this.plugin.settings.showNotesWithDateAndText;
-    }
-    return true;
-  }
-  getDailyNoteFolder() {
-    var _a, _b, _c, _d;
-    if (this.plugin.settings.dailyNoteFolderMode === "obsidian") {
-      const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
-      if (dailyNotesPlugin && dailyNotesPlugin.enabled) {
-        let folder = ((_d = (_c = dailyNotesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.folder) || "";
-        folder = folder.replace(/^\/+|\/+$/g, "");
-        return folder ? folder + "/" : "";
-      }
-      return "";
-    } else {
-      const folder = this.plugin.settings.dailyNoteCustomFolder;
-      return folder ? folder + "/" : "";
-    }
-  }
-  async findDailyNoteInFolder(filename, folderPath) {
-    const files = this.app.vault.getMarkdownFiles();
-    for (const file of files) {
-      if (file.path.startsWith(folderPath) && file.name === filename) {
-        return file;
-      }
-    }
-    return null;
-  }
-  findPeriodicNoteInFolder(filename, folderPath, includeSubfolders) {
-    if (!includeSubfolders) {
-      return this.app.vault.getAbstractFileByPath(`${folderPath}${filename}.md`);
-    }
-    const files = this.app.vault.getMarkdownFiles();
-    for (const file of files) {
-      if (file.name === `${filename}.md` && (folderPath === "" || file.path.startsWith(folderPath))) {
-        return file;
-      }
-    }
-    return null;
-  }
-  /**
-   * Get ISO week number (1-53) for a date.
-   * ISO week starts on Monday, week 1 is the week with the first Thursday.
-   */
-  getISOWeek(date) {
-    const tempDate = new Date(date.getTime());
-    tempDate.setHours(0, 0, 0, 0);
-    tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
-    const yearStart = new Date(tempDate.getFullYear(), 0, 1);
-    const weekNo = Math.ceil(((tempDate.getTime() - yearStart.getTime()) / 864e5 + 1) / 7);
-    return weekNo;
-  }
-  /**
-   * Get the ISO week year (may differ from calendar year for dates in week 1 or 53).
-   */
-  getISOWeekYear(date) {
-    const tempDate = new Date(date.getTime());
-    tempDate.setDate(tempDate.getDate() + 4 - (tempDate.getDay() || 7));
-    return tempDate.getFullYear();
-  }
-  /**
-   * Get quarter (1-4) for a date.
-   */
-  getQuarter(date) {
-    return Math.floor(date.getMonth() / 3) + 1;
-  }
-  /**
-   * Get month names.
-   */
-  getMonthName(date, short = false) {
-    const months = short ? ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] : ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    return months[date.getMonth()];
-  }
-  /**
-   * Format a date using Moment.js-style format tokens.
-   * Supports: YYYY, YY, MMMM, MMM, MM, M, DD, D, ww, w, gggg, Q
-   */
-  formatDate(date, format) {
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const week = this.getISOWeek(date);
-    const weekYear = this.getISOWeekYear(date);
-    const quarter = this.getQuarter(date);
-    return format.replace(/YYYY/g, String(year)).replace(/YY/g, String(year).slice(-2)).replace(/MMMM/g, this.getMonthName(date, false)).replace(/MMM/g, this.getMonthName(date, true)).replace(/MM/g, String(month).padStart(2, "0")).replace(/M/g, String(month)).replace(/DD/g, String(day).padStart(2, "0")).replace(/D/g, String(day)).replace(/ww/g, String(week).padStart(2, "0")).replace(/w/g, String(week)).replace(/gggg/g, String(weekYear)).replace(/Q/g, String(quarter));
-  }
-  formatDateForDailyNote(date) {
-    const format = this.plugin.settings.dailyNoteFormat;
-    return this.formatDate(date, format);
-  }
-  async openOrCreateDailyNote(date) {
-    const filename = this.formatDateForDailyNote(date);
-    const folderPath = this.getDailyNoteFolder();
-    const existingFile = await this.findDailyNoteInFolder(`${filename}.md`, folderPath);
-    if (existingFile) {
-      await this.app.workspace.getLeaf(false).openFile(existingFile);
-    } else {
-      const fullPath = `${folderPath}${filename}.md`;
-      const templateContent = await this.getDailyNoteTemplateContent(date, filename);
-      const newFile = await this.app.vault.create(fullPath, templateContent);
-      await this.app.workspace.getLeaf(false).openFile(newFile);
-    }
-  }
-  async openOrCreateWeeklyNote(date) {
-    var _a, _b, _c, _d;
-    const settings = this.plugin.settings.periodicNotes;
-    const moment = window.moment;
-    const targetMoment = moment(date);
-    let folder = settings.weekly.folder;
-    let format = settings.weekly.format || "gggg-[W]ww";
-    let template = settings.weekly.template;
-    let includeSubfolders = settings.weekly.includeSubfolders;
-    if (settings.usePeriodicNotesPlugin) {
-      const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
-      if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.weekly) == null ? void 0 : _d.enabled) {
-        folder = periodicNotesPlugin.settings.weekly.folder || folder;
-        format = periodicNotesPlugin.settings.weekly.format || format;
-        template = periodicNotesPlugin.settings.weekly.template || template;
-        includeSubfolders = true;
-      }
-    }
-    const filename = targetMoment.format(format);
-    const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
-    if (existingFile instanceof import_obsidian7.TFile) {
-      await this.app.workspace.getLeaf(false).openFile(existingFile);
-    } else {
-      if (folder) {
-        const folderExists = this.app.vault.getAbstractFileByPath(folder);
-        if (!folderExists) {
-          await this.app.vault.createFolder(folder);
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : "";
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
+        if (existingFile instanceof import_obsidian7.TFile) {
+          await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+          if (folder) {
+            const folderExists = this.app.vault.getAbstractFileByPath(folder);
+            if (!folderExists) {
+              await this.app.vault.createFolder(folder);
+            }
+          }
+          let content = "";
+          if (template) {
+            const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+            if (templateFile instanceof import_obsidian7.TFile) {
+              content = await this.app.vault.read(templateFile);
+              content = this.processQuarterlyTemplateVariables(content, date, filename);
+            }
+          }
+          const fullPath = `${folderPath}${filename}.md`;
+          const newFile = await this.app.vault.create(fullPath, content);
+          await this.app.workspace.getLeaf(false).openFile(newFile);
         }
       }
-      let content = "";
-      if (template) {
-        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+      processQuarterlyTemplateVariables(content, date, filename) {
+        const moment = window.moment;
+        const targetMoment = moment(date);
+        const format = this.plugin.settings.periodicNotes.quarterly.format || "YYYY-[Q]Q";
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.startOf("quarter").format(customFormat || format);
+        });
+        content = content.replace(/\{\{title\}\}/g, filename);
+        content = content.replace(/\{\{quarter\}\}/g, String(targetMoment.quarter()));
+        content = content.replace(/\{\{year\}\}/g, String(targetMoment.year()));
+        return content;
+      }
+      async openOrCreateMonthlyNote(date) {
+        var _a, _b, _c, _d;
+        const settings = this.plugin.settings.periodicNotes;
+        const moment = window.moment;
+        const targetMoment = moment(date);
+        let folder = settings.monthly.folder;
+        let format = settings.monthly.format || "YYYY-MM";
+        let template = settings.monthly.template;
+        let includeSubfolders = settings.monthly.includeSubfolders;
+        if (settings.usePeriodicNotesPlugin) {
+          const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+          if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.monthly) == null ? void 0 : _d.enabled) {
+            folder = periodicNotesPlugin.settings.monthly.folder || folder;
+            format = periodicNotesPlugin.settings.monthly.format || format;
+            template = periodicNotesPlugin.settings.monthly.template || template;
+            includeSubfolders = true;
+          }
+        }
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : "";
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
+        if (existingFile instanceof import_obsidian7.TFile) {
+          await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+          if (folder) {
+            const folderExists = this.app.vault.getAbstractFileByPath(folder);
+            if (!folderExists) {
+              await this.app.vault.createFolder(folder);
+            }
+          }
+          let content = "";
+          if (template) {
+            const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+            if (templateFile instanceof import_obsidian7.TFile) {
+              content = await this.app.vault.read(templateFile);
+              content = this.processMonthlyTemplateVariables(content, date, filename);
+            }
+          }
+          const fullPath = `${folderPath}${filename}.md`;
+          const newFile = await this.app.vault.create(fullPath, content);
+          await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+      }
+      processMonthlyTemplateVariables(content, date, filename) {
+        const moment = window.moment;
+        const targetMoment = moment(date);
+        const format = this.plugin.settings.periodicNotes.monthly.format || "YYYY-MM";
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.startOf("month").format(customFormat || format);
+        });
+        content = content.replace(/\{\{title\}\}/g, filename);
+        content = content.replace(/\{\{month(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.format(customFormat || "MMMM");
+        });
+        content = content.replace(/\{\{year\}\}/g, String(targetMoment.year()));
+        return content;
+      }
+      async openOrCreateYearlyNote(year) {
+        var _a, _b, _c, _d;
+        const settings = this.plugin.settings.periodicNotes;
+        const moment = window.moment;
+        const targetMoment = moment({ year, month: 0, day: 1 });
+        let folder = settings.yearly.folder;
+        let format = settings.yearly.format || "YYYY";
+        let template = settings.yearly.template;
+        let includeSubfolders = settings.yearly.includeSubfolders;
+        if (settings.usePeriodicNotesPlugin) {
+          const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
+          if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.yearly) == null ? void 0 : _d.enabled) {
+            folder = periodicNotesPlugin.settings.yearly.folder || folder;
+            format = periodicNotesPlugin.settings.yearly.format || format;
+            template = periodicNotesPlugin.settings.yearly.template || template;
+            includeSubfolders = true;
+          }
+        }
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : "";
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
+        if (existingFile instanceof import_obsidian7.TFile) {
+          await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+          if (folder) {
+            const folderExists = this.app.vault.getAbstractFileByPath(folder);
+            if (!folderExists) {
+              await this.app.vault.createFolder(folder);
+            }
+          }
+          let content = "";
+          if (template) {
+            const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+            if (templateFile instanceof import_obsidian7.TFile) {
+              content = await this.app.vault.read(templateFile);
+              content = this.processYearlyTemplateVariables(content, year, filename);
+            }
+          }
+          const fullPath = `${folderPath}${filename}.md`;
+          const newFile = await this.app.vault.create(fullPath, content);
+          await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+      }
+      processYearlyTemplateVariables(content, year, filename) {
+        const moment = window.moment;
+        const targetMoment = moment({ year, month: 0, day: 1 });
+        const format = this.plugin.settings.periodicNotes.yearly.format || "YYYY";
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.format(customFormat || format);
+        });
+        content = content.replace(/\{\{title\}\}/g, filename);
+        content = content.replace(/\{\{year\}\}/g, String(year));
+        return content;
+      }
+      async openOrCreateCustomPeriodNote(period, year, group) {
+        var _a, _b;
+        const moment = window.moment;
+        const firstMonth = Math.min(...period.months) - 1;
+        const targetMoment = moment({ year, month: firstMonth, day: 1 });
+        const useGroupDefaults = period.useGroupSettings !== false && group;
+        const folder = useGroupDefaults ? group.folder || period.folder : period.folder;
+        const format = period.format || `YYYY-[${period.name}]`;
+        const template = useGroupDefaults ? group.template || period.template : period.template;
+        const includeSubfolders = useGroupDefaults ? (_a = group.includeSubfolders) != null ? _a : true : (_b = period.includeSubfolders) != null ? _b : true;
+        const filename = targetMoment.format(format);
+        const folderPath = folder ? `${folder}/` : "";
+        const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
+        if (existingFile instanceof import_obsidian7.TFile) {
+          await this.app.workspace.getLeaf(false).openFile(existingFile);
+        } else {
+          if (folder) {
+            const folderExists = this.app.vault.getAbstractFileByPath(folder);
+            if (!folderExists) {
+              await this.app.vault.createFolder(folder);
+            }
+          }
+          let content = "";
+          if (template) {
+            const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
+            if (templateFile instanceof import_obsidian7.TFile) {
+              content = await this.app.vault.read(templateFile);
+              content = this.processCustomPeriodTemplateVariables(content, period, year, filename);
+            }
+          }
+          const fullPath = `${folderPath}${filename}.md`;
+          const newFile = await this.app.vault.create(fullPath, content);
+          await this.app.workspace.getLeaf(false).openFile(newFile);
+        }
+      }
+      processCustomPeriodTemplateVariables(content, period, year, filename) {
+        const moment = window.moment;
+        const monthNames = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December"
+        ];
+        const sortedMonths = [...period.months].sort((a, b) => a - b);
+        const firstMonth = sortedMonths[0] - 1;
+        const lastMonth = sortedMonths[sortedMonths.length - 1] - 1;
+        const targetMoment = moment({ year, month: firstMonth, day: 1 });
+        const format = period.format || `YYYY-[${period.name}]`;
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.format(customFormat || format);
+        });
+        content = content.replace(/\{\{title\}\}/g, filename);
+        content = content.replace(/\{\{period\}\}/g, period.name);
+        content = content.replace(/\{\{year\}\}/g, String(year));
+        content = content.replace(/\{\{startMonth\}\}/g, monthNames[firstMonth]);
+        content = content.replace(/\{\{endMonth\}\}/g, monthNames[lastMonth]);
+        return content;
+      }
+      async getDailyNoteTemplateContent(date, filename) {
+        var _a, _b, _c, _d;
+        const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
+        if (!dailyNotesPlugin || !dailyNotesPlugin.enabled) {
+          return "";
+        }
+        const templatePath = (_d = (_c = dailyNotesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.template;
+        if (!templatePath) {
+          return "";
+        }
+        const templateFile = this.app.vault.getAbstractFileByPath(templatePath + ".md") || this.app.vault.getAbstractFileByPath(templatePath);
         if (templateFile instanceof import_obsidian7.TFile) {
-          content = await this.app.vault.read(templateFile);
-          content = this.processWeeklyTemplateVariables(content, date, filename);
+          const rawContent = await this.app.vault.read(templateFile);
+          return this.processTemplateVariables(rawContent, date, filename);
         }
+        return "";
       }
-      const fullPath = `${folderPath}${filename}.md`;
-      const newFile = await this.app.vault.create(fullPath, content);
-      await this.app.workspace.getLeaf(false).openFile(newFile);
-    }
-  }
-  processWeeklyTemplateVariables(content, date, filename) {
-    const moment = window.moment;
-    const targetMoment = moment(date);
-    const format = this.plugin.settings.periodicNotes.weekly.format || "gggg-[W]ww";
-    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.startOf("week").format(customFormat || format);
-    });
-    content = content.replace(/\{\{title\}\}/g, filename);
-    content = content.replace(/\{\{week\}\}/g, String(targetMoment.week()));
-    content = content.replace(/\{\{year\}\}/g, String(targetMoment.weekYear()));
-    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-    days.forEach((dayName, dayIndex) => {
-      const regex = new RegExp(`\\{\\{${dayName}(?::([^}]+))?\\}\\}`, "g");
-      content = content.replace(regex, (_, customFormat) => {
-        return targetMoment.clone().startOf("week").add(dayIndex, "days").format(customFormat || "YYYY-MM-DD");
-      });
-    });
-    return content;
-  }
-  async openOrCreateQuarterlyNote(date) {
-    var _a, _b, _c, _d;
-    const settings = this.plugin.settings.periodicNotes;
-    const moment = window.moment;
-    const targetMoment = moment(date);
-    let folder = settings.quarterly.folder;
-    let format = settings.quarterly.format || "YYYY-[Q]Q";
-    let template = settings.quarterly.template;
-    let includeSubfolders = settings.quarterly.includeSubfolders;
-    if (settings.usePeriodicNotesPlugin) {
-      const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
-      if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.quarterly) == null ? void 0 : _d.enabled) {
-        folder = periodicNotesPlugin.settings.quarterly.folder || folder;
-        format = periodicNotesPlugin.settings.quarterly.format || format;
-        template = periodicNotesPlugin.settings.quarterly.template || template;
-        includeSubfolders = true;
+      processTemplateVariables(content, date, filename) {
+        const moment = window.moment;
+        const targetMoment = moment(date);
+        const format = this.plugin.settings.dailyNoteFormat;
+        content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.format(customFormat || format);
+        });
+        content = content.replace(/\{\{time(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.format(customFormat || "HH:mm");
+        });
+        content = content.replace(/\{\{title\}\}/g, filename);
+        content = content.replace(/\{\{yesterday(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.clone().subtract(1, "day").format(customFormat || format);
+        });
+        content = content.replace(/\{\{tomorrow(?::([^}]+))?\}\}/g, (_, customFormat) => {
+          return targetMoment.clone().add(1, "day").format(customFormat || format);
+        });
+        return content;
       }
-    }
-    const filename = targetMoment.format(format);
-    const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
-    if (existingFile instanceof import_obsidian7.TFile) {
-      await this.app.workspace.getLeaf(false).openFile(existingFile);
-    } else {
-      if (folder) {
-        const folderExists = this.app.vault.getAbstractFileByPath(folder);
-        if (!folderExists) {
-          await this.app.vault.createFolder(folder);
-        }
+      async openQuickNoteModal(startDate, endDate = null) {
+        const { QuickNoteModal: QuickNoteModal2 } = await Promise.resolve().then(() => (init_QuickNoteModal(), QuickNoteModal_exports));
+        new QuickNoteModal2(
+          this.app,
+          this.plugin,
+          startDate,
+          endDate
+        ).open();
       }
-      let content = "";
-      if (template) {
-        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
-        if (templateFile instanceof import_obsidian7.TFile) {
-          content = await this.app.vault.read(templateFile);
-          content = this.processQuarterlyTemplateVariables(content, date, filename);
-        }
+      highlightDateRange(startDate, endDate) {
+        const [start, end] = startDate <= endDate ? [startDate, endDate] : [endDate, startDate];
+        const dayNumbers = this.containerEl.querySelectorAll(".day-number");
+        dayNumbers.forEach((el) => {
+          const htmlEl = el;
+          const dateStr = htmlEl.dataset.date;
+          if (!dateStr) return;
+          const cellDate = new Date(dateStr);
+          if (cellDate >= start && cellDate <= end) {
+            htmlEl.addClass("drag-selecting");
+          }
+        });
       }
-      const fullPath = `${folderPath}${filename}.md`;
-      const newFile = await this.app.vault.create(fullPath, content);
-      await this.app.workspace.getLeaf(false).openFile(newFile);
-    }
-  }
-  processQuarterlyTemplateVariables(content, date, filename) {
-    const moment = window.moment;
-    const targetMoment = moment(date);
-    const format = this.plugin.settings.periodicNotes.quarterly.format || "YYYY-[Q]Q";
-    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.startOf("quarter").format(customFormat || format);
-    });
-    content = content.replace(/\{\{title\}\}/g, filename);
-    content = content.replace(/\{\{quarter\}\}/g, String(targetMoment.quarter()));
-    content = content.replace(/\{\{year\}\}/g, String(targetMoment.year()));
-    return content;
-  }
-  async openOrCreateMonthlyNote(date) {
-    var _a, _b, _c, _d;
-    const settings = this.plugin.settings.periodicNotes;
-    const moment = window.moment;
-    const targetMoment = moment(date);
-    let folder = settings.monthly.folder;
-    let format = settings.monthly.format || "YYYY-MM";
-    let template = settings.monthly.template;
-    let includeSubfolders = settings.monthly.includeSubfolders;
-    if (settings.usePeriodicNotesPlugin) {
-      const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
-      if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.monthly) == null ? void 0 : _d.enabled) {
-        folder = periodicNotesPlugin.settings.monthly.folder || folder;
-        format = periodicNotesPlugin.settings.monthly.format || format;
-        template = periodicNotesPlugin.settings.monthly.template || template;
-        includeSubfolders = true;
+      clearDragSelection() {
+        this.containerEl.querySelectorAll(".drag-selecting").forEach((el) => {
+          el.removeClass("drag-selecting");
+        });
+        this.dragStartDate = null;
+        this.dragEndDate = null;
+        this.isDragging = false;
       }
-    }
-    const filename = targetMoment.format(format);
-    const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
-    if (existingFile instanceof import_obsidian7.TFile) {
-      await this.app.workspace.getLeaf(false).openFile(existingFile);
-    } else {
-      if (folder) {
-        const folderExists = this.app.vault.getAbstractFileByPath(folder);
-        if (!folderExists) {
-          await this.app.vault.createFolder(folder);
-        }
-      }
-      let content = "";
-      if (template) {
-        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
-        if (templateFile instanceof import_obsidian7.TFile) {
-          content = await this.app.vault.read(templateFile);
-          content = this.processMonthlyTemplateVariables(content, date, filename);
-        }
-      }
-      const fullPath = `${folderPath}${filename}.md`;
-      const newFile = await this.app.vault.create(fullPath, content);
-      await this.app.workspace.getLeaf(false).openFile(newFile);
-    }
-  }
-  processMonthlyTemplateVariables(content, date, filename) {
-    const moment = window.moment;
-    const targetMoment = moment(date);
-    const format = this.plugin.settings.periodicNotes.monthly.format || "YYYY-MM";
-    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.startOf("month").format(customFormat || format);
-    });
-    content = content.replace(/\{\{title\}\}/g, filename);
-    content = content.replace(/\{\{month(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.format(customFormat || "MMMM");
-    });
-    content = content.replace(/\{\{year\}\}/g, String(targetMoment.year()));
-    return content;
-  }
-  async openOrCreateYearlyNote(year) {
-    var _a, _b, _c, _d;
-    const settings = this.plugin.settings.periodicNotes;
-    const moment = window.moment;
-    const targetMoment = moment({ year, month: 0, day: 1 });
-    let folder = settings.yearly.folder;
-    let format = settings.yearly.format || "YYYY";
-    let template = settings.yearly.template;
-    let includeSubfolders = settings.yearly.includeSubfolders;
-    if (settings.usePeriodicNotesPlugin) {
-      const periodicNotesPlugin = (_b = (_a = this.app.plugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["periodic-notes"];
-      if ((_d = (_c = periodicNotesPlugin == null ? void 0 : periodicNotesPlugin.settings) == null ? void 0 : _c.yearly) == null ? void 0 : _d.enabled) {
-        folder = periodicNotesPlugin.settings.yearly.folder || folder;
-        format = periodicNotesPlugin.settings.yearly.format || format;
-        template = periodicNotesPlugin.settings.yearly.template || template;
-        includeSubfolders = true;
-      }
-    }
-    const filename = targetMoment.format(format);
-    const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
-    if (existingFile instanceof import_obsidian7.TFile) {
-      await this.app.workspace.getLeaf(false).openFile(existingFile);
-    } else {
-      if (folder) {
-        const folderExists = this.app.vault.getAbstractFileByPath(folder);
-        if (!folderExists) {
-          await this.app.vault.createFolder(folder);
-        }
-      }
-      let content = "";
-      if (template) {
-        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
-        if (templateFile instanceof import_obsidian7.TFile) {
-          content = await this.app.vault.read(templateFile);
-          content = this.processYearlyTemplateVariables(content, year, filename);
-        }
-      }
-      const fullPath = `${folderPath}${filename}.md`;
-      const newFile = await this.app.vault.create(fullPath, content);
-      await this.app.workspace.getLeaf(false).openFile(newFile);
-    }
-  }
-  processYearlyTemplateVariables(content, year, filename) {
-    const moment = window.moment;
-    const targetMoment = moment({ year, month: 0, day: 1 });
-    const format = this.plugin.settings.periodicNotes.yearly.format || "YYYY";
-    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.format(customFormat || format);
-    });
-    content = content.replace(/\{\{title\}\}/g, filename);
-    content = content.replace(/\{\{year\}\}/g, String(year));
-    return content;
-  }
-  async openOrCreateCustomPeriodNote(period, year, group) {
-    var _a, _b;
-    const moment = window.moment;
-    const firstMonth = Math.min(...period.months) - 1;
-    const targetMoment = moment({ year, month: firstMonth, day: 1 });
-    const useGroupDefaults = period.useGroupSettings !== false && group;
-    const folder = useGroupDefaults ? group.folder || period.folder : period.folder;
-    const format = period.format || `YYYY-[${period.name}]`;
-    const template = useGroupDefaults ? group.template || period.template : period.template;
-    const includeSubfolders = useGroupDefaults ? (_a = group.includeSubfolders) != null ? _a : true : (_b = period.includeSubfolders) != null ? _b : true;
-    const filename = targetMoment.format(format);
-    const folderPath = folder ? `${folder}/` : "";
-    const existingFile = this.findPeriodicNoteInFolder(filename, folderPath, includeSubfolders);
-    if (existingFile instanceof import_obsidian7.TFile) {
-      await this.app.workspace.getLeaf(false).openFile(existingFile);
-    } else {
-      if (folder) {
-        const folderExists = this.app.vault.getAbstractFileByPath(folder);
-        if (!folderExists) {
-          await this.app.vault.createFolder(folder);
-        }
-      }
-      let content = "";
-      if (template) {
-        const templateFile = this.app.vault.getAbstractFileByPath(template + ".md") || this.app.vault.getAbstractFileByPath(template);
-        if (templateFile instanceof import_obsidian7.TFile) {
-          content = await this.app.vault.read(templateFile);
-          content = this.processCustomPeriodTemplateVariables(content, period, year, filename);
-        }
-      }
-      const fullPath = `${folderPath}${filename}.md`;
-      const newFile = await this.app.vault.create(fullPath, content);
-      await this.app.workspace.getLeaf(false).openFile(newFile);
-    }
-  }
-  processCustomPeriodTemplateVariables(content, period, year, filename) {
-    const moment = window.moment;
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December"
-    ];
-    const sortedMonths = [...period.months].sort((a, b) => a - b);
-    const firstMonth = sortedMonths[0] - 1;
-    const lastMonth = sortedMonths[sortedMonths.length - 1] - 1;
-    const targetMoment = moment({ year, month: firstMonth, day: 1 });
-    const format = period.format || `YYYY-[${period.name}]`;
-    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.format(customFormat || format);
-    });
-    content = content.replace(/\{\{title\}\}/g, filename);
-    content = content.replace(/\{\{period\}\}/g, period.name);
-    content = content.replace(/\{\{year\}\}/g, String(year));
-    content = content.replace(/\{\{startMonth\}\}/g, monthNames[firstMonth]);
-    content = content.replace(/\{\{endMonth\}\}/g, monthNames[lastMonth]);
-    return content;
-  }
-  async getDailyNoteTemplateContent(date, filename) {
-    var _a, _b, _c, _d;
-    const dailyNotesPlugin = (_b = (_a = this.app.internalPlugins) == null ? void 0 : _a.plugins) == null ? void 0 : _b["daily-notes"];
-    if (!dailyNotesPlugin || !dailyNotesPlugin.enabled) {
-      return "";
-    }
-    const templatePath = (_d = (_c = dailyNotesPlugin.instance) == null ? void 0 : _c.options) == null ? void 0 : _d.template;
-    if (!templatePath) {
-      return "";
-    }
-    const templateFile = this.app.vault.getAbstractFileByPath(templatePath + ".md") || this.app.vault.getAbstractFileByPath(templatePath);
-    if (templateFile instanceof import_obsidian7.TFile) {
-      const rawContent = await this.app.vault.read(templateFile);
-      return this.processTemplateVariables(rawContent, date, filename);
-    }
-    return "";
-  }
-  processTemplateVariables(content, date, filename) {
-    const moment = window.moment;
-    const targetMoment = moment(date);
-    const format = this.plugin.settings.dailyNoteFormat;
-    content = content.replace(/\{\{date(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.format(customFormat || format);
-    });
-    content = content.replace(/\{\{time(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.format(customFormat || "HH:mm");
-    });
-    content = content.replace(/\{\{title\}\}/g, filename);
-    content = content.replace(/\{\{yesterday(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.clone().subtract(1, "day").format(customFormat || format);
-    });
-    content = content.replace(/\{\{tomorrow(?::([^}]+))?\}\}/g, (_, customFormat) => {
-      return targetMoment.clone().add(1, "day").format(customFormat || format);
-    });
-    return content;
-  }
-  async openQuickNoteModal(startDate, endDate = null) {
-    const { QuickNoteModal: QuickNoteModal2 } = await Promise.resolve().then(() => (init_QuickNoteModal(), QuickNoteModal_exports));
-    new QuickNoteModal2(
-      this.app,
-      this.plugin,
-      startDate,
-      endDate
-    ).open();
-  }
-  highlightDateRange(startDate, endDate) {
-    const [start, end] = startDate <= endDate ? [startDate, endDate] : [endDate, startDate];
-    const dayNumbers = this.containerEl.querySelectorAll(".day-number");
-    dayNumbers.forEach((el) => {
-      const htmlEl = el;
-      const dateStr = htmlEl.dataset.date;
-      if (!dateStr) return;
-      const cellDate = new Date(dateStr);
-      if (cellDate >= start && cellDate <= end) {
-        htmlEl.addClass("drag-selecting");
-      }
-    });
-  }
-  clearDragSelection() {
-    this.containerEl.querySelectorAll(".drag-selecting").forEach((el) => {
-      el.removeClass("drag-selecting");
-    });
-    this.dragStartDate = null;
-    this.dragEndDate = null;
-    this.isDragging = false;
-  }
-  renderBanner(container, def) {
-    const banner = container.createDiv({ cls: def.cssClass });
-    banner.style.cssText = `
+      renderBanner(container, def) {
+        const banner = container.createDiv({ cls: def.cssClass });
+        banner.style.cssText = `
             background: var(--background-secondary);
             padding: 16px 20px;
             border-radius: 8px;
@@ -7287,15 +11023,15 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
             justify-content: space-between;
             gap: 16px;
         `;
-    const contentWrapper = banner.createDiv();
-    contentWrapper.style.cssText = "flex: 1;";
-    const title = contentWrapper.createEl("div", { text: def.title });
-    title.style.cssText = "font-weight: 600; font-size: 1.05em; margin-bottom: 8px;";
-    const message = contentWrapper.createEl("div");
-    message.style.cssText = "color: var(--text-muted); font-size: 0.95em; line-height: 1.5;";
-    message.innerHTML = def.contentHtml;
-    const closeBtn = banner.createEl("button", { text: "\xD7" });
-    closeBtn.style.cssText = `
+        const contentWrapper = banner.createDiv();
+        contentWrapper.style.cssText = "flex: 1;";
+        const title = contentWrapper.createEl("div", { text: def.title });
+        title.style.cssText = "font-weight: 600; font-size: 1.05em; margin-bottom: 8px;";
+        const message = contentWrapper.createEl("div");
+        message.style.cssText = "color: var(--text-muted); font-size: 0.95em; line-height: 1.5;";
+        message.innerHTML = def.contentHtml;
+        const closeBtn = banner.createEl("button", { text: "\xD7" });
+        closeBtn.style.cssText = `
             background: none;
             border: none;
             color: var(--text-muted);
@@ -7311,675 +11047,808 @@ var LinearCalendarView = class extends import_obsidian7.ItemView {
             border-radius: 4px;
             flex-shrink: 0;
         `;
-    closeBtn.setAttribute("aria-label", "Dismiss banner");
-    closeBtn.onmouseenter = () => {
-      closeBtn.style.background = "var(--background-modifier-hover)";
-    };
-    closeBtn.onmouseleave = () => {
-      closeBtn.style.background = "none";
-    };
-    closeBtn.onclick = async () => {
-      def.dismiss(this.plugin.settings);
-      await this.plugin.saveSettings();
-      banner.remove();
-    };
-  }
-  renderCategoryIndexRow(container) {
-    const config = this.plugin.settings.colorCategories;
-    const categoryIndexDiv = container.createDiv({ cls: "category-index-section" });
-    if (config.categories.length === 0) {
-      const welcomeContainer = categoryIndexDiv.createDiv({ cls: "categories-container" });
-      welcomeContainer.style.cssText = "flex-direction: column; gap: 12px; align-items: center;";
-      const welcomeText = welcomeContainer.createEl("div", { text: "Add color to your year! \u2728\u{1F988}" });
-      welcomeText.style.cssText = "font-size: 1.1em; font-weight: 500;";
-      const hideHint = welcomeContainer.createEl("div", { text: "Hide this section by disabling Color Categories in the settings." });
-      hideHint.style.cssText = "font-size: 0.9em; color: var(--text-muted); margin-top: 4px;";
-      const addBtn2 = welcomeContainer.createEl("button", { text: "+ Add category" });
-      addBtn2.style.cssText = "padding: 6px 16px; cursor: pointer; margin-top: 8px;";
-      addBtn2.onclick = async () => {
-        const newCategory = {
-          id: Date.now().toString(),
-          name: "New Category",
-          color: "#6366f1",
-          iconType: null,
-          iconValue: "",
-          conditions: [],
-          matchMode: "all",
-          enabled: true
+        closeBtn.setAttribute("aria-label", "Dismiss banner");
+        closeBtn.onmouseenter = () => {
+          closeBtn.style.background = "var(--background-modifier-hover)";
         };
-        config.categories.push(newCategory);
-        await this.plugin.saveSettings();
-        new CategoryEditModal(
-          this.app,
-          this.plugin,
-          newCategory,
-          () => this.reload()
-        ).open();
-      };
-      return;
-    }
-    const chipsContainer = categoryIndexDiv.createDiv({ cls: "categories-container" });
-    config.categories.forEach((category) => {
-      if (!category.enabled) return;
-      const isHidden = category.hidden === true;
-      const chip = chipsContainer.createDiv({ cls: `category-chip${isHidden ? " is-hidden" : ""}` });
-      chip.style.background = category.color;
-      chip.style.color = "#ffffff";
-      if (isHidden) chip.style.opacity = "0.4";
-      if (category.iconType && category.iconValue && config.showIconsInCalendar) {
-        const iconEl = chip.createEl("span", { cls: "category-chip-icon" });
-        if (category.iconType === "emoji") {
-          iconEl.textContent = category.iconValue;
-        } else {
-          (0, import_obsidian7.setIcon)(iconEl, category.iconValue);
-          iconEl.style.color = "#ffffff";
-        }
+        closeBtn.onmouseleave = () => {
+          closeBtn.style.background = "none";
+        };
+        closeBtn.onclick = async () => {
+          def.dismiss(this.plugin.settings);
+          await this.plugin.saveSettings();
+          banner.remove();
+        };
       }
-      chip.createEl("span", {
-        text: category.name,
-        cls: "category-chip-name"
-      });
-      const eyeBtn = chip.createEl("span", { cls: "category-chip-eye" });
-      (0, import_obsidian7.setIcon)(eyeBtn, isHidden ? "eye-off" : "eye");
-      eyeBtn.title = isHidden ? "Show notes" : "Hide notes";
-      eyeBtn.onclick = async (e) => {
-        e.stopPropagation();
-        category.hidden = !category.hidden;
-        await this.plugin.saveSettings();
-      };
-      chip.style.cursor = "pointer";
-      chip.onclick = () => {
-        new CategoryEditModal(
-          this.app,
-          this.plugin,
-          category,
-          () => this.reload()
-        ).open();
-      };
-      chip.addEventListener("mouseenter", () => {
-        chip.style.opacity = isHidden ? "0.55" : "0.8";
-      });
-      chip.addEventListener("mouseleave", () => {
-        chip.style.opacity = isHidden ? "0.4" : "1";
-      });
-    });
-    const addBtn = chipsContainer.createDiv({ cls: "category-chip category-add-btn" });
-    addBtn.style.cssText = "background: var(--interactive-accent); color: #ffffff; cursor: pointer; font-weight: 600;";
-    addBtn.textContent = "+";
-    addBtn.onclick = async () => {
-      const newCategory = {
-        id: Date.now().toString(),
-        name: "New Category",
-        color: "#6366f1",
-        iconType: null,
-        iconValue: "",
-        conditions: [],
-        matchMode: "all",
-        enabled: true
-      };
-      config.categories.push(newCategory);
-      await this.plugin.saveSettings();
-      new CategoryEditModal(
-        this.app,
-        this.plugin,
-        newCategory,
-        () => this.reload()
-      ).open();
-    };
-    addBtn.addEventListener("mouseenter", () => {
-      addBtn.style.opacity = "0.8";
-    });
-    addBtn.addEventListener("mouseleave", () => {
-      addBtn.style.opacity = "1";
-    });
-  }
-  /**
-   * Get the custom period that a given month belongs to within a specific group
-   * Returns the period and whether this month is the first month of that period
-   */
-  getCustomPeriodForMonth(month, group) {
-    if (group.periods.length === 0) return null;
-    const monthNum = month + 1;
-    for (const period of group.periods) {
-      if (period.months.includes(monthNum)) {
+      renderCategoryIndexRow(container) {
+        const config = this.plugin.settings.colorCategories;
+        const categoryIndexDiv = container.createDiv({ cls: "category-index-section" });
+        if (config.categories.length === 0) {
+          const welcomeContainer = categoryIndexDiv.createDiv({ cls: "categories-container" });
+          welcomeContainer.style.cssText = "flex-direction: column; gap: 12px; align-items: center;";
+          const welcomeText = welcomeContainer.createEl("div", { text: "Add color to your year! \u2728\u{1F988}" });
+          welcomeText.style.cssText = "font-size: 1.1em; font-weight: 500;";
+          const hideHint = welcomeContainer.createEl("div", { text: "Hide this section by disabling Color Categories in the settings." });
+          hideHint.style.cssText = "font-size: 0.9em; color: var(--text-muted); margin-top: 4px;";
+          const addBtn2 = welcomeContainer.createEl("button", { text: "+ Add category" });
+          addBtn2.style.cssText = "padding: 6px 16px; cursor: pointer; margin-top: 8px;";
+          addBtn2.onclick = async () => {
+            const newCategory = {
+              id: Date.now().toString(),
+              name: "New Category",
+              color: "#6366f1",
+              iconType: null,
+              iconValue: "",
+              conditions: [],
+              matchMode: "all",
+              enabled: true
+            };
+            config.categories.push(newCategory);
+            await this.plugin.saveSettings();
+            new CategoryEditModal(
+              this.app,
+              this.plugin,
+              newCategory,
+              () => this.reload()
+            ).open();
+          };
+          return;
+        }
+        const chipsContainer = categoryIndexDiv.createDiv({ cls: "categories-container" });
+        config.categories.forEach((category) => {
+          if (!category.enabled) return;
+          const isHidden = category.hidden === true;
+          const chip = chipsContainer.createDiv({ cls: `category-chip${isHidden ? " is-hidden" : ""}` });
+          chip.style.background = category.color;
+          chip.style.color = "#ffffff";
+          if (isHidden) chip.style.opacity = "0.4";
+          if (category.iconType && category.iconValue && config.showIconsInCalendar) {
+            const iconEl = chip.createEl("span", { cls: "category-chip-icon" });
+            if (category.iconType === "emoji") {
+              iconEl.textContent = category.iconValue;
+            } else {
+              (0, import_obsidian7.setIcon)(iconEl, category.iconValue);
+              iconEl.style.color = "#ffffff";
+            }
+          }
+          chip.createEl("span", {
+            text: category.name,
+            cls: "category-chip-name"
+          });
+          const eyeBtn = chip.createEl("span", { cls: "category-chip-eye" });
+          (0, import_obsidian7.setIcon)(eyeBtn, isHidden ? "eye-off" : "eye");
+          eyeBtn.title = isHidden ? "Show notes" : "Hide notes";
+          eyeBtn.onclick = async (e) => {
+            e.stopPropagation();
+            category.hidden = !category.hidden;
+            await this.plugin.saveSettings();
+          };
+          chip.style.cursor = "pointer";
+          chip.onclick = () => {
+            new CategoryEditModal(
+              this.app,
+              this.plugin,
+              category,
+              () => this.reload()
+            ).open();
+          };
+          chip.addEventListener("mouseenter", () => {
+            chip.style.opacity = isHidden ? "0.55" : "0.8";
+          });
+          chip.addEventListener("mouseleave", () => {
+            chip.style.opacity = isHidden ? "0.4" : "1";
+          });
+        });
+        const addBtn = chipsContainer.createDiv({ cls: "category-chip category-add-btn" });
+        addBtn.style.cssText = "background: var(--interactive-accent); color: #ffffff; cursor: pointer; font-weight: 600;";
+        addBtn.textContent = "+";
+        addBtn.onclick = async () => {
+          const newCategory = {
+            id: Date.now().toString(),
+            name: "New Category",
+            color: "#6366f1",
+            iconType: null,
+            iconValue: "",
+            conditions: [],
+            matchMode: "all",
+            enabled: true
+          };
+          config.categories.push(newCategory);
+          await this.plugin.saveSettings();
+          new CategoryEditModal(
+            this.app,
+            this.plugin,
+            newCategory,
+            () => this.reload()
+          ).open();
+        };
+        addBtn.addEventListener("mouseenter", () => {
+          addBtn.style.opacity = "0.8";
+        });
+        addBtn.addEventListener("mouseleave", () => {
+          addBtn.style.opacity = "1";
+        });
+      }
+      /**
+       * Get the custom period that a given month belongs to within a specific group
+       * Returns the period and whether this month is the first month of that period
+       */
+      getCustomPeriodForMonth(month, group) {
+        if (group.periods.length === 0) return null;
+        const monthNum = month + 1;
+        for (const period of group.periods) {
+          if (period.months.includes(monthNum)) {
+            const sortedMonths = [...period.months].sort((a, b) => a - b);
+            const wrapsYear = sortedMonths.length > 1 && sortedMonths[sortedMonths.length - 1] - sortedMonths[0] > 6;
+            let isFirstMonthInYear = false;
+            let consecutiveMonths = 0;
+            if (wrapsYear) {
+              const highMonths = sortedMonths.filter((m) => m > 6);
+              const lowMonths = sortedMonths.filter((m) => m <= 6);
+              if (highMonths.includes(monthNum)) {
+                isFirstMonthInYear = monthNum === Math.min(...highMonths);
+                consecutiveMonths = highMonths.filter((m) => m >= monthNum).length;
+              } else if (lowMonths.includes(monthNum)) {
+                isFirstMonthInYear = monthNum === Math.min(...lowMonths);
+                consecutiveMonths = lowMonths.filter((m) => m >= monthNum).length;
+              }
+            } else {
+              isFirstMonthInYear = monthNum === sortedMonths[0];
+              consecutiveMonths = sortedMonths.filter((m) => m >= monthNum).length;
+            }
+            return {
+              period,
+              isFirstMonth: isFirstMonthInYear,
+              rowSpan: consecutiveMonths
+            };
+          }
+        }
+        return null;
+      }
+      /**
+       * Calculate the year for a custom period note based on yearBasis setting
+       */
+      getCustomPeriodYear(period, calendarYear, month) {
+        const monthNum = month + 1;
         const sortedMonths = [...period.months].sort((a, b) => a - b);
         const wrapsYear = sortedMonths.length > 1 && sortedMonths[sortedMonths.length - 1] - sortedMonths[0] > 6;
-        let isFirstMonthInYear = false;
-        let consecutiveMonths = 0;
-        if (wrapsYear) {
-          const highMonths = sortedMonths.filter((m) => m > 6);
-          const lowMonths = sortedMonths.filter((m) => m <= 6);
-          if (highMonths.includes(monthNum)) {
-            isFirstMonthInYear = monthNum === Math.min(...highMonths);
-            consecutiveMonths = highMonths.filter((m) => m >= monthNum).length;
-          } else if (lowMonths.includes(monthNum)) {
-            isFirstMonthInYear = monthNum === Math.min(...lowMonths);
-            consecutiveMonths = lowMonths.filter((m) => m >= monthNum).length;
-          }
-        } else {
-          isFirstMonthInYear = monthNum === sortedMonths[0];
-          consecutiveMonths = sortedMonths.filter((m) => m >= monthNum).length;
+        if (!wrapsYear) {
+          return calendarYear;
         }
-        return {
-          period,
-          isFirstMonth: isFirstMonthInYear,
-          rowSpan: consecutiveMonths
-        };
-      }
-    }
-    return null;
-  }
-  /**
-   * Calculate the year for a custom period note based on yearBasis setting
-   */
-  getCustomPeriodYear(period, calendarYear, month) {
-    const monthNum = month + 1;
-    const sortedMonths = [...period.months].sort((a, b) => a - b);
-    const wrapsYear = sortedMonths.length > 1 && sortedMonths[sortedMonths.length - 1] - sortedMonths[0] > 6;
-    if (!wrapsYear) {
-      return calendarYear;
-    }
-    const highMonths = sortedMonths.filter((m) => m > 6);
-    const lowMonths = sortedMonths.filter((m) => m <= 6);
-    switch (period.yearBasis) {
-      case "start":
-        return highMonths.includes(monthNum) ? calendarYear : calendarYear;
-      case "end":
-        return lowMonths.includes(monthNum) ? calendarYear : calendarYear + 1;
-      case "majority":
-      default:
-        if (lowMonths.length >= highMonths.length) {
-          return lowMonths.includes(monthNum) ? calendarYear : calendarYear + 1;
-        } else {
-          return highMonths.includes(monthNum) ? calendarYear : calendarYear;
-        }
-    }
-  }
-  async renderMonthRow(tbody, year, month, monthName, notesMap, multiDayEntries, maxDayCells, showQuarterColumn = false, enabledGroups = []) {
-    const periodicSettings = this.plugin.settings.periodicNotes;
-    const weekDisplayMode = periodicSettings.weekly.enabled ? periodicSettings.weekNumberDisplay : "none";
-    const moment = window.moment;
-    if (weekDisplayMode === "header-row") {
-      const weekRowClass = month > 0 ? "week-header-row month-first-row" : "week-header-row";
-      const weekRow = tbody.createEl("tr", { cls: weekRowClass });
-      for (const group of enabledGroups) {
-        const periodInfo = this.getCustomPeriodForMonth(month, group);
-        if (periodInfo && periodInfo.isFirstMonth) {
-          const { period, rowSpan } = periodInfo;
-          const periodYear = this.getCustomPeriodYear(period, year, month);
-          const periodCell = weekRow.createEl("td", { cls: "custom-period-cell" });
-          periodCell.textContent = period.name;
-          periodCell.rowSpan = rowSpan * 2;
-          periodCell.style.cursor = "pointer";
-          const effectiveColor = period.useGroupSettings !== false && (group == null ? void 0 : group.color) ? group.color : period.color;
-          if (effectiveColor) {
-            periodCell.style.color = effectiveColor;
-          }
-          periodCell.dataset.periodId = period.id;
-          periodCell.dataset.groupId = group.id;
-          periodCell.dataset.year = String(periodYear);
-          periodCell.onclick = async (e) => {
-            e.preventDefault();
-            await this.openOrCreateCustomPeriodNote(period, periodYear, group);
-          };
-        } else if (!periodInfo) {
-          const emptyCell = weekRow.createEl("td", { cls: "custom-period-cell empty" });
-          emptyCell.rowSpan = 2;
-        }
-      }
-      if (showQuarterColumn) {
-        const isFirstMonthOfQuarter = month % 3 === 0;
-        if (isFirstMonthOfQuarter) {
-          const quarterNum = Math.floor(month / 3) + 1;
-          const quarterCell = weekRow.createEl("td", { cls: "quarter-cell" });
-          quarterCell.textContent = `Q${quarterNum}`;
-          quarterCell.rowSpan = 6;
-          quarterCell.style.cursor = "pointer";
-          const quarterlyColor = periodicSettings.quarterly.color;
-          if (quarterlyColor) {
-            quarterCell.style.color = quarterlyColor;
-          }
-          quarterCell.onclick = async (e) => {
-            e.preventDefault();
-            const quarterDate = new Date(year, month, 1);
-            await this.openOrCreateQuarterlyNote(quarterDate);
-          };
-        }
-      }
-      weekRow.createEl("td", { cls: "month-label empty" });
-      const firstDay2 = new Date(year, month, 1);
-      const lastDay2 = new Date(year, month + 1, 0);
-      const daysInMonth2 = lastDay2.getDate();
-      const weekStartDay = this.plugin.settings.weekStartDay;
-      const useWeekdayAlignment2 = this.plugin.settings.columnAlignment === "weekday";
-      let colOffset = 0;
-      if (useWeekdayAlignment2) {
-        colOffset = (firstDay2.getDay() - weekStartDay + 7) % 7;
-      }
-      if (colOffset > 0) {
-        const emptyCell = weekRow.createEl("td", { cls: "week-header-cell empty" });
-        emptyCell.colSpan = colOffset;
-      }
-      let totalCellsUsed = colOffset;
-      let currentDay = 1;
-      let isFirstWeek = true;
-      while (currentDay <= daysInMonth2) {
-        const currentDate = new Date(year, month, currentDay);
-        const currentDayOfWeek = currentDate.getDay();
-        const daysFromWeekStart = (currentDayOfWeek - weekStartDay + 7) % 7;
-        const weekStartDate = new Date(year, month, currentDay - daysFromWeekStart);
-        const weekNumber = moment(weekStartDate).week();
-        let daysInThisWeek = 0;
-        let tempDay = currentDay;
-        while (tempDay <= daysInMonth2) {
-          const tempDate = new Date(year, month, tempDay);
-          const tempDayOfWeek = tempDate.getDay();
-          daysInThisWeek++;
-          if (tempDayOfWeek === (weekStartDay + 6) % 7) break;
-          tempDay++;
-        }
-        const weekCell = weekRow.createEl("td", { cls: "week-header-cell" });
-        weekCell.colSpan = daysInThisWeek;
-        totalCellsUsed += daysInThisWeek;
-        if (!isFirstWeek) {
-          weekCell.addClass("week-divider");
-          const borderConfig = periodicSettings.weekBorderColor;
-          let borderColor = "var(--background-modifier-border)";
-          if (borderConfig.mode === "accent") {
-            borderColor = "var(--interactive-accent)";
-          } else if (borderConfig.mode === "custom" && borderConfig.customColor) {
-            borderColor = borderConfig.customColor;
-          }
-          weekCell.style.borderLeft = `1px solid ${borderColor}`;
-        }
-        const weekLink = weekCell.createEl("a", {
-          text: `W${String(weekNumber).padStart(2, "0")}`,
-          cls: "week-header-link"
-        });
-        weekLink.dataset.date = currentDate.toISOString();
-        const weeklyColor = periodicSettings.weekly.color;
-        if (weeklyColor) {
-          weekLink.style.color = weeklyColor;
-        }
-        weekLink.onclick = async (e) => {
-          e.preventDefault();
-          await this.openOrCreateWeeklyNote(currentDate);
-        };
-        currentDay += daysInThisWeek;
-        isFirstWeek = false;
-      }
-      const remainingCells2 = maxDayCells - totalCellsUsed;
-      if (remainingCells2 > 0) {
-        const emptyCell = weekRow.createEl("td", { cls: "week-header-cell empty" });
-        emptyCell.colSpan = remainingCells2;
-      }
-      weekRow.createEl("td", { cls: "month-label-right empty" });
-    }
-    const monthRowClass = month > 0 && weekDisplayMode !== "header-row" ? "month-row month-first-row" : "month-row";
-    const row = tbody.createEl("tr", { cls: monthRowClass });
-    if (weekDisplayMode !== "header-row") {
-      for (const group of enabledGroups) {
-        const periodInfo = this.getCustomPeriodForMonth(month, group);
-        if (periodInfo && periodInfo.isFirstMonth) {
-          const { period, rowSpan } = periodInfo;
-          const periodYear = this.getCustomPeriodYear(period, year, month);
-          const periodCell = row.createEl("td", { cls: "custom-period-cell" });
-          periodCell.textContent = period.name;
-          periodCell.rowSpan = rowSpan;
-          periodCell.style.cursor = "pointer";
-          const effectiveColor = period.useGroupSettings !== false && (group == null ? void 0 : group.color) ? group.color : period.color;
-          if (effectiveColor) {
-            periodCell.style.color = effectiveColor;
-          }
-          periodCell.dataset.periodId = period.id;
-          periodCell.dataset.groupId = group.id;
-          periodCell.dataset.year = String(periodYear);
-          periodCell.onclick = async (e) => {
-            e.preventDefault();
-            await this.openOrCreateCustomPeriodNote(period, periodYear, group);
-          };
-        } else if (!periodInfo) {
-          row.createEl("td", { cls: "custom-period-cell empty" });
-        }
-      }
-    }
-    if (showQuarterColumn && weekDisplayMode !== "header-row") {
-      const isFirstMonthOfQuarter = month % 3 === 0;
-      if (isFirstMonthOfQuarter) {
-        const quarterNum = Math.floor(month / 3) + 1;
-        const quarterCell = row.createEl("td", {
-          text: `Q${quarterNum}`,
-          cls: "quarter-cell"
-        });
-        quarterCell.rowSpan = 3;
-        quarterCell.style.cursor = "pointer";
-        quarterCell.dataset.quarter = String(quarterNum);
-        quarterCell.dataset.year = String(year);
-        const quarterlyColor = periodicSettings.quarterly.color;
-        if (quarterlyColor) {
-          quarterCell.style.color = quarterlyColor;
-        }
-        quarterCell.onclick = async (e) => {
-          e.preventDefault();
-          const quarterStartMonth = (quarterNum - 1) * 3;
-          const quarterDate = new Date(year, quarterStartMonth, 1);
-          await this.openOrCreateQuarterlyNote(quarterDate);
-        };
-      }
-    }
-    const monthLabelCell = row.createEl("td", { cls: "month-label" });
-    const monthlyEnabled = this.plugin.settings.periodicNotes.monthly.enabled;
-    if (monthlyEnabled) {
-      const monthLink = monthLabelCell.createEl("a", {
-        text: monthName,
-        cls: "month-label-link"
-      });
-      const monthlyColor = periodicSettings.monthly.color;
-      if (monthlyColor) {
-        monthLink.style.color = monthlyColor;
-      }
-      monthLink.onclick = async (e) => {
-        e.preventDefault();
-        const monthDate = new Date(year, month, 1);
-        await this.openOrCreateMonthlyNote(monthDate);
-      };
-    } else {
-      monthLabelCell.textContent = monthName;
-    }
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
-    const useWeekdayAlignment = this.plugin.settings.columnAlignment === "weekday";
-    let columnOffset = 0;
-    if (useWeekdayAlignment) {
-      const weekStartDay = this.plugin.settings.weekStartDay;
-      columnOffset = (startingDayOfWeek - weekStartDay + 7) % 7;
-    }
-    const dayCells = [];
-    const activeMultiDayEntries = [];
-    multiDayEntries.forEach((entry) => {
-      if (entry.month === month && entry.year === year && this.shouldShowNote(entry.file)) {
-        activeMultiDayEntries.push(entry);
-      }
-    });
-    const occupiedRows = [];
-    const barPositions = /* @__PURE__ */ new Map();
-    activeMultiDayEntries.forEach((entry) => {
-      const startDay = entry.startDate.getDate();
-      const endDay = entry.endDate.getDate();
-      const startCol = columnOffset + startDay - 1;
-      const endCol = columnOffset + endDay - 1;
-      const span = endCol - startCol + 1;
-      if (span <= 0) return;
-      let rowIndex = 0;
-      while (occupiedRows.some(
-        (occupied) => occupied.row === rowIndex && occupied.start < endCol + 1 && occupied.end > startCol
-      )) {
-        rowIndex++;
-      }
-      occupiedRows.push({ row: rowIndex, start: startCol, end: endCol + 1 });
-      barPositions.set(entry.file.path + "-" + entry.month, { rowIndex, startCol, endCol, span });
-    });
-    const maxBarRow = occupiedRows.length > 0 ? Math.max(...occupiedRows.map((o) => o.row)) : -1;
-    const topPadding = (maxBarRow + 1) * 16 + 18;
-    for (let i = 0; i < columnOffset; i++) {
-      const emptyCell = row.createEl("td", { cls: "day-cell empty" });
-      dayCells.push(emptyCell);
-    }
-    const today = /* @__PURE__ */ new Date();
-    today.setHours(0, 0, 0, 0);
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      const dateKey = this.dateToKey(date);
-      const dayOfWeek = date.getDay();
-      const isWeekStart = dayOfWeek === this.plugin.settings.weekStartDay || day === 1;
-      const moment2 = window.moment;
-      const weekNumber = moment2(date).week();
-      const dayCell = row.createEl("td", { cls: "day-cell" });
-      const highlightedWeekdays = this.plugin.settings.highlightedWeekdays || [0, 6];
-      if (highlightedWeekdays.includes(dayOfWeek)) {
-        dayCell.addClass("day-cell-highlighted");
-      }
-      if (weekDisplayMode === "extra-column" && isWeekStart && day > 1) {
-        dayCell.addClass("week-start-cell");
-        const weekIndicator = dayCell.createEl("a", {
-          text: `W${String(weekNumber).padStart(2, "0")}`,
-          cls: "week-divider-label"
-        });
-        weekIndicator.dataset.date = date.toISOString();
-        weekIndicator.onclick = async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          await this.openOrCreateWeeklyNote(date);
-        };
-      }
-      if (weekDisplayMode === "header-row" && isWeekStart && day > 1) {
-        dayCell.addClass("week-boundary");
-        const borderConfig = periodicSettings.weekBorderColor;
-        let borderColor = "var(--background-modifier-border)";
-        if (borderConfig.mode === "accent") {
-          borderColor = "var(--interactive-accent)";
-        } else if (borderConfig.mode === "custom" && borderConfig.customColor) {
-          borderColor = borderConfig.customColor;
-        }
-        dayCell.style.borderLeft = `1px solid ${borderColor}`;
-      }
-      const dayIndex = columnOffset + day - 1;
-      const barsAbove = occupiedRows.filter((o) => o.start <= dayIndex && o.end > dayIndex).length;
-      if (barsAbove > 0) {
-        dayCell.style.paddingTop = `${topPadding}px`;
-      }
-      dayCells.push(dayCell);
-      const isActualWeekStart = dayOfWeek === this.plugin.settings.weekStartDay;
-      if (weekDisplayMode === "above-day" && isActualWeekStart) {
-        const weekIndicator = dayCell.createEl("a", {
-          text: `W${String(weekNumber).padStart(2, "0")}`,
-          cls: "week-indicator"
-        });
-        weekIndicator.dataset.date = date.toISOString();
-        weekIndicator.onclick = async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          await this.openOrCreateWeeklyNote(date);
-        };
-      }
-      const dayNumber = dayCell.createEl("a", {
-        text: String(day).padStart(2, "0"),
-        cls: "day-number day-number-link"
-      });
-      dayNumber.dataset.date = date.toISOString();
-      dayNumber.onclick = async (e) => {
-        e.preventDefault();
-        if (e.metaKey || e.ctrlKey) {
-          if (this.plugin.settings.quickNoteCreation.enabled) {
-            await this.openQuickNoteModal(date);
-          }
-        } else {
-          await this.openOrCreateDailyNote(date);
-        }
-      };
-      dayNumber.onmousedown = (e) => {
-        if (e.metaKey || e.ctrlKey) {
-          e.preventDefault();
-          this.dragStartDate = date;
-          this.dragEndDate = null;
-          this.isDragging = true;
-          dayNumber.addClass("drag-selecting");
-        }
-      };
-      dayNumber.onmouseenter = () => {
-        if (this.isDragging && this.dragStartDate) {
-          this.containerEl.querySelectorAll(".drag-selecting").forEach((el) => {
-            el.removeClass("drag-selecting");
-          });
-          this.dragEndDate = date;
-          this.highlightDateRange(this.dragStartDate, this.dragEndDate);
-        }
-      };
-      const notes = notesMap.get(dateKey);
-      if (notes && notes.length > 0) {
-        const notesContainer = dayCell.createDiv({ cls: "day-notes" });
-        const singleDayNotes = notes.filter((n) => !n.isMultiDay && this.shouldShowNote(n.file));
-        singleDayNotes.forEach((noteInfo) => {
-          const noteLink = notesContainer.createEl("a", {
-            cls: "note-link internal-link",
-            href: "#"
-          });
-          noteLink.style.background = this.getColorForFile(noteInfo.file);
-          const icon = this.getIconForFile(noteInfo.file);
-          if (icon) {
-            const iconSpan = noteLink.createEl("span", { cls: "note-icon" });
-            iconSpan.style.cssText = "margin-right: 3px;";
-            if (icon.type === "emoji") {
-              iconSpan.textContent = icon.value;
+        const highMonths = sortedMonths.filter((m) => m > 6);
+        const lowMonths = sortedMonths.filter((m) => m <= 6);
+        switch (period.yearBasis) {
+          case "start":
+            return highMonths.includes(monthNum) ? calendarYear : calendarYear;
+          case "end":
+            return lowMonths.includes(monthNum) ? calendarYear : calendarYear + 1;
+          case "majority":
+          default:
+            if (lowMonths.length >= highMonths.length) {
+              return lowMonths.includes(monthNum) ? calendarYear : calendarYear + 1;
             } else {
-              (0, import_obsidian7.setIcon)(iconSpan, icon.value);
-              iconSpan.style.color = "#ffffff";
+              return highMonths.includes(monthNum) ? calendarYear : calendarYear;
+            }
+        }
+      }
+      async renderMonthRow(tbody, year, month, monthName, notesMap, multiDayEntries, maxDayCells, showQuarterColumn = false, enabledGroups = []) {
+        const periodicSettings = this.plugin.settings.periodicNotes;
+        const weekDisplayMode = periodicSettings.weekly.enabled ? periodicSettings.weekNumberDisplay : "none";
+        const moment = window.moment;
+        if (weekDisplayMode === "header-row") {
+          const weekRowClass = month > 0 ? "week-header-row month-first-row" : "week-header-row";
+          const weekRow = tbody.createEl("tr", { cls: weekRowClass });
+          for (const group of enabledGroups) {
+            const periodInfo = this.getCustomPeriodForMonth(month, group);
+            if (periodInfo && periodInfo.isFirstMonth) {
+              const { period, rowSpan } = periodInfo;
+              const periodYear = this.getCustomPeriodYear(period, year, month);
+              const periodCell = weekRow.createEl("td", { cls: "custom-period-cell" });
+              periodCell.textContent = period.name;
+              periodCell.rowSpan = rowSpan * 2;
+              periodCell.style.cursor = "pointer";
+              const effectiveColor = period.useGroupSettings !== false && (group == null ? void 0 : group.color) ? group.color : period.color;
+              if (effectiveColor) {
+                periodCell.style.color = effectiveColor;
+              }
+              periodCell.dataset.periodId = period.id;
+              periodCell.dataset.groupId = group.id;
+              periodCell.dataset.year = String(periodYear);
+              periodCell.onclick = async (e) => {
+                e.preventDefault();
+                await this.openOrCreateCustomPeriodNote(period, periodYear, group);
+              };
+            } else if (!periodInfo) {
+              const emptyCell = weekRow.createEl("td", { cls: "custom-period-cell empty" });
+              emptyCell.rowSpan = 2;
             }
           }
-          noteLink.createEl("span", { text: this.getDisplayName(noteInfo.file) });
-          noteLink.setAttr("data-href", noteInfo.file.path);
-          noteLink.addEventListener("mouseenter", (event) => {
-            this.showTooltip(noteInfo.file.basename, event);
-          });
-          noteLink.addEventListener("mouseleave", () => {
-            this.hideTooltip();
-          });
-          noteLink.addEventListener("mouseover", (event) => {
-            this.app.workspace.trigger("hover-link", {
-              event,
-              source: VIEW_TYPE_CALENDAR,
-              hoverParent: this,
-              targetEl: noteLink,
-              linktext: noteInfo.file.path
+          if (showQuarterColumn) {
+            const isFirstMonthOfQuarter = month % 3 === 0;
+            if (isFirstMonthOfQuarter) {
+              const quarterNum = Math.floor(month / 3) + 1;
+              const quarterCell = weekRow.createEl("td", { cls: "quarter-cell" });
+              quarterCell.textContent = `Q${quarterNum}`;
+              quarterCell.rowSpan = 6;
+              quarterCell.style.cursor = "pointer";
+              const quarterlyColor = periodicSettings.quarterly.color;
+              if (quarterlyColor) {
+                quarterCell.style.color = quarterlyColor;
+              }
+              quarterCell.onclick = async (e) => {
+                e.preventDefault();
+                const quarterDate = new Date(year, month, 1);
+                await this.openOrCreateQuarterlyNote(quarterDate);
+              };
+            }
+          }
+          weekRow.createEl("td", { cls: "month-label empty" });
+          const firstDay2 = new Date(year, month, 1);
+          const lastDay2 = new Date(year, month + 1, 0);
+          const daysInMonth2 = lastDay2.getDate();
+          const weekStartDay = this.plugin.settings.weekStartDay;
+          const useWeekdayAlignment2 = this.plugin.settings.columnAlignment === "weekday";
+          let colOffset = 0;
+          if (useWeekdayAlignment2) {
+            colOffset = (firstDay2.getDay() - weekStartDay + 7) % 7;
+          }
+          if (colOffset > 0) {
+            const emptyCell = weekRow.createEl("td", { cls: "week-header-cell empty" });
+            emptyCell.colSpan = colOffset;
+          }
+          let totalCellsUsed = colOffset;
+          let currentDay = 1;
+          let isFirstWeek = true;
+          while (currentDay <= daysInMonth2) {
+            const currentDate = new Date(year, month, currentDay);
+            const currentDayOfWeek = currentDate.getDay();
+            const daysFromWeekStart = (currentDayOfWeek - weekStartDay + 7) % 7;
+            const weekStartDate = new Date(year, month, currentDay - daysFromWeekStart);
+            const weekNumber = moment(weekStartDate).week();
+            let daysInThisWeek = 0;
+            let tempDay = currentDay;
+            while (tempDay <= daysInMonth2) {
+              const tempDate = new Date(year, month, tempDay);
+              const tempDayOfWeek = tempDate.getDay();
+              daysInThisWeek++;
+              if (tempDayOfWeek === (weekStartDay + 6) % 7) break;
+              tempDay++;
+            }
+            const weekCell = weekRow.createEl("td", { cls: "week-header-cell" });
+            weekCell.colSpan = daysInThisWeek;
+            totalCellsUsed += daysInThisWeek;
+            if (!isFirstWeek) {
+              weekCell.addClass("week-divider");
+              const borderConfig = periodicSettings.weekBorderColor;
+              let borderColor = "var(--background-modifier-border)";
+              if (borderConfig.mode === "accent") {
+                borderColor = "var(--interactive-accent)";
+              } else if (borderConfig.mode === "custom" && borderConfig.customColor) {
+                borderColor = borderConfig.customColor;
+              }
+              weekCell.style.borderLeft = `1px solid ${borderColor}`;
+            }
+            const weekLink = weekCell.createEl("a", {
+              text: `W${String(weekNumber).padStart(2, "0")}`,
+              cls: "week-header-link"
             });
-          });
-          noteLink.onclick = (e) => {
-            e.preventDefault();
-            this.app.workspace.getLeaf(false).openFile(noteInfo.file);
-          };
-        });
-      }
-      if (date.getTime() === today.getTime()) {
-        dayCell.addClass("today");
-      }
-    }
-    const cellsUsed = columnOffset + daysInMonth;
-    const remainingCells = maxDayCells - cellsUsed;
-    for (let i = 0; i < remainingCells; i++) {
-      const emptyCell = row.createEl("td", { cls: "day-cell empty" });
-      dayCells.push(emptyCell);
-    }
-    activeMultiDayEntries.forEach((entry) => {
-      const pos = barPositions.get(entry.file.path + "-" + entry.month);
-      if (!pos) return;
-      const firstDayCell = dayCells[pos.startCol];
-      if (firstDayCell && firstDayCell.classList.contains("day-cell")) {
-        const multiDayBar = firstDayCell.createEl("div", {
-          cls: "multi-day-bar"
-        });
-        multiDayBar.style.background = this.getColorForFile(entry.file);
-        multiDayBar.style.top = `${20 + pos.rowIndex * 16}px`;
-        multiDayBar.dataset.span = pos.span.toString();
-        const noteLink = multiDayBar.createEl("a", {
-          cls: "multi-day-link internal-link",
-          href: "#"
-        });
-        const icon = this.getIconForFile(entry.file);
-        if (icon) {
-          const iconSpan = noteLink.createEl("span", { cls: "note-icon" });
-          iconSpan.style.cssText = "margin-right: 3px;";
-          if (icon.type === "emoji") {
-            iconSpan.textContent = icon.value;
-          } else {
-            (0, import_obsidian7.setIcon)(iconSpan, icon.value);
-            iconSpan.style.color = "#ffffff";
+            weekLink.dataset.date = currentDate.toISOString();
+            const weeklyColor = periodicSettings.weekly.color;
+            if (weeklyColor) {
+              weekLink.style.color = weeklyColor;
+            }
+            weekLink.onclick = async (e) => {
+              e.preventDefault();
+              await this.openOrCreateWeeklyNote(currentDate);
+            };
+            currentDay += daysInThisWeek;
+            isFirstWeek = false;
+          }
+          const remainingCells2 = maxDayCells - totalCellsUsed;
+          if (remainingCells2 > 0) {
+            const emptyCell = weekRow.createEl("td", { cls: "week-header-cell empty" });
+            emptyCell.colSpan = remainingCells2;
+          }
+          weekRow.createEl("td", { cls: "month-label-right empty" });
+        }
+        const monthRowClass = month > 0 && weekDisplayMode !== "header-row" ? "month-row month-first-row" : "month-row";
+        const row = tbody.createEl("tr", { cls: monthRowClass });
+        if (weekDisplayMode !== "header-row") {
+          for (const group of enabledGroups) {
+            const periodInfo = this.getCustomPeriodForMonth(month, group);
+            if (periodInfo && periodInfo.isFirstMonth) {
+              const { period, rowSpan } = periodInfo;
+              const periodYear = this.getCustomPeriodYear(period, year, month);
+              const periodCell = row.createEl("td", { cls: "custom-period-cell" });
+              periodCell.textContent = period.name;
+              periodCell.rowSpan = rowSpan;
+              periodCell.style.cursor = "pointer";
+              const effectiveColor = period.useGroupSettings !== false && (group == null ? void 0 : group.color) ? group.color : period.color;
+              if (effectiveColor) {
+                periodCell.style.color = effectiveColor;
+              }
+              periodCell.dataset.periodId = period.id;
+              periodCell.dataset.groupId = group.id;
+              periodCell.dataset.year = String(periodYear);
+              periodCell.onclick = async (e) => {
+                e.preventDefault();
+                await this.openOrCreateCustomPeriodNote(period, periodYear, group);
+              };
+            } else if (!periodInfo) {
+              row.createEl("td", { cls: "custom-period-cell empty" });
+            }
           }
         }
-        noteLink.createEl("span", { text: this.getDisplayName(entry.file) });
-        noteLink.setAttr("data-href", entry.file.path);
-        noteLink.addEventListener("mouseenter", (event) => {
-          this.showTooltip(entry.file.basename, event);
-        });
-        noteLink.addEventListener("mouseleave", () => {
-          this.hideTooltip();
-        });
-        noteLink.addEventListener("mouseover", (event) => {
-          this.app.workspace.trigger("hover-link", {
-            event,
-            source: VIEW_TYPE_CALENDAR,
-            hoverParent: this,
-            targetEl: noteLink,
-            linktext: entry.file.path
-          });
-        });
-        noteLink.onclick = (e) => {
-          e.preventDefault();
-          this.app.workspace.getLeaf(false).openFile(entry.file);
-        };
-        setTimeout(() => {
-          if (firstDayCell && firstDayCell.parentElement) {
-            const row2 = firstDayCell.parentElement;
-            const cells = Array.from(row2.querySelectorAll(".day-cell"));
-            const startIndex = cells.indexOf(firstDayCell);
-            if (startIndex >= 0 && startIndex + pos.span - 1 < cells.length) {
-              const lastCell = cells[startIndex + pos.span - 1];
-              const firstCellRect = firstDayCell.getBoundingClientRect();
-              const lastCellRect = lastCell.getBoundingClientRect();
-              const totalWidth = lastCellRect.right - firstCellRect.left - 6;
-              multiDayBar.style.width = `${totalWidth}px`;
+        if (showQuarterColumn && weekDisplayMode !== "header-row") {
+          const isFirstMonthOfQuarter = month % 3 === 0;
+          if (isFirstMonthOfQuarter) {
+            const quarterNum = Math.floor(month / 3) + 1;
+            const quarterCell = row.createEl("td", {
+              text: `Q${quarterNum}`,
+              cls: "quarter-cell"
+            });
+            quarterCell.rowSpan = 3;
+            quarterCell.style.cursor = "pointer";
+            quarterCell.dataset.quarter = String(quarterNum);
+            quarterCell.dataset.year = String(year);
+            const quarterlyColor = periodicSettings.quarterly.color;
+            if (quarterlyColor) {
+              quarterCell.style.color = quarterlyColor;
             }
+            quarterCell.onclick = async (e) => {
+              e.preventDefault();
+              const quarterStartMonth = (quarterNum - 1) * 3;
+              const quarterDate = new Date(year, quarterStartMonth, 1);
+              await this.openOrCreateQuarterlyNote(quarterDate);
+            };
           }
-        }, 0);
+        }
+        const monthLabelCell = row.createEl("td", { cls: "month-label" });
+        const monthlyEnabled = this.plugin.settings.periodicNotes.monthly.enabled;
+        if (monthlyEnabled) {
+          const monthLink = monthLabelCell.createEl("a", {
+            text: monthName,
+            cls: "month-label-link"
+          });
+          const monthlyColor = periodicSettings.monthly.color;
+          if (monthlyColor) {
+            monthLink.style.color = monthlyColor;
+          }
+          monthLink.onclick = async (e) => {
+            e.preventDefault();
+            const monthDate = new Date(year, month, 1);
+            await this.openOrCreateMonthlyNote(monthDate);
+          };
+        } else {
+          monthLabelCell.textContent = monthName;
+        }
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        const startingDayOfWeek = firstDay.getDay();
+        const useWeekdayAlignment = this.plugin.settings.columnAlignment === "weekday";
+        let columnOffset = 0;
+        if (useWeekdayAlignment) {
+          const weekStartDay = this.plugin.settings.weekStartDay;
+          columnOffset = (startingDayOfWeek - weekStartDay + 7) % 7;
+        }
+        const dayCells = [];
+        const activeMultiDayEntries = [];
+        multiDayEntries.forEach((entry) => {
+          if (entry.month === month && entry.year === year && this.shouldShowNote(entry.file)) {
+            activeMultiDayEntries.push(entry);
+          }
+        });
+        const occupiedRows = [];
+        const barPositions = /* @__PURE__ */ new Map();
+        activeMultiDayEntries.forEach((entry) => {
+          const startDay = entry.startDate.getDate();
+          const endDay = entry.endDate.getDate();
+          const startCol = columnOffset + startDay - 1;
+          const endCol = columnOffset + endDay - 1;
+          const span = endCol - startCol + 1;
+          if (span <= 0) return;
+          let rowIndex = 0;
+          while (occupiedRows.some(
+            (occupied) => occupied.row === rowIndex && occupied.start < endCol + 1 && occupied.end > startCol
+          )) {
+            rowIndex++;
+          }
+          occupiedRows.push({ row: rowIndex, start: startCol, end: endCol + 1 });
+          barPositions.set(entry.file.path + "-" + entry.month, { rowIndex, startCol, endCol, span });
+        });
+        const maxBarRow = occupiedRows.length > 0 ? Math.max(...occupiedRows.map((o) => o.row)) : -1;
+        const topPadding = (maxBarRow + 1) * 16 + 18;
+        for (let i = 0; i < columnOffset; i++) {
+          const emptyCell = row.createEl("td", { cls: "day-cell empty" });
+          dayCells.push(emptyCell);
+        }
+        const today = /* @__PURE__ */ new Date();
+        today.setHours(0, 0, 0, 0);
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = new Date(year, month, day);
+          const dateKey = this.dateToKey(date);
+          const dayOfWeek = date.getDay();
+          const isWeekStart = dayOfWeek === this.plugin.settings.weekStartDay || day === 1;
+          const moment2 = window.moment;
+          const weekNumber = moment2(date).week();
+          const dayCell = row.createEl("td", { cls: "day-cell" });
+          const highlightedWeekdays = this.plugin.settings.highlightedWeekdays || [0, 6];
+          if (highlightedWeekdays.includes(dayOfWeek)) {
+            dayCell.addClass("day-cell-highlighted");
+          }
+          if (weekDisplayMode === "extra-column" && isWeekStart && day > 1) {
+            dayCell.addClass("week-start-cell");
+            const weekIndicator = dayCell.createEl("a", {
+              text: `W${String(weekNumber).padStart(2, "0")}`,
+              cls: "week-divider-label"
+            });
+            weekIndicator.dataset.date = date.toISOString();
+            weekIndicator.onclick = async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              await this.openOrCreateWeeklyNote(date);
+            };
+          }
+          if (weekDisplayMode === "header-row" && isWeekStart && day > 1) {
+            dayCell.addClass("week-boundary");
+            const borderConfig = periodicSettings.weekBorderColor;
+            let borderColor = "var(--background-modifier-border)";
+            if (borderConfig.mode === "accent") {
+              borderColor = "var(--interactive-accent)";
+            } else if (borderConfig.mode === "custom" && borderConfig.customColor) {
+              borderColor = borderConfig.customColor;
+            }
+            dayCell.style.borderLeft = `1px solid ${borderColor}`;
+          }
+          const dayIndex = columnOffset + day - 1;
+          const barsAbove = occupiedRows.filter((o) => o.start <= dayIndex && o.end > dayIndex).length;
+          if (barsAbove > 0) {
+            dayCell.style.paddingTop = `${topPadding}px`;
+          }
+          dayCells.push(dayCell);
+          const isActualWeekStart = dayOfWeek === this.plugin.settings.weekStartDay;
+          if (weekDisplayMode === "above-day" && isActualWeekStart) {
+            const weekIndicator = dayCell.createEl("a", {
+              text: `W${String(weekNumber).padStart(2, "0")}`,
+              cls: "week-indicator"
+            });
+            weekIndicator.dataset.date = date.toISOString();
+            weekIndicator.onclick = async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              await this.openOrCreateWeeklyNote(date);
+            };
+          }
+          const dayNumber = dayCell.createEl("a", {
+            text: String(day).padStart(2, "0"),
+            cls: "day-number day-number-link"
+          });
+          dayNumber.dataset.date = date.toISOString();
+          dayNumber.onclick = async (e) => {
+            e.preventDefault();
+            if (e.metaKey || e.ctrlKey) {
+              if (this.plugin.settings.quickNoteCreation.enabled) {
+                await this.openQuickNoteModal(date);
+              }
+            } else {
+              await this.openOrCreateDailyNote(date);
+            }
+          };
+          dayNumber.onmousedown = (e) => {
+            if (e.metaKey || e.ctrlKey) {
+              e.preventDefault();
+              this.dragStartDate = date;
+              this.dragEndDate = null;
+              this.isDragging = true;
+              dayNumber.addClass("drag-selecting");
+            }
+          };
+          dayNumber.onmouseenter = () => {
+            if (this.isDragging && this.dragStartDate) {
+              this.containerEl.querySelectorAll(".drag-selecting").forEach((el) => {
+                el.removeClass("drag-selecting");
+              });
+              this.dragEndDate = date;
+              this.highlightDateRange(this.dragStartDate, this.dragEndDate);
+            }
+          };
+          const notes = notesMap.get(dateKey);
+          if (notes && notes.length > 0) {
+            const notesContainer = dayCell.createDiv({ cls: "day-notes" });
+            const singleDayNotes = notes.filter((n) => !n.isMultiDay && this.shouldShowNote(n.file));
+            singleDayNotes.forEach((noteInfo) => {
+              var _a;
+              const noteLink = notesContainer.createEl("a", {
+                cls: noteInfo.isRecurring ? "note-link internal-link lc-recurring" : "note-link internal-link",
+                href: "#"
+              });
+              noteLink.style.background = this.getColorForFile(noteInfo.file);
+              const icon = this.getIconForFile(noteInfo.file);
+              if (icon) {
+                const iconSpan = noteLink.createEl("span", { cls: "note-icon" });
+                iconSpan.style.cssText = "margin-right: 3px;";
+                if (icon.type === "emoji") {
+                  iconSpan.textContent = icon.value;
+                } else {
+                  (0, import_obsidian7.setIcon)(iconSpan, icon.value);
+                  iconSpan.style.color = "#ffffff";
+                }
+              }
+              const displayText = (_a = noteInfo.recurringLabel) != null ? _a : this.getDisplayName(noteInfo.file);
+              noteLink.createEl("span", { text: displayText });
+              noteLink.setAttr("data-href", noteInfo.file.path);
+              noteLink.addEventListener("mouseenter", (event) => {
+                var _a2;
+                const tooltipText = noteInfo.isRecurring ? (_a2 = noteInfo.recurringLabel) != null ? _a2 : noteInfo.file.basename : noteInfo.file.basename;
+                this.showTooltip(tooltipText, event);
+              });
+              noteLink.addEventListener("mouseleave", () => {
+                this.hideTooltip();
+              });
+              noteLink.addEventListener("mouseover", (event) => {
+                this.app.workspace.trigger("hover-link", {
+                  event,
+                  source: VIEW_TYPE_CALENDAR,
+                  hoverParent: this,
+                  targetEl: noteLink,
+                  linktext: noteInfo.file.path
+                });
+              });
+              noteLink.onclick = (e) => {
+                e.preventDefault();
+                this.app.workspace.getLeaf(false).openFile(noteInfo.file);
+              };
+              if (noteInfo.isRecurring) {
+                noteLink.addEventListener("contextmenu", (e) => {
+                  e.preventDefault();
+                  this.plugin.openRecurringRuleBuilder(noteInfo.file);
+                });
+              }
+            });
+          }
+          if (date.getTime() === today.getTime()) {
+            dayCell.addClass("today");
+          }
+        }
+        const cellsUsed = columnOffset + daysInMonth;
+        const remainingCells = maxDayCells - cellsUsed;
+        for (let i = 0; i < remainingCells; i++) {
+          const emptyCell = row.createEl("td", { cls: "day-cell empty" });
+          dayCells.push(emptyCell);
+        }
+        activeMultiDayEntries.forEach((entry) => {
+          const pos = barPositions.get(entry.file.path + "-" + entry.month);
+          if (!pos) return;
+          const firstDayCell = dayCells[pos.startCol];
+          if (firstDayCell && firstDayCell.classList.contains("day-cell")) {
+            const multiDayBar = firstDayCell.createEl("div", {
+              cls: "multi-day-bar"
+            });
+            multiDayBar.style.background = this.getColorForFile(entry.file);
+            multiDayBar.style.top = `${20 + pos.rowIndex * 16}px`;
+            multiDayBar.dataset.span = pos.span.toString();
+            const noteLink = multiDayBar.createEl("a", {
+              cls: "multi-day-link internal-link",
+              href: "#"
+            });
+            const icon = this.getIconForFile(entry.file);
+            if (icon) {
+              const iconSpan = noteLink.createEl("span", { cls: "note-icon" });
+              iconSpan.style.cssText = "margin-right: 3px;";
+              if (icon.type === "emoji") {
+                iconSpan.textContent = icon.value;
+              } else {
+                (0, import_obsidian7.setIcon)(iconSpan, icon.value);
+                iconSpan.style.color = "#ffffff";
+              }
+            }
+            noteLink.createEl("span", { text: this.getDisplayName(entry.file) });
+            noteLink.setAttr("data-href", entry.file.path);
+            noteLink.addEventListener("mouseenter", (event) => {
+              this.showTooltip(entry.file.basename, event);
+            });
+            noteLink.addEventListener("mouseleave", () => {
+              this.hideTooltip();
+            });
+            noteLink.addEventListener("mouseover", (event) => {
+              this.app.workspace.trigger("hover-link", {
+                event,
+                source: VIEW_TYPE_CALENDAR,
+                hoverParent: this,
+                targetEl: noteLink,
+                linktext: entry.file.path
+              });
+            });
+            noteLink.onclick = (e) => {
+              e.preventDefault();
+              this.app.workspace.getLeaf(false).openFile(entry.file);
+            };
+            requestAnimationFrame(() => {
+              if (firstDayCell && firstDayCell.parentElement) {
+                const row2 = firstDayCell.parentElement;
+                const cells = Array.from(row2.querySelectorAll(".day-cell"));
+                const startIndex = cells.indexOf(firstDayCell);
+                if (startIndex >= 0 && startIndex + pos.span - 1 < cells.length) {
+                  const lastCell = cells[startIndex + pos.span - 1];
+                  const firstCellRect = firstDayCell.getBoundingClientRect();
+                  const lastCellRect = lastCell.getBoundingClientRect();
+                  const totalWidth = lastCellRect.right - firstCellRect.left - 6;
+                  multiDayBar.style.width = `${totalWidth}px`;
+                }
+              }
+            });
+          }
+        });
+        const monthLabelRightCell = row.createEl("td", { cls: "month-label-right" });
+        if (monthlyEnabled) {
+          const monthLinkRight = monthLabelRightCell.createEl("a", {
+            text: monthName,
+            cls: "month-label-link"
+          });
+          const monthlyColor = periodicSettings.monthly.color;
+          if (monthlyColor) {
+            monthLinkRight.style.color = monthlyColor;
+          }
+          monthLinkRight.onclick = async (e) => {
+            e.preventDefault();
+            const monthDate = new Date(year, month, 1);
+            await this.openOrCreateMonthlyNote(monthDate);
+          };
+        } else {
+          monthLabelRightCell.textContent = monthName;
+        }
       }
-    });
-    const monthLabelRightCell = row.createEl("td", { cls: "month-label-right" });
-    if (monthlyEnabled) {
-      const monthLinkRight = monthLabelRightCell.createEl("a", {
-        text: monthName,
-        cls: "month-label-link"
-      });
-      const monthlyColor = periodicSettings.monthly.color;
-      if (monthlyColor) {
-        monthLinkRight.style.color = monthlyColor;
+      async onClose() {
+        if (this.resizeObserver) {
+          this.resizeObserver.disconnect();
+        }
+        this.hideTooltip();
       }
-      monthLinkRight.onclick = async (e) => {
-        e.preventDefault();
-        const monthDate = new Date(year, month, 1);
-        await this.openOrCreateMonthlyNote(monthDate);
-      };
-    } else {
-      monthLabelRightCell.textContent = monthName;
-    }
+      showTooltip(text, event) {
+        this.hideTooltip();
+        this.tooltip = document.body.createEl("div", {
+          cls: "lc-tooltip",
+          text
+        });
+        const x = event.clientX + 10;
+        const y = event.clientY + 10;
+        this.tooltip.style.left = `${x}px`;
+        this.tooltip.style.top = `${y}px`;
+      }
+      hideTooltip() {
+        if (this.tooltip) {
+          this.tooltip.remove();
+          this.tooltip = null;
+        }
+      }
+    };
   }
-  async onClose() {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-    this.hideTooltip();
+});
+
+// src/RecurringEventEditorExtension.ts
+var RecurringEventEditorExtension_exports = {};
+__export(RecurringEventEditorExtension_exports, {
+  buildRecurringEditorExtension: () => buildRecurringEditorExtension
+});
+function buildRecurringEditorExtension(plugin) {
+  return import_view.ViewPlugin.fromClass(
+    class {
+      constructor(view) {
+        this.decorations = this.buildDecorations(view);
+      }
+      update(update) {
+        if (update.docChanged || update.viewportChanged || update.focusChanged) {
+          this.decorations = this.buildDecorations(update.view);
+        }
+      }
+      buildDecorations(view) {
+        const config = plugin.settings.recurringEvents;
+        if (!config.enabled || config.propertyRules.length === 0) {
+          return import_view.Decoration.none;
+        }
+        const file = plugin.app.workspace.getActiveFile();
+        if (!file) return import_view.Decoration.none;
+        const builder = new import_state.RangeSetBuilder();
+        const doc = view.state.doc;
+        const docText = doc.toString();
+        if (!docText.startsWith("---")) return import_view.Decoration.none;
+        const fmEnd = docText.indexOf("\n---", 3);
+        if (fmEnd === -1) return import_view.Decoration.none;
+        const propertyNames = new Set(config.propertyRules.map((r) => r.propertyName));
+        for (let lineNum = 1; lineNum <= doc.lines; lineNum++) {
+          const line = doc.line(lineNum);
+          if (line.from > fmEnd + 4) break;
+          const text = line.text;
+          const colonIdx = text.indexOf(":");
+          if (colonIdx < 1) continue;
+          const key = text.slice(0, colonIdx).trim();
+          if (!propertyNames.has(key)) continue;
+          const lineEnd = line.to;
+          builder.add(
+            lineEnd,
+            lineEnd,
+            import_view.Decoration.widget({
+              widget: new RRuleEditWidget(plugin.app, file.path, plugin),
+              side: 1
+            })
+          );
+        }
+        return builder.finish();
+      }
+    },
+    { decorations: (v) => v.decorations }
+  );
+}
+var import_obsidian8, import_view, import_state, RRuleEditWidget;
+var init_RecurringEventEditorExtension = __esm({
+  "src/RecurringEventEditorExtension.ts"() {
+    "use strict";
+    import_obsidian8 = require("obsidian");
+    import_view = require("@codemirror/view");
+    import_state = require("@codemirror/state");
+    RRuleEditWidget = class extends import_view.WidgetType {
+      constructor(app, filePath, plugin) {
+        super();
+        this.app = app;
+        this.filePath = filePath;
+        this.plugin = plugin;
+      }
+      toDOM() {
+        const btn = document.createElement("span");
+        btn.className = "lc-rrule-edit-btn";
+        btn.setAttribute("aria-label", "Edit recurring rule");
+        btn.style.cssText = "cursor: pointer; margin-left: 6px; opacity: 0.6; vertical-align: middle; display: inline-flex; align-items: center;";
+        (0, import_obsidian8.setIcon)(btn, "square-pen");
+        btn.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const file = this.app.vault.getAbstractFileByPath(this.filePath);
+          if (file instanceof import_obsidian8.TFile) {
+            this.plugin.openRecurringRuleBuilder(file);
+          }
+        });
+        return btn;
+      }
+      eq(other) {
+        return other.filePath === this.filePath;
+      }
+      ignoreEvent() {
+        return false;
+      }
+    };
   }
-  showTooltip(text, event) {
-    this.hideTooltip();
-    this.tooltip = document.body.createEl("div", {
-      cls: "lc-tooltip",
-      text
-    });
-    const x = event.clientX + 10;
-    const y = event.clientY + 10;
-    this.tooltip.style.left = `${x}px`;
-    this.tooltip.style.top = `${y}px`;
-  }
-  hideTooltip() {
-    if (this.tooltip) {
-      this.tooltip.remove();
-      this.tooltip = null;
-    }
-  }
-};
+});
 
 // src/main.ts
-var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
+var main_exports = {};
+__export(main_exports, {
+  default: () => LinearCalendarPlugin
+});
+module.exports = __toCommonJS(main_exports);
+var import_obsidian9 = require("obsidian");
+init_CalendarView();
+init_SettingsTab();
+init_types();
+
+// src/recurringUtils.ts
+init_esm();
+function rruleValueToReadable(value, dateFormat) {
+  if (!value) return null;
+  const fmt = dateFormat != null ? dateFormat : value.startsWith("FREQ=") ? "rrule" : "iso_date";
+  if (fmt !== "rrule") return null;
+  if (!value.startsWith("FREQ=")) return null;
+  try {
+    const rule = RRule.fromString(value);
+    const text = rule.toText();
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  } catch (e) {
+    return null;
+  }
+}
+
+// src/main.ts
+var LinearCalendarPlugin = class extends import_obsidian9.Plugin {
   constructor() {
     super(...arguments);
     this.isBratUser = false;
@@ -8011,6 +11880,22 @@ var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
         new QuickNoteModal2(this.app, this, null, null).open();
       }
     });
+    this.addCommand({
+      id: "edit-recurring-rule",
+      name: "Edit recurring rule for current note",
+      callback: async () => {
+        const file = this.app.workspace.getActiveFile();
+        if (file) this.openRecurringRuleBuilder(file);
+      }
+    });
+    const { buildRecurringEditorExtension: buildRecurringEditorExtension2 } = await Promise.resolve().then(() => (init_RecurringEventEditorExtension(), RecurringEventEditorExtension_exports));
+    this.registerEditorExtension(buildRecurringEditorExtension2(this));
+    this.registerEvent(this.app.workspace.on("active-leaf-change", () => {
+      setTimeout(() => this.injectRecurringButtonsToPropertiesPane(), 100);
+    }));
+    this.registerEvent(this.app.metadataCache.on("changed", () => {
+      setTimeout(() => this.injectRecurringButtonsToPropertiesPane(), 100);
+    }));
     this.addSettingTab(new CalendarSettingTab(this.app, this));
   }
   async activateView() {
@@ -8026,6 +11911,7 @@ var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
     workspace.revealLeaf(leaf);
   }
   onunload() {
+    this.cleanupRecurringInjections();
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR);
     for (const leaf of leaves) {
       if (leaf.view instanceof LinearCalendarView) {
@@ -8153,6 +12039,79 @@ var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
   arraysEqual(a, b) {
     return a.length === b.length && a.every((val, index) => val === b[index]);
   }
+  cleanupRecurringInjections() {
+    document.querySelectorAll(".lc-rrule-edit-btn-live, .lc-rrule-display").forEach((el) => el.remove());
+    document.querySelectorAll(".lc-rrule-value-hidden").forEach((el) => {
+      el.style.display = "";
+      el.classList.remove("lc-rrule-value-hidden");
+    });
+  }
+  injectRecurringButtonsToPropertiesPane() {
+    var _a;
+    this.cleanupRecurringInjections();
+    const config = this.settings.recurringEvents;
+    if (!config.enabled || config.propertyRules.length === 0) return;
+    const rruleRules = config.propertyRules.filter((r) => {
+      var _a2;
+      return ((_a2 = r.dateFormat) != null ? _a2 : "iso_date") === "rrule";
+    });
+    if (rruleRules.length === 0) return;
+    const leaves = this.app.workspace.getLeavesOfType("markdown");
+    for (const leaf of leaves) {
+      const view = leaf.view;
+      if (!(view instanceof import_obsidian9.MarkdownView)) continue;
+      const file = view.file;
+      if (!file) continue;
+      const fm = (_a = this.app.metadataCache.getFileCache(file)) == null ? void 0 : _a.frontmatter;
+      if (!fm) continue;
+      const propertiesEl = view.containerEl.querySelector(".metadata-properties");
+      if (!propertiesEl) continue;
+      for (const rule of rruleRules) {
+        const rawVal = fm[rule.propertyName];
+        if (rawVal === void 0 || rawVal === null) continue;
+        const propEl = propertiesEl.querySelector(`[data-property-key="${CSS.escape(rule.propertyName)}"]`);
+        if (!propEl) continue;
+        const valueStr = String(rawVal).trim();
+        const readable = rruleValueToReadable(valueStr, "rrule");
+        if (!propEl.querySelector(".lc-rrule-display")) {
+          const rawInput = propEl.querySelector(".metadata-property-value .metadata-input-longtext, .metadata-property-value input");
+          if (rawInput) {
+            rawInput.style.display = "none";
+            rawInput.classList.add("lc-rrule-value-hidden");
+          }
+          const valueWrapper = propEl.querySelector(".metadata-property-value");
+          if (valueWrapper) {
+            const display = document.createElement("div");
+            display.className = "lc-rrule-display";
+            display.style.cssText = "display: flex; align-items: center; gap: 4px;";
+            const text = document.createElement("span");
+            text.textContent = readable != null ? readable : valueStr;
+            text.style.fontSize = "var(--metadata-input-font-size)";
+            display.appendChild(text);
+            const btn = document.createElement("button");
+            btn.className = "lc-rrule-edit-btn-live";
+            btn.setAttribute("aria-label", "Edit recurring rule");
+            btn.style.cssText = "cursor: pointer; opacity: var(--icon-opacity); color: var(--icon-color); background: none; border: none; outline: none; padding: 0; margin: 0; display: inline-flex; align-items: center; flex-shrink: 0; box-shadow: none;";
+            (0, import_obsidian9.setIcon)(btn, "square-pen");
+            const svg = btn.querySelector("svg");
+            if (svg) svg.style.cssText = "width: var(--icon-xs); height: var(--icon-xs);";
+            btn.addEventListener("mouseenter", () => btn.style.opacity = "var(--icon-opacity-hover)");
+            btn.addEventListener("mouseleave", () => btn.style.opacity = "var(--icon-opacity)");
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              this.openRecurringRuleBuilder(file);
+            });
+            display.appendChild(btn);
+            valueWrapper.appendChild(display);
+          }
+        }
+      }
+    }
+  }
+  async openRecurringRuleBuilder(file) {
+    const { RecurringRuleBuilderModal: RecurringRuleBuilderModal2 } = await Promise.resolve().then(() => (init_SettingsTab(), SettingsTab_exports));
+    new RecurringRuleBuilderModal2(this.app, this, file).open();
+  }
   async saveSettings() {
     await this.saveData(this.settings);
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_CALENDAR);
@@ -8161,5 +12120,7 @@ var LinearCalendarPlugin = class extends import_obsidian8.Plugin {
         await leaf.view.reload();
       }
     }
+    this.cleanupRecurringInjections();
+    setTimeout(() => this.injectRecurringButtonsToPropertiesPane(), 50);
   }
 };

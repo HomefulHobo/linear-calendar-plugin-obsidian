@@ -311,13 +311,14 @@ export class CalendarSettingTab extends PluginSettingTab {
 
         const feedbackTitle = feedbackBox.createEl('div');
         feedbackTitle.style.cssText = 'font-weight: 600; margin-bottom: 10px; color: var(--interactive-accent); font-size: 1.05em;';
-        feedbackTitle.textContent = '💬 Feedback wanted – Version 0.4.0+';
+        feedbackTitle.textContent = '💬 Feedback wanted – Version 0.5.0';
 
         const feedbackList = feedbackBox.createEl('ul');
         feedbackList.style.cssText = 'margin: 8px 0 10px 0; padding-left: 20px; color: var(--text-normal); font-size: 0.95em; line-height: 1.6;';
         feedbackList.innerHTML = `
-            <li>Do the periodic notes work and behave as expected?</li>
-            <li>Is it clear how to edit the calendar's look?</li>
+            <li>Do the recurring notes work and behave as expected?</li>
+            <li>Does the hide/show toggle for categories work and behave as expected?</li>
+            <li>Is the difference between hide/show and disable/enable clear?</li>
             <li>Did switching from an older version to the new one go smoothly?</li>
             <li>Is there anything weird, annoying, unexpected happening?</li>
             <li>Is anything hard to understand or unclear how to configure?</li>
@@ -332,6 +333,8 @@ export class CalendarSettingTab extends PluginSettingTab {
         olderVersionsList.innerHTML = `
             <li>Does the QuickAdd feature work as you would like?</li>
             <li>Are the color categories working as you would like?</li>
+            <li>Do the periodic notes work and behave as expected?</li>
+            <li>Is it clear how to edit the calendar's look?</li>
         `;
 
         const feedbackFooter = feedbackBox.createEl('div');

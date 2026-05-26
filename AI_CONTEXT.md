@@ -35,9 +35,12 @@ linear-calendar/
 │   ├── QuickNoteModal.ts         # QuickNote creation modal
 │   ├── IconSuggest.ts            # Icon autocomplete (500+ emojis/Lucide icons)
 │   ├── FolderSuggest.ts          # Folder autocomplete (extends BaseSuggest)
+│   ├── FileSuggest.ts            # File autocomplete (extends BaseSuggest)
 │   ├── PropertySuggest.ts        # Property autocomplete (extends BaseSuggest)
 │   ├── ValueSuggest.ts           # Value autocomplete (extends BaseSuggest)
 │   ├── TagSuggest.ts             # Tag autocomplete (extends BaseSuggest)
+│   ├── recurringUtils.ts         # RRULE helpers — parsing, formatting, readable descriptions
+│   ├── RecurringEventEditorExtension.ts # CodeMirror extension — inline pencil widget for RRULE properties in source mode
 │   └── helpers/                  # Reusable UI components (DRY/SSOT)
 │       ├── BaseSuggest.ts        # Abstract base class for all suggest components
 │       ├── TagPillRenderer.ts    # Tag pill UI with chips and autocomplete
@@ -217,7 +220,32 @@ Show, open, or create periodic notes directly in the calendar:
 - `CustomPeriodGroup`: optional `boolean?` — use `?? true` in code because arrays aren't deep-merged (user data replaces defaults entirely)
 - `CustomPeriod`: optional `boolean?` — same reason, same pattern
 
-### 10. Banner System
+### 10. Recurring Events (v0.5.0)
+
+Notes can appear on the calendar on a recurring schedule without creating extra files. A property name is registered per rule; if a note has that property, it shows on matching dates.
+
+**Two value formats**:
+- **Full ISO date** (`1980-03-14`): used for birthdays/anniversaries. The plugin calculates years elapsed from the start year. Rhythm (yearly/monthly/weekly) is set per rule.
+- **RRULE string**: standard iCalendar RRULE for complex schedules ("2nd Tuesday of every month", "last Sunday"). Optional `startDate` and `endDate` properties can bound the recurrence.
+
+**Display title modes**: note title only / title + property name / title + property name + years elapsed (e.g. "Mom – Birthday (46)"). A custom separator can be set.
+
+**RRULE builder modal**: UI to compose RRULE strings (Yearly / Monthly / Nth weekday / last weekday / Weekly) with a live plain-language preview. Opens from command palette, calendar right-click, or the inline pencil icon.
+
+**Live preview in Properties pane**: RRULE property values render as human-readable text in Obsidian's Properties UI, with a pencil icon that opens the builder. Raw string only visible in source mode.
+
+**Inline editor widget**: CodeMirror extension (`RecurringEventEditorExtension.ts`) injects a pencil button next to registered RRULE properties in source mode.
+
+**Birthday rule pre-configured**: new installs include a ready-to-use "birthday" rule so the feature is immediately understandable.
+
+**Implementation**:
+- Types: `RecurringEventRule`, `RecurringEventsConfig` in `types.ts`
+- Utilities: `recurringUtils.ts` — `rruleValueToReadable()` and helpers
+- Source-mode widget: `RecurringEventEditorExtension.ts` — `buildRecurringEditorExtension()`
+- Calendar rendering: `CalendarView.ts` — recurring entries resolved alongside regular notes
+- Settings: `SettingsTab.ts` Recurring Events tab
+
+### 11. Banner System
 
 Welcome/informational banners shown above the calendar. All banner definitions live in `src/banners.ts` — this is the only file that needs to be edited to add, remove, or change a banner.
 
@@ -235,7 +263,7 @@ Welcome/informational banners shown above the calendar. All banner definitions l
 
 **Adding a new banner**: Add one entry to the `BANNERS` array in `src/banners.ts`, add a key to `BannerSettings` in `types.ts`, and add a `false` default in `DEFAULT_SETTINGS.banners`. Nothing else needs to change.
 
-### 11. Helper Components (DRY/SSOT Architecture) (v0.3.1)
+### 12. Helper Components (DRY/SSOT Architecture) (v0.3.1)
 
 Reusable UI components to eliminate code duplication:
 
@@ -478,6 +506,16 @@ This plugin is officially listed in the Obsidian community plugins directory (su
 
 ## Version History
 
+- **0.5.0** (2026-05-26): Recurring Events, category visibility toggle, Settings button in calendar header, category UX polish
+  - **Recurring Events**: notes appear on calendar on a recurring schedule (yearly/monthly/weekly) via a registered property. Supports full ISO date and RRULE formats. Display title modes, custom separator, years elapsed. RRULE builder modal, live preview in Properties pane, inline CodeMirror widget, birthday rule pre-configured.
+  - **Settings button in calendar header**: gear icon opens the LinearCalendar settings tab directly.
+  - **Category visibility toggle**: eye icon on each category chip hides/shows all notes in that category.
+  - **Confirmation dialogs**: disabling or deleting a category now prompts for confirmation.
+  - **Instant CSS tooltips**: all icon buttons in category settings/modal show labels immediately on hover.
+  - **Category disable/enable UX**: checkbox replaced with ban-icon button; disabled rows fade out, ban icon turns red.
+  - **Category edit modal footer**: Delete/Disable left-aligned, Close right-aligned.
+  - **Delete button**: × replaced with trash icon throughout category UI.
+
 - **0.4.5** (2026-05-19): Banner registry, BRAT migration notice, periodic notes sub-folder search, hide second date setting
   - Banner registry (`src/banners.ts`): all banner definitions in one file — content, visibility logic, settings keys
   - Community Plugin migration banner: shown to BRAT users, auto-hides after migration
@@ -640,6 +678,6 @@ When working on this project:
 
 ---
 
-**Last Updated**: 2026-05-19
-**Plugin Version**: 0.4.5
+**Last Updated**: 2026-05-26
+**Plugin Version**: 0.5.0
 **Maintained for**: Claude Code and other AI assistants

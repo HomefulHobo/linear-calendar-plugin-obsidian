@@ -1,6 +1,7 @@
 import { ItemView, TFile, WorkspaceLeaf, setIcon } from 'obsidian';
 import LinearCalendarPlugin from './main';
-import { VIEW_TYPE_CALENDAR, NoteInfo, MultiDayEntry, Condition, ColorCategory, CustomPeriod, CustomPeriodGroup } from './types';
+import { VIEW_TYPE_CALENDAR, NoteInfo, MultiDayEntry, Condition, ColorCategory, CustomPeriod, CustomPeriodGroup, RecurringPropertyRule } from './types';
+import { RRule } from 'rrule';
 import { BANNERS, BannerDef } from './banners';
 import { CategoryEditModal } from './SettingsTab';
 
@@ -378,7 +379,178 @@ export class LinearCalendarView extends ItemView {
             }
         }
 
+        // Merge recurring entries
+        if (this.plugin.settings.recurringEvents.enabled) {
+            const recurringEntries = this.expandRecurringEntries(notesMap);
+            for (const [key, entries] of recurringEntries) {
+                if (!notesMap.has(key)) {
+                    notesMap.set(key, []);
+                }
+                notesMap.get(key)!.push(...entries);
+            }
+        }
+
         return notesMap;
+    }
+
+    private expandRecurringEntries(existingMap: Map<string, NoteInfo[]>): Map<string, NoteInfo[]> {
+        const result = new Map<string, NoteInfo[]>();
+        const config = this.plugin.settings.recurringEvents;
+        const year = this.plugin.settings.currentYear;
+        // Use UTC boundaries so rrule comparisons are consistent
+        const yearStartUtc = new Date(Date.UTC(year, 0, 1));
+        const yearEndUtc = new Date(Date.UTC(year, 11, 31, 23, 59, 59));
+
+        const files = this.app.vault.getMarkdownFiles();
+
+        for (const file of files) {
+            const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
+
+            // Property-based rules
+            for (const rule of config.propertyRules) {
+                const rawValue = fm?.[rule.propertyName];
+                if (rawValue === undefined || rawValue === null || rawValue === '') continue;
+
+                // Normalise: YAML may auto-parse YYYY-MM-DD values to JS Date objects
+                let valueStr: string;
+                if (rawValue instanceof Date) {
+                    const y = rawValue.getFullYear();
+                    const mo = String(rawValue.getMonth() + 1).padStart(2, '0');
+                    const dy = String(rawValue.getDate()).padStart(2, '0');
+                    valueStr = `${y}-${mo}-${dy}`;
+                } else {
+                    valueStr = String(rawValue).trim();
+                }
+
+                // Check end property — stop showing if end date is in the past
+                if (rule.endPropertyName) {
+                    const endRaw = fm?.[rule.endPropertyName];
+                    if (endRaw) {
+                        const endStr = endRaw instanceof Date
+                            ? `${endRaw.getFullYear()}-${String(endRaw.getMonth()+1).padStart(2,'0')}-${String(endRaw.getDate()).padStart(2,'0')}`
+                            : String(endRaw);
+                        const endDate = this.parseLocalDate(endStr);
+                        if (endDate && endDate < new Date()) continue;
+                    }
+                }
+
+                let rruleStr: string | null = null;
+                let startYear: number | null = null;
+                let dtstart: Date | null = null;
+
+                // Use declared dateFormat; fall back to auto-detect for legacy rules
+                const fmt = rule.dateFormat ?? (valueStr.startsWith('FREQ=') ? 'rrule' : 'iso_date');
+
+                if (fmt === 'rrule') {
+                    if (!valueStr.startsWith('FREQ=')) continue;
+                    rruleStr = valueStr;
+                    if (!valueStr.includes('DTSTART')) {
+                        // Use startPropertyName if configured, otherwise epoch
+                        if (rule.startPropertyName) {
+                            const startRaw = fm?.[rule.startPropertyName];
+                            if (startRaw) {
+                                const startStr = startRaw instanceof Date
+                                    ? `${startRaw.getFullYear()}-${String(startRaw.getMonth()+1).padStart(2,'0')}-${String(startRaw.getDate()).padStart(2,'0')}`
+                                    : String(startRaw);
+                                const startMatch = startStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                                if (startMatch) {
+                                    startYear = parseInt(startMatch[1], 10);
+                                    dtstart = new Date(Date.UTC(startYear, parseInt(startMatch[2], 10) - 1, parseInt(startMatch[3], 10)));
+                                }
+                            }
+                        }
+                        if (!dtstart) dtstart = new Date(Date.UTC(1970, 0, 1));
+                    }
+                } else {
+                    // iso_date — interpret based on rule frequency
+                    const fullIsoMatch = valueStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                    if (!fullIsoMatch) continue;
+                    startYear = parseInt(fullIsoMatch[1], 10);
+                    const m = parseInt(fullIsoMatch[2], 10);
+                    const d = parseInt(fullIsoMatch[3], 10);
+
+                    if (rule.frequency === 'yearly') {
+                        rruleStr = `FREQ=YEARLY;BYMONTH=${m};BYMONTHDAY=${d}`;
+                        dtstart = new Date(Date.UTC(startYear, m - 1, d));
+                    } else if (rule.frequency === 'monthly') {
+                        rruleStr = `FREQ=MONTHLY;BYMONTHDAY=${d}`;
+                        dtstart = new Date(Date.UTC(startYear, m - 1, d));
+                    } else if (rule.frequency === 'weekly') {
+                        const weekdays = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+                        const wday = weekdays[new Date(startYear, m - 1, d).getDay()];
+                        rruleStr = `FREQ=WEEKLY;BYDAY=${wday}`;
+                        dtstart = new Date(Date.UTC(startYear, m - 1, d));
+                    }
+                }
+
+                if (!rruleStr) continue;
+
+                let occurrences: Date[];
+                try {
+                    let rule_obj: RRule;
+                    if (dtstart) {
+                        // Parse options then apply explicit dtstart so past occurrences in the year are found
+                        const opts = RRule.parseString(rruleStr);
+                        opts.dtstart = dtstart;
+                        rule_obj = new RRule(opts);
+                    } else {
+                        rule_obj = RRule.fromString(rruleStr);
+                    }
+                    occurrences = rule_obj.between(yearStartUtc, yearEndUtc, true);
+                } catch {
+                    continue;
+                }
+
+                for (const occurrence of occurrences) {
+                    // rrule returns UTC midnight — extract UTC parts to build local date
+                    const occDate = new Date(occurrence.getUTCFullYear(), occurrence.getUTCMonth(), occurrence.getUTCDate());
+                    const key = this.dateToKey(occDate);
+
+                    // Skip if this file already has a regular entry on this day
+                    const existing = existingMap.get(key);
+                    if (existing?.some(n => n.file.path === file.path)) continue;
+
+                    const label = this.buildRecurringLabel(file, rule, startYear, occDate);
+
+                    const noteInfo: NoteInfo = {
+                        file,
+                        startDate: occDate,
+                        endDate: null,
+                        isMultiDay: false,
+                        isRecurring: true,
+                        recurringLabel: label
+                    };
+
+                    if (!result.has(key)) result.set(key, []);
+                    result.get(key)!.push(noteInfo);
+                }
+            }
+
+        }
+
+        return result;
+    }
+
+    private buildRecurringLabel(file: TFile, rule: RecurringPropertyRule, startYear: number | null, occDate: Date): string {
+        const { titleDisplay, titleSeparator, propertyName } = rule;
+        const sep = titleSeparator ?? '–';
+        const base = file.basename;
+
+        if (titleDisplay === 'title') return base;
+
+        const propLabel = propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
+        const join = (parts: string[]) => sep ? parts.join(` ${sep} `) : parts.join(' ');
+
+        if (titleDisplay === 'title_property') {
+            return join([base, propLabel]);
+        }
+
+        // title_property_years
+        if (startYear !== null) {
+            const years = occDate.getFullYear() - startYear;
+            return join([base, `${propLabel} (${years})`]);
+        }
+        return join([base, propLabel]);
     }
 
     filePassesFilter(file: TFile): boolean {
@@ -2218,7 +2390,7 @@ export class LinearCalendarView extends ItemView {
 
                 singleDayNotes.forEach(noteInfo => {
                     const noteLink = notesContainer.createEl('a', {
-                        cls: 'note-link internal-link',
+                        cls: noteInfo.isRecurring ? 'note-link internal-link lc-recurring' : 'note-link internal-link',
                         href: '#'
                     });
 
@@ -2238,14 +2410,18 @@ export class LinearCalendarView extends ItemView {
                         }
                     }
 
-                    // Add title
-                    noteLink.createEl('span', { text: this.getDisplayName(noteInfo.file) });
+                    // Add title — use recurringLabel when available
+                    const displayText = noteInfo.recurringLabel ?? this.getDisplayName(noteInfo.file);
+                    noteLink.createEl('span', { text: displayText });
 
                     noteLink.setAttr('data-href', noteInfo.file.path);
 
                     // Custom tooltip on mouseenter
                     noteLink.addEventListener('mouseenter', (event) => {
-                        this.showTooltip(noteInfo.file.basename, event);
+                        const tooltipText = noteInfo.isRecurring
+                            ? (noteInfo.recurringLabel ?? noteInfo.file.basename)
+                            : noteInfo.file.basename;
+                        this.showTooltip(tooltipText, event);
                     });
 
                     noteLink.addEventListener('mouseleave', () => {
@@ -2266,6 +2442,14 @@ export class LinearCalendarView extends ItemView {
                         e.preventDefault();
                         this.app.workspace.getLeaf(false).openFile(noteInfo.file);
                     };
+
+                    // Right-click on recurring notes: open RRULE builder
+                    if (noteInfo.isRecurring) {
+                        noteLink.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            this.plugin.openRecurringRuleBuilder(noteInfo.file);
+                        });
+                    }
                 });
             }
 
@@ -2344,8 +2528,8 @@ export class LinearCalendarView extends ItemView {
                     this.app.workspace.getLeaf(false).openFile(entry.file);
                 };
 
-                // Set width after DOM is rendered
-                setTimeout(() => {
+                // Set width before first paint using rAF (layout is ready, paint hasn't happened yet)
+                requestAnimationFrame(() => {
                     if (firstDayCell && firstDayCell.parentElement) {
                         const row = firstDayCell.parentElement;
                         const cells = Array.from(row.querySelectorAll('.day-cell'));
@@ -2361,7 +2545,7 @@ export class LinearCalendarView extends ItemView {
                             multiDayBar.style.width = `${totalWidth}px`;
                         }
                     }
-                }, 0);
+                });
             }
         });
 

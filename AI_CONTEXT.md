@@ -343,6 +343,25 @@ interface NoteInfo {
 - Check console for errors
 - Verify settings persistence by reopening settings tab
 
+## Obsidian CSS Reference
+
+When styling UI elements to match native Obsidian appearance, look up the correct CSS variables here before hardcoding values:
+
+- **Icons**: https://docs.obsidian.md/Reference/CSS+variables/Foundations/Icons
+  - Opacity: `--icon-opacity`, `--icon-opacity-hover`, `--icon-opacity-active`
+  - Color: `--icon-color`, `--icon-color-hover`, `--icon-color-active`
+  - Size constants: `--icon-xs` (14px), `--icon-s` (16px), `--icon-m` (18px), `--icon-l` (18px), `--icon-xl` (32px)
+  - Use `var(--icon-xs)` for compact contexts (e.g. metadata property rows)
+- **Properties / Metadata pane**: https://docs.obsidian.md/Reference/CSS+variables/Editor/Properties
+  - Font size for values: `--metadata-input-font-size`
+  - Font size for labels: `--metadata-label-font-size`
+  - Row height: `--metadata-input-height`
+  - Colors: `--metadata-label-text-color`, `--metadata-input-text-color`, `--metadata-input-background`
+- **Spacing**: https://docs.obsidian.md/Reference/CSS+variables/Foundations/Spacing
+- **Full variable index**: https://docs.obsidian.md/Reference/CSS+variables/CSS+variables
+
+> Always use CSS variables instead of hardcoded px/color values so the plugin respects any Obsidian theme automatically.
+
 ## GitHub Integration
 
 ### Repository Structure

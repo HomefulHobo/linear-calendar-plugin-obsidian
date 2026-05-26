@@ -8,7 +8,13 @@
     "build": "node esbuild.config.mjs production",
     "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
-  "keywords": ["obsidian", "plugin", "calendar", "linear", "timeline"],
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "calendar",
+    "linear",
+    "timeline"
+  ],
   "author": "Celine | HomefulHobo",
   "license": "MIT",
   "type": "commonjs",
@@ -17,5 +23,8 @@
     "esbuild": "^0.27.2",
     "obsidian": "^1.11.0",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "rrule": "^2.8.1"
   }
 }

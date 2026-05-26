@@ -34,6 +34,9 @@ export interface LinearCalendarSettings {
     periodicNotes: PeriodicNotesSettings;
     banners: BannerSettings;
 
+    // Recurring events
+    recurringEvents: RecurringEventsConfig;
+
     // Experimental features
     experimental: ExperimentalFeatures;
 }
@@ -136,6 +139,24 @@ export interface NoteInfo {
     startDate: Date;
     endDate: Date | null;
     isMultiDay: boolean;
+    isRecurring?: boolean;
+    recurringLabel?: string;
+}
+
+export interface RecurringEventsConfig {
+    enabled: boolean;
+    propertyRules: RecurringPropertyRule[];
+}
+
+export interface RecurringPropertyRule {
+    id: string;
+    propertyName: string;
+    dateFormat: 'iso_date' | 'rrule';
+    frequency: 'yearly' | 'monthly' | 'weekly';  // only used when dateFormat === 'iso_date'
+    startPropertyName: string;  // optional: property holding an ISO start date for rrule dtstart
+    endPropertyName: string;
+    titleDisplay: 'title' | 'title_property' | 'title_property_years';
+    titleSeparator: string;
 }
 
 export interface MultiDayEntry {
@@ -376,6 +397,22 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
         quickNotes: false,
         periodicNotes: false,
         communityPlugin: false,
+    },
+
+    recurringEvents: {
+        enabled: false,
+        propertyRules: [
+            {
+                id: 'default-birthday',
+                propertyName: 'birthday',
+                dateFormat: 'iso_date',
+                frequency: 'yearly',
+                startPropertyName: '',
+                endPropertyName: '',
+                titleDisplay: 'title_property_years',
+                titleSeparator: '–'
+            }
+        ]
     },
 
     experimental: {

@@ -25,6 +25,7 @@ This plugin is being developed with the help of AI.
 - **Clickable notes**: Click any note to open it instantly
 - **Instant tooltips**: Hover over any note to see the full title immediately
 - **Note preview**: Cmd/Ctrl + hover to see a preview of any note
+- **Hide/Show notes of categories**: click on the eye icon to toggle visibility
 
 ### 📆 Daily Notes Integration
 
@@ -63,6 +64,33 @@ Or use filenames:
 - `2024-01-15 – 2024-01-20 Conference.md` → Multi-day event Jan 15-20
 
 ![Settings Date Extraction Screenshot](screenshots/settings-date-extraction.png)
+
+### 🔄 Recurring Notes (Birthdays!)
+
+Make the same note appear regularly in your calendar.
+
+1. Register a recurring note property
+2. Add settings for the property
+3. Add the property to your note
+4. Insert the date in the chosen format (Full Date or RRULE)
+
+**Birthday/Anniversary Option**
+- Set a start date in YYYY-MM-DD format (default obsidian date property)
+- Choose the frequency (yearly, monthly, weekly) in settings
+- Optionally add an end-date property
+You can even show the number of years since the start date!
+
+**Complex Patterns Option** – Standard Calendar Experience
+- Set a RRULE via the simple builder modal
+   - click on the edit icon in the property field inside of your note
+   - use the command
+   - right-click your note in the calendar
+- Optionally use a start-date and/or end-date property
+
+<table><tr>
+  <td><img src="screenshots/rrule-live-preview.png" width="100%"/></td>
+  <td><img src="screenshots/rrule-modal.png" width="100%"/></td>
+</tr></table>
 
 ### 🎨 Customization Options
 
@@ -128,6 +156,8 @@ Organize and visualize your notes with custom colors and icons:
 - Master toggle to enable/disable color categories
 - Global setting to show/hide icons in calendar
 - Set default color for uncategorized notes (custom or theme accent)
+- Toggle to hide/show notes of a category
+- Toggle to disable/enable categories without permanently deleting them
 
 ![Settings Color Categories Screenshot](screenshots/settings-color-categories.png)
 ![Settings Chip Color Categories Screenshot](screenshots/chip-settings-color-categories.png)

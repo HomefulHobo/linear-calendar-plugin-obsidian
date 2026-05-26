@@ -55,6 +55,25 @@ export const BANNERS: BannerDef[] = [
         reset: (s) => { s.banners.periodicNotes = false; },
     },
     {
+        id: 'recurring-events',
+        cssClass: 'recurring-events-welcome-banner',
+        borderColor: 'var(--interactive-accent)',
+        title: '🔁 Recurring Events',
+        contentHtml: `
+            🎉 <strong>Birthdays & Anniversaries!</strong><br>
+            <strong>Show recurring events</strong>: make the same note appear regularly in your calendar<br>
+            <strong>Supports two date formats</strong> standard Obsidian date (YYYY-MM-DD) and complex schedules via <strong>RRULE</strong><br>
+            <strong>Show years elapsed</strong> — optionally display years passed since start-date<br>
+            <strong>Use the simple RRULE builder</strong> based on natural language<br>
+            ⚙️ <strong>Configure</strong> your recurring event rules in this plugin's settings under "Recurring Events"
+        `,
+        settingsName: 'Show Recurring Events banner',
+        settingsDesc: 'Display the Recurring Events welcome banner with tips about birthdays, anniversaries, and recurring schedules',
+        shouldShow: (s) => !s.banners.recurringEvents,
+        dismiss: (s) => { s.banners.recurringEvents = true; },
+        reset: (s) => { s.banners.recurringEvents = false; },
+    },
+    {
         id: 'community-plugin',
         cssClass: 'community-plugin-banner',
         borderColor: 'var(--text-accent)',

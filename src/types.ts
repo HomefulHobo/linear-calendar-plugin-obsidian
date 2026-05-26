@@ -45,6 +45,7 @@ export interface BannerSettings {
     quickNotes: boolean;
     periodicNotes: boolean;
     communityPlugin: boolean;
+    recurringEvents: boolean;
 }
 
 export interface ExperimentalFeatures {
@@ -397,6 +398,7 @@ export const DEFAULT_SETTINGS: LinearCalendarSettings = {
         quickNotes: false,
         periodicNotes: false,
         communityPlugin: false,
+        recurringEvents: false,
     },
 
     recurringEvents: {
